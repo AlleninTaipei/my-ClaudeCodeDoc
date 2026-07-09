@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>設定權限 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.info-box.warn { background: #fef3c7; border-color: #fcd34d; }
+.info-box.warn .tag { background: #d97706; } .info-box.warn p { color: #92400e; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 170px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 200px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .info-box.warn { background: #3a2a10; border-color: #7a5a20; }
+body.dark .info-box.warn .tag { background: #7a5a20; color: #f6ad55; }
+body.dark .info-box.warn p { color: #f6ad55; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>設定權限</h1>
+  <p>用細緻的權限規則, 模式與 managed policies 控制 Claude Code 能存取與執行的內容</p>
+</header>
+
+<main>
+
+<section>
+  <h2>權限系統</h2>
+  <p>Claude Code 使用分層的權限系統, 在能力與安全之間取得平衡。</p>
+  <div class="response-box">
+    <div class="response-field"><div class="rf-key">唯讀 (File reads, Grep)</div><div class="rf-val">不需核准</div></div>
+    <div class="response-field"><div class="rf-key">Bash 指令 (Shell execution)</div><div class="rf-val">需要核准, "不再詢問"後在該專案目錄與指令永久生效</div></div>
+    <div class="response-field"><div class="rf-key">檔案修改 (Edit/write files)</div><div class="rf-val">需要核准, 直到 session 結束為止</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>管理權限</h2>
+  <p>用 <code>/permissions</code> 檢視與管理 Claude Code 的工具權限, 此介面會列出所有規則及其來源的 settings.json 檔案。</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">Allow</span><span class="event-desc">讓 Claude Code 不需人工核准即可使用指定工具</span></div>
+    <div class="event-item"><span class="event-name">Ask</span><span class="event-desc">每次嘗試使用指定工具時都提示確認</span></div>
+    <div class="event-item"><span class="event-name">Deny</span><span class="event-desc">禁止 Claude Code 使用指定工具</span></div>
+  </div>
+  <p>規則依 deny, ask, allow 的順序評估, 該順序中第一個符合的規則決定結果, 規則的specificity 不會改變順序。像 <code>Bash(aws *)</code> 這種寬泛的 deny 規則會封鎖所有符合的呼叫, 即使有更精確的 allow 規則也一樣。</p>
+  <div class="info-box"><span class="tag">差異</span><p>裸工具名稱的 deny 規則 (如 Bash) 會將該工具整個從 Claude 的上下文中移除, Claude 永遠看不到它。範圍化規則 (如 Bash(rm *)) 則保留工具可見, 但封鎖符合的呼叫。</p></div>
+  <div class="info-box"><span class="tag">注意</span><p>權限規則由 Claude Code 強制執行, 而非模型本身。提示或 CLAUDE.md 中的指示會影響 Claude 嘗試做的事, 但不會改變 Claude Code 允許的範圍。</p></div>
+</section>
+
+<section>
+  <h2>權限模式</h2>
+  <p>在 settings 檔案設定 <code>defaultMode</code> 來控制核准工具呼叫的方式。</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">default</div><div class="desc">標準行為: 每個工具首次使用時提示核准</div></div>
+    <div class="field"><div class="name">acceptEdits</div><div class="desc">自動接受檔案編輯與常見檔案系統指令</div></div>
+    <div class="field"><div class="name">plan</div><div class="desc">計畫模式: 讀取與唯讀探索, 不編輯原始碼</div></div>
+    <div class="field"><div class="name">auto</div><div class="desc">背景安全檢查自動核准工具呼叫 (研究預覽)</div></div>
+    <div class="field"><div class="name">dontAsk</div><div class="desc">除非預先在 /permissions 或 allow 規則核准, 否則自動拒絕</div></div>
+    <div class="field"><div class="name">bypassPermissions</div><div class="desc">跳過權限提示, 明確 ask 規則除外</div></div>
+  </div>
+  <div class="info-box warn"><span class="tag">警告</span><p>bypassPermissions 模式會跳過對 .git, .config/git, .claude, .vscode, .idea, .husky, .cargo, .devcontainer, .yarn, .mvn 等路徑寫入的提示。僅在容器或 VM 等隔離環境使用。</p></div>
+</section>
+
+<section>
+  <h2>權限規則語法</h2>
+  <p>權限規則採用 <code>Tool</code> 或 <code>Tool(specifier)</code> 的格式。點選下方分類查看各種語法情境與範例。</p>
+  <div class="chip-row" id="ruleChips"></div>
+  <div class="response-box" id="ruleDisplay"></div>
+</section>
+
+<section>
+  <h2>Bash 萬用字元範例</h2>
+  <p>Bash 規則支援用 <code>*</code> 做萬用字元比對, 可以出現在指令的任何位置。此設定允許 npm 與 git commit 指令, 但封鎖 git push:</p>
+  <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"permissions"</span>: <span class="kw">{</span>
+    <span class="str">"allow"</span>: [
+      <span class="str">"Bash(npm run *)"</span>,
+      <span class="str">"Bash(git commit *)"</span>,
+      <span class="str">"Bash(git * main)"</span>,
+      <span class="str">"Bash(* --version)"</span>,
+      <span class="str">"Bash(* --help *)"</span>
+    ],
+    <span class="str">"deny"</span>: [
+      <span class="str">"Bash(git push *)"</span>
+    ]
+  <span class="kw">}</span>
+<span class="kw">}</span></pre>
+  <div class="info-box"><span class="tag">重要</span><p><code>Bash(ls *)</code> 前面有空白, 會比對 ls -la 但不比對 lsof (要求單字邊界); <code>Bash(ls*)</code> 沒有空白則兩者都比對。<code>:*</code> 後綴等同於結尾加空白星號。</p></div>
+</section>
+
+<section>
+  <h2>工具專屬的權限規則</h2>
+  <p>不同工具在規則比對上有各自的細節。點選下方標籤切換查看。</p>
+  <div class="stage-tabs">
+    <div class="tool-tab stage-tab active" onclick="toolGoTo(0)">Bash</div>
+    <div class="tool-tab stage-tab" onclick="toolGoTo(1)">PowerShell</div>
+    <div class="tool-tab stage-tab" onclick="toolGoTo(2)">Read/Edit</div>
+    <div class="tool-tab stage-tab" onclick="toolGoTo(3)">WebFetch</div>
+    <div class="tool-tab stage-tab" onclick="toolGoTo(4)">MCP</div>
+    <div class="tool-tab stage-tab" onclick="toolGoTo(5)">Agent</div>
+    <div class="tool-tab stage-tab" onclick="toolGoTo(6)">Cd</div>
+  </div>
+  <div class="tool-panel demo-panel visible" id="tool-p0">
+    <p>Claude Code 能識別 shell 運算子, 因此 <code>Bash(safe-cmd *)</code> 不會授權執行 <code>safe-cmd && other-cmd</code>。可識別的分隔符為 <code>&& || ; | |& &</code> 與換行, 規則必須各自比對每個子指令。</p>
+    <p>核准複合指令的「不再詢問」時, Claude Code 會為每個需要核准的子指令各自儲存一條規則, 而非整條複合字串一條規則。單一複合指令最多儲存 5 條規則。</p>
+    <p>比對前會先剝除固定的行程包裝工具 (timeout, time, nice, nohup, stdbuf), 所以 <code>Bash(npm test *)</code> 也會比對 <code>timeout 30 npm test</code>。裸 xargs 也會被剝除。</p>
+    <p>Claude Code 內建一組唯讀 Bash 指令 (ls, cat, echo, pwd, head, tail, grep, find, wc, which, diff, stat, du, cd, 唯讀形式的 git), 這些指令在所有模式下都不需提示。</p>
+  </div>
+  <div class="tool-panel demo-panel" id="tool-p1">
+    <p>PowerShell 規則語法與 Bash 相同, 星號比對任意位置, <code>:*</code> 後綴等同於結尾空白星號, 裸 <code>PowerShell</code> 或 <code>PowerShell(*)</code> 比對所有指令。</p>
+    <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"permissions"</span>: <span class="kw">{</span>
+    <span class="str">"allow"</span>: [<span class="str">"PowerShell(Get-ChildItem *)"</span>, <span class="str">"PowerShell(git commit *)"</span>],
+    <span class="str">"deny"</span>: [<span class="str">"PowerShell(Remove-Item *)"</span>]
+  <span class="kw">}</span>
+<span class="kw">}</span></pre>
+    <p>常見別名會先正規化再比對, 例如 <code>PowerShell(Get-ChildItem *)</code> 也比對 gci, ls, dir。Claude Code 會解析 PowerShell AST, 並各自檢查複合指令中的每個子指令。</p>
+  </div>
+  <div class="tool-panel demo-panel" id="tool-p2">
+    <p>Edit 規則適用於所有內建的檔案編輯工具。Read 規則盡力適用於 Grep, Glob, @file 提及, 以及已連接 IDE 分享的選取與開啟檔案上下文。四種路徑寫法皆遵循 gitignore 規格:</p>
+    <div class="api-fields">
+      <div class="field"><div class="name">//path</div><div class="desc">檔案系統根目錄的絕對路徑, 例如 Read(//Users/alice/secrets/**)</div></div>
+      <div class="field"><div class="name">~/path</div><div class="desc">從家目錄開始的路徑, 例如 Read(~/Documents/*.pdf)</div></div>
+      <div class="field"><div class="name">/path</div><div class="desc">相對於專案根目錄, 例如 Edit(/src/**/*.ts)</div></div>
+      <div class="field"><div class="name">path 或 ./path</div><div class="desc">相對於目前目錄, 例如 Read(*.env)</div></div>
+    </div>
+    <div class="info-box warn"><span class="tag">警告</span><p>像 /Users/alice/file 這種寫法不是絕對路徑, 而是相對於專案根目錄, 絕對路徑要用 //Users/alice/file。Windows 路徑會先正規化為 POSIX 形式再比對。</p></div>
+  </div>
+  <div class="tool-panel demo-panel" id="tool-p3">
+    <p>WebFetch 規則使用 <code>domain:</code> 前綴比對請求網址的主機名稱, 比對不分大小寫, 支援 <code>*</code> 萬用字元。</p>
+    <div class="api-fields">
+      <div class="field"><div class="name">WebFetch(domain:example.com)</div><div class="desc">比對 example.com 的請求</div></div>
+      <div class="field"><div class="name">WebFetch(domain:*.example.com)</div><div class="desc">比對任意深度子網域, 但不比對 example.com 本身</div></div>
+      <div class="field"><div class="name">WebFetch(domain:*)</div><div class="desc">比對所有網域, 等同裸 WebFetch 規則</div></div>
+    </div>
+  </div>
+  <div class="tool-panel demo-panel" id="tool-p4">
+    <p>MCP 規則使用 Claude Code 中設定的伺服器名稱, 選擇性加上該伺服器的工具名稱。</p>
+    <div class="api-fields">
+      <div class="field"><div class="name">mcp__puppeteer</div><div class="desc">比對 puppeteer 伺服器提供的任何工具</div></div>
+      <div class="field"><div class="name">mcp__puppeteer__*</div><div class="desc">同樣比對 puppeteer 伺服器的所有工具</div></div>
+      <div class="field"><div class="name">mcp__puppeteer__puppeteer_navigate</div><div class="desc">比對特定的 puppeteer_navigate 工具</div></div>
+    </div>
+  </div>
+  <div class="tool-panel demo-panel" id="tool-p5">
+    <p>用 <code>Agent(AgentName)</code> 規則控制 Claude 可使用哪些子代理。</p>
+    <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"permissions"</span>: <span class="kw">{</span>
+    <span class="str">"deny"</span>: [<span class="str">"Agent(Explore)"</span>]
+  <span class="kw">}</span>
+<span class="kw">}</span></pre>
+  </div>
+  <div class="tool-panel demo-panel" id="tool-p6">
+    <p><code>Cd</code> 規則控制 <code>/cd</code> 指令可以移動到哪些目錄。Cd 不是模型可呼叫的工具, Claude 無法呼叫它, 規則只在你自己執行 /cd 時套用。加入任何 Cd allow 規則會將 /cd 切換為允許清單模式。</p>
+    <div class="api-fields">
+      <div class="field"><div class="name">Cd(~/code/*)</div><div class="desc">比對 ~/code/app, 但不比對 ~/code/app/src 或 ~/code 本身</div></div>
+      <div class="field"><div class="name">Cd(~/code/**)</div><div class="desc">比對 ~/code 與其下任何目錄</div></div>
+      <div class="field"><div class="name">Cd(**/node_modules)</div><div class="desc">比對任意深度的 node_modules 目錄</div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>用 Hooks 擴充權限</h2>
+  <p>Claude Code hooks 提供在執行期間註冊自訂 shell 指令來做權限評估的方式。工具呼叫發生時, PreToolUse hooks 會在權限提示前執行, hook 輸出可以拒絕工具呼叫, 強制提示, 或跳過提示讓呼叫繼續。</p>
+  <div class="info-box"><span class="tag">重要</span><p>Hook 決策不會繞過權限規則。Deny 與 ask 規則無論 PreToolUse hook 回傳什麼都會被評估, 因此符合的 deny 規則仍會封鎖呼叫。退出碼 2 的封鎖型 hook 則優先於 allow 規則。</p></div>
+</section>
+
+<section>
+  <h2>工作目錄</h2>
+  <p>預設情況下, Claude 只能存取啟動時所在目錄中的檔案, 可透過以下方式擴充存取範圍:</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">啟動時</span><span class="event-desc">使用 --add-dir &lt;path&gt; 參數</span></div>
+    <div class="event-item"><span class="event-name">Session 中</span><span class="event-desc">使用 /add-dir 指令</span></div>
+    <div class="event-item"><span class="event-name">持久設定</span><span class="event-desc">在 settings 檔案的 additionalDirectories 中新增</span></div>
+  </div>
+  <div class="info-box"><span class="tag">注意</span><p>新增目錄只會擴充檔案讀寫的存取範圍, 並不會讓該目錄成為完整的設定根目錄, 大多數 .claude/ 設定不會從額外目錄中被發現, 只有少數例外 (skills, subagents, 部分 settings 鍵, 需搭配環境變數的 CLAUDE.md)。</p></div>
+</section>
+
+<section>
+  <h2>權限與沙盒的關係</h2>
+  <p>權限與沙盒是互補的安全層。</p>
+  <div class="two-col">
+    <div class="col-card"><div class="col-card-title">Permissions</div><p>控制 Claude Code 能使用哪些工具, 能存取哪些檔案或網域, 適用於所有工具, 包含 Bash, Read, Edit, WebFetch, MCP。</p></div>
+    <div class="col-card"><div class="col-card-title">Sandboxing</div><p>提供作業系統層級的強制執行, 限制 Bash 工具的檔案系統與網路存取, 僅適用於 Bash 指令與其子行程。</p></div>
+  </div>
+  <div class="takeaway"><p>兩者搭配使用可達成縱深防禦: 權限的 deny 規則封鎖 Claude 嘗試存取受限資源, 沙盒限制則防止 Bash 指令觸及邊界外資源, 即使提示注入繞過了 Claude 的決策。</p></div>
+</section>
+
+<section>
+  <h2>Managed settings</h2>
+  <p>需要集中控管 Claude Code 設定的組織, 管理員可以部署無法被使用者或專案設定覆寫的 managed settings, 透過 MDM/OS 層級政策, managed settings 檔案, server-managed settings, 或自架的 Claude apps gateway 傳遞。</p>
+  <h3>設定優先順序</h3>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">1. Managed settings</span><span class="event-desc">無法被任何其他層級覆寫, 包含命令列參數</span></div>
+    <div class="event-item"><span class="event-name">2. 命令列參數</span><span class="event-desc">臨時性的 session 覆寫</span></div>
+    <div class="event-item"><span class="event-name">3. Local project settings</span><span class="event-desc">.claude/settings.local.json</span></div>
+    <div class="event-item"><span class="event-name">4. Shared project settings</span><span class="event-desc">.claude/settings.json</span></div>
+    <div class="event-item"><span class="event-name">5. User settings</span><span class="event-desc">~/.claude/settings.json</span></div>
+  </div>
+  <div class="info-box"><span class="tag">重要</span><p>若某個工具在任一層級被拒絕, 其他層級都無法允許它。使用者層級的 deny 會封鎖專案層級的 allow, 因為任何範圍的 deny 規則都會在 allow 規則之前被評估。</p></div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+const RULES = {
+  '比對工具全部用法': [['Bash','比對所有 Bash 指令'],['WebFetch','比對所有 web fetch 請求'],['Read','比對所有檔案讀取']],
+  '用 specifier 精細控制': [['Bash(npm run build)','比對確切指令 npm run build'],['Read(./.env)','比對讀取目前目錄的 .env 檔'],['WebFetch(domain:example.com)','比對送往 example.com 的請求']],
+  '依輸入參數比對': [['Agent(model:opus)','請求 Opus 模型層級的 Agent 呼叫'],['Agent(isolation:worktree)','請求 git worktree 的 Agent 呼叫'],['Bash(run_in_background:true)','在背景執行的 Bash 呼叫']],
+  '工具名稱萬用字元': [['mcp__*','比對所有伺服器的所有 MCP 工具 (deny/ask 專用)'],['*','比對每一個工具 (deny/ask 專用)']],
+};
+const ruleChipsEl = document.getElementById('ruleChips');
+const ruleDisplayEl = document.getElementById('ruleDisplay');
+function renderRule(key) {
+  ruleDisplayEl.innerHTML = RULES[key].map(([r,e]) =>
+    `<div class="response-field"><div class="rf-key">${r}</div><div class="rf-val">${e}</div></div>`).join('');
+}
+Object.keys(RULES).forEach((key, i) => {
+  const chip = document.createElement('div');
+  chip.className = 'chip' + (i === 0 ? ' active' : '');
+  chip.textContent = key;
+  chip.onclick = () => {
+    document.querySelectorAll('#ruleChips .chip').forEach(el => el.classList.remove('active'));
+    chip.classList.add('active');
+    renderRule(key);
+  };
+  ruleChipsEl.appendChild(chip);
+});
+renderRule(Object.keys(RULES)[0]);
+
+let ToolStep = 0;
+const TOOL_MAX = 6;
+function toolGoTo(n) {
+  ToolStep = Math.max(0, Math.min(TOOL_MAX, n));
+  document.querySelectorAll('.tool-panel').forEach((el, i) => el.classList.toggle('visible', i === ToolStep));
+  document.querySelectorAll('.tool-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === ToolStep) t.classList.add('active');
+    else if (i < ToolStep) t.classList.add('done');
+  });
+}
+toolGoTo(0);
+</script>
+</body>
+</html>

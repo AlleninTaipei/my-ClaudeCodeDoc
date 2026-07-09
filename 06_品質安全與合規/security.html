@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Security 安全機制互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.warn-box { background: #fef3c7; border: 1px solid #fcd34d; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.warn-box .tag { display: inline-block; background: #d97706; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.warn-box p { color: #92400e; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 170px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .warn-box { background: #3a2a10; border-color: #7a5a20; }
+body.dark .warn-box .tag { background: #7a5a20; color: #fbd38d; }
+body.dark .warn-box p { color: #fbd38d; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; }
+body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; }
+body.dark .event-desc { color: #718096; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; }
+body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Security 安全機制</h1>
+  <p>Claude Code 的安全防護措施與安全使用最佳實踐</p>
+</header>
+
+<main>
+
+  <section>
+    <h2>我們如何看待安全性</h2>
+    <div class="stage-tabs">
+      <div class="sec-tab stage-tab active" onclick="secGoTo(0)">安全基礎</div>
+      <div class="sec-tab stage-tab" onclick="secGoTo(1)">權限架構</div>
+      <div class="sec-tab stage-tab" onclick="secGoTo(2)">內建防護</div>
+      <div class="sec-tab stage-tab" onclick="secGoTo(3)">使用者責任</div>
+    </div>
+
+    <div class="sec-panel demo-panel visible" id="sec-p0">
+      <p>Claude Code 的核心即以安全性為出發點打造, 依照 Anthropic 完整的安全計畫開發。可於 Anthropic Trust Center 取得 SOC 2 Type 2 報告, ISO 27001 證書等資源。</p>
+    </div>
+    <div class="sec-panel demo-panel" id="sec-p1">
+      <p>Claude Code 預設採用嚴格的唯讀權限。需要額外動作 (編輯檔案, 執行測試, 執行指令) 時, 會明確請求權限, 使用者可選擇單次核准或自動允許。執行可能修改系統的 Bash 指令前需要核准, 內建的唯讀指令集 (如 ls, cat, git status) 則不會提示。</p>
+    </div>
+    <div class="sec-panel demo-panel" id="sec-p2">
+      <div class="event-list">
+        <div class="event-item"><div class="event-name">沙箱化 Bash 工具</div><div class="event-desc">以檔案系統與網路隔離沙箱化 Bash 指令, 減少權限提示同時維持安全性, 用 /sandbox 啟用</div></div>
+        <div class="event-item"><div class="event-name">寫入存取限制</div><div class="event-desc">Claude Code 只能寫入啟動時所在的資料夾及其子資料夾, 無法修改父層目錄的檔案</div></div>
+        <div class="event-item"><div class="event-name">提示疲勞緩解</div><div class="event-desc">支援針對使用者, 程式碼庫或組織允許清單常用安全指令</div></div>
+        <div class="event-item"><div class="event-name">Accept Edits 模式</div><div class="event-desc">自動核准檔案編輯與固定集合的檔案系統 Bash 指令如 mkdir, touch, rm, mv, cp, sed</div></div>
+      </div>
+    </div>
+    <div class="sec-panel demo-panel" id="sec-p3">
+      <p>Claude Code 只擁有你授予的權限。使用者有責任在核准前審查所提出的程式碼與指令是否安全。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>防範提示注入 (Prompt Injection)</h2>
+    <p>提示注入是攻擊者試圖插入惡意文字, 藉此覆寫或操縱 AI 助理指令的技術。Claude Code 內建多項防範措施:</p>
+
+    <div class="chip-row">
+      <span class="chip-label">選擇防護類別:</span>
+      <div class="chip active" onclick="secSelect(0,this)">核心防護</div>
+      <div class="chip" onclick="secSelect(1,this)">隱私防護</div>
+      <div class="chip" onclick="secSelect(2,this)">額外防護</div>
+    </div>
+
+    <div class="sec-cat-panel demo-panel visible" id="sec-cat-0">
+      <div class="event-list">
+        <div class="event-item"><div class="event-name">權限系統</div><div class="event-desc">敏感操作需要明確核准</div></div>
+        <div class="event-item"><div class="event-name">情境感知分析</div><div class="event-desc">透過分析完整請求偵測潛在有害指令</div></div>
+        <div class="event-item"><div class="event-name">輸入清理</div><div class="event-desc">處理使用者輸入以防止指令注入</div></div>
+        <div class="event-item"><div class="event-name">網路指令核准</div><div class="event-desc">curl, wget 等抓取網路內容的指令預設不會自動核准, 會像其他非唯讀 Bash 指令一樣提示</div></div>
+      </div>
+    </div>
+    <div class="sec-cat-panel demo-panel" id="sec-cat-1">
+      <div class="event-list">
+        <div class="event-item"><div class="event-name">有限保留期</div><div class="event-desc">敏感資訊的保留期限受限, 詳見 Privacy Center</div></div>
+        <div class="event-item"><div class="event-name">限制存取</div><div class="event-desc">限制對使用者 session 資料的存取</div></div>
+        <div class="event-item"><div class="event-name">訓練偏好控制</div><div class="event-desc">消費者使用者可隨時變更隱私設定</div></div>
+      </div>
+    </div>
+    <div class="sec-cat-panel demo-panel" id="sec-cat-2">
+      <div class="event-list">
+        <div class="event-item"><div class="event-name">網路請求核准</div><div class="event-desc">發出網路請求的工具預設需要使用者核准</div></div>
+        <div class="event-item"><div class="event-name">隔離的 context window</div><div class="event-desc">Web fetch 使用獨立的 context window, 避免注入潛在惡意提示</div></div>
+        <div class="event-item"><div class="event-name">信任驗證</div><div class="event-desc">首次執行的程式碼庫與新的 MCP 伺服器需要信任驗證</div></div>
+        <div class="event-item"><div class="event-name">指令注入偵測</div><div class="event-desc">可疑的 bash 指令即使先前已允許, 仍需人工核准</div></div>
+        <div class="event-item"><div class="event-name">安全憑證儲存</div><div class="event-desc">API 金鑰與 token 在 macOS 存於 Keychain, Windows/Linux 以檔案權限保護</div></div>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      <span class="tag">Windows WebDAV 安全風險</span>
+      <p>在 Windows 上執行 Claude Code 時, 建議不要啟用 WebDAV 或允許 Claude Code 存取可能含有 WebDAV 子目錄的路徑如 \\*。啟用 WebDAV 可能讓 Claude Code 觸發對遠端主機的網路請求, 繞過權限系統。</p>
+    </div>
+
+    <h3>處理不受信任內容的最佳實踐</h3>
+    <div class="event-list">
+      <div class="event-item"><div class="event-name">1</div><div class="event-desc">核准前先審查建議的指令</div></div>
+      <div class="event-item"><div class="event-name">2</div><div class="event-desc">避免將不受信任的內容直接傳入 Claude</div></div>
+      <div class="event-item"><div class="event-name">3</div><div class="event-desc">驗證對關鍵檔案的變更提案</div></div>
+      <div class="event-item"><div class="event-name">4</div><div class="event-desc">使用虛擬機執行腳本與工具呼叫, 特別是與外部網路服務互動時</div></div>
+      <div class="event-item"><div class="event-name">5</div><div class="event-desc">使用 /feedback 回報可疑行為</div></div>
+    </div>
+
+    <div class="takeaway">
+      <p>重點: 這些防護大幅降低風險, 但沒有任何系統能完全免於所有攻擊, 使用任何 AI 工具時都應維持良好的安全習慣。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>MCP 安全性</h2>
+    <div class="info-box">
+      <span class="tag">MCP</span>
+      <p>Claude Code 允許使用者設定 Model Context Protocol (MCP) 伺服器, 允許清單是設定在原始碼中, 屬於工程師會檢查進版控的 Claude Code 設定。建議自行撰寫 MCP 伺服器或使用信任供應商提供的伺服器。Anthropic 在將連接器加入 Anthropic Directory 前會依 listing criteria 審查, 但不會對任何 MCP 伺服器進行安全稽核或管理。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>IDE 安全性</h2>
+    <div class="info-box">
+      <span class="tag">VS Code</span>
+      <p>在 IDE 中執行 Claude Code 的安全性與隱私詳情, 請參閱 VS Code security and privacy 文件。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>雲端執行安全性</h2>
+    <p>使用 Claude Code on the web 時, 會套用以下額外安全控制:</p>
+    <div class="event-list">
+      <div class="event-item"><div class="event-name">隔離虛擬機</div><div class="event-desc">每個雲端 session 都在隔離的, Anthropic 管理的 VM 中執行</div></div>
+      <div class="event-item"><div class="event-name">網路存取控制</div><div class="event-desc">網路存取預設受限, 可設定為停用或僅允許特定網域</div></div>
+      <div class="event-item"><div class="event-name">憑證保護</div><div class="event-desc">驗證透過安全代理處理, 使用範圍受限的憑證, 再轉換為實際的 GitHub 驗證 token</div></div>
+      <div class="event-item"><div class="event-name">分支限制</div><div class="event-desc">Git push 操作限制在目前工作分支</div></div>
+      <div class="event-item"><div class="event-name">稽核記錄</div><div class="event-desc">雲端環境中的所有操作都會記錄, 用於合規與稽核</div></div>
+      <div class="event-item"><div class="event-name">自動清理</div><div class="event-desc">雲端環境在 session 完成後自動終止</div></div>
+    </div>
+    <p style="margin-top:12px;">Remote Control session 運作方式不同: 網頁介面連接到你本機執行的 Claude Code 行程, 所有程式碼執行與檔案存取都留在本機, 資料透過 TLS 經由 Anthropic API 傳輸, 不涉及雲端 VM 或沙箱, 且使用多組短生命週期, 範圍狹窄的憑證各自獨立過期, 降低單一憑證外洩的影響範圍。</p>
+  </section>
+
+  <section>
+    <h2>安全性最佳實踐</h2>
+    <div class="two-col">
+      <div class="col-card">
+        <div class="col-card-title">處理敏感程式碼</div>
+        <p>核准前審查所有建議的變更</p>
+        <p>對敏感儲存庫使用專案專屬的權限設定</p>
+        <p>考慮使用 dev container 做額外隔離</p>
+        <p>定期以 /permissions 稽核權限設定</p>
+      </div>
+      <div class="col-card">
+        <div class="col-card-title">團隊安全性</div>
+        <p>使用 managed settings 強制執行組織標準</p>
+        <p>透過版本控制分享已核准的權限設定</p>
+        <p>訓練團隊成員安全最佳實踐</p>
+        <p>透過 OpenTelemetry 指標監控 Claude Code 使用情況</p>
+        <p>使用 ConfigChange hooks 稽核或封鎖 session 中的設定變更</p>
+      </div>
+    </div>
+
+    <h3>回報安全問題</h3>
+    <div class="event-list">
+      <div class="event-item"><div class="event-name">1</div><div class="event-desc">不要公開揭露漏洞</div></div>
+      <div class="event-item"><div class="event-name">2</div><div class="event-desc">透過 HackerOne 計畫回報</div></div>
+      <div class="event-item"><div class="event-name">3</div><div class="event-desc">附上詳細的重現步驟</div></div>
+      <div class="event-item"><div class="event-name">4</div><div class="event-desc">在公開揭露前, 留時間讓我們處理問題</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>相關資源</h2>
+    <div class="api-fields">
+      <div class="field"><div class="name">Security guidance plugin</div><div class="desc">讓 Claude 在 session 中審查並修正自己程式碼變更的漏洞</div></div>
+      <div class="field"><div class="name">Sandbox environments</div><div class="desc">比較隔離方式, 依威脅模型選擇適合的方案</div></div>
+      <div class="field"><div class="name">Sandboxing</div><div class="desc">Bash 指令的檔案系統與網路隔離</div></div>
+      <div class="field"><div class="name">Permissions</div><div class="desc">設定權限與存取控制</div></div>
+      <div class="field"><div class="name">Monitoring usage</div><div class="desc">追蹤與稽核 Claude Code 活動</div></div>
+      <div class="field"><div class="name">Development containers</div><div class="desc">安全, 隔離的執行環境</div></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+let secStep = 0;
+const SEC_MAX = 3;
+function secGoTo(n) {
+  secStep = Math.max(0, Math.min(SEC_MAX, n));
+  document.querySelectorAll('.sec-panel').forEach((el, i) => el.classList.toggle('visible', i === secStep));
+  document.querySelectorAll('.sec-tab').forEach((t, i) => t.classList.toggle('active', i === secStep));
+}
+secGoTo(0);
+
+function secSelect(n, el) {
+  document.querySelectorAll('.sec-cat-panel').forEach((p, i) => p.classList.toggle('visible', i === n));
+  el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>

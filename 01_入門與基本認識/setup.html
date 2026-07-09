@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Advanced Setup 進階安裝互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%); border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 48px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.0rem; font-weight: 600; margin: 16px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c; overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw { color: #7c3aed; } .fn { color: #16a34a; } .str { color: #d97706; } .cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a; min-width: 170px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; } body.dark p { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw { color: #9f7aea; } body.dark .fn { color: #68d391; } body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; } body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; } body.dark .info-box p { color: #a0aec0; }
+body.dark .field { background: #1a202c; border-color: #2d3748; } body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; } body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; } body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); } body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+<header>
+  <h1>進階安裝設定</h1>
+  <p>系統需求, 平台專屬安裝方式, 版本管理, 以及移除 Claude Code 的完整參考。</p>
+</header>
+<main>
+
+<section>
+  <h2>系統需求</h2>
+  <div class="api-fields">
+    <div class="field"><div class="name">作業系統</div><div class="desc">macOS 13.0+, Windows 10 1809+, Ubuntu 20.04+, Debian 10+, Alpine 3.19+</div></div>
+    <div class="field"><div class="name">硬體</div><div class="desc">4GB+ RAM, x64 或 ARM64 處理器</div></div>
+    <div class="field"><div class="name">網路</div><div class="desc">需要網際網路連線</div></div>
+    <div class="field"><div class="name">Shell</div><div class="desc">Bash, Zsh, PowerShell 或 CMD</div></div>
+  </div>
+  <div class="info-box"><span class="tag">依賴</span><p>ripgrep 通常已內建, 若搜尋失敗請參考疑難排解頁面。</p></div>
+</section>
+
+<section>
+  <h2>安裝 Claude Code</h2>
+  <div class="chip-row">
+    <span class="chip-label">選擇安裝方式:</span>
+    <div class="chip active" onclick="stChip(this,0)">Native</div>
+    <div class="chip" onclick="stChip(this,1)">Homebrew</div>
+    <div class="chip" onclick="stChip(this,2)">WinGet</div>
+  </div>
+  <div id="stPanel0"><pre class="code-block"><span class="fn">curl</span> -fsSL https://claude.ai/install.sh | bash</pre></div>
+  <div id="stPanel1" style="display:none"><pre class="code-block"><span class="fn">brew</span> install --cask claude-code</pre></div>
+  <div id="stPanel2" style="display:none"><pre class="code-block"><span class="fn">winget</span> install Anthropic.ClaudeCode</pre></div>
+
+  <h3>在 Windows 上設定</h3>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">Native Windows</span><span class="event-desc">不需管理員權限, Git for Windows 為選用, 適合 Windows 原生專案</span></div>
+    <div class="event-item"><span class="event-name">WSL 2</span><span class="event-desc">需啟用 WSL 2, 支援 sandboxing, 適合 Linux 工具鏈</span></div>
+    <div class="event-item"><span class="event-name">WSL 1</span><span class="event-desc">不支援 sandboxing, WSL 2 無法使用時的備案</span></div>
+  </div>
+
+  <h3>Alpine Linux</h3>
+  <pre class="code-block"><span class="fn">apk</span> add libgcc libstdc++ ripgrep</pre>
+</section>
+
+<section>
+  <h2>驗證你的安裝</h2>
+  <pre class="code-block"><span class="fn">claude</span> --version
+<span class="fn">claude</span> doctor</pre>
+  <div class="info-box"><span class="tag">TIP</span><p>claude doctor 會提供更詳細的安裝與設定檢查結果。</p></div>
+</section>
+
+<section>
+  <h2>驗證身分</h2>
+  <p>Claude Code 需要 Pro, Max, Team, Enterprise 或 Console 帳號。免費的 claude.ai 方案不含 Claude Code 存取權。也可透過 Amazon Bedrock, Google Vertex AI 或 Microsoft Foundry 使用。</p>
+  <pre class="code-block"><span class="fn">claude</span>
+<span class="cmt"># 依瀏覽器提示完成登入</span></pre>
+</section>
+
+<section>
+  <h2>更新 Claude Code</h2>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">自動更新</span><span class="event-desc">Native 安裝會在背景自動檢查並下載更新, 下次啟動時生效</span></div>
+    <div class="event-item"><span class="event-name">設定發行頻道</span><span class="event-desc">autoUpdatesChannel 設為 latest 或 stable</span></div>
+    <div class="event-item"><span class="event-name">釘選最低版本</span><span class="event-desc">minimumVersion 設定更新下限, 防止自動降版</span></div>
+    <div class="event-item"><span class="event-name">停用自動更新</span><span class="event-desc">DISABLE_AUTOUPDATER 設為 1, DISABLE_UPDATES 則封鎖所有更新途徑</span></div>
+    <div class="event-item"><span class="event-name">手動更新</span><span class="event-desc">執行 claude update 立即套用更新</span></div>
+  </div>
+  <pre class="code-block"><span class="str">{</span>
+  <span class="key">"autoUpdatesChannel"</span>: <span class="str">"stable"</span>,
+  <span class="key">"minimumVersion"</span>: <span class="str">"2.1.100"</span>
+<span class="str">}</span></pre>
+</section>
+
+<section>
+  <h2>進階安裝選項</h2>
+  <div class="chip-row">
+    <span class="chip-label">選擇主題:</span>
+    <div class="chip active" onclick="advChip(this,0)">安裝特定版本</div>
+    <div class="chip" onclick="advChip(this,1)">Linux 套件管理器</div>
+    <div class="chip" onclick="advChip(this,2)">npm 安裝</div>
+    <div class="chip" onclick="advChip(this,3)">二進位完整性驗證</div>
+  </div>
+  <div id="advPanel0"><pre class="code-block"><span class="fn">curl</span> -fsSL https://claude.ai/install.sh | bash -s 2.1.89</pre></div>
+  <div id="advPanel1" style="display:none"><pre class="code-block"><span class="cmt"># apt (Debian/Ubuntu)</span>
+<span class="fn">sudo</span> apt install claude-code
+
+<span class="cmt"># dnf (Fedora/RHEL)</span>
+<span class="fn">sudo</span> dnf install claude-code</pre></div>
+  <div id="advPanel2" style="display:none"><pre class="code-block"><span class="fn">npm</span> install -g @anthropic-ai/claude-code</pre>
+  <div class="info-box"><span class="tag">警告</span><p>不要使用 sudo npm install -g, 可能導致權限問題與安全風險。</p></div></div>
+  <div id="advPanel3" style="display:none"><pre class="code-block"><span class="fn">curl</span> -fsSL https://downloads.claude.ai/keys/claude-code.asc | gpg --import
+<span class="fn">gpg</span> --verify manifest.json.sig manifest.json</pre>
+  <p>macOS 由 Anthropic PBC 簽署並經 Apple 公證, Windows 由 Anthropic, PBC 簽署。</p></div>
+</section>
+
+<section>
+  <h2>移除 Claude Code</h2>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">Native</span><span class="event-desc">移除 ~/.local/bin/claude 與 ~/.local/share/claude</span></div>
+    <div class="event-item"><span class="event-name">Homebrew</span><span class="event-desc">brew uninstall --cask claude-code</span></div>
+    <div class="event-item"><span class="event-name">WinGet</span><span class="event-desc">winget uninstall Anthropic.ClaudeCode</span></div>
+    <div class="event-item"><span class="event-name">npm</span><span class="event-desc">npm uninstall -g @anthropic-ai/claude-code</span></div>
+  </div>
+  <div class="info-box"><span class="tag">警告</span><p>移除設定檔會刪除所有設定, 允許清單, MCP 伺服器設定與 session 歷史紀錄。</p></div>
+</section>
+
+</main>
+<script>
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+  }
+  function stChip(el, i) {
+    el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    for (let n = 0; n < 3; n++) document.getElementById('stPanel'+n).style.display = (n === i ? 'block' : 'none');
+  }
+  function advChip(el, i) {
+    el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    for (let n = 0; n < 4; n++) document.getElementById('advPanel'+n).style.display = (n === i ? 'block' : 'none');
+  }
+</script>
+</body>
+</html>

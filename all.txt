@@ -1,0 +1,300 @@
+● 我已重新閱讀 llms.txt 的完整內容, 並依照建議的學習路徑,
+  由入門到進階重新排列如下. 各階段標題與簡短說明以中文呈現,
+  文件標題與描述維持原文（因為是官方文件標題, 屬專有名詞）.
+
+  第一階段, 入門與基本認識
+
+  先了解 Claude Code 是什麼, 如何安裝與啟動.
+
+  1. Overview (https://code.claude.com/docs/en/overview.md)
+  2. Quickstart (https://code.claude.com/docs/en/quickstart.md)
+  3. How Claude Code works
+  (https://code.claude.com/docs/en/how-claude-code-works.md)
+  4. Glossary (https://code.claude.com/docs/en/glossary.md)
+  5. Authentication (https://code.claude.com/docs/en/authentication.md)
+  6. Advanced setup (https://code.claude.com/docs/en/setup.md)
+  7. Get started with the desktop app
+  (https://code.claude.com/docs/en/desktop-quickstart.md)
+  8. Get started with Claude Code on the web
+  (https://code.claude.com/docs/en/web-quickstart.md)
+  9. Best practices for Claude Code
+  (https://code.claude.com/docs/en/best-practices.md)
+
+  第二階段, 日常操作與個人化設定
+
+  熟悉互動模式, 常用指令與個人偏好設定.
+
+  1. Interactive mode (https://code.claude.com/docs/en/interactive-mode.md)
+  2. Common workflows (https://code.claude.com/docs/en/common-workflows.md)
+  3. Commands (https://code.claude.com/docs/en/commands.md)
+  4. CLI reference (https://code.claude.com/docs/en/cli-reference.md)
+  5. Choose a permission mode
+  (https://code.claude.com/docs/en/permission-modes.md)
+  6. Configure permissions (https://code.claude.com/docs/en/permissions.md)
+  7. Claude Code settings (https://code.claude.com/docs/en/settings.md)
+  8. How Claude remembers your project
+  (https://code.claude.com/docs/en/memory.md)
+  9. Explore the .claude directory
+  (https://code.claude.com/docs/en/claude-directory.md)
+  10. Manage sessions (https://code.claude.com/docs/en/sessions.md)
+  11. Customize your status line (https://code.claude.com/docs/en/statusline.md)
+  12. Customize keyboard shortcuts
+  (https://code.claude.com/docs/en/keybindings.md)
+  13. Configure your terminal for Claude Code
+  (https://code.claude.com/docs/en/terminal-config.md)
+  14. Fullscreen rendering (https://code.claude.com/docs/en/fullscreen.md)
+  15. Speed up responses with fast mode
+  (https://code.claude.com/docs/en/fast-mode.md)
+  16. Model configuration (https://code.claude.com/docs/en/model-config.md)
+
+  第三階段, 使用介面與平台整合
+
+  在不同環境（編輯器, 桌面, 瀏覽器, 行動裝置）中使用 Claude Code.
+
+  1. Platforms and integrations (https://code.claude.com/docs/en/platforms.md)
+  2. Use Claude Code in VS Code (https://code.claude.com/docs/en/vs-code.md)
+  3. JetBrains IDEs (https://code.claude.com/docs/en/jetbrains.md)
+  4. Desktop application (https://code.claude.com/docs/en/desktop.md)
+  5. Claude Desktop on Linux (beta)
+  (https://code.claude.com/docs/en/desktop-linux.md)
+  6. Use Claude Code with Chrome (beta)
+  (https://code.claude.com/docs/en/chrome.md)
+  7. Let Claude use your computer from the CLI
+  (https://code.claude.com/docs/en/computer-use.md)
+  8. Use Claude Code on the web
+  (https://code.claude.com/docs/en/claude-code-on-the-web.md)
+  9. Continue local sessions from any device with Remote Control
+  (https://code.claude.com/docs/en/remote-control.md)
+  10. Claude Code in Slack (https://code.claude.com/docs/en/slack.md)
+  11. Voice dictation (https://code.claude.com/docs/en/voice-dictation.md)
+  12. Launch sessions from links (https://code.claude.com/docs/en/deep-links.md)
+  13. Share session output as artifacts
+  (https://code.claude.com/docs/en/artifacts.md)
+
+  第四階段, 擴充能力, Skills, Hooks, 子代理與 MCP
+
+  學習如何客製化與擴充 Claude 的能力.
+
+  1. Extend Claude Code (https://code.claude.com/docs/en/features-overview.md)
+  2. Extend Claude with skills (https://code.claude.com/docs/en/skills.md)
+  3. Create custom subagents (https://code.claude.com/docs/en/sub-agents.md)
+  4. Automate actions with hooks
+  (https://code.claude.com/docs/en/hooks-guide.md)
+  5. Hooks reference (https://code.claude.com/docs/en/hooks.md)
+  6. Connect to MCP servers (https://code.claude.com/docs/en/mcp-quickstart.md)
+  7. Connect Claude Code to tools via MCP
+  (https://code.claude.com/docs/en/mcp.md)
+  8. Output styles (https://code.claude.com/docs/en/output-styles.md)
+  9. Create plugins (https://code.claude.com/docs/en/plugins.md)
+  10. Plugins reference (https://code.claude.com/docs/en/plugins-reference.md)
+  11. Create and distribute a plugin marketplace
+  (https://code.claude.com/docs/en/plugin-marketplaces.md)
+  12. Discover and install prebuilt plugins through marketplaces
+  (https://code.claude.com/docs/en/discover-plugins.md)
+  13. Constrain plugin dependency versions
+  (https://code.claude.com/docs/en/plugin-dependencies.md)
+  14. Recommend your plugin from your CLI
+  (https://code.claude.com/docs/en/plugin-hints.md)
+  15. Recommend plugins for your org
+  (https://code.claude.com/docs/en/plugin-relevance.md)
+
+  第五階段, 自動化與多代理協作
+
+  進一步讓 Claude 自主執行任務, 排程, 或多個代理協同工作.
+
+  1. Keep Claude working toward a goal (https://code.claude.com/docs/en/goal.md)
+  2. Run prompts on a schedule
+  (https://code.claude.com/docs/en/scheduled-tasks.md)
+  3. Schedule recurring tasks in Claude Code Desktop
+  (https://code.claude.com/docs/en/desktop-scheduled-tasks.md)
+  4. Automate work with routines (https://code.claude.com/docs/en/routines.md)
+  5. Push events into a running session with channels
+  (https://code.claude.com/docs/en/channels.md)
+  6. Channels reference (https://code.claude.com/docs/en/channels-reference.md)
+  7. Run agents in parallel (https://code.claude.com/docs/en/agents.md)
+  8. Manage multiple agents with agent view
+  (https://code.claude.com/docs/en/agent-view.md)
+  9. Orchestrate teams of Claude Code sessions
+  (https://code.claude.com/docs/en/agent-teams.md)
+  10. Run Claude Code programmatically
+  (https://code.claude.com/docs/en/headless.md)
+  11. Plan in the cloud with ultraplan
+  (https://code.claude.com/docs/en/ultraplan.md)
+
+  第六階段, 程式碼品質, 安全與合規
+
+  確保程式碼品質與安全性的工具.
+
+  1. Checkpointing (https://code.claude.com/docs/en/checkpointing.md)
+  2. Code Review (https://code.claude.com/docs/en/code-review.md)
+  3. Find bugs with ultrareview (https://code.claude.com/docs/en/ultrareview.md)
+  4. Security (https://code.claude.com/docs/en/security.md)
+  5. Catch security issues as Claude writes code
+  (https://code.claude.com/docs/en/security-guidance.md)
+  6. Data usage (https://code.claude.com/docs/en/data-usage.md)
+  7. Legal and compliance
+  (https://code.claude.com/docs/en/legal-and-compliance.md)
+
+  第七階段, 成本, 效能與可觀測性
+
+  理解並管理 token 用量, 快取與成本.
+
+  1. Manage costs effectively (https://code.claude.com/docs/en/costs.md)
+  2. How Claude Code uses prompt caching
+  (https://code.claude.com/docs/en/prompt-caching.md)
+  3. Explore the context window
+  (https://code.claude.com/docs/en/context-window.md)
+  4. Monitoring (https://code.claude.com/docs/en/monitoring-usage.md)
+  5. Track team usage with analytics
+  (https://code.claude.com/docs/en/analytics.md)
+
+  第八階段, CI/CD 與大型專案整合
+
+  將 Claude Code 導入既有開發流程與大型程式庫.
+
+  1. Claude Code GitHub Actions
+  (https://code.claude.com/docs/en/github-actions.md)
+  2. Claude Code with GitHub Enterprise Server
+  (https://code.claude.com/docs/en/github-enterprise-server.md)
+  3. Claude Code GitLab CI/CD (https://code.claude.com/docs/en/gitlab-ci-cd.md)
+  4. Set up Claude Code in a monorepo or large codebase
+  (https://code.claude.com/docs/en/large-codebases.md)
+  5. Development containers (https://code.claude.com/docs/en/devcontainer.md)
+
+  第九階段, Agent SDK, 開發者建置自訂代理
+
+  給想以程式方式建置自己代理應用的開發者.
+
+  1. Agent SDK overview (https://code.claude.com/docs/en/agent-sdk/overview.md)
+  2. Quickstart (https://code.claude.com/docs/en/agent-sdk/quickstart.md)
+  3. How the agent loop works
+  (https://code.claude.com/docs/en/agent-sdk/agent-loop.md)
+  4. Use Claude Code features in the SDK
+  (https://code.claude.com/docs/en/agent-sdk/claude-code-features.md)
+  5. Streaming Input
+  (https://code.claude.com/docs/en/agent-sdk/streaming-vs-single-mode.md)
+  6. Stream responses in real-time
+  (https://code.claude.com/docs/en/agent-sdk/streaming-output.md)
+  7. Work with sessions (https://code.claude.com/docs/en/agent-sdk/sessions.md)
+  8. Persist sessions to external storage
+  (https://code.claude.com/docs/en/agent-sdk/session-storage.md)
+  9. Give Claude custom tools
+  (https://code.claude.com/docs/en/agent-sdk/custom-tools.md)
+  10. Connect to external tools with MCP
+  (https://code.claude.com/docs/en/agent-sdk/mcp.md)
+  11. Scale to many tools with tool search
+  (https://code.claude.com/docs/en/agent-sdk/tool-search.md)
+  12. Agent Skills in the SDK
+  (https://code.claude.com/docs/en/agent-sdk/skills.md)
+  13. Subagents in the SDK
+  (https://code.claude.com/docs/en/agent-sdk/subagents.md)
+  14. Slash Commands in the SDK
+  (https://code.claude.com/docs/en/agent-sdk/slash-commands.md)
+  15. Plugins in the SDK (https://code.claude.com/docs/en/agent-sdk/plugins.md)
+  16. Modifying system prompts
+  (https://code.claude.com/docs/en/agent-sdk/modifying-system-prompts.md)
+  17. Configure permissions
+  (https://code.claude.com/docs/en/agent-sdk/permissions.md)
+  18. Intercept and control agent behavior with hooks
+  (https://code.claude.com/docs/en/agent-sdk/hooks.md)
+  19. Rewind file changes with checkpointing
+  (https://code.claude.com/docs/en/agent-sdk/file-checkpointing.md)
+  20. Get structured output from agents
+  (https://code.claude.com/docs/en/agent-sdk/structured-outputs.md)
+  21. Todo Lists (https://code.claude.com/docs/en/agent-sdk/todo-tracking.md)
+  22. Handle approvals and user input
+  (https://code.claude.com/docs/en/agent-sdk/user-input.md)
+  23. Track cost and usage
+  (https://code.claude.com/docs/en/agent-sdk/cost-tracking.md)
+  24. Observability with OpenTelemetry
+  (https://code.claude.com/docs/en/agent-sdk/observability.md)
+  25. Securely deploying AI agents
+  (https://code.claude.com/docs/en/agent-sdk/secure-deployment.md)
+  26. Hosting the Agent SDK
+  (https://code.claude.com/docs/en/agent-sdk/hosting.md)
+  27. Migrate to Claude Agent SDK
+  (https://code.claude.com/docs/en/agent-sdk/migration-guide.md)
+  28. Agent SDK reference - Python
+  (https://code.claude.com/docs/en/agent-sdk/python.md)
+  29. Agent SDK reference - TypeScript
+  (https://code.claude.com/docs/en/agent-sdk/typescript.md)
+  30. TypeScript SDK V2 session API (removed)
+  (https://code.claude.com/docs/en/agent-sdk/typescript-v2-preview.md)
+
+  第十階段, 企業級部署與治理
+
+  給需要在組織內大規模部署與治理 Claude Code 的管理者.
+
+  1. Set up Claude Code for your organization
+  (https://code.claude.com/docs/en/admin-setup.md)
+  2. Feature availability
+  (https://code.claude.com/docs/en/feature-availability.md)
+  3. Configure auto mode (https://code.claude.com/docs/en/auto-mode-config.md)
+  4. Control MCP server access for your organization
+  (https://code.claude.com/docs/en/managed-mcp.md)
+  5. Configure server-managed settings
+  (https://code.claude.com/docs/en/server-managed-settings.md)
+  6. Enterprise network configuration
+  (https://code.claude.com/docs/en/network-config.md)
+  7. Choose a sandbox environment
+  (https://code.claude.com/docs/en/sandbox-environments.md)
+  8. Configure the sandboxed Bash tool
+  (https://code.claude.com/docs/en/sandboxing.md)
+  9. Run Claude Code through a gateway
+  (https://code.claude.com/docs/en/gateways.md)
+  10. Other LLM gateways (https://code.claude.com/docs/en/llm-gateway.md)
+  11. Connect Claude Code to an LLM gateway
+  (https://code.claude.com/docs/en/llm-gateway-connect.md)
+  12. Gateway protocol reference
+  (https://code.claude.com/docs/en/llm-gateway-protocol.md)
+  13. Roll out an LLM gateway for your organization
+  (https://code.claude.com/docs/en/llm-gateway-rollout.md)
+  14. Claude apps gateway for Amazon Bedrock, Google Cloud, and Microsoft
+  Foundry (https://code.claude.com/docs/en/claude-apps-gateway.md)
+  15. Claude apps gateway configuration
+  (https://code.claude.com/docs/en/claude-apps-gateway-config.md)
+  16. Claude apps gateway deployment and operations
+  (https://code.claude.com/docs/en/claude-apps-gateway-deploy.md)
+  17. Deploy Claude apps gateway on Google Cloud
+  (https://code.claude.com/docs/en/claude-apps-gateway-on-gcp.md)
+  18. Claude apps gateway spend limits
+  (https://code.claude.com/docs/en/claude-apps-gateway-spend-limits.md)
+  19. Claude Code on Amazon Bedrock
+  (https://code.claude.com/docs/en/amazon-bedrock.md)
+  20. Claude Code on Google Vertex AI
+  (https://code.claude.com/docs/en/google-vertex-ai.md)
+  21. Claude Code on Microsoft Foundry
+  (https://code.claude.com/docs/en/microsoft-foundry.md)
+  22. Claude Code on Claude Platform on AWS
+  (https://code.claude.com/docs/en/claude-platform-on-aws.md)
+  23. Enterprise deployment overview
+  (https://code.claude.com/docs/en/third-party-integrations.md)
+
+  第十一階段, 疑難排解與參考資料
+
+  遇到問題時查閱.
+
+  1. Debug your configuration
+  (https://code.claude.com/docs/en/debug-your-config.md)
+  2. Environment variables (https://code.claude.com/docs/en/env-vars.md)
+  3. Error reference (https://code.claude.com/docs/en/errors.md)
+  4. Tools reference (https://code.claude.com/docs/en/tools-reference.md)
+  5. Troubleshoot installation and login
+  (https://code.claude.com/docs/en/troubleshoot-install.md)
+  6. Troubleshooting (https://code.claude.com/docs/en/troubleshooting.md)
+
+  第十二階段, 其他資源
+
+  推廣, 溝通與延伸閱讀素材.
+
+  1. Escalate hard decisions with the advisor tool
+  (https://code.claude.com/docs/en/advisor.md)
+  2. Champion kit (https://code.claude.com/docs/en/champion-kit.md)
+  3. Communications kit (https://code.claude.com/docs/en/communications-kit.md)
+  4. Prompt library (https://code.claude.com/docs/en/prompt-library.md)
+  5. Claude Code changelog (https://code.claude.com/docs/en/changelog.md)
+
+  以上共十二個階段, 涵蓋原檔案全部 145 篇文件, 由入門逐步過渡到平台整合,
+  擴充功能, 自動化, 品質與安全, 開發者 SDK, 最後到企業部署與參考資料.
+
+✻ Cogitated for 1m 52s

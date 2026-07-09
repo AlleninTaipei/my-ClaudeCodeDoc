@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>在 SDK 中使用 Claude Code 功能</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; }
+.fn  { color: #16a34a; }
+.str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; }
+.key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 150px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.scope-badge { display: inline-block; font-size: 0.58rem; font-weight: 700;
+  letter-spacing: 0.07em; text-transform: uppercase; padding: 2px 8px;
+  border-radius: 4px; vertical-align: middle; margin-left: 10px;
+  position: relative; top: -2px; }
+.scope-universal { background: #dcfce7; color: #166534; border: 1px solid #4ade80; }
+.scope-api       { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.scope-specific  { background: #ede9fe; color: #6d28d9; border: 1px solid #a78bfa; }
+.scope-legend { display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  background: #e2e8f0; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 10px 18px; margin-bottom: 36px; }
+.scope-legend-label { font-size: 0.72rem; color: #4a5568; font-weight: 700; }
+.scope-legend-item  { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; }
+body.dark .fn  { color: #68d391; }
+body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; }
+body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; }
+body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; }
+body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; }
+body.dark .rf-val { color: #a0aec0; }
+body.dark .scope-universal { background: #1a3a28; color: #68d391; border-color: #276749; }
+body.dark .scope-api       { background: #3a2a10; color: #f6ad55; border-color: #7a5a20; }
+body.dark .scope-specific  { background: #2d1f4a; color: #b794f4; border-color: #553c8b; }
+body.dark .scope-legend { background: #1a202c; border-color: #2d3748; }
+body.dark .scope-legend-label { color: #4a5568; }
+body.dark .scope-legend-item  { color: #718096; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; }
+body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>在 SDK 中使用 Claude Code 功能</h1>
+  <p>將專案指示, skills, hooks 等 Claude Code 檔案系統功能載入你的 SDK agent</p>
+</header>
+
+<main>
+
+  <div class="scope-legend">
+    <span class="scope-legend-label">範圍標示</span>
+    <span class="scope-legend-item"><span class="scope-badge scope-universal">UNIVERSAL</span> CLI 與 SDK 共通概念</span>
+    <span class="scope-legend-item"><span class="scope-badge scope-api">API-SPECIFIC</span> 僅 SDK 程式化選項</span>
+  </div>
+
+  <section>
+    <h2>控制檔案系統設定來源 settingSources <span class="scope-badge scope-api">API-SPECIFIC</span></h2>
+    <p>省略 settingSources 時, query() 會讀取與 CLI 相同的檔案系統設定: 使用者, 專案與本地設定, CLAUDE.md 檔案, 以及 .claude/ 底下的 skills, agents 與 commands。</p>
+
+    <div class="chip-row">
+      <span class="chip-label">選擇來源查看載入內容:</span>
+      <span class="chip active" onclick="cfsShow(0,this)">project</span>
+      <span class="chip" onclick="cfsShow(1,this)">user</span>
+      <span class="chip" onclick="cfsShow(2,this)">local</span>
+    </div>
+
+    <div class="cfs-panel demo-panel visible" id="cfs-p0">
+      <div class="response-box">
+        <div class="response-field"><div class="rf-key">載入內容</div><div class="rf-val">專案 CLAUDE.md, .claude/rules/*.md, 專案 skills, 專案 hooks, 專案 settings.json</div></div>
+        <div class="response-field"><div class="rf-key">位置</div><div class="rf-val">&lt;cwd&gt;/.claude/ 用於 settings.json 與 hooks; &lt;cwd&gt; 及所有父目錄用於 CLAUDE.md 與 rules</div></div>
+      </div>
+    </div>
+    <div class="cfs-panel demo-panel" id="cfs-p1">
+      <div class="response-box">
+        <div class="response-field"><div class="rf-key">載入內容</div><div class="rf-val">使用者 CLAUDE.md, ~/.claude/rules/*.md, 使用者 skills, 使用者 settings</div></div>
+        <div class="response-field"><div class="rf-key">位置</div><div class="rf-val">~/.claude/</div></div>
+      </div>
+    </div>
+    <div class="cfs-panel demo-panel" id="cfs-p2">
+      <div class="response-box">
+        <div class="response-field"><div class="rf-key">載入內容</div><div class="rf-val">CLAUDE.local.md, .claude/settings.local.json</div></div>
+        <div class="response-field"><div class="rf-key">位置</div><div class="rf-val">&lt;cwd&gt;/.claude/ 用於 settings.local.json; &lt;cwd&gt; 及所有父目錄用於 CLAUDE.local.md</div></div>
+      </div>
+    </div>
+
+    <pre class="code-block"><span class="kw">async for</span> message <span class="kw">in</span> <span class="fn">query</span>(
+    prompt=<span class="str">"Help me refactor the auth module"</span>,
+    options=ClaudeAgentOptions(
+        <span class="cmt"># "user" 讀取 ~/.claude/, "project" 讀取 ./.claude/</span>
+        setting_sources=[<span class="str">"user"</span>, <span class="str">"project"</span>],
+        allowed_tools=[<span class="str">"Read"</span>, <span class="str">"Edit"</span>, <span class="str">"Bash"</span>],
+    ),
+):
+    ...</pre>
+
+    <h3>settingSources 不會控制的項目</h3>
+    <div class="api-fields">
+      <div class="field"><div class="name">Managed policy settings</div><div class="desc">MDM, registry policy, 或 server-managed settings, 一律從主機載入</div></div>
+      <div class="field"><div class="name">~/.claude.json</div><div class="desc">全域設定一律讀取, 可用 CLAUDE_CONFIG_DIR 搬移</div></div>
+      <div class="field"><div class="name">Auto memory</div><div class="desc">預設載入系統提示, 可設 autoMemoryEnabled: false 停用</div></div>
+      <div class="field"><div class="name">claude.ai MCP connectors</div><div class="desc">使用 claude.ai 訂閱認證時載入, 需設 strictMcpConfig 停用</div></div>
+    </div>
+
+    <div class="info-box">
+      <span class="tag">警告</span>
+      <p>多租戶部署不要依賴預設選項。因為上述項目不受 settingSources 控制, 應設定 settingSources: [] 加上 CLAUDE_CODE_DISABLE_AUTO_MEMORY=1, 每個租戶使用獨立檔案系統。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>專案指示 CLAUDE.md 與規則 <span class="scope-badge scope-universal">UNIVERSAL</span></h2>
+    <p>CLAUDE.md 與 .claude/rules/*.md 給予 agent 持久的專案脈絡: 程式碼慣例, 建置指令, 架構決策。當 settingSources 包含 "project" 時, SDK 會在 session 開始時載入這些檔案。</p>
+
+    <div class="api-fields">
+      <div class="field"><div class="name">Project (root)</div><div class="desc">&lt;cwd&gt;/CLAUDE.md, settingSources 包含 project 時載入</div></div>
+      <div class="field"><div class="name">Project rules</div><div class="desc">&lt;cwd&gt;/.claude/rules/*.md 及每層父目錄</div></div>
+      <div class="field"><div class="name">Local</div><div class="desc">&lt;cwd&gt;/CLAUDE.local.md, settingSources 包含 local 時載入</div></div>
+      <div class="field"><div class="name">User</div><div class="desc">~/.claude/CLAUDE.md, settingSources 包含 user 時載入</div></div>
+    </div>
+
+    <div class="takeaway">
+      <p>所有層級都是疊加的: 若專案與使用者 CLAUDE.md 同時存在, agent 會同時看到兩者。沒有硬性優先順序規則, 若指示衝突, 建議在更明確的檔案中直接陳述優先順序。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Skills <span class="scope-badge scope-universal">UNIVERSAL</span></h2>
+    <p>Skills 是給予 agent 專門知識與可呼叫工作流程的 markdown 檔案。與每個 session 都會載入的 CLAUDE.md 不同, skills 是按需載入。</p>
+
+    <pre class="code-block"><span class="kw">async for</span> message <span class="kw">in</span> <span class="fn">query</span>(
+    prompt=<span class="str">"Review this PR using our code review checklist"</span>,
+    options=ClaudeAgentOptions(
+        setting_sources=[<span class="str">"user"</span>, <span class="str">"project"</span>],
+        skills=<span class="str">"all"</span>,
+        allowed_tools=[<span class="str">"Read"</span>, <span class="str">"Grep"</span>, <span class="str">"Glob"</span>],
+    ),
+):
+    ...</pre>
+
+    <div class="info-box">
+      <span class="tag">注意</span>
+      <p>Skills 必須以檔案系統形式建立 (.claude/skills/&lt;name&gt;/SKILL.md)。SDK 沒有提供程式化註冊 skills 的 API。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Hooks <span class="scope-badge scope-universal">UNIVERSAL</span></h2>
+    <p>SDK 支援兩種定義 hooks 的方式, 兩者並行執行。</p>
+
+    <div class="two-col">
+      <div class="col-card">
+        <div class="col-card-title">Filesystem hooks</div>
+        <p>settings.json 中定義的 shell 指令, 與互動式 Claude Code session 使用相同格式。</p>
+        <p>適合在 CLI 與 SDK session 間共用 hooks。</p>
+      </div>
+      <div class="col-card">
+        <div class="col-card-title">Programmatic hooks</div>
+        <p>直接傳入 query() 的 callback 函式, 在你的應用程式行程中執行, 可回傳結構化決策。</p>
+        <p>適合應用程式專屬邏輯與流程內整合。</p>
+      </div>
+    </div>
+
+    <pre class="code-block"><span class="kw">async def</span> <span class="fn">audit_bash</span>(input_data, tool_use_id, context):
+    command = input_data.get(<span class="str">"tool_input"</span>, {}).get(<span class="str">"command"</span>, <span class="str">""</span>)
+    <span class="kw">if</span> <span class="str">"rm -rf"</span> <span class="kw">in</span> command:
+        <span class="kw">return</span> {
+            <span class="str">"hookSpecificOutput"</span>: {
+                <span class="str">"hookEventName"</span>: <span class="str">"PreToolUse"</span>,
+                <span class="str">"permissionDecision"</span>: <span class="str">"deny"</span>,
+                <span class="str">"permissionDecisionReason"</span>: <span class="str">"Destructive command blocked"</span>,
+            }
+        }
+    <span class="kw">return</span> {}  <span class="cmt"># 空字典代表允許執行</span></pre>
+  </section>
+
+  <section>
+    <h2>選擇正確的功能</h2>
+    <p>Agent SDK 提供多種擴充 agent 行為的方式, 下表將常見目標對應到正確的做法。</p>
+
+    <div class="api-fields">
+      <div class="field"><div class="name">CLAUDE.md</div><div class="desc">設定 agent 永遠遵循的專案慣例, settingSources 自動載入</div></div>
+      <div class="field"><div class="name">Skills</div><div class="desc">給予 agent 按需載入的參考資料, 或可重複使用的工作流程</div></div>
+      <div class="field"><div class="name">Subagents</div><div class="desc">將獨立子任務委派給全新的 context, 透過 agents 參數設定</div></div>
+      <div class="field"><div class="name">Agent teams</div><div class="desc">多個 Claude Code 實例協調共享任務清單, 為 CLI 限定功能</div></div>
+      <div class="field"><div class="name">Hooks</div><div class="desc">在工具呼叫上執行確定性邏輯, 例如稽核, 封鎖或轉換</div></div>
+      <div class="field"><div class="name">MCP</div><div class="desc">給予 Claude 對外部服務的結構化工具存取, 透過 mcpServers 參數</div></div>
+    </div>
+
+    <div class="info-box">
+      <span class="tag">要點</span>
+      <p>Subagents 是短暫且獨立的: 全新對話, 單一任務, 回傳摘要給父層。Agent teams 則是多個獨立 Claude Code 實例共享任務清單並直接互相傳訊息, 是 CLI 限定功能。</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+  }
+
+  function cfsShow(n, el) {
+    document.querySelectorAll('.cfs-panel').forEach((p, i) => p.classList.toggle('visible', i === n));
+    document.querySelectorAll('.chip-row .chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>

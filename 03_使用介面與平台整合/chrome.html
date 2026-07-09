@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Chrome 瀏覽器整合互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; }
+.fn  { color: #16a34a; }
+.str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; }
+.key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 170px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; }
+body.dark .fn  { color: #68d391; }
+body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; }
+body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; }
+body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; }
+body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; }
+body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; }
+body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>在 Claude Code 中使用 Chrome (beta)</h1>
+  <p>把 Claude Code 連接到 Chrome 瀏覽器擴充功能, 讓 CLI 或 VS Code 具備瀏覽器自動化能力, 測試網頁, 除錯 console log, 自動填表, 擷取網頁資料。</p>
+</header>
+
+<main>
+
+<section>
+  <h2>整合概念</h2>
+  <p>Claude Code 透過 Claude in Chrome 瀏覽器擴充功能取得瀏覽器自動化能力。Claude 會開啟新分頁執行瀏覽器任務, 並共享你目前瀏覽器的登入狀態, 因此可以存取任何你已登入的網站。瀏覽器動作會在真實可見的 Chrome 視窗中即時執行, 遇到登入頁或 CAPTCHA 時會暫停並請你手動處理。</p>
+  <div class="info-box">
+    <span class="tag">BETA 限制</span>
+    <p>目前僅支援 Google Chrome 與 Microsoft Edge, 尚不支援 Brave, Arc 等其他 Chromium 瀏覽器, 也不支援 WSL。整合功能不透過 Amazon Bedrock, Google Cloud Vertex AI 或 Microsoft Foundry 提供, 若你僅透過第三方供應商存取 Claude, 需要另外準備一個 claude.ai 帳號。</p>
+  </div>
+</section>
+
+<section>
+  <h2>能做什麼</h2>
+  <div class="api-fields">
+    <div class="field"><div class="name">即時除錯</div><div class="desc">直接讀取 console 錯誤與 DOM 狀態, 再修正造成問題的程式碼</div></div>
+    <div class="field"><div class="name">設計驗證</div><div class="desc">依 Figma 模型建立 UI 後, 在瀏覽器中開啟核對是否一致</div></div>
+    <div class="field"><div class="name">網頁應用測試</div><div class="desc">測試表單驗證, 檢查視覺回歸, 驗證使用者流程</div></div>
+    <div class="field"><div class="name">已登入應用互動</div><div class="desc">無需 API 連接器即可操作 Google Docs, Gmail, Notion 等</div></div>
+    <div class="field"><div class="name">資料擷取</div><div class="desc">從網頁擷取結構化資訊並存成本地檔案</div></div>
+    <div class="field"><div class="name">任務自動化</div><div class="desc">自動化重複性瀏覽器工作, 例如資料輸入, 表單填寫, 跨站流程</div></div>
+    <div class="field"><div class="name">Session 錄製</div><div class="desc">將瀏覽器互動錄製成 GIF, 用於記錄或分享操作過程</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>前置需求</h2>
+  <div class="response-box">
+    <div class="response-field"><div class="rf-key">瀏覽器</div><div class="rf-val">Google Chrome 或 Microsoft Edge</div></div>
+    <div class="response-field"><div class="rf-key">Chrome 擴充功能</div><div class="rf-val">Claude in Chrome extension 1.0.36 以上版本</div></div>
+    <div class="response-field"><div class="rf-key">Claude Code</div><div class="rf-val">2.0.73 以上版本</div></div>
+    <div class="response-field"><div class="rf-key">帳號方案</div><div class="rf-val">直接 Anthropic 方案 (Pro, Max, Team, 或 Enterprise)</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>在 CLI 中開始使用</h2>
+  <div class="stage-tabs">
+    <div class="cs-tab stage-tab active" onclick="csGoTo(0)">1 · 啟用 Chrome</div>
+    <div class="cs-tab stage-tab" onclick="csGoTo(1)">2 · 請 Claude 使用瀏覽器</div>
+    <div class="cs-tab stage-tab" onclick="csGoTo(2)">3 · 設為預設啟用</div>
+    <div class="cs-tab stage-tab" onclick="csGoTo(3)">4 · 管理網站權限</div>
+  </div>
+  <div class="cs-panel demo-panel visible" id="cs-p0">
+    <p>用 <code>--chrome</code> 旗標啟動 Claude Code:</p>
+    <pre class="code-block"><span class="kw">claude</span> --chrome</pre>
+    <p>也可以在現有 session 中執行 <code>/chrome</code> 來啟用。隨時執行 <code>/chrome</code> 可檢查連線狀態, 管理權限, 重新連接擴充功能, 或選擇要使用哪個已連接的瀏覽器。</p>
+  </div>
+  <div class="cs-panel demo-panel" id="cs-p1">
+    <p>這個範例會導覽到頁面, 進行互動, 並回報結果, 全程都在你的終端機或編輯器中完成:</p>
+    <pre class="code-block"><span class="str">Go to code.claude.com/docs, click on the search box,
+type "hooks", and tell me what results appear</span></pre>
+  </div>
+  <div class="cs-panel demo-panel" id="cs-p2">
+    <p>若不想每次 session 都輸入 <code>--chrome</code>, 執行 <code>/chrome</code> 並選擇 "Enabled by default"。在 VS Code 擴充功能中, 只要安裝了 Chrome 擴充功能就可以直接使用, 不需額外旗標。</p>
+    <div class="info-box"><span class="tag">注意</span><p>在 CLI 中預設啟用 Chrome 會增加 context 用量, 因為瀏覽器工具會一直載入。若發現 context 用量增加, 可以停用此設定, 只在需要時使用 <code>--chrome</code>。</p></div>
+  </div>
+  <div class="cs-panel demo-panel" id="cs-p3">
+    <p>網站層級的權限繼承自 Chrome 擴充功能。到 Chrome 擴充功能設定中管理權限, 控制 Claude 可以瀏覽, 點擊, 輸入的網站範圍。</p>
+  </div>
+  <div>
+    <button class="btn btn-ghost" id="csPrev" disabled onclick="csGoTo(csStep-1)">← Back</button>
+    <button class="btn btn-primary" id="csNext" onclick="csGoTo(csStep+1)">Next →</button>
+    <span class="step-indicator" id="csIndicator">Step 1 of 4</span>
+  </div>
+</section>
+
+<section>
+  <h2>範例工作流程</h2>
+  <div class="chip-row">
+    <span class="chip-label">選擇情境:</span>
+    <div class="wf-chip chip active" data-target="wf-0" onclick="wfShow(0)">測試本地應用</div>
+    <div class="wf-chip chip" data-target="wf-1" onclick="wfShow(1)">除錯 console log</div>
+    <div class="wf-chip chip" data-target="wf-2" onclick="wfShow(2)">自動填表</div>
+    <div class="wf-chip chip" data-target="wf-3" onclick="wfShow(3)">Google Docs 草稿</div>
+    <div class="wf-chip chip" data-target="wf-4" onclick="wfShow(4)">擷取資料</div>
+    <div class="wf-chip chip" data-target="wf-5" onclick="wfShow(5)">多站流程</div>
+    <div class="wf-chip chip" data-target="wf-6" onclick="wfShow(6)">錄製 GIF</div>
+  </div>
+  <div class="wf-panel demo-panel visible" id="wf-0">
+    <pre class="code-block"><span class="str">I just updated the login form validation. Can you open localhost:3000,
+try submitting the form with invalid data, and check if the error
+messages appear correctly?</span></pre>
+    <p>Claude 導覽到本地伺服器, 與表單互動, 並回報觀察結果。</p>
+  </div>
+  <div class="wf-panel demo-panel" id="wf-1">
+    <pre class="code-block"><span class="str">Open the dashboard page and check the console for any errors when
+the page loads.</span></pre>
+    <p>建議告訴 Claude 要找的模式, 而不是要求所有 console 輸出, 因為 log 可能非常冗長。</p>
+  </div>
+  <div class="wf-panel demo-panel" id="wf-2">
+    <pre class="code-block"><span class="str">I have a spreadsheet of customer contacts in contacts.csv. For each row,
+go to the CRM at crm.example.com, click "Add Contact", and fill in the
+name, email, and phone fields.</span></pre>
+    <p>Claude 讀取本地檔案, 導覽網頁介面, 並逐筆輸入資料。</p>
+  </div>
+  <div class="wf-panel demo-panel" id="wf-3">
+    <pre class="code-block"><span class="str">Draft a project update based on the recent commits and add it to my
+Google Doc at docs.google.com/document/d/abc123</span></pre>
+    <p>這對任何已登入的網頁應用都適用: Gmail, Notion, Sheets 等等。</p>
+  </div>
+  <div class="wf-panel demo-panel" id="wf-4">
+    <pre class="code-block"><span class="str">Go to the product listings page and extract the name, price, and
+availability for each item. Save the results as a CSV file.</span></pre>
+  </div>
+  <div class="wf-panel demo-panel" id="wf-5">
+    <pre class="code-block"><span class="str">Check my calendar for meetings tomorrow, then for each meeting with
+an external attendee, look up their company website and add a note
+about what they do.</span></pre>
+    <p>Claude 會跨多個分頁協同工作, 蒐集資訊並完成整個流程。</p>
+  </div>
+  <div class="wf-panel demo-panel" id="wf-6">
+    <pre class="code-block"><span class="str">Record a GIF showing how to complete the checkout flow, from adding
+an item to the cart through to the confirmation page.</span></pre>
+  </div>
+</section>
+
+<section>
+  <h2>疑難排解</h2>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">擴充功能未偵測到</span><span class="event-desc">確認擴充功能已啟用, Claude Code 已更新, Chrome 正在執行, 執行 /chrome 重新連接, 仍失敗則重啟兩者</span></div>
+    <div class="event-item"><span class="event-name">瀏覽器沒有回應</span><span class="event-desc">檢查是否有 modal 對話框阻擋頁面, 手動關閉後請 Claude 繼續, 或請 Claude 開新分頁重試</span></div>
+    <div class="event-item"><span class="event-name">長時間 session 連線中斷</span><span class="event-desc">擴充功能的 service worker 閒置過久會斷線, 執行 /chrome 重新連接</span></div>
+    <div class="event-item"><span class="event-name">Windows 專屬問題</span><span class="event-desc">named pipe 衝突需重啟 Claude Code, native messaging host 錯誤可嘗試重新安裝 Claude Code</span></div>
+  </div>
+  <div class="response-box" style="margin-top:16px;">
+    <div class="response-field"><div class="rf-key">"Browser extension is not connected"</div><div class="rf-val">重啟 Chrome 與 Claude Code, 執行 /chrome 重新連接</div></div>
+    <div class="response-field"><div class="rf-key">"Extension not detected"</div><div class="rf-val">在 chrome://extensions 安裝或啟用擴充功能</div></div>
+    <div class="response-field"><div class="rf-key">"No tab available"</div><div class="rf-val">請 Claude 建立新分頁再重試</div></div>
+    <div class="response-field"><div class="rf-key">"Receiving end does not exist"</div><div class="rf-val">執行 /chrome 並選擇 "Reconnect extension"</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>重點整理</h2>
+  <div class="takeaway">
+    <p>Chrome 整合讓 Claude 能在同一個工作流程中把撰寫程式碼與瀏覽器測試除錯串接起來, 共用登入狀態且動作即時可見, 遇到登入或驗證碼會主動交還控制權給你, 是目前僅限 macOS 以外, Chrome 或 Edge 上的 beta 功能。</p>
+  </div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+let csStep = 0;
+const CS_MAX = 3;
+function csGoTo(n) {
+  csStep = Math.max(0, Math.min(CS_MAX, n));
+  document.querySelectorAll('.cs-panel').forEach((el, i) => el.classList.toggle('visible', i === csStep));
+  document.querySelectorAll('.cs-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === csStep) t.classList.add('active');
+    else if (i < csStep) t.classList.add('done');
+  });
+  document.getElementById('csPrev').disabled = csStep === 0;
+  const next = document.getElementById('csNext');
+  next.disabled = csStep === CS_MAX;
+  next.textContent = csStep === CS_MAX ? 'Done ✓' : 'Next →';
+  document.getElementById('csIndicator').textContent = `Step ${csStep + 1} of ${CS_MAX + 1}`;
+}
+csGoTo(0);
+
+function wfShow(n) {
+  document.querySelectorAll('.wf-panel').forEach((el, i) => el.classList.toggle('visible', i === n));
+  document.querySelectorAll('.wf-chip').forEach((c, i) => c.classList.toggle('active', i === n));
+}
+</script>
+</body>
+</html>

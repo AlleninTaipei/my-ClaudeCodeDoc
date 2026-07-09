@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>部署 Agent SDK</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; }
+.fn  { color: #16a34a; }
+.str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; }
+.key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 150px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; }
+body.dark .fn  { color: #68d391; }
+body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; }
+body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; }
+body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; }
+body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; }
+body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; }
+body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>部署 Agent SDK</h1>
+  <p>在正式環境部署 Agent SDK: subprocess 架構, session 持久化, 擴展, 可觀測性, 多租戶隔離</p>
+</header>
+
+<main>
+
+  <section>
+    <h2>Subprocess 模型</h2>
+    <p>當程式碼呼叫 query() 時, SDK 會啟動獨立的 claude CLI subprocess 並透過 stdio 溝通。該 subprocess 擁有 shell, 工作目錄, 與本地磁碟上的 JSONL session 逐字稿。一個 agent session 對應一個 subprocess, N 個並行 session 就是 N 個 subprocess。</p>
+
+    <div class="api-fields">
+      <div class="field"><div class="name">Session 逐字稿</div><div class="desc">預設位於 ~/.claude/projects/, 容器重啟即遺失</div></div>
+      <div class="field"><div class="name">CLAUDE.md 記憶檔案</div><div class="desc">使用者層級與專案層級, 同樣不隨容器持久化</div></div>
+      <div class="field"><div class="name">工作目錄產出物</div><div class="desc">session 工作目錄下的檔案, 需自行規劃儲存策略</div></div>
+    </div>
+
+    <div class="info-box">
+      <span class="tag">要點</span>
+      <p>以上三種狀態都活在容器檔案系統上, 都不會撐過容器重啟, 縮減, 或搬到不同節點。要跨主機保留逐字稿, 需設定 SessionStore adapter。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>選擇 Session 模式</h2>
+    <div class="chip-row">
+      <span class="chip-label">選擇模式:</span>
+      <span class="chip active" onclick="spShow(0,this)">Ephemeral 短暫</span>
+      <span class="chip" onclick="spShow(1,this)">Long-running 長駐</span>
+      <span class="chip" onclick="spShow(2,this)">Hybrid 混合</span>
+      <span class="chip" onclick="spShow(3,this)">Multi-agent 容器</span>
+    </div>
+    <div class="sp-panel demo-panel visible" id="sp-p0">
+      <p>為每個使用者任務建立容器, 任務完成即銷毀。適合一次性任務, 例如錯誤調查修復, 發票資料擷取, 文件翻譯。容器執行一次性 entrypoint, 呼叫 SDK 後即結束。</p>
+    </div>
+    <div class="sp-panel demo-panel" id="sp-p1">
+      <p>執行持久容器實例, 常常一個容器承載多個 SDK 行程, 服務持續性工作。適合會主動採取行動, 提供內容服務, 或處理高流量訊息串流的 agent, 例如信件分流 agent, 網站建置工具, 聊天機器人。</p>
+    </div>
+    <div class="sp-panel demo-panel" id="sp-p2">
+      <p>短暫容器在啟動時從 SessionStore 復原, 並將更新寫回。適合跨多次互動但互動間會閒置的 session, 例如個人專案管理助理, 間歇性深度研究, 客服 agent 讀取工單歷史。若無 SessionStore, 容器關閉會連逐字稿一起遺失。</p>
+    </div>
+    <div class="sp-panel demo-panel" id="sp-p3">
+      <p>在一個容器內執行多個 SDK subprocess, 適合需要緊密協作的 agent, 例如多 agent 模擬情境中互動的 agent。務必給每個 agent 各自的工作目錄, 避免互相覆寫檔案。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>佈建容器</h2>
+    <div class="api-fields">
+      <div class="field"><div class="name">執行環境</div><div class="desc">Python 3.10+ 或 Node.js 18+, SDK 套件已內建原生 Claude Code binary</div></div>
+      <div class="field"><div class="name">資源起點</div><div class="desc">每個 agent 1 GiB RAM, 5 GiB 磁碟, 1 CPU 為合理起點, 隨 session 長度成長</div></div>
+      <div class="field"><div class="name">網路</div><div class="desc">需要對 api.anthropic.com 或所選供應商端點的對外 HTTPS</div></div>
+      <div class="field"><div class="name">容器沙箱</div><div class="desc">Modal Sandbox, Cloudflare Sandboxes, Daytona, E2B, Fly Machines, Vercel Sandbox 等可評估選項</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>生產環境考量</h2>
+    <div class="chip-row">
+      <span class="chip-label">選擇主題:</span>
+      <span class="chip active" onclick="pcShow(0,this)">Session 持久化</span>
+      <span class="chip" onclick="pcShow(1,this)">可觀測性</span>
+      <span class="chip" onclick="pcShow(2,this)">認證與密鑰</span>
+      <span class="chip" onclick="pcShow(3,this)">擴展與並行</span>
+      <span class="chip" onclick="pcShow(4,this)">多租戶隔離</span>
+    </div>
+    <div class="pc-panel demo-panel visible" id="pc-p0">
+      <p>對任何使用者期望能復原的 session, 用 SessionStore adapter 將逐字稿鏡射到持久儲存。SessionStore 只鏡射逐字稿, 不含 CLAUDE.md 或其他工作目錄產出物, 這些需要另外掛載共享磁碟或同步。</p>
+    </div>
+    <div class="pc-panel demo-panel" id="pc-p1">
+      <p>SDK 繼承環境中的 OpenTelemetry 設定, 在容器或協調器層級設定 OTEL 環境變數, 每次 query() 呼叫就會匯出 spans, metrics, 與 log events 到你的 collector。</p>
+      <pre class="code-block">CLAUDE_CODE_ENABLE_TELEMETRY=<span class="str">1</span>
+OTEL_TRACES_EXPORTER=<span class="str">otlp</span>
+OTEL_METRICS_EXPORTER=<span class="str">otlp</span>
+OTEL_LOGS_EXPORTER=<span class="str">otlp</span></pre>
+    </div>
+    <div class="pc-panel demo-panel" id="pc-p2">
+      <p>Subprocess 從環境讀取 ANTHROPIC_API_KEY。對外流量應放在能注入憑證, 記錄請求的 egress proxy 之後, agent 只負責發出呼叫, proxy 負責加上憑證。</p>
+    </div>
+    <div class="pc-panel demo-panel" id="pc-p3">
+      <p>每個 session 都在自己的 subprocess 中執行, 一台主機的並行數受限於 RAM 能容納多少 subprocess: agents per host = (host RAM - overhead) / (per-session RAM ceiling)。</p>
+    </div>
+    <div class="pc-panel demo-panel" id="pc-p4">
+      <p>共享容器中, 預設會從檔案系統讀取設定與 CLAUDE.md, 可能讓一個租戶的 context 外洩到另一個租戶。應設定 settingSources: [], CLAUDE_CODE_DISABLE_AUTO_MEMORY=1, 每租戶獨立的 CLAUDE_CONFIG_DIR 與工作目錄。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>已知限制</h2>
+    <div class="api-fields">
+      <div class="field"><div class="name">沒有頂層 session 逾時</div><div class="desc">Session 不會自動逾時, 用 maxTurns 限制工具往返輪數</div></div>
+      <div class="field"><div class="name">長 session 記憶體成長</div><div class="desc">限制 session 長度或定期回收 subprocess</div></div>
+      <div class="field"><div class="name">大量平行 subagent 觸及速率限制</div><div class="desc">把工作拆成較小批次而非一次性大範圍派發</div></div>
+      <div class="field"><div class="name">沒有 subagent 層級的時限</div><div class="desc">用 AgentDefinition 的 maxTurns 為每個 subagent 設限</div></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+  }
+  function spShow(n, el) {
+    document.querySelectorAll('.sp-panel').forEach((p, i) => p.classList.toggle('visible', i === n));
+    el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  }
+  function pcShow(n, el) {
+    document.querySelectorAll('.pc-panel').forEach((p, i) => p.classList.toggle('visible', i === n));
+    el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Routines 自動化雲端例程互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%); border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px; font-family: monospace;
+  font-size: 0.82rem; color: #1a202c; overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700;
+  padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a; min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 150px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+  border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+  border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px;
+  font-size: 0.78rem; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; }
+body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>用 Routines 自動化工作</h1>
+  <p>把 Claude Code 交給自動駕駛: 定義在排程, API 呼叫, 或 GitHub 事件觸發下, 於 Anthropic 代管雲端基礎設施執行的例程。</p>
+</header>
+
+<main>
+
+<section id="use-cases">
+  <h2>範例使用情境</h2>
+  <p>每個範例都配對一種觸發類型與適合無人值守, 可重複, 且有明確結果的工作。</p>
+  <div class="chip-row">
+    <span class="chip-label">選擇情境</span>
+    <div class="uc-chip chip active" onclick="ucShow(0)">待辦維護</div>
+    <div class="uc-chip chip" onclick="ucShow(1)">警報分診</div>
+    <div class="uc-chip chip" onclick="ucShow(2)">客製審查</div>
+    <div class="uc-chip chip" onclick="ucShow(3)">部署驗證</div>
+    <div class="uc-chip chip" onclick="ucShow(4)">文件漂移</div>
+  </div>
+  <div class="uc-panel demo-panel visible" id="uc-0"><p>排程觸發每個工作夜晚透過連接器讀取議題追蹤系統, 為自上次執行後開啟的議題貼標籤, 依程式碼區域指派負責人, 並把摘要貼到 Slack。</p></div>
+  <div class="uc-panel demo-panel" id="uc-1"><p>監控工具在錯誤門檻被超過時呼叫例程的 API endpoint, 傳入警報內容作為 text, 例程拉出堆疊追蹤, 與近期提交做關聯, 並開啟含修復建議的草稿 PR。</p></div>
+  <div class="uc-panel demo-panel" id="uc-2"><p>GitHub 觸發在 pull_request.opened 時執行, 套用團隊自己的審查清單, 為安全性, 效能, 風格問題留下行內註解, 並加上摘要留言。</p></div>
+  <div class="uc-panel demo-panel" id="uc-3"><p>CD pipeline 在每次生產部署後呼叫例程的 API endpoint, 執行冒煙測試, 掃描錯誤日誌找回歸, 在部署視窗關閉前貼出 go 或 no-go。</p></div>
+  <div class="uc-panel demo-panel" id="uc-4"><p>排程觸發每週掃描已合併 PR, 標記引用已變更 API 的文件, 對文件儲存庫開啟更新 PR 供編輯審閱。</p></div>
+</section>
+
+<section id="create-routine">
+  <h2>建立一個 Routine</h2>
+  <p>可在網頁, Desktop App, 或 CLI 建立, 三者都寫入同一個雲端帳號。</p>
+
+  <div class="stage-tabs">
+    <div class="rt-tab stage-tab active" onclick="rtGoTo(0)">1 · 名稱與提示詞</div>
+    <div class="rt-tab stage-tab" onclick="rtGoTo(1)">2 · 選擇儲存庫</div>
+    <div class="rt-tab stage-tab" onclick="rtGoTo(2)">3 · 選擇環境</div>
+    <div class="rt-tab stage-tab" onclick="rtGoTo(3)">4 · 選擇觸發</div>
+    <div class="rt-tab stage-tab" onclick="rtGoTo(4)">5 · 連接器與權限</div>
+  </div>
+
+  <div class="rt-panel demo-panel visible" id="rt-p0"><p>提示詞是最重要的部分, 因為例程自主執行, 提示詞必須自成一體並明確說明要做什麼與成功的樣子。</p></div>
+  <div class="rt-panel demo-panel" id="rt-p1"><p>新增一個或多個 GitHub 儲存庫供 Claude 工作, 每次執行都會複製預設分支, Claude 建立 claude/ 前綴的分支。</p></div>
+  <div class="rt-panel demo-panel" id="rt-p2"><p>Default 環境提供 Trusted 網路存取, 允許套件註冊表, 雲端供應商 API, 容器註冊表等預設清單, 其餘一律阻擋。</p></div>
+  <div class="rt-panel demo-panel" id="rt-p3"><p>可選擇 Schedule, GitHub event, 或 API 其中一種或多種組合, 見下方觸發設定章節。</p></div>
+  <div class="rt-panel demo-panel" id="rt-p4"><p>已連接的 MCP 連接器預設全部包含, 移除不需要的以限縮 Claude 能觸及的工具, 並在 Permissions 開啟允許不受限分支推送。</p></div>
+
+  <div>
+    <button class="btn btn-ghost" id="rtPrev" disabled onclick="rtGoTo(rtStep-1)">← 上一步</button>
+    <button class="btn btn-primary" id="rtNext" onclick="rtGoTo(rtStep+1)">下一步 →</button>
+    <span class="step-indicator" id="rtIndicator">Step 1 of 5</span>
+  </div>
+</section>
+
+<section id="triggers">
+  <h2>設定觸發器</h2>
+  <p>一個 routine 啟動於其中一個觸發器匹配時, 可同時附加排程, API, 與 GitHub 觸發。</p>
+
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">Schedule 排程</div>
+      <p>依固定頻率執行或一次性排程, 時間以本地時區輸入自動轉換, 最短間隔一小時, 可用 /schedule update 設定自訂 cron。</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">API 觸發</div>
+      <p>給予專屬 HTTP endpoint, 用 bearer token POST 即可啟動新 session。</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">GitHub 觸發</div>
+      <p>訂閱 Pull request 或 Release 事件, 可用作者, 標題, 分支, 標籤等欄位篩選。</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">組合觸發</div>
+      <p>一個 routine 可同時每晚排程, 由部署腳本觸發, 也對每個新 PR 反應。</p>
+    </div>
+  </div>
+
+  <pre class="code-block">curl -X POST https://api.anthropic.com/v1/claude_code/routines/trig_01ABC.../fire \
+  -H <span class="str">"Authorization: Bearer sk-ant-oat01-xxxxx"</span> \
+  -d <span class="str">'{"text": "Sentry alert SEN-4521 fired in prod."}'</span></pre>
+</section>
+
+<section id="manage">
+  <h2>管理 Routines</h2>
+  <div class="response-box">
+    <div class="response-field"><div class="rf-key">Run now</div><div class="rf-val">立即啟動一次執行</div></div>
+    <div class="response-field"><div class="rf-key">Repeats 開關</div><div class="rf-val">暫停或恢復排程, 暫停不會刪除設定</div></div>
+    <div class="response-field"><div class="rf-key">Edit routine</div><div class="rf-val">修改名稱, 提示詞, 儲存庫, 環境, 連接器或觸發器</div></div>
+    <div class="response-field"><div class="rf-key">Delete</div><div class="rf-val">移除 routine, 過去建立的 session 仍保留在列表中</div></div>
+  </div>
+  <div class="info-box"><span class="tag">注意</span><p>綠色狀態只代表 session 啟動並正常結束, 不代表提示詞裡的任務成功, 打開執行紀錄確認 Claude 實際做了什麼。</p></div>
+</section>
+
+<section id="limits">
+  <h2>使用量與限制</h2>
+  <p>Routines 與互動 session 一樣消耗訂閱額度, 額外還有每日執行次數上限。一次性執行不計入每日 routine 上限。</p>
+  <div class="takeaway"><p>開啟 usage credits 可在達到上限後以計量方式繼續執行 routine, 否則額外執行會被拒絕直到視窗重置。</p></div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+function ucShow(n) {
+  document.querySelectorAll('.uc-panel').forEach((el, i) => el.classList.toggle('visible', i === n));
+  document.querySelectorAll('.uc-chip').forEach((c, i) => c.classList.toggle('active', i === n));
+}
+let rtStep = 0;
+const RT_MAX = 4;
+function rtGoTo(n) {
+  rtStep = Math.max(0, Math.min(RT_MAX, n));
+  document.querySelectorAll('.rt-panel').forEach((el, i) => el.classList.toggle('visible', i === rtStep));
+  document.querySelectorAll('.rt-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === rtStep) t.classList.add('active');
+    else if (i < rtStep) t.classList.add('done');
+  });
+  document.getElementById('rtPrev').disabled = rtStep === 0;
+  const next = document.getElementById('rtNext');
+  next.disabled = rtStep === RT_MAX;
+  next.textContent = rtStep === RT_MAX ? 'Done ✓' : '下一步 →';
+  document.getElementById('rtIndicator').textContent = `Step ${rtStep + 1} of ${RT_MAX + 1}`;
+}
+rtGoTo(0);
+</script>
+</body>
+</html>

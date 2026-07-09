@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>管理 Session 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 190px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 190px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>管理 Session</h1>
+  <p>命名, 恢復, 分支, 切換 Claude Code 對話, 涵蓋 --continue, --resume, /resume, session 命名, 匯出逐字稿與儲存位置</p>
+</header>
+
+<main>
+
+<section>
+  <h2>恢復 Session</h2>
+  <p>Session 會持續儲存到本機逐字稿檔案, 因此離開或執行 /clear 後都能回到原本的對話。</p>
+  <div class="response-box">
+    <div class="response-field"><div class="rf-key">claude --continue</div><div class="rf-val">恢復目前目錄中最近的 session</div></div>
+    <div class="response-field"><div class="rf-key">claude --resume</div><div class="rf-val">開啟 session 選擇器</div></div>
+    <div class="response-field"><div class="rf-key">claude --resume &lt;name&gt;</div><div class="rf-val">直接恢復指定名稱的 session</div></div>
+    <div class="response-field"><div class="rf-key">claude --from-pr &lt;number&gt;</div><div class="rf-val">恢復與該 PR 連結的 session</div></div>
+    <div class="response-field"><div class="rf-key">/resume</div><div class="rf-val">在 session 中切換到另一個對話</div></div>
+  </div>
+  <div class="info-box"><span class="tag">注意</span><p>用 claude -p 或 Agent SDK 建立的 session 不會出現在 session 選擇器中, 但仍可用 claude --resume &lt;session-id&gt; 恢復, 且必須在建立 session 的目錄中執行, 因為 session ID 查找範圍限定在目前專案目錄與其 git worktrees。</p></div>
+  <h3>Session 選擇器的搜尋範圍</h3>
+  <p>Session 依專案目錄儲存。預設 session 選擇器顯示目前 worktree 的互動式 session, 加上以 /add-dir 加入目前目錄的其他 session。</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">Ctrl+W</div><div class="desc">擴大顯示範圍到儲存庫的所有 worktrees</div></div>
+    <div class="field"><div class="name">Ctrl+A</div><div class="desc">擴大顯示範圍到這台機器上的所有專案</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>為 Session 命名</h2>
+  <p>為 session 取有意義的名稱, 讓它在 session 選擇器中容易尋找, 也能用名稱恢復, 在並行處理多個任務時特別重要。</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">啟動時</span><span class="event-desc">claude -n auth-refactor</span></div>
+    <div class="event-item"><span class="event-name">Session 進行中</span><span class="event-desc">/rename auth-refactor, 名稱也會顯示在提示欄</span></div>
+    <div class="event-item"><span class="event-name">從 session 選擇器</span><span class="event-desc">反白 session 後按 Ctrl+R</span></div>
+    <div class="event-item"><span class="event-name">計畫核准時</span><span class="event-desc">在 plan 模式核准計畫會依計畫內容自動命名 session</span></div>
+  </div>
+  <div class="takeaway"><p>從未命名的互動式 session 啟動時仍會取得預設顯示名稱 (工作目錄名稱加兩碼後綴, 例如 my-app-3f), 但預設名稱不是恢復代號, 只有你自己設定的名稱才能用來恢復。</p></div>
+</section>
+
+<section>
+  <h2>使用 Session 選擇器</h2>
+  <p>在 session 中執行 <code>/resume</code>, 或不帶參數執行 <code>claude --resume</code>, 開啟互動式 session 選擇器。</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">Enter</span><span class="event-desc">恢復反白的 session</span></div>
+    <div class="event-item"><span class="event-name">Space / Ctrl+V</span><span class="event-desc">預覽 session 內容</span></div>
+    <div class="event-item"><span class="event-name">Ctrl+R</span><span class="event-desc">重新命名反白的 session</span></div>
+    <div class="event-item"><span class="event-name">/ 或任意可列印字元</span><span class="event-desc">進入搜尋模式篩選 session, 也可貼上 PR/MR 網址找出建立它的 session</span></div>
+    <div class="event-item"><span class="event-name">Ctrl+A</span><span class="event-desc">顯示這台機器上所有專案的 session</span></div>
+    <div class="event-item"><span class="event-name">Ctrl+W</span><span class="event-desc">顯示目前儲存庫所有 worktrees 的 session</span></div>
+    <div class="event-item"><span class="event-name">Ctrl+B</span><span class="event-desc">篩選出目前 git 分支的 session</span></div>
+    <div class="event-item"><span class="event-name">Esc</span><span class="event-desc">離開選擇器或搜尋模式</span></div>
+  </div>
+  <p>用 <code>/branch</code>, <code>/rewind</code>, 或 <code>--fork-session</code> 建立的分支 session 會分組顯示在根 session 之下。</p>
+</section>
+
+<section>
+  <h2>分支一個 Session</h2>
+  <p>分支會複製目前為止的對話並切換進去, 保留原本的對話不受影響, 用來在不失去原本路徑的情況下嘗試不同做法。</p>
+  <div class="stage-tabs">
+    <div class="br-tab stage-tab active" onclick="brGoTo(0)">1 · 在 Session 中分支</div>
+    <div class="br-tab stage-tab" onclick="brGoTo(1)">2 · 從命令列分支</div>
+  </div>
+  <div class="br-panel demo-panel visible" id="br-p0">
+    <pre class="code-block"><span class="fn">/branch</span> try-streaming-approach</pre>
+    <p>分支確認訊息會印出兩個 session ID: 你現在所在的新分支, 以及原本的 session。</p>
+  </div>
+  <div class="br-panel demo-panel" id="br-p1">
+    <pre class="code-block"><span class="fn">claude</span> --continue --fork-session</pre>
+    <p>原本的 session 不受影響, 仍在 session 選擇器中可用。</p>
+  </div>
+  <div>
+    <button class="btn btn-ghost" id="brPrev" disabled onclick="brGoTo(BRStep-1)">← Back</button>
+    <button class="btn btn-primary" id="brNext" onclick="brGoTo(BRStep+1)">Next →</button>
+    <span class="step-indicator" id="brIndicator">Step 1 of 2</span>
+  </div>
+  <div class="info-box"><span class="tag">注意</span><p>用「本 session 允許」核准的權限不會帶入新分支。若在兩個終端機不用分支恢復同一個 session, 兩邊的訊息會交錯進同一份逐字稿。單一 session 內的倒轉請改用 Checkpointing。</p></div>
+</section>
+
+<section>
+  <h2>管理 Session 中的上下文</h2>
+  <p>不離開 session 就能控制上下文視窗內容的指令:</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">/clear</span><span class="event-desc">以空白上下文重新開始, 先前對話已儲存可恢復</span></div>
+    <div class="event-item"><span class="event-name">/compact [instructions]</span><span class="event-desc">用摘要取代歷史紀錄, 可選擇聚焦於指定內容</span></div>
+    <div class="event-item"><span class="event-name">/context</span><span class="event-desc">顯示目前消耗上下文的內容</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>匯出與定位 Session 資料</h2>
+  <p>執行 <code>/export</code> 開啟選單, 可將目前對話複製到剪貼簿, 或存成純文字檔, 訊息與工具輸出都會轉為可讀文字。傳入檔名可跳過選單直接寫入該檔案。</p>
+  <h3>從腳本存取對話</h3>
+  <p><code>/export</code> 產出給人閱讀的逐字稿。下方介面則產出給腳本解析的結構化資料, 依觸發腳本的方式挑選:</p>
+  <div class="chip-row" id="exportChips"></div>
+  <div class="response-box" id="exportDisplay"></div>
+  <pre class="code-block"><span class="fn">claude</span> -p --resume &lt;session-id&gt; --output-format json <span class="str">"summarize what we changed"</span> | <span class="fn">jq</span> -r <span class="str">'.result'</span></pre>
+  <h3>逐字稿儲存位置</h3>
+  <p>預設情況下, 逐字稿以 JSONL 格式儲存於 <code>~/.claude/projects/&lt;project&gt;/&lt;session-id&gt;.jsonl</code>, 每一行是一則訊息, 工具使用, 或中繼資料的 JSON 物件。此格式為內部格式, 版本間可能變動, 直接解析的腳本可能因任何版本更新而失效。</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">CLAUDE_CONFIG_DIR</div><div class="desc">將儲存位置移出 ~/.claude</div></div>
+    <div class="field"><div class="name">cleanupPeriodDays</div><div class="desc">變更 30 天的保留期限</div></div>
+    <div class="field"><div class="name">CLAUDE_CODE_SKIP_PROMPT_HISTORY</div><div class="desc">在所有模式下停止寫入逐字稿</div></div>
+    <div class="field"><div class="name">--no-session-persistence</div><div class="desc">單次非互動執行時停止寫入</div></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+const EXPORT = {
+  '執行一次並取得結果': '用 --output-format json 或 stream-json 呼叫 claude -p, 取得結構化的結果, session ID, 用量與成本。',
+  '向既有 Session 提問': '將 session ID 傳給 claude -p --resume 送出後續提示 (例如摘要要求), 並取得結構化回應。',
+  '回應 Session 事件': '讀取 hooks 與 status line 指令收到的 transcript_path 欄位, SessionEnd hook 可在 session 結束時封存逐字稿。',
+  '嵌入 TypeScript / Python 應用': '使用 Agent SDK 以程式化方式接收每一則訊息。',
+};
+const exportChipsEl = document.getElementById('exportChips');
+const exportDisplayEl = document.getElementById('exportDisplay');
+function renderExport(key) {
+  exportDisplayEl.innerHTML = `<div class="response-field"><div class="rf-key">${key}</div><div class="rf-val">${EXPORT[key]}</div></div>`;
+}
+Object.keys(EXPORT).forEach((key, i) => {
+  const chip = document.createElement('div');
+  chip.className = 'chip' + (i === 0 ? ' active' : '');
+  chip.textContent = key;
+  chip.onclick = () => {
+    document.querySelectorAll('#exportChips .chip').forEach(el => el.classList.remove('active'));
+    chip.classList.add('active');
+    renderExport(key);
+  };
+  exportChipsEl.appendChild(chip);
+});
+renderExport(Object.keys(EXPORT)[0]);
+
+let BRStep = 0;
+const BR_MAX = 1;
+function brGoTo(n) {
+  BRStep = Math.max(0, Math.min(BR_MAX, n));
+  document.querySelectorAll('.br-panel').forEach((el, i) => el.classList.toggle('visible', i === BRStep));
+  document.querySelectorAll('.br-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === BRStep) t.classList.add('active');
+    else if (i < BRStep) t.classList.add('done');
+  });
+  document.getElementById('brPrev').disabled = BRStep === 0;
+  const next = document.getElementById('brNext');
+  next.disabled = BRStep === BR_MAX;
+  next.textContent = BRStep === BR_MAX ? 'Done ✓' : 'Next →';
+  document.getElementById('brIndicator').textContent = `Step ${BRStep + 1} of ${BR_MAX + 1}`;
+}
+brGoTo(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VS Code 擴充套件 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%); border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px;
+  font-family: monospace; font-size: 0.82rem; color: #1a202c; overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; } .cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a; min-width: 190px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; } .btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; } .btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; } .demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; } .col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 220px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; } body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; } body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; } body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; } body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; } body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; } body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .btn-primary { background: #2b6cb0; } body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; } body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; } body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; } body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; } body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>在 VS Code 中使用 Claude Code</h1>
+  <p>安裝並設定 Claude Code 擴充套件, 取得行內 diff, @-mention, plan 審查與鍵盤快捷鍵等圖形化輔助.</p>
+</header>
+
+<main>
+  <section>
+    <h2>先決條件與安裝</h2>
+    <div class="api-fields">
+      <div class="field"><div class="name">VS Code 版本</div><div class="desc">需要 1.98.0 以上版本</div></div>
+      <div class="field"><div class="name">帳號</div><div class="desc">任何付費 Claude 訂閱或 Claude Console 帳號, 不需要 API key</div></div>
+    </div>
+    <pre class="code-block"><span class="cmt"># VS Code / Cursor 安裝連結, 或在擴充套件檢視搜尋 "Claude Code"</span>
+vscode:extension/anthropic.claude-code</pre>
+    <div class="info-box">
+      <span class="tag">提示</span>
+      <p>擴充套件內建自己的 CLI 副本供聊天面板使用. 若要在整合終端機中執行 claude 指令, 仍需另外安裝 standalone CLI.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>開始使用</h2>
+    <div class="stage-tabs">
+      <div class="vc-tab stage-tab active" onclick="vcGoTo(0)">1 · 開啟面板</div>
+      <div class="vc-tab stage-tab" onclick="vcGoTo(1)">2 · 登入</div>
+      <div class="vc-tab stage-tab" onclick="vcGoTo(2)">3 · 送出提示</div>
+      <div class="vc-tab stage-tab" onclick="vcGoTo(3)">4 · 審查變更</div>
+    </div>
+    <div class="vc-panel demo-panel visible" id="vc-p0"><p>點選編輯器右上角的 Spark 圖示最快開啟面板. 也可從 Activity Bar, Command Palette 或 Status Bar 開啟.</p></div>
+    <div class="vc-panel demo-panel" id="vc-p1"><p>首次開啟面板會出現登入畫面, 點選 Sign in 並在瀏覽器完成驗證.</p></div>
+    <div class="vc-panel demo-panel" id="vc-p2"><p>Claude 會自動看到選取的文字, 按 Option+K / Alt+K 插入 @-mention 參照.</p></div>
+    <div class="vc-panel demo-panel" id="vc-p3"><p>Claude 要編輯檔案時會顯示並排的原始與提議變更比較, 並詢問權限.</p></div>
+    <div>
+      <button class="btn btn-ghost" id="vcPrev" disabled onclick="vcGoTo(vcStep-1)">← 上一步</button>
+      <button class="btn btn-primary" id="vcNext" onclick="vcGoTo(vcStep+1)">下一步 →</button>
+      <span class="step-indicator" id="vcIndicator">Step 1 of 4</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>提示框功能</h2>
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">Permission modes</span><span class="event-desc">一般模式, Plan 模式, 自動接受模式三種切換</span></div>
+      <div class="event-item"><span class="event-name">Command menu</span><span class="event-desc">輸入 / 附加檔案, 切換模型, 開關 extended thinking</span></div>
+      <div class="event-item"><span class="event-name">Context indicator</span><span class="event-desc">顯示 context window 使用比例, 可手動 /compact</span></div>
+      <div class="event-item"><span class="event-name">@-mentions</span><span class="event-desc">用 @ 加檔案或資料夾名稱給 Claude 上下文, 支援模糊比對</span></div>
+      <div class="event-item"><span class="event-name">Multi-line input</span><span class="event-desc">Shift+Enter 換行不送出</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>自訂工作流程與管理外掛</h2>
+    <div class="two-col">
+      <div class="col-card">
+        <div class="col-card-title">面板位置</div>
+        <p>可拖曳到右側次要側邊欄, 左側主側邊欄, 或編輯器區域開成分頁</p>
+      </div>
+      <div class="col-card">
+        <div class="col-card-title">管理外掛</div>
+        <p>輸入 /plugins 開啟管理介面, 分為 Plugins 與 Marketplaces 兩個分頁, 安裝時可選擇使用者, 專案或本機範圍</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>用 Chrome 自動化瀏覽器任務</h2>
+    <p>連接 Claude 到 Chrome 瀏覽器以測試網頁應用, 用 console log 除錯, 需要 Claude in Chrome 擴充套件 1.0.36 以上版本.</p>
+    <pre class="code-block">@browser go to localhost:3000 and check the console for errors</pre>
+  </section>
+
+  <section>
+    <h2>常用指令與快捷鍵</h2>
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">Cmd/Ctrl+Esc</span><span class="event-desc">切換編輯器與 Claude 面板的焦點</span></div>
+      <div class="event-item"><span class="event-name">Cmd/Ctrl+Shift+Esc</span><span class="event-desc">在新分頁開啟一段新對話</span></div>
+      <div class="event-item"><span class="event-name">Cmd/Ctrl+N</span><span class="event-desc">開始新對話 (需啟用設定)</span></div>
+      <div class="event-item"><span class="event-name">Option/Alt+K</span><span class="event-desc">插入目前檔案與選取範圍的 @-mention 參照</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>設定</h2>
+    <div class="chip-row" id="settingsChips"></div>
+    <div class="response-box" id="settingsBox"></div>
+  </section>
+
+  <section>
+    <h2>VS Code 擴充套件與 CLI 的差異</h2>
+    <div class="two-col">
+      <div class="col-card">
+        <div class="col-card-title">CLI</div>
+        <p>所有指令與 skills, 完整 MCP 設定, ! bash 捷徑, tab 補全</p>
+      </div>
+      <div class="col-card">
+        <div class="col-card-title">VS Code 擴充套件</div>
+        <p>指令子集, 部分 MCP 管理, 支援 checkpoint 回溯的三種選項</p>
+      </div>
+    </div>
+    <div class="info-box">
+      <span class="tag">Checkpoint</span>
+      <p>Fork conversation from here, Rewind code to here, Fork conversation and rewind code 三種回溯方式.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Git 整合與第三方供應商</h2>
+    <p>Claude 可以暫存變更, 撰寫 commit 訊息並建立 pull request. 使用 --worktree (-w) 旗標可在獨立的 git worktree 中啟動 Claude.</p>
+    <pre class="code-block"><span class="fn">claude</span> <span class="kw">--worktree</span> feature-auth</pre>
+    <p>若組織使用 Amazon Bedrock, Google Vertex AI 或 Microsoft Foundry, 需在設定中停用登入提示並依供應商指南設定 ~/.claude/settings.json.</p>
+  </section>
+
+  <section>
+    <h2>安全性與內建 IDE MCP 伺服器</h2>
+    <p>擴充套件啟用時會執行本機 MCP 伺服器供 CLI 自動連接, 綁定於 127.0.0.1 隨機高位連接埠, 每次啟用都會產生新的驗證權杖.</p>
+    <div class="api-fields">
+      <div class="field"><div class="name">mcp__ide__getDiagnostics</div><div class="desc">回傳語言伺服器診斷訊息, 不會寫入</div></div>
+      <div class="field"><div class="name">mcp__ide__executeCode</div><div class="desc">在使用中的 Jupyter kernel 執行 Python 程式碼, 每次都會先詢問確認</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>疑難排解</h2>
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">Spark 圖示看不到</span><span class="event-desc">需先開啟檔案, 圖示才會出現在編輯器工具列</span></div>
+      <div class="event-item"><span class="event-name">Cmd+Esc 沒有反應</span><span class="event-desc">macOS Tahoe 的 Game Overlay 快捷鍵攔截了按鍵, 需在系統設定中清除</span></div>
+      <div class="event-item"><span class="event-name">擴充套件無回應</span><span class="event-desc">確認網路連線, 開始新對話, 或改用 CLI 測試</span></div>
+    </div>
+    <div class="takeaway">
+      <p>移除擴充套件後, 在整合終端機執行 claude 會自動重新安裝. 若要保持解除安裝狀態, 需在 /config 關閉 Auto-install IDE extension.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+let vcStep = 0;
+const VC_MAX = 3;
+function vcGoTo(n) {
+  vcStep = Math.max(0, Math.min(VC_MAX, n));
+  document.querySelectorAll('.vc-panel').forEach((el, i) => el.classList.toggle('visible', i === vcStep));
+  document.querySelectorAll('.vc-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === vcStep) t.classList.add('active'); else if (i < vcStep) t.classList.add('done');
+  });
+  document.getElementById('vcPrev').disabled = vcStep === 0;
+  const next = document.getElementById('vcNext');
+  next.disabled = vcStep === VC_MAX;
+  next.textContent = vcStep === VC_MAX ? '完成 ✓' : '下一步 →';
+  document.getElementById('vcIndicator').textContent = `Step ${vcStep + 1} of ${VC_MAX + 1}`;
+}
+vcGoTo(0);
+
+const SETTINGS = [
+  { name: 'useTerminal', def: 'false', desc: '以終端機模式啟動 Claude 而非圖形面板' },
+  { name: 'initialPermissionMode', def: 'default', desc: '控制新對話的核准提示模式' },
+  { name: 'preferredLocation', def: 'panel', desc: 'Claude 開啟位置: sidebar 或 panel' },
+  { name: 'autosave', def: 'true', desc: '在 Claude 讀寫前自動儲存檔案' },
+  { name: 'respectGitIgnore', def: 'true', desc: '檔案搜尋排除 .gitignore 中的樣式' },
+  { name: 'allowDangerouslySkipPermissions', def: 'false', desc: '在模式選擇器加入 Bypass permissions, 僅限無網路的沙盒環境' },
+];
+let setIdx = 0;
+function renderSettings() {
+  document.getElementById('settingsChips').innerHTML = SETTINGS.map((s,i) =>
+    `<span class="chip ${i===setIdx?'active':''}" onclick="setIdx=${i};renderSettings()">${s.name}</span>`).join('');
+  const s = SETTINGS[setIdx];
+  document.getElementById('settingsBox').innerHTML = `
+    <div class="response-field"><div class="rf-key">預設值</div><div class="rf-val">${s.def}</div></div>
+    <div class="response-field"><div class="rf-key">說明</div><div class="rf-val">${s.desc}</div></div>`;
+}
+renderSettings();
+</script>
+</body>
+</html>

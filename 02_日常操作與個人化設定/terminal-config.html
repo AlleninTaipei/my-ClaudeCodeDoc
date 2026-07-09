@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>設定終端機 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 220px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 180px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>設定終端機</h1>
+  <p>修正 Shift+Enter 換行, 取得完成通知, 設定 tmux, 配色主題, 啟用 Vim 模式</p>
+</header>
+
+<main>
+
+<section>
+  <h2>症狀速查</h2>
+  <p>Claude Code 在任何終端機都能開箱即用, 本頁針對特定不如預期的行為。點選你遇到的症狀查看對應解法。</p>
+  <div class="chip-row" id="symChips"></div>
+  <div class="response-box" id="symDisplay"></div>
+  <div class="info-box"><span class="tag">注意</span><p>本頁是關於讓終端機送出正確訊號給 Claude Code。要改變 Claude Code 本身回應哪些按鍵, 請改看 keybindings 頁面。</p></div>
+</section>
+
+<section>
+  <h2>輸入多行提示</h2>
+  <p>按 Enter 會送出訊息, 要換行而不送出, 按 Ctrl+J, 或輸入 <code>\</code> 後按 Enter, 兩者在所有終端機都不需設定即可運作。</p>
+  <div class="response-box">
+    <div class="response-field"><div class="rf-key">Ghostty/Kitty/iTerm2/WezTerm/Warp/Apple Terminal/Windows Terminal</div><div class="rf-val">不需設定即可用 Shift+Enter</div></div>
+    <div class="response-field"><div class="rf-key">VS Code/Cursor/Devin Desktop/Alacritty/Zed</div><div class="rf-val">執行一次 /terminal-setup</div></div>
+    <div class="response-field"><div class="rf-key">gnome-terminal/JetBrains IDE</div><div class="rf-val">不支援, 改用 Ctrl+J 或 \ 加 Enter</div></div>
+  </div>
+  <p><code>/terminal-setup</code> 會把 Shift+Enter 等按鍵綁定寫入終端機的設定檔, 既有綁定會保留不動。要換掉 Enter 與 Shift+Enter 的行為, 可在 keybindings 檔案中對應 <code>chat:newline</code> 與 <code>chat:submit</code> 動作。</p>
+</section>
+
+<section>
+  <h2>在 macOS 啟用 Option 按鍵快捷方式</h2>
+  <p>部分 Claude Code 快捷鍵使用 Option 鍵, 例如 Option+Enter 換行或 Option+P 切換模型, macOS 上多數終端機預設不會送出 Option 作為修飾鍵。</p>
+  <div class="stage-tabs">
+    <div class="opt-tab stage-tab active" onclick="optGoTo(0)">Apple Terminal</div>
+    <div class="opt-tab stage-tab" onclick="optGoTo(1)">iTerm2</div>
+    <div class="opt-tab stage-tab" onclick="optGoTo(2)">VS Code</div>
+  </div>
+  <div class="opt-panel demo-panel visible" id="opt-p0">
+    <p>開啟 Settings → Profiles → Keyboard, 勾選 "Use Option as Meta Key"。若你已接受 Claude Code 首次執行時提供的提示, 此設定已經自動完成。</p>
+  </div>
+  <div class="opt-panel demo-panel" id="opt-p1">
+    <p>開啟 Settings → Profiles → Keys → General, 將 Left/Right Option key 設為 "Esc+"。執行 /terminal-setup 也會啟用剪貼簿存取, 讓 /copy 能寫入系統剪貼簿, 重新啟動 iTerm2 後生效。</p>
+  </div>
+  <div class="opt-panel demo-panel" id="opt-p2">
+    <pre class="code-block"><span class="str">"terminal.integrated.macOptionIsMeta"</span>: true</pre>
+  </div>
+  <div>
+    <button class="btn btn-ghost" id="optPrev" disabled onclick="optGoTo(OptStep-1)">← Back</button>
+    <button class="btn btn-primary" id="optNext" onclick="optGoTo(OptStep+1)">Next →</button>
+    <span class="step-indicator" id="optIndicator">Step 1 of 3</span>
+  </div>
+</section>
+
+<section>
+  <h2>取得終端機提示音或通知</h2>
+  <p>Claude 完成任務或暫停等待權限提示時會觸發通知事件。預設只有 Ghostty, Kitty, iTerm2 會送出桌面通知, 其他終端機可設定 <code>preferredNotifChannel</code> 為 <code>"terminal_bell"</code> 改用終端機鈴聲, 或設定 Notification hook 自訂音效。</p>
+  <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"hooks"</span>: <span class="kw">{</span>
+    <span class="str">"Notification"</span>: [
+      <span class="kw">{</span>
+        <span class="str">"hooks"</span>: [<span class="kw">{</span> <span class="str">"type"</span>: <span class="str">"command"</span>, <span class="str">"command"</span>: <span class="str">"afplay /System/Library/Sounds/Glass.aiff"</span> <span class="kw">}</span>]
+      <span class="kw">}</span>
+    ]
+  <span class="kw">}</span>
+<span class="kw">}</span></pre>
+  <div class="takeaway"><p>桌面通知能透過 SSH 傳到本機, 遠端 session 也能提醒你; Ghostty 與 Kitty 會自動轉發到系統通知中心, iTerm2 需要在 Settings → Profiles → Terminal 手動啟用 alerts。</p></div>
+</section>
+
+<section>
+  <h2>設定 tmux</h2>
+  <p>在 tmux 中執行 Claude Code 時, 預設有兩件事會壞掉: Shift+Enter 會變成送出而非換行, 桌面通知與進度條無法傳到外層終端機。</p>
+  <pre class="code-block"><span class="kw">set</span> -g allow-passthrough on
+<span class="kw">set</span> -s extended-keys on
+<span class="kw">set</span> -as terminal-features <span class="str">'xterm*:extkeys'</span></pre>
+  <p>加入 <code>~/.tmux.conf</code> 後執行 <code>tmux source-file ~/.tmux.conf</code> 套用到執行中的 server。</p>
+</section>
+
+<section>
+  <h2>配色主題</h2>
+  <p>用 <code>/theme</code> 指令或 <code>/config</code> 中的主題選擇器挑選符合終端機的配色, 選擇 auto 會偵測終端機的明暗背景並隨系統外觀改變。</p>
+  <h3>建立自訂主題</h3>
+  <p>每個自訂主題是 <code>~/.claude/themes/</code> 中的一個 JSON 檔案, 檔名 (不含副檔名) 即為主題代號。</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">name</div><div class="desc">在 /theme 中顯示的名稱, 預設為檔名代號</div></div>
+    <div class="field"><div class="name">base</div><div class="desc">起始的內建主題: dark, light, dark-daltonized 等, 預設 dark</div></div>
+    <div class="field"><div class="name">overrides</div><div class="desc">色彩代碼名稱對應色彩值的映射表</div></div>
+  </div>
+  <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"name"</span>: <span class="str">"Dracula"</span>,
+  <span class="str">"base"</span>: <span class="str">"dark"</span>,
+  <span class="str">"overrides"</span>: <span class="kw">{</span>
+    <span class="str">"claude"</span>: <span class="str">"#bd93f9"</span>,
+    <span class="str">"error"</span>: <span class="str">"#ff5555"</span>,
+    <span class="str">"success"</span>: <span class="str">"#50fa7b"</span>
+  <span class="kw">}</span>
+<span class="kw">}</span></pre>
+  <p>點選下方分類瀏覽可自訂的色彩代碼群組:</p>
+  <div class="chip-row" id="tokenChips"></div>
+  <div class="event-list" id="tokenList"></div>
+  <div class="info-box"><span class="tag">提示</span><p>Claude Code 會監看 ~/.claude/themes/ 並在檔案變更時重新載入, 編輯後不需重啟 session。</p></div>
+</section>
+
+<section>
+  <h2>切換至全螢幕渲染模式</h2>
+  <p>若顯示閃爍或捲動位置跳動, 切換到全螢幕渲染模式。此模式繪製於終端機保留給全螢幕應用的獨立畫面, 而非附加到一般的捲動歷史, 讓記憶體用量維持平穩, 並加入滑鼠捲動與選取支援。</p>
+  <pre class="code-block"><span class="fn">/tui</span> fullscreen</pre>
+  <div class="api-fields">
+    <div class="field"><div class="name">Bash / Zsh</div><div class="desc">CLAUDE_CODE_NO_FLICKER=1 claude</div></div>
+    <div class="field"><div class="name">PowerShell</div><div class="desc">$env:CLAUDE_CODE_NO_FLICKER = "1"; claude</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>貼上大量內容</h2>
+  <p>貼上超過 10,000 字元時, Claude Code 會將輸入框摺疊為 <code>[Pasted text]</code> 佔位符, 讓輸入框保持可用, 完整內容仍會在送出時傳給 Claude。</p>
+  <div class="info-box"><span class="tag">注意</span><p>VS Code 內建終端機在貼上非常大量內容時可能遺失字元, 建議改用檔案式流程: 將內容寫入檔案, 請 Claude 讀取檔案而非直接貼上。</p></div>
+</section>
+
+<section>
+  <h2>用 Vim 快捷鍵編輯提示</h2>
+  <p>透過 <code>/config</code> → Editor mode, 或在 <code>~/.claude/settings.json</code> 設定 <code>editorMode</code> 為 <code>"vim"</code> 啟用。Vim 模式支援 NORMAL 與 VISUAL 模式的部分動作與運算子, 例如 hjkl 導覽, v/V 選取, 以及搭配文字物件的 d/c/y。</p>
+  <div class="takeaway"><p>在 INSERT 模式按 Enter 仍會送出提示, 這與標準 Vim 不同; 要插入換行請在 NORMAL 模式用 o 或 O, 或使用 Ctrl+J。</p></div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+const SYMPTOMS = {
+  'Shift+Enter 送出而非換行': '執行一次 /terminal-setup 寫入終端機的設定檔, 或用 Ctrl+J / 反斜線加 Enter 換行。',
+  'macOS 上 Option 快捷鍵沒反應': '在終端機設定中啟用 "Use Option as Meta Key" 或等效選項。',
+  '完成時沒有聲音或提醒': '設定 preferredNotifChannel 為 terminal_bell, 或加入 Notification hook。',
+  '在 tmux 中執行': '在 ~/.tmux.conf 加入 allow-passthrough 與 extended-keys 設定。',
+  '畫面閃爍或捲動跳動': '切換到全螢幕渲染模式: /tui fullscreen。',
+  '想要 Vim 按鍵': '在 /config 的 Editor mode 或 settings.json 設定 editorMode 為 vim。',
+};
+const symChipsEl = document.getElementById('symChips');
+const symDisplayEl = document.getElementById('symDisplay');
+function renderSym(key) {
+  symDisplayEl.innerHTML = `<div class="response-field"><div class="rf-key">${key}</div><div class="rf-val">${SYMPTOMS[key]}</div></div>`;
+}
+Object.keys(SYMPTOMS).forEach((key, i) => {
+  const chip = document.createElement('div');
+  chip.className = 'chip' + (i === 0 ? ' active' : '');
+  chip.textContent = key;
+  chip.onclick = () => {
+    document.querySelectorAll('#symChips .chip').forEach(el => el.classList.remove('active'));
+    chip.classList.add('active');
+    renderSym(key);
+  };
+  symChipsEl.appendChild(chip);
+});
+renderSym(Object.keys(SYMPTOMS)[0]);
+
+let OptStep = 0;
+const OPT_MAX = 2;
+function optGoTo(n) {
+  OptStep = Math.max(0, Math.min(OPT_MAX, n));
+  document.querySelectorAll('.opt-panel').forEach((el, i) => el.classList.toggle('visible', i === OptStep));
+  document.querySelectorAll('.opt-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === OptStep) t.classList.add('active');
+    else if (i < OptStep) t.classList.add('done');
+  });
+  document.getElementById('optPrev').disabled = OptStep === 0;
+  const next = document.getElementById('optNext');
+  next.disabled = OptStep === OPT_MAX;
+  next.textContent = OptStep === OPT_MAX ? 'Done ✓' : 'Next →';
+  document.getElementById('optIndicator').textContent = `Step ${OptStep + 1} of ${OPT_MAX + 1}`;
+}
+optGoTo(0);
+
+const TOKENS = {
+  '文字與強調色': [['claude','主要品牌強調色, 用於 spinner 與助理標籤'],['text','預設前景文字'],['inactive','次要文字如提示, 時間戳記'],['subtle','淡邊框與弱化的次要文字'],['permission','對話框邊框, 包含權限提示與選擇器']],
+  '狀態色': [['success','成功訊息與通過的檢查'],['error','錯誤訊息與失敗'],['warning','警告, 注意訊息與 auto 模式邊框'],['merged','已合併 PR 的狀態']],
+  '輸入框與模式指示': [['promptBorder','預設權限模式下的輸入框邊框'],['planMode','計畫模式強調色與邊框'],['autoAccept','接受編輯模式強調色與邊框'],['bashBorder','輸入 ! shell 指令時的輸入框邊框']],
+  'Diff 渲染': [['diffAdded','新增行的背景色'],['diffRemoved','移除行的背景色'],['diffAddedWord','新增行內的字詞層級高亮'],['diffRemovedWord','移除行內的字詞層級高亮']],
+  '全螢幕模式': [['userMessageBackground','逐字稿中你的訊息背景'],['bashMessageBackgroundColor','! shell 指令項目的背景'],['selectionBg','滑鼠選取文字的背景色']],
+  '子代理色彩': [['<color>_FOR_SUBAGENTS_ONLY','八種子代理顏色 (red/blue/green/yellow/purple/orange/pink/cyan) 各自的顯示色'],['rainbow_<color>','ultrathink 與 ultraplan 關鍵字的七色彩虹漸層']],
+};
+const tokenChipsEl = document.getElementById('tokenChips');
+const tokenListEl = document.getElementById('tokenList');
+function renderTokens(key) {
+  tokenListEl.innerHTML = TOKENS[key].map(([n,d]) =>
+    `<div class="event-item"><span class="event-name">${n}</span><span class="event-desc">${d}</span></div>`).join('');
+}
+Object.keys(TOKENS).forEach((key, i) => {
+  const chip = document.createElement('div');
+  chip.className = 'chip' + (i === 0 ? ' active' : '');
+  chip.textContent = key;
+  chip.onclick = () => {
+    document.querySelectorAll('#tokenChips .chip').forEach(el => el.classList.remove('active'));
+    chip.classList.add('active');
+    renderTokens(key);
+  };
+  tokenChipsEl.appendChild(chip);
+});
+renderTokens(Object.keys(TOKENS)[0]);
+</script>
+</body>
+</html>

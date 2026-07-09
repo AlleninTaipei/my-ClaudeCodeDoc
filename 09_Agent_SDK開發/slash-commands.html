@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SDK 中的 Slash Commands 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; }
+.fn  { color: #16a34a; }
+.str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; }
+.key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 150px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; }
+body.dark .fn  { color: #68d391; }
+body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; }
+body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; }
+body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; }
+body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; }
+body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; }
+body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>SDK 中的 Slash Commands</h1>
+  <p>學習如何透過 Claude Agent SDK 使用 slash commands 來控制 Claude Code session, 包含發現指令, 傳送指令與建立自訂指令.</p>
+</header>
+
+<main>
+
+  <section>
+    <h2>探索可用的 Slash Commands</h2>
+    <p>Claude Agent SDK 會在系統初始化訊息 (system/init) 中提供可用 slash commands 的資訊. 只有不需要互動式終端機就能執行的指令才能透過 SDK 呼叫.</p>
+    <div class="chip-row">
+      <span class="chip-label">選擇語言:</span>
+      <div class="chip active" onclick="scSwitchLang(this,'ts','disc')">TypeScript</div>
+      <div class="chip" onclick="scSwitchLang(this,'py','disc')">Python</div>
+    </div>
+    <div id="disc-ts" class="code-block">
+<span class="kw">import</span> { query } <span class="kw">from</span> <span class="str">"@anthropic-ai/claude-agent-sdk"</span>;
+
+<span class="kw">for await</span> (<span class="kw">const</span> <span class="key">message</span> <span class="kw">of</span> <span class="fn">query</span>({
+  prompt: <span class="str">"Hello Claude"</span>,
+  options: { maxTurns: <span class="key">1</span> }
+})) {
+  <span class="kw">if</span> (<span class="key">message</span>.type === <span class="str">"system"</span> && <span class="key">message</span>.subtype === <span class="str">"init"</span>) {
+    <span class="key">console</span>.<span class="fn">log</span>(<span class="str">"Available slash commands:"</span>, <span class="key">message</span>.slash_commands);
+    <span class="cmt">// 包含內建指令與內附的 skills, 例如:</span>
+    <span class="cmt">// ["clear", "compact", "context", "usage", "code-review", "verify", ...]</span>
+  }
+}</div>
+    <div id="disc-py" class="code-block" style="display:none">
+<span class="kw">import</span> asyncio
+<span class="kw">from</span> claude_agent_sdk <span class="kw">import</span> query, ClaudeAgentOptions, SystemMessage
+
+<span class="kw">async def</span> <span class="fn">main</span>():
+    <span class="kw">async for</span> message <span class="kw">in</span> <span class="fn">query</span>(prompt=<span class="str">"Hello Claude"</span>, options=<span class="fn">ClaudeAgentOptions</span>(max_turns=<span class="key">1</span>)):
+        <span class="kw">if</span> <span class="fn">isinstance</span>(message, SystemMessage) <span class="kw">and</span> message.subtype == <span class="str">"init"</span>:
+            <span class="fn">print</span>(<span class="str">"Available slash commands:"</span>, message.data[<span class="str">"slash_commands"</span>])
+            <span class="cmt"># 包含內建指令與內附的 skills</span>
+
+asyncio.<span class="fn">run</span>(main())</div>
+    <div class="info-box">
+      <span class="tag">重點</span>
+      <p>回傳的清單包含內建指令加上已內附的 skills 與你自訂的指令, 建議在 session 一開始就讀取這份清單以確認可用指令.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>傳送 Slash Commands</h2>
+    <p>將 slash command 像一般文字一樣放入 prompt 字串中即可傳送. 像 <code>/compact</code> 這類作用於對話歷史的指令, 需要先有對話內容才能運作, 因此範例會先進行一次問答, 再以 follow-up 的方式送出指令.</p>
+    <div class="chip-row">
+      <span class="chip-label">選擇語言:</span>
+      <div class="chip active" onclick="scSwitchLang(this,'ts','send')">TypeScript</div>
+      <div class="chip" onclick="scSwitchLang(this,'py','send')">Python</div>
+    </div>
+    <div id="send-ts" class="code-block">
+<span class="cmt">// 先建立對話歷史</span>
+<span class="kw">try</span> {
+  <span class="kw">for await</span> (<span class="kw">const</span> <span class="key">message</span> <span class="kw">of</span> <span class="fn">query</span>({
+    prompt: <span class="str">"What does the README in this directory cover?"</span>,
+    options: { maxTurns: <span class="key">2</span> }
+  })) {
+    <span class="kw">if</span> (<span class="key">message</span>.type === <span class="str">"result"</span> && <span class="key">message</span>.subtype === <span class="str">"success"</span>) {
+      <span class="key">console</span>.<span class="fn">log</span>(<span class="key">message</span>.result);
+    }
+  }
+} <span class="kw">catch</span> (<span class="key">error</span>) {
+  <span class="cmt">// 單次 query() 在產出錯誤結果後會拋出例外, 後續指令仍會執行</span>
+  <span class="key">console</span>.<span class="fn">error</span>(<span class="str">`Session ended with an error: ${error}`</span>);
+}
+
+<span class="cmt">// 以 follow-up 方式送出 slash command</span>
+<span class="kw">for await</span> (<span class="kw">const</span> <span class="key">message</span> <span class="kw">of</span> <span class="fn">query</span>({
+  prompt: <span class="str">"/compact"</span>,
+  options: { continue: <span class="key">true</span>, maxTurns: <span class="key">1</span> }
+})) {
+  <span class="kw">if</span> (<span class="key">message</span>.type === <span class="str">"result"</span>) {
+    <span class="key">console</span>.<span class="fn">log</span>(<span class="str">"Command executed, result subtype:"</span>, <span class="key">message</span>.subtype);
+  }
+}</div>
+    <div id="send-py" class="code-block" style="display:none">
+<span class="kw">import</span> asyncio
+<span class="kw">from</span> claude_agent_sdk <span class="kw">import</span> query, ClaudeAgentOptions, ResultMessage
+
+<span class="kw">async def</span> <span class="fn">main</span>():
+    <span class="kw">try</span>:
+        <span class="kw">async for</span> message <span class="kw">in</span> <span class="fn">query</span>(
+            prompt=<span class="str">"What does the README in this directory cover?"</span>,
+            options=<span class="fn">ClaudeAgentOptions</span>(max_turns=<span class="key">2</span>),
+        ):
+            <span class="kw">if</span> <span class="fn">isinstance</span>(message, ResultMessage) <span class="kw">and</span> message.subtype == <span class="str">"success"</span>:
+                <span class="fn">print</span>(message.result)
+    <span class="kw">except</span> Exception <span class="kw">as</span> error:
+        <span class="fn">print</span>(<span class="str">f"Session ended with an error: {error}"</span>)
+
+    <span class="kw">async for</span> message <span class="kw">in</span> <span class="fn">query</span>(
+        prompt=<span class="str">"/compact"</span>,
+        options=<span class="fn">ClaudeAgentOptions</span>(continue_conversation=<span class="key">True</span>, max_turns=<span class="key">1</span>),
+    ):
+        <span class="kw">if</span> <span class="fn">isinstance</span>(message, ResultMessage):
+            <span class="fn">print</span>(<span class="str">"Command executed, result subtype:"</span>, message.subtype)
+
+asyncio.<span class="fn">run</span>(main())</div>
+    <div class="info-box">
+      <span class="tag">注意</span>
+      <p>query 可能以錯誤結果結束, 例如達到 maxTurns 上限. 最終結果訊息會帶有 is_error: true 與 error_max_turns 等 subtype, 且 SDK 會在此之後拋出例外 (因為 CLI 行程以非零狀態碼結束), 記得用 try/catch 包住.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>常用 Slash Commands</h2>
+    <div class="stage-tabs">
+      <div class="cmd-tab stage-tab active" onclick="cmdGoTo(0)">1 · /compact</div>
+      <div class="cmd-tab stage-tab" onclick="cmdGoTo(1)">2 · /clear</div>
+    </div>
+
+    <div class="cmd-panel demo-panel visible" id="cmd-p0">
+      <p><code>/compact</code> 會透過摘要較舊的訊息來縮減對話歷史大小, 同時保留重要脈絡. 執行 compaction 需要至少已有兩輪先前交流.</p>
+      <div class="response-box">
+        <div class="response-field"><div class="rf-key">compact_boundary</div><div class="rf-val">只有在真的執行了壓縮時才會出現的 system 訊息</div></div>
+        <div class="response-field"><div class="rf-key">pre_tokens</div><div class="rf-val">壓縮前的 token 數量, 例如 1842</div></div>
+        <div class="response-field"><div class="rf-key">trigger</div><div class="rf-val">觸發方式, 例如 manual</div></div>
+      </div>
+      <div class="info-box">
+        <span class="tag">邊界情況</span>
+        <p>若沒有可摘要的內容, /compact 不會拋出錯誤, 而是以 success 結束並在結果文字中說明原因, 例如 "Not enough messages to compact." 全新的 query() 呼叫每次都是空白脈絡, 因此此模式建議搭配串流輸入模式或 resume session 使用.</p>
+      </div>
+    </div>
+
+    <div class="cmd-panel demo-panel" id="cmd-p1">
+      <p><code>/clear</code> 會把對話重設為空白脈絡, 讓後續 prompt 從無先前歷史開始. 舊對話仍保存在磁碟上, 可透過 session ID 搭配 resume 選項回到該對話.</p>
+      <div class="info-box">
+        <span class="tag">適用情境</span>
+        <p>此指令在串流輸入模式下最有用, 因為該模式會在單一連線上傳送多個 prompt. 對單次 query() 呼叫而言, 每次呼叫本來就是空白脈絡, 所以送出 /clear 沒有實際效果, 直接開新的 query() 即可.</p>
+      </div>
+      <div class="info-box">
+        <span class="tag">版本需求</span>
+        <p>SDK 中的 /clear 需要 Claude Code v2.1.117 以上版本, 較早版本的 slash_commands 清單中不會包含它.</p>
+      </div>
+    </div>
+
+    <div>
+      <button class="btn btn-ghost" id="cmdPrev" disabled onclick="cmdGoTo(cmdStep-1)">← 上一步</button>
+      <button class="btn btn-primary" id="cmdNext" onclick="cmdGoTo(cmdStep+1)">下一步 →</button>
+      <span class="step-indicator" id="cmdIndicator">Step 1 of 2</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>建立自訂 Slash Commands</h2>
+    <p>除了內建指令外, 你也可以建立自己的自訂指令, 以 markdown 檔案定義, 存放位置與 subagent 設定方式類似.</p>
+    <div class="info-box">
+      <span class="tag">格式演進</span>
+      <p><code>.claude/commands/</code> 是舊格式. 建議格式是 <code>.claude/skills/&lt;name&gt;/SKILL.md</code>, 支援相同的 slash command 呼叫方式 (/name), 並額外支援 Claude 自主呼叫. CLI 持續支援兩種格式.</p>
+    </div>
+
+    <h3>存放位置</h3>
+    <div class="two-col">
+      <div class="col-card">
+        <div class="col-card-title">專案指令</div>
+        <p><code>.claude/commands/</code></p>
+        <p>只在目前專案中可用 (舊格式, 建議改用 .claude/skills/)</p>
+      </div>
+      <div class="col-card">
+        <div class="col-card-title">個人指令</div>
+        <p><code>~/.claude/commands/</code></p>
+        <p>在你所有的專案中都可用 (舊格式, 建議改用 ~/.claude/skills/)</p>
+      </div>
+    </div>
+
+    <h3>Frontmatter 可用欄位</h3>
+    <div class="api-fields">
+      <div class="field"><div class="name">allowed-tools</div><div class="desc">限定此指令可使用的工具, 例如 Read, Grep, Glob</div></div>
+      <div class="field"><div class="name">description</div><div class="desc">指令的簡短描述</div></div>
+      <div class="field"><div class="name">model</div><div class="desc">覆寫此指令使用的模型, 例如 claude-opus-4-8</div></div>
+      <div class="field"><div class="name">argument-hint</div><div class="desc">提示此指令接受的參數, 例如 [issue-number] [priority]</div></div>
+    </div>
+
+    <h3>進階功能</h3>
+    <div class="event-list">
+      <div class="event-item"><div class="event-name">參數與佔位符</div><div class="event-desc">用 $0, $1 或 $ARGUMENTS 接收動態參數, 例如 /fix-issue 123 high</div></div>
+      <div class="event-item"><div class="event-name">執行 Bash 指令</div><div class="event-desc">用 !`git status` 這類語法在指令內嵌入 shell 輸出</div></div>
+      <div class="event-item"><div class="event-name">檔案參照</div><div class="event-desc">用 @package.json 這類語法在指令內引用檔案內容</div></div>
+      <div class="event-item"><div class="event-name">子目錄命名空間</div><div class="event-desc">將指令放入子目錄以利組織, 子目錄只影響描述, 不影響指令名稱本身</div></div>
+    </div>
+
+    <div class="code-block">.claude/commands/
+├── frontend/
+│   ├── component.md      <span class="cmt">// 建立 /component (project:frontend)</span>
+│   └── style-check.md    <span class="cmt">// 建立 /style-check (project:frontend)</span>
+├── backend/
+│   ├── api-test.md       <span class="cmt">// 建立 /api-test (project:backend)</span>
+│   └── db-migrate.md     <span class="cmt">// 建立 /db-migrate (project:backend)</span>
+└── review.md              <span class="cmt">// 建立 /review (project)</span></div>
+
+    <div class="info-box">
+      <span class="tag">名稱衝突</span>
+      <p>Claude Code 內附 code-review 與 verify skills. 若自訂指令與其同名, 例如 .claude/commands/code-review.md, 你的指令會覆蓋內附的 skill, slash_commands 只會列出一次該名稱.</p>
+    </div>
+
+    <div class="takeaway">
+      <p>自訂指令一旦定義在檔案系統中, 就會自動出現在 SDK 的 slash_commands 清單中並可直接於 prompt 中呼叫, 是將團隊常用工作流程封裝成可重用指令的最簡單方式.</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+function scSwitchLang(el, lang, group) {
+  el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(group + '-ts').style.display = lang === 'ts' ? 'block' : 'none';
+  document.getElementById(group + '-py').style.display = lang === 'py' ? 'block' : 'none';
+}
+
+let cmdStep = 0;
+const CMD_MAX = 1;
+function cmdGoTo(n) {
+  cmdStep = Math.max(0, Math.min(CMD_MAX, n));
+  document.querySelectorAll('.cmd-panel').forEach((el, i) => el.classList.toggle('visible', i === cmdStep));
+  document.querySelectorAll('.cmd-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === cmdStep) t.classList.add('active');
+    else if (i < cmdStep) t.classList.add('done');
+  });
+  document.getElementById('cmdPrev').disabled = cmdStep === 0;
+  const next = document.getElementById('cmdNext');
+  next.disabled = cmdStep === CMD_MAX;
+  next.textContent = cmdStep === CMD_MAX ? 'Done ✓' : '下一步 →';
+  document.getElementById('cmdIndicator').textContent = `Step ${cmdStep + 1} of ${CMD_MAX + 1}`;
+}
+cmdGoTo(0);
+</script>
+</body>
+</html>

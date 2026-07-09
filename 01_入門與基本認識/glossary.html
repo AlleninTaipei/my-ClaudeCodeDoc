@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Glossary 術語表互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%); border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
+main    { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 40px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+.term-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.term-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.term-card .name { font-family: monospace; font-size: 0.9rem; color: #16a34a; font-weight: 700; }
+.term-card .desc { font-size: 0.82rem; color: #4a5568; margin-top: 6px; }
+.term-card .link { font-size: 0.75rem; color: #2563eb; margin-top: 6px; display: block; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 12px 16px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 150px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+@media (max-width: 640px) { .term-grid { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark p { color: #a0aec0; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; } body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; } body.dark .info-box p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; } body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark .term-card { background: #1a202c; border-color: #2d3748; } body.dark .term-card .name { color: #68d391; } body.dark .term-card .desc { color: #a0aec0; } body.dark .term-card .link { color: #63b3ed; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; } body.dark .response-field { border-bottom-color: #2d3748; } body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); } body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+<header>
+  <h1>Claude Code 術語表</h1>
+  <p>Agentic loop, compaction, CLAUDE.md, hooks, subagents, MCP 等核心概念的定義, 按字母分組並可篩選。</p>
+</header>
+<main>
+
+<section>
+  <h2>依字母篩選術語</h2>
+  <div class="chip-row">
+    <span class="chip-label">跳到:</span>
+    <div class="chip active" onclick="glFilter(this,'all')">全部</div>
+    <div class="chip" onclick="glFilter(this,'A')">A</div>
+    <div class="chip" onclick="glFilter(this,'B')">B</div>
+    <div class="chip" onclick="glFilter(this,'C')">C</div>
+    <div class="chip" onclick="glFilter(this,'D')">D</div>
+    <div class="chip" onclick="glFilter(this,'E')">E</div>
+    <div class="chip" onclick="glFilter(this,'H')">H</div>
+    <div class="chip" onclick="glFilter(this,'M')">M</div>
+    <div class="chip" onclick="glFilter(this,'N')">N</div>
+    <div class="chip" onclick="glFilter(this,'O')">O</div>
+    <div class="chip" onclick="glFilter(this,'P')">P</div>
+    <div class="chip" onclick="glFilter(this,'R')">R</div>
+    <div class="chip" onclick="glFilter(this,'S')">S</div>
+    <div class="chip" onclick="glFilter(this,'T')">T</div>
+    <div class="chip" onclick="glFilter(this,'V')">V</div>
+    <div class="chip" onclick="glFilter(this,'W')">W</div>
+  </div>
+
+  <div class="term-grid" id="termGrid">
+    <div class="term-card" data-letter="A"><div class="name">Agent teams</div><div class="desc">多個獨立 Claude Code session 由 team lead 協調, 共用任務清單與點對點訊息, 每個成員都有自己的上下文視窗。</div></div>
+    <div class="term-card" data-letter="A"><div class="name">Agentic coding</div><div class="desc">AI 能讀取檔案, 執行指令並自主進行修改的工作流程, 而非只回覆文字等你套用。</div></div>
+    <div class="term-card" data-letter="A"><div class="name">Agentic harness</div><div class="desc">把語言模型變成有能力的編碼代理的工具, 上下文管理與執行環境。Claude Code 是 harness, Claude 是其中的模型。</div></div>
+    <div class="term-card" data-letter="A"><div class="name">Agentic loop</div><div class="desc">蒐集情境, 採取行動, 驗證結果, 重複直到完成的循環。多數擴充點都掛接在此循環的特定階段。</div></div>
+    <div class="term-card" data-letter="A"><div class="name">Artifact</div><div class="desc">Claude Code 從 session 發布到 claude.ai 私有網址的即時互動網頁, 分享範圍僅限於你的組織。</div></div>
+    <div class="term-card" data-letter="A"><div class="name">Auto memory</div><div class="desc">Claude 依你的修正與偏好自行撰寫的筆記, 存放於每個 git 儲存庫下的 ~/.claude/projects/。</div></div>
+    <div class="term-card" data-letter="A"><div class="name">Auto mode</div><div class="desc">獨立分類模型在背景審查動作的權限模式, 多數動作不需核准提示, 攔截範圍擴大, 未知基礎設施與提示注入。</div></div>
+    <div class="term-card" data-letter="B"><div class="name">Bare mode</div><div class="desc">--bare 啟動旗標, 跳過 hooks, skills, plugins, MCP 伺服器, auto memory 與 CLAUDE.md 的自動探索。</div></div>
+    <div class="term-card" data-letter="B"><div class="name">Bundled skills</div><div class="desc">內建的提示式工作手冊, 例如 /batch, /code-review, /debug, /loop, 讓 Claude 編排工作而非執行固定邏輯。</div></div>
+    <div class="term-card" data-letter="C"><div class="name">Channel</div><div class="desc">將事件推送進執行中 session 的 MCP 伺服器, 讓 Claude 能對你不在終端機時發生的事做出反應。</div></div>
+    <div class="term-card" data-letter="C"><div class="name">Checkpoint</div><div class="desc">每次送出提示時建立的還原點, Claude Code 在每次編輯前都會先快照檔案內容。</div></div>
+    <div class="term-card" data-letter="C"><div class="name">.claude directory</div><div class="desc">Claude Code 讀取專案範圍設定的目錄: 設定, hooks, skills, subagents, rules 與 auto memory。</div></div>
+    <div class="term-card" data-letter="C"><div class="name">CLAUDE.md</div><div class="desc">你為 Claude 撰寫的持久指示 markdown 檔, 在系統提示之後作為使用者訊息載入每個 session。</div></div>
+    <div class="term-card" data-letter="C"><div class="name">Command</div><div class="desc">輸入 /name 呼叫的可重複使用指令。內建指令控制 session, 也可以在 .claude/commands/ 自訂。</div></div>
+    <div class="term-card" data-letter="C"><div class="name">Compaction</div><div class="desc">上下文視窗接近上限時的自動摘要。較舊的工具輸出會先被清除, 接著才會摘要對話內容。</div></div>
+    <div class="term-card" data-letter="C"><div class="name">Context window</div><div class="desc">session 的工作記憶, 保存對話紀錄, 檔案內容, 指令輸出, CLAUDE.md, auto memory, 已載入的 skills 與系統指示。</div></div>
+    <div class="term-card" data-letter="D"><div class="name">Dispatch</div><div class="desc">從手機發起的任務路由, 當你從 Claude 行動 App 送出編碼任務時, 會在 Desktop App 中生成一個 Claude Code session。</div></div>
+    <div class="term-card" data-letter="E"><div class="name">Effort level</div><div class="desc">控制每輪使用多少自適應推理思考預算的設定, 較高的 effort 代表更多思考 token 與更深入的推理。</div></div>
+    <div class="term-card" data-letter="E"><div class="name">Extended thinking</div><div class="desc">模型回應前執行的可見逐步推理過程, 可用 effort level 調整或用 MAX_THINKING_TOKENS 限制。</div></div>
+    <div class="term-card" data-letter="H"><div class="name">Hook</div><div class="desc">在 Claude Code 生命週期特定時間點自動執行的使用者定義處理器, 確定性地觸發而非由模型自行決定。</div></div>
+    <div class="term-card" data-letter="M"><div class="name">Managed settings</div><div class="desc">由 IT 或 DevOps 全組織強制執行的設定, 使用者與專案設定無法覆寫。</div></div>
+    <div class="term-card" data-letter="M"><div class="name">MCP (Model Context Protocol)</div><div class="desc">連接 AI 工具與外部資料來源及服務的開放標準, 提供 Slack, Jira, 資料庫, 瀏覽器等數百種整合。</div></div>
+    <div class="term-card" data-letter="M"><div class="name">MCP Tool Search</div><div class="desc">延遲載入 MCP 工具結構描述的節省上下文機制, 啟動時只載入工具名稱。</div></div>
+    <div class="term-card" data-letter="N"><div class="name">Non-interactive mode</div><div class="desc">用 -p 或 --print 呼叫, 執行單一提示後不進入對話式 session 就結束, 用於 CI, 腳本與管線。</div></div>
+    <div class="term-card" data-letter="O"><div class="name">Output style</div><div class="desc">修改 Claude 系統提示以改變回應行為, 語氣或格式的設定, 會關閉預設系統提示中軟體工程專屬的部分。</div></div>
+    <div class="term-card" data-letter="P"><div class="name">Permission mode</div><div class="desc">session 的基本核准行為, 可用的模式包含 default, acceptEdits, plan, auto, dontAsk 與 bypassPermissions。</div></div>
+    <div class="term-card" data-letter="P"><div class="name">Permission rule</div><div class="desc">根據工具名稱與參數模式決定允許, 詢問或拒絕的設定項目, 依 deny → ask → allow 順序評估, 先比對到者優先。</div></div>
+    <div class="term-card" data-letter="P"><div class="name">Plan mode</div><div class="desc">Claude 研究並提出變更但不編輯原始檔案的權限模式, 提出計畫等待核准後才動手。</div></div>
+    <div class="term-card" data-letter="P"><div class="name">Plugin</div><div class="desc">將 skills, hooks, subagents 與 MCP 伺服器打包成單一可安裝單元, 以 plugin-name:skill-name 命名空間區隔。</div></div>
+    <div class="term-card" data-letter="P"><div class="name">Project trust</div><div class="desc">Claude Code 載入設定前的目錄信任對話框, 信任後 .claude/settings.json 與 .mcp.json 等設定才會生效。</div></div>
+    <div class="term-card" data-letter="P"><div class="name">Prompt injection</div><div class="desc">嵌在檔案, 網頁或工具結果中的惡意指示, 試圖將 Claude 導向你未曾要求的動作。</div></div>
+    <div class="term-card" data-letter="R"><div class="name">Remote Control</div><div class="desc">透過 claude.ai 從手機或瀏覽器繼續本機 Claude Code session, 程式碼留在本機, 只有介面是遠端的。</div></div>
+    <div class="term-card" data-letter="R"><div class="name">Rules</div><div class="desc">.claude/rules/ 中的模組化指示檔, 與 CLAUDE.md 一起載入, 可用 YAML paths 前置資料限定路徑範圍。</div></div>
+    <div class="term-card" data-letter="S"><div class="name">Sandboxing</div><div class="desc">Bash 工具的作業系統層級檔案系統與網路隔離, 讓 Claude 能在你預先定義的邊界內自由工作。</div></div>
+    <div class="term-card" data-letter="S"><div class="name">Session</div><div class="desc">綁定目前目錄的對話, 擁有獨立的上下文視窗, 可用 claude -c 恢復或用 --fork-session 分支。</div></div>
+    <div class="term-card" data-letter="S"><div class="name">Settings layers</div><div class="desc">Claude Code 讀取設定的層級順序: managed policy, 命令列參數, local settings, 專案設定, 使用者設定。</div></div>
+    <div class="term-card" data-letter="S"><div class="name">Skill</div><div class="desc">包含指示, 知識或工作流程的 SKILL.md 檔案, Claude 相關時自動載入, 也可以用 /skill-name 直接呼叫。</div></div>
+    <div class="term-card" data-letter="S"><div class="name">Subagent</div><div class="desc">在自己的上下文視窗中執行的專門 AI 助手, 擁有自訂系統提示, 特定工具存取權與獨立權限。</div></div>
+    <div class="term-card" data-letter="S"><div class="name">Surface</div><div class="desc">你存取 Claude Code 的任何地方: CLI, VS Code, JetBrains, Desktop 或 claude.ai, 所有介面共用同一套引擎。</div></div>
+    <div class="term-card" data-letter="T"><div class="name">Teleport</div><div class="desc">/teleport 指令, 把雲端 Claude Code session 拉進本機終端機, 反方向則是 --remote。</div></div>
+    <div class="term-card" data-letter="T"><div class="name">Tool</div><div class="desc">Claude 能採取的動作: 讀檔, 編輯程式碼, 執行 shell 指令, 搜尋網頁, 生成 subagent。</div></div>
+    <div class="term-card" data-letter="T"><div class="name">Turn</div><div class="desc">session 中 Claude 的一次完整回應, 從你送出訊息開始, 到 Claude 完成回應結束, 中間可有任意次工具呼叫。</div></div>
+    <div class="term-card" data-letter="V"><div class="name">Verification loop</div><div class="desc">session 如何得知工作是真的完成而非只是看起來合理, 給 Claude 一個可執行的檢查, 讓它反覆迭代直到通過。</div></div>
+    <div class="term-card" data-letter="W"><div class="name">Worktree isolation</div><div class="desc">在 .claude/worktrees/ 下獨立 git worktree 執行 Claude 的隔離模式, 讓平行代理不會互相覆寫檔案。</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>已棄用或改名的術語</h2>
+  <p>這些術語出現在較舊的文件, 部落格文章與社群內容中, 搜尋本站時請改用目前的名稱。</p>
+  <div class="response-box">
+    <div class="response-field"><span class="rf-key">Headless mode</span><span class="rf-val">現稱 Non-interactive mode, 相同的 -p 旗標, 相同行為</span></div>
+    <div class="response-field"><span class="rf-key">Custom commands</span><span class="rf-val">現稱 Skills, .claude/commands/ 檔案仍可運作</span></div>
+    <div class="response-field"><span class="rf-key">Slash commands</span><span class="rf-val">現稱 Commands, 產品文案中已刪去「slash」</span></div>
+  </div>
+  <div class="info-box"><span class="tag">TIP</span><p>模型層級的概念如 tokens, temperature 與 RAG, 請參考 platform glossary。</p></div>
+</section>
+
+</main>
+<script>
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+  }
+  function glFilter(el, letter) {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.term-card').forEach(card => {
+      card.style.display = (letter === 'all' || card.dataset.letter === letter) ? 'block' : 'none';
+    });
+  }
+</script>
+</body>
+</html>

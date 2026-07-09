@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fast Mode 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%); border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a; min-width: 26px; flex-shrink: 0; font-weight:700; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 130px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+input[type=range] { width: 100%; margin-top: 16px; accent-color: #3b82f6; }
+.range-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: #6b7280; margin-top: 6px; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; } body.dark p  { color: #a0aec0; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Fast Mode</h1>
+  <p>用更高費率換取更快的 Opus 回應速度<span class="scope-badge" style="background:#fef3c7;color:#92400e;border:1px solid #fcd34d;padding:2px 8px;border-radius:4px;font-size:0.58rem;font-weight:700;margin-left:8px;">研究預覽</span></p>
+</header>
+
+<main>
+
+<section>
+  <h2>切換 Fast Mode</h2>
+  <p>Fast mode 是 Claude Opus 的高速設定, 讓模型最高快 2.5 倍, 但每個 token 的費用較高。它不是不同的模型, 而是用不同的 API 設定, 優先考慮速度而非成本效率, 品質與能力完全相同。</p>
+  <div class="chip-row">
+    <span class="chip-label">支援模型:</span>
+    <span class="chip active">Opus 4.8</span>
+    <span class="chip active">Opus 4.7 (即將淘汰)</span>
+  </div>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">/fast</span><span class="event-desc">輸入並按 Tab 切換開關</span></div>
+    <div class="event-item"><span class="event-name">setting</span><span class="event-desc">在使用者設定檔設定 "fastMode": true</span></div>
+  </div>
+  <div class="info-box"><span class="tag">啟用時會發生</span><p>若目前在不同模型, Claude Code 會自動切換到 Opus; 出現 "Fast mode ON" 確認訊息; 提示旁出現小圖示; 再次執行 /fast 可檢查目前狀態。停用後仍停留在 Opus, 不會回到先前的模型。</p></div>
+  <div class="info-box"><span class="tag">已淘汰</span><p>Opus 4.7 的 fast mode 已於 2026 年 6 月 25 日淘汰, 將於 2026 年 7 月 24 日移除, 屆時該模型的 fast mode 請求會回傳錯誤且不會退回標準版本, 建議遷移至 Opus 4.8。</p></div>
+</section>
+
+<section>
+  <h2>理解成本取捨</h2>
+  <p>Fast mode 每個 token 的定價高於標準 Opus, 倍率依模型而異, 且定價在完整 1M token context window 中維持一致。</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">Opus 4.8</div><div class="desc">輸入 $10 / MTok, 輸出 $50 / MTok</div></div>
+    <div class="field"><div class="name">Opus 4.7</div><div class="desc">輸入 $30 / MTok, 輸出 $150 / MTok</div></div>
+  </div>
+  <div class="info-box"><span class="tag">第一次開啟的成本</span><p>在對話中第一次啟用 fast mode, 需為整段對話 context 支付完整未快取的 fast mode 輸入價格。對話進行得越深, 開啟成本越高, 因此從一開始就啟用最省錢。此成本每個對話只收一次, 之後再切換開關不會重複收費。</p></div>
+</section>
+
+<section>
+  <h2>決定何時使用 Fast Mode</h2>
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">適合 Fast Mode</div>
+      <p>快速反覆修改程式碼</p>
+      <p>即時除錯 session</p>
+      <p>時間緊迫的工作</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">適合標準模式</div>
+      <p>速度較不重要的長時間自主任務</p>
+      <p>批次處理或 CI/CD pipeline</p>
+      <p>對成本敏感的工作負載</p>
+    </div>
+  </div>
+  <h3>Fast Mode 對比 Effort Level</h3>
+  <div class="response-box">
+    <div class="response-field"><div class="rf-key">Fast mode</div><div class="rf-val">模型品質相同, 延遲較低, 成本較高</div></div>
+    <div class="response-field"><div class="rf-key">較低 effort level</div><div class="rf-val">思考時間較少, 回應較快, 複雜任務品質可能下降</div></div>
+  </div>
+  <div class="takeaway"><p>兩者可以合併使用: 搭配較低的 effort level 使用 fast mode, 在簡單任務上達到最高速度。</p></div>
+</section>
+
+<section>
+  <h2>使用需求</h2>
+  <p>Fast mode 需要滿足以下所有條件:</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">帳號</span><span class="event-desc">僅限 Anthropic API 或訂閱方案, 不支援 Bedrock, Vertex AI, Azure Foundry 或 Claude Platform on AWS</span></div>
+    <div class="event-item"><span class="event-name">用量額度</span><span class="event-desc">帳號須開啟 usage credits, 個人帳號於 Console 帳單設定開啟, Team/Enterprise 需管理員開啟</span></div>
+    <div class="event-item"><span class="event-name">組織啟用</span><span class="event-desc">Team 與 Enterprise 預設停用, 須由 Owner 明確啟用後使用者才能開啟</span></div>
+  </div>
+  <h3>為組織啟用 Fast Mode</h3>
+  <div class="response-box">
+    <div class="response-field"><div class="rf-key">Console (API 客戶)</div><div class="rf-val">管理員於 Claude Code preferences 啟用</div></div>
+    <div class="response-field"><div class="rf-key">Claude AI (Team/Enterprise)</div><div class="rf-val">Owner 於 Admin Settings > Claude Code 啟用</div></div>
+  </div>
+  <div class="info-box"><span class="tag">每 Session 選擇加入</span><p>預設 fast mode 會跨 session 保留。管理員可在 Team 或 Enterprise 方案設定 fastModePerSessionOptIn 為 true, 讓每個 session 都以關閉狀態開始, 需使用者以 /fast 明確開啟。</p></div>
+</section>
+
+<section>
+  <h2>處理速率限制</h2>
+  <p>Fast mode 有獨立的速率限制, Opus 4.8 與 4.7 共用同一個限制池。當達到限制或用量額度用盡時:</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">1</span><span class="event-desc">Fast mode 自動退回標準速度</span></div>
+    <div class="event-item"><span class="event-name">2</span><span class="event-desc">圖示轉為灰色表示冷卻中</span></div>
+    <div class="event-item"><span class="event-name">3</span><span class="event-desc">以標準速度與價格繼續工作</span></div>
+    <div class="event-item"><span class="event-name">4</span><span class="event-desc">冷卻結束後 fast mode 自動重新啟用</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>研究預覽</h2>
+  <div class="info-box"><span class="tag">研究預覽</span><p>Fast mode 為研究預覽功能: 功能可能依回饋調整, 可用性與定價可能變動, 底層 API 設定可能演進。透過一般 Anthropic 支援管道回報問題或意見。</p></div>
+</section>
+
+<section>
+  <h2>延伸閱讀</h2>
+  <div class="info-box"><span class="tag">相關文件</span><p>Model configuration: 切換模型與調整 effort level · Manage costs: 追蹤 token 用量並降低成本 · Status line configuration: 顯示模型與 context 資訊</p></div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+</script>
+</body>
+</html>

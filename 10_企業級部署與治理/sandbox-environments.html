@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Choose a Sandbox Environment 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; }
+.fn  { color: #16a34a; }
+.str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; }
+.key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 200px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; }
+body.dark .fn  { color: #68d391; }
+body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; }
+body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; }
+body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; }
+body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; }
+body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; }
+body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Choose a Sandbox Environment</h1>
+  <p>比較 Claude Code 的沙盒選項: 內建的 sandboxed Bash 工具, sandbox runtime, dev container, Docker 與虛擬機, 依威脅模型選出合適的隔離方式。</p>
+</header>
+
+<main>
+
+<section>
+  <h2>Compare sandboxing approaches</h2>
+  <p>下表前兩種方式運行在主機作業系統上, 不使用容器; 其餘方式則將 Claude Code 放進容器或虛擬機中。</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">Sandboxed Bash tool</div><div class="desc">隔離: Bash 指令與子行程 / 需要 Docker: 否 / 設定難度: macOS 極低, Linux/WSL2 低</div></div>
+    <div class="field"><div class="name">Sandbox runtime</div><div class="desc">隔離: 整個 Claude Code 行程 (含檔案工具, MCP, hooks) / 需要 Docker: 否 / 設定難度: 低</div></div>
+    <div class="field"><div class="name">Dev container</div><div class="desc">隔離: 完整開發環境 / 需要 Docker: 是 / 設定難度: 中</div></div>
+    <div class="field"><div class="name">Custom container</div><div class="desc">隔離: 完整開發環境 / 需要 Docker: 是 / 設定難度: 中至高</div></div>
+    <div class="field"><div class="name">Virtual machine</div><div class="desc">隔離: 完整作業系統 / 需要 Docker: 否 / 設定難度: 高</div></div>
+    <div class="field"><div class="name">Claude Code on the web</div><div class="desc">隔離: 完整作業系統, 由 Anthropic 代管 / 需要 Docker: 否 / 設定難度: 無, 需訂閱與 GitHub</div></div>
+  </div>
+  <div class="info-box"><span class="tag">WARNING</span><p>沙盒隔離能降低外洩的影響範圍, 但不能完全消除風險。任何允許網路對外連線的方式仍可能外洩資料, 任何以可寫方式掛載專案目錄的方式仍可能修改程式碼。隔離也不會改變傳送給模型的內容, 你的提示與 Claude 讀取的檔案一律會傳送給 Anthropic API 或你設定的提供者。</p></div>
+</section>
+
+<section>
+  <h2>Choose an approach</h2>
+  <p>將你的目標對應到下方情境, 挑選建議的起點。</p>
+  <div class="chip-row">
+    <span class="chip-label">選擇你的情境:</span>
+    <div class="se-goal-chip chip active" onclick="seGoalGoTo(0)">日常減少提示</div>
+    <div class="se-goal-chip chip" onclick="seGoalGoTo(1)">無人值守執行</div>
+    <div class="se-goal-chip chip" onclick="seGoalGoTo(2)">隔離 MCP/hooks</div>
+    <div class="se-goal-chip chip" onclick="seGoalGoTo(3)">不信任的程式碼</div>
+    <div class="se-goal-chip chip" onclick="seGoalGoTo(4)">團隊標準化</div>
+    <div class="se-goal-chip chip" onclick="seGoalGoTo(5)">組織強制要求</div>
+  </div>
+  <div class="se-goal-panel demo-panel visible" id="se-goal-p0"><p><b>建議起點:</b> 使用 <code>/sandbox</code> 啟用的 sandboxed Bash tool。</p></div>
+  <div class="se-goal-panel demo-panel" id="se-goal-p1"><p><b>建議起點:</b> 搭配 <code>--dangerously-skip-permissions</code> 或 auto mode, 使用預先設定好的 dev container, 任一容器或 VM, 或是 sandbox runtime。</p></div>
+  <div class="se-goal-panel demo-panel" id="se-goal-p2"><p><b>建議起點:</b> 若想不使用 Docker 就隔離 MCP 伺服器與 hooks, 使用 sandbox runtime。</p></div>
+  <div class="se-goal-panel demo-panel" id="se-goal-p3"><p><b>建議起點:</b> 使用專屬虛擬機, 或若有 Claude 訂閱與已連接的 GitHub 帳戶, 使用 Claude Code on the web。</p></div>
+  <div class="se-goal-panel demo-panel" id="se-goal-p4"><p><b>建議起點:</b> 將預先設定好的 dev container 複製進你的儲存庫中, 讓團隊環境標準化。</p></div>
+  <div class="se-goal-panel demo-panel" id="se-goal-p5"><p><b>建議起點:</b> 參考下方「Enforce isolation across an organization」章節, 依方式選擇對應的強制手段。</p></div>
+
+  <h3>How isolation relates to permission modes</h3>
+  <div class="two-col">
+    <div class="col-card"><div class="col-card-title">Permission modes</div><p>決定工具呼叫是否執行, 以及是否要先詢問你。</p></div>
+    <div class="col-card"><div class="col-card-title">Isolation</div><p>限制指令執行後能存取到什麼。兩者互補: 當權限模式允許動作不經詢問就執行時, 隔離邊界限制了這些動作能觸及的範圍。</p></div>
+  </div>
+  <div class="info-box"><span class="tag">NOTE</span><p><code>--dangerously-skip-permissions</code> 移除了除明確 ask 規則外的逐項審查, 因此隔離邊界是唯一能限制 Claude 行為的機制, 務必搭配容器, VM 或 sandbox runtime 使用。Auto mode 則用分類器取代提示, 屬於逐項控制而非隔離邊界。</p></div>
+</section>
+
+<section>
+  <h2>Sandboxed Bash tool</h2>
+  <p>Sandboxed Bash tool 內建於 Claude Code, 使用作業系統原生機制限制每個 Bash 指令的檔案系統與網路存取: macOS 用 Seatbelt, Linux 與 WSL2 用 bubblewrap。預設允許寫入工作目錄, 且第一次需要新網路網域時會提示核准。</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">Read / Edit / WebFetch</span><span class="event-desc">在 Claude Code 行程內執行, 不會產生任意程式碼, 改由路徑或網域的權限規則把關</span></div>
+    <div class="event-item"><span class="event-name">MCP 伺服器與 hooks</span><span class="event-desc">是獨立行程, 在主機上不受限制執行</span></div>
+  </div>
+  <p>若要把內建工具, MCP 伺服器與 hooks 都納入同一個 OS 邊界, 需要使用 sandbox runtime, dev container 或 custom container。</p>
+</section>
+
+<section>
+  <h2>Sandbox runtime</h2>
+  <p><code>@anthropic-ai/sandbox-runtime</code> 套件將整個行程包在與內建 Bash 沙盒相同的 Seatbelt 或 bubblewrap 隔離中。透過它執行 Claude Code 會限制該 session 中的每個工具, hook 與 MCP 伺服器, 而不只是 Bash。此 runtime 為 beta 研究預覽版。</p>
+  <pre class="code-block"><span class="fn">npx</span> @anthropic-ai/sandbox-runtime <span class="key">claude</span></pre>
+  <div class="info-box"><span class="tag">NOTE</span><p>Runtime 預設拒絕所有寫入與網路存取, 需先在 <code>~/.srt-settings.json</code> 中設定允許寫入專案目錄與 <code>~/.claude</code>, <code>~/.claude.json</code>, 以及允許 session 所需的網路網域。</p></div>
+</section>
+
+<section>
+  <h2>Dev containers</h2>
+  <p>Dev container 透過 VS Code 或相容編輯器管理的 Docker 容器執行 Claude Code, 並掛載你的專案。你可以在儲存庫中用 <code>.devcontainer/</code> 目錄定義自己的環境。</p>
+  <div class="takeaway"><p>claude-code 儲存庫發佈了一個內含預設拒絕 iptables 防火牆的範例 dev container, 可作為起點複製進你的儲存庫, 並調整防火牆允許清單, 基底映像與 Claude Code 版本。因為防火牆會封鎖未核准的對外流量, 這種設定足以支援以 <code>--dangerously-skip-permissions</code> 進行無人值守工作。</p></div>
+</section>
+
+<section>
+  <h2>Custom container</h2>
+  <p>你可以在任何 Docker 或 OCI 容器映像中執行 Claude Code, 搭配自訂的網路政策, 掛載磁區與 seccomp profile。這是擁有既有容器基礎設施或 CI runner 的組織最常見的做法。</p>
+  <p>檢查清單與其他容器方式相同: 檢視哪些磁區以可寫方式掛載, 容器內能存取到哪些憑證與 token, 以及網路對外政策允許什麼。你也可以在容器內再疊加內建 Bash 沙盒做逐指令限制。</p>
+</section>
+
+<section>
+  <h2>Virtual machine</h2>
+  <p>專屬虛擬機提供最強的隔離, 擁有自己的核心, 在雲端或 microVM 部署中甚至有自己的虛擬化硬體。選項包含雲端執行個體, 本地 hypervisor, 以及 Firecracker 等 microVM。</p>
+  <p>適用情境: 評估不受信任的程式碼, 安全政策要求核心層級的隔離, 或沒有任何主機層級方式能滿足合規需求時。Docker Desktop 的 sandboxes 功能提供含獨立 Docker daemon 與工作區同步的 microVM。</p>
+</section>
+
+<section>
+  <h2>Claude Code on the web</h2>
+  <p>Claude Code on the web 讓每個 session 在隔離的, 由 Anthropic 代管的虛擬機中執行。網路代理伺服器強制執行預設允許清單, 另一個代理伺服器則將你的 GitHub token 保存在沙盒之外, 只在沙盒內發放範圍受限的憑證。</p>
+  <p>適用情境: 想要完整 VM 隔離但不想自行建置基礎設施, 或是從沒有本地開發環境的裝置委派任務時。需要 Claude 訂閱與已連接的 GitHub 帳戶。</p>
+</section>
+
+<section>
+  <h2>Enforce isolation across an organization</h2>
+  <p>個別開發者可以自行選擇上述任一方式, 而組織能強制的範圍與工具則依方式而異:</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">內建 Bash 沙盒</div><div class="desc">Claude Code 自身唯一能強制執行的方式, 透過 managed settings 或 MDM 交付 sandbox 設定鍵</div></div>
+    <div class="field"><div class="name">Dev containers</div><div class="desc">將範例 dev container 提交到儲存庫以標準化團隊環境, 屬於慣例而非強制邊界</div></div>
+    <div class="field"><div class="name">Custom containers 與 VM</div><div class="desc">透過核准的映像散布 Claude Code, 並用組織的裝置管理或軟體允許清單工具防止在外部安裝</div></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+function seGoalGoTo(n) {
+  document.querySelectorAll('.se-goal-panel').forEach((el, i) => el.classList.toggle('visible', i === n));
+  document.querySelectorAll('.se-goal-chip').forEach((c, i) => c.classList.toggle('active', i === n));
+}
+</script>
+</body>
+</html>

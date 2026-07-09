@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Web Quickstart 網頁版快速上手互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%); border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
+main    { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 48px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.0rem; font-weight: 600; margin: 16px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c; overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw { color: #7c3aed; } .fn { color: #16a34a; } .str { color: #d97706; } .cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a; min-width: 190px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 12px 16px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.8rem; color: #d97706; width: 220px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; } .btn-primary:hover:not(:disabled) { background: #1d4ed8; } .btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; } .btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; } .btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; } .stage-tab.done { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; } .demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields { grid-template-columns: 1fr; } .rf-key { width: 140px; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; } body.dark p { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw { color: #9f7aea; } body.dark .fn { color: #68d391; } body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; } body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; } body.dark .info-box p { color: #a0aec0; }
+body.dark .field { background: #1a202c; border-color: #2d3748; } body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; } body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; } body.dark .response-field { border-bottom-color: #2d3748; } body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; } body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; } body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; } body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; } body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; } body.dark .stage-tab.done { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; } body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); } body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+<header>
+  <h1>Claude Code on the Web</h1>
+  <p>在瀏覽器或手機的雲端執行 Claude Code, 連接 GitHub 儲存庫, 送出任務並審查 PR, 不需要本機設定。</p>
+</header>
+<main>
+
+<section>
+  <h2>Session 如何執行</h2>
+  <div class="stage-tabs">
+    <div name="wq" class="wq-tab stage-tab active" onclick="wqGoTo(0)">1 · 複製並準備</div>
+    <div class="wq-tab stage-tab" onclick="wqGoTo(1)">2 · 設定網路</div>
+    <div class="wq-tab stage-tab" onclick="wqGoTo(2)">3 · 工作</div>
+    <div class="wq-tab stage-tab" onclick="wqGoTo(3)">4 · 推送分支</div>
+  </div>
+  <div class="wq-panel demo-panel visible" id="wq-p0"><p>你的儲存庫被複製到 Anthropic 管理的 VM, 並執行你設定的 setup script。</p></div>
+  <div class="wq-panel demo-panel" id="wq-p1"><p>依環境的存取層級設定網際網路存取權限。</p></div>
+  <div class="wq-panel demo-panel" id="wq-p2"><p>Claude 分析程式碼, 進行修改, 執行測試並檢查成果, 你可以全程觀看或引導, 也可以離開稍後再回來。</p></div>
+  <div class="wq-panel demo-panel" id="wq-p3"><p>Claude 到達停止點後推送分支到 GitHub, 你可以審查差異, 留下行內註解, 建立 PR, 或送出下一則訊息繼續。</p></div>
+  <div><button class="btn btn-ghost" id="wqPrev" disabled onclick="wqGoTo(wqStep-1)">← Back</button><button class="btn btn-primary" id="wqNext" onclick="wqGoTo(wqStep+1)">Next →</button><span class="step-indicator" id="wqIndicator">Step 1 of 4</span></div>
+</section>
+
+<section>
+  <h2>比較各種執行 Claude Code 的方式</h2>
+  <div class="response-box">
+    <div class="response-field"><span class="rf-key">程式碼在哪執行</span><span class="rf-val">Web: Anthropic 雲端 VM / Remote Control, Terminal, Desktop: 你的機器</span></div>
+    <div class="response-field"><span class="rf-key">需要 GitHub</span><span class="rf-val">Web 需要, Remote Control 與 Terminal 不需要</span></div>
+    <div class="response-field"><span class="rf-key">斷線後持續執行</span><span class="rf-val">Web 是, Terminal 否, Remote Control 視終端機是否維持開啟</span></div>
+    <div class="response-field"><span class="rf-key">權限模式</span><span class="rf-val">Web: Accept edits, Plan, Auto; Terminal 支援所有模式</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>連接 GitHub 並建立環境</h2>
+  <div class="chip-row">
+    <span class="chip-label">選擇設定方式:</span>
+    <div class="chip active" onclick="ghChip(this,0)">從瀏覽器</div>
+    <div class="chip" onclick="ghChip(this,1)">從終端機</div>
+  </div>
+  <div id="ghPanel0">
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">1. 造訪 claude.ai/code</span><span class="event-desc">用 Anthropic 帳號登入</span></div>
+      <div class="event-item"><span class="event-name">2. 安裝 GitHub App</span><span class="event-desc">授予存取儲存庫的權限</span></div>
+      <div class="event-item"><span class="event-name">3. 建立雲端環境</span><span class="event-desc">設定網路存取層級, 環境變數與 setup script</span></div>
+    </div>
+  </div>
+  <div id="ghPanel1" style="display:none">
+    <pre class="code-block"><span class="fn">gh</span> auth login
+<span class="cmt"># 在 Claude Code CLI 中</span>
+/login
+/web-setup</pre>
+    <p>/web-setup 會同步你的 gh token, 並在你還沒有雲端環境時自動建立一個。</p>
+  </div>
+</section>
+
+<section>
+  <h2>開始一項任務</h2>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">選擇儲存庫與分支</span><span class="event-desc">可加入多個儲存庫在同一 session 中跨庫工作</span></div>
+    <div class="event-item"><span class="event-name">選擇權限模式</span><span class="event-desc">預設 Accept edits, 或切換到 Plan mode 先審查再動手</span></div>
+    <div class="event-item"><span class="event-name">描述任務並送出</span><span class="event-desc">具體指出檔案或函式, 貼上錯誤輸出, 描述預期行為</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>預先填入 Session</h2>
+  <p>透過查詢參數預先填入 prompt, 儲存庫與環境, 用於整合像是 issue tracker 中的按鈕。</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">prompt / q</div><div class="desc">要預先填入輸入框的提示文字</div></div>
+    <div class="field"><div class="name">prompt_url</div><div class="desc">從網址抓取提示文字, 適合太長無法內嵌的提示</div></div>
+    <div class="field"><div class="name">repositories / repo</div><div class="desc">逗號分隔的 owner/repo 清單</div></div>
+    <div class="field"><div class="name">environment</div><div class="desc">要預選的環境名稱或 ID</div></div>
+  </div>
+  <pre class="code-block">https://claude.ai/code?prompt=Fix%20the%20login%20bug&repositories=acme/webapp</pre>
+</section>
+
+<section>
+  <h2>審查與迭代</h2>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">1. 開啟差異檢視</span><span class="event-desc">例如 +42 -18 的指示器, 左側檔案清單, 右側變更內容</span></div>
+    <div class="event-item"><span class="event-name">2. 留下行內註解</span><span class="event-desc">選取任一行輸入意見, 會與下一則訊息一起送出</span></div>
+    <div class="event-item"><span class="event-name">3. 建立 Pull Request</span><span class="event-desc">開成完整 PR, draft, 或跳到 GitHub 撰寫頁面</span></div>
+    <div class="event-item"><span class="event-name">4. PR 之後持續迭代</span><span class="event-desc">貼上 CI 失敗輸出或審查者意見, 請 Claude 處理</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>疑難排解設定</h2>
+  <div class="chip-row">
+    <span class="chip-label">選擇問題:</span>
+    <div class="chip active" onclick="tsChip(this,0)">看不到儲存庫</div>
+    <div class="chip" onclick="tsChip(this,1)">只顯示 GitHub 登入按鈕</div>
+    <div class="chip" onclick="tsChip(this,2)">Setup script 失敗</div>
+    <div class="chip" onclick="tsChip(this,3)">Session 卡住或逾時</div>
+  </div>
+  <div id="tsPanel0"><p>雲端 session 可使用連接帳號能看到的任何儲存庫。確認 GitHub 帳號有存取權, 若要用 Auto-fix, 需在該儲存庫安裝 Claude GitHub App。</p></div>
+  <div id="tsPanel1" style="display:none"><p>雲端 session 需要連接 GitHub 帳號。用瀏覽器流程連接, 或用 gh CLI 執行 /web-setup。</p></div>
+  <div id="tsPanel2" style="display:none"><p>常見原因: 套件安裝的登錄檔不在網路存取層級內, 腳本引用不存在的路徑, 或指令在 Ubuntu 上需要不同呼叫方式。加上 set -x 除錯。</p></div>
+  <div id="tsPanel3" style="display:none"><p>setup script 可能超過約五分鐘的建置時間預算。拉大型 Docker image 或下載模型權重的步驟應改用 SessionStart hook 在背景進行。</p></div>
+</section>
+
+<section>
+  <h2>接下來的步驟</h2>
+  <div class="api-fields">
+    <div class="field"><div class="name">Use Claude Code on the web</div><div class="desc">完整參考, 包含 teleport, setup script 與存取層級</div></div>
+    <div class="field"><div class="name">Routines</div><div class="desc">依排程, API 呼叫或 GitHub 事件自動化工作</div></div>
+    <div class="field"><div class="name">CLAUDE.md</div><div class="desc">給 Claude 每個 session 開始時載入的持久指示</div></div>
+  </div>
+</section>
+
+</main>
+<script>
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+  }
+  let wqStep = 0; const WQ_MAX = 3;
+  function wqGoTo(n) {
+    wqStep = Math.max(0, Math.min(WQ_MAX, n));
+    document.querySelectorAll('.wq-panel').forEach((el, i) => el.classList.toggle('visible', i === wqStep));
+    document.querySelectorAll('.wq-tab').forEach((t, i) => { t.classList.remove('active','done'); if (i===wqStep) t.classList.add('active'); else if (i<wqStep) t.classList.add('done'); });
+    document.getElementById('wqPrev').disabled = wqStep === 0;
+    const next = document.getElementById('wqNext');
+    next.disabled = wqStep === WQ_MAX;
+    next.textContent = wqStep === WQ_MAX ? 'Done ✓' : 'Next →';
+    document.getElementById('wqIndicator').textContent = `Step ${wqStep+1} of ${WQ_MAX+1}`;
+  }
+  wqGoTo(0);
+  function ghChip(el, i) {
+    el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('ghPanel0').style.display = i === 0 ? 'block' : 'none';
+    document.getElementById('ghPanel1').style.display = i === 1 ? 'block' : 'none';
+  }
+  function tsChip(el, i) {
+    el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    for (let n = 0; n < 4; n++) document.getElementById('tsPanel'+n).style.display = (n === i ? 'block' : 'none');
+  }
+</script>
+</body>
+</html>

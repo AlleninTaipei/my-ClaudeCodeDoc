@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Prompt Library 提示詞庫互動課程</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+
+  header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+           border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+  header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+  header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+              max-width: 600px; margin-inline: auto; }
+
+  main    { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+  section { margin-bottom: 52px; }
+  h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+       border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+  h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+  p  { color: #4a5568; margin-bottom: 12px; }
+
+  .code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+    padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+    overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+  .kw  { color: #7c3aed; }
+  .fn  { color: #16a34a; }
+  .str { color: #d97706; }
+  .cmt { color: #94a3b8; font-style: italic; }
+  .key { color: #2563eb; }
+
+  .info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+    padding: 16px 20px; margin-top: 14px; }
+  .info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+    font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+    margin-bottom: 10px; letter-spacing: 0.05em; }
+  .info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+
+  .takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+    border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+  .takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+
+  .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+  .chip-label { font-size: 0.75rem; color: #6b7280; }
+  .chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+    cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+  .chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+
+  .btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+    cursor: pointer; border: none; transition: all 0.2s; }
+  .btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+  .btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+
+  .pl-search { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid #cbd5e0;
+    background: #fff; font-size: 0.9rem; margin-bottom: 16px; color: #1a202c; }
+  .pl-count { font-size: 0.8rem; color: #6b7280; margin-bottom: 16px; }
+  .pl-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+    margin-bottom: 12px; overflow: hidden; }
+  .pl-head { display: flex; align-items: center; gap: 12px; padding: 14px 18px;
+    cursor: pointer; background: #f8fafc; }
+  .pl-head:hover { background: #f0f4f8; }
+  .pl-title { font-weight: 700; color: #1e40af; font-size: 0.9rem; flex: 1; }
+  .pl-badge { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; padding: 2px 8px;
+    border-radius: 10px; background: #fef3c7; color: #92400e; flex-shrink: 0; }
+  .pl-body { display: none; padding: 4px 18px 18px; }
+  .pl-card.open .pl-body { display: block; }
+  .pl-prompt-box { background: #1a202c; color: #e2e8f0; border-radius: 8px; padding: 14px 16px;
+    font-family: monospace; font-size: 0.85rem; margin: 8px 0 12px; white-space: pre-wrap; line-height: 1.7; }
+  .pl-teaches { font-size: 0.85rem; color: #4a5568; margin-bottom: 8px; }
+  .pl-next { font-size: 0.8rem; color: #166534; background: #dcfce7; border-radius: 6px; padding: 8px 12px; }
+  .pl-src { font-size: 0.75rem; color: #9ca3af; margin-top: 8px; }
+  .pl-empty { padding: 32px; text-align: center; color: #9ca3af; border: 1px dashed #cbd5e0; border-radius: 10px; }
+
+  @media (max-width: 640px) { }
+
+  #themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+    padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+    cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+    transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+  #themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+
+  body.dark { background: #0f1117; color: #e2e8f0; }
+  body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+  body.dark header h1 { color: #f7fafc; }
+  body.dark header p  { color: #a0aec0; }
+  body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+  body.dark h3 { color: #e2e8f0; }
+  body.dark p  { color: #a0aec0; }
+  body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+  body.dark .kw  { color: #9f7aea; }
+  body.dark .fn  { color: #68d391; }
+  body.dark .str { color: #f6ad55; }
+  body.dark .cmt { color: #4a5568; }
+  body.dark .key { color: #63b3ed; }
+  body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+  body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+  body.dark .info-box p { color: #a0aec0; }
+  body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+  body.dark .takeaway p { color: #c6f6d5; }
+  body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+  body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+  body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+  body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+  body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+  body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+  body.dark .pl-search { background: #1a202c; border-color: #2d3748; color: #e2e8f0; }
+  body.dark .pl-count { color: #718096; }
+  body.dark .pl-card { background: #1a202c; border-color: #2d3748; }
+  body.dark .pl-head { background: #161b22; }
+  body.dark .pl-head:hover { background: #1e2530; }
+  body.dark .pl-title { color: #90cdf4; }
+  body.dark .pl-badge { background: #3a2a10; color: #f6ad55; }
+  body.dark .pl-teaches { color: #a0aec0; }
+  body.dark .pl-next { background: #1a3a28; color: #68d391; }
+  body.dark .pl-src { color: #4a5568; }
+  body.dark .pl-empty { color: #4a5568; border-color: #2d3748; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Prompt Library 提示詞庫互動課程</h1>
+  <p>依開發階段與角色分類的複製貼上提示詞庫, 收錄自 Anthropic 官方指南與團隊實務案例, 是探索 Claude Code 用法的起點, 而非固定腳本。</p>
+</header>
+
+<main>
+  <section>
+    <h2>搜尋與篩選提示詞</h2>
+    <p>總共收錄 <strong id="plTotal"></strong> 則提示詞, 依軟體開發生命週期 (探索, 設計, 建構, 上線, 維運) 與角色 (PM, 設計, 文件, 行銷, 安全, 值班) 分類。點擊分類 chip 或輸入關鍵字即可篩選, 點擊卡片展開查看完整提示詞與使用說明。</p>
+    <input type="text" class="pl-search" id="plSearch" placeholder="搜尋提示詞內容或標題, 例如 refactor 或 測試" oninput="plRender()" />
+    <div class="chip-row" id="plChips"></div>
+    <div class="pl-count" id="plCount"></div>
+    <div style="margin-bottom:14px;">
+      <button class="btn btn-ghost" onclick="plExpandAll(true)">展開全部</button>
+      <button class="btn btn-ghost" onclick="plExpandAll(false)">收合全部</button>
+    </div>
+    <div id="plList"></div>
+  </section>
+
+  <section>
+    <h2>這些提示詞為什麼有效</h2>
+    <p>以上提示詞共享幾個模式, 認得出這些模式, 就能把任何一則提示詞調整成適合你自己任務的版本。</p>
+
+    <h3>描述你要的結果, 而不是步驟</h3>
+    <p>說出你想要什麼, 讓 Claude 自己去找檔案。下面這則提示詞完全沒有指定任何檔案路徑, 依然能運作。</p>
+    <pre class="code-block">add rate limiting to the public API and make sure existing tests still pass</pre>
+
+    <h3>給它一個自我檢查的方式</h3>
+    <p>在同一則提示詞裡加入「執行, 測試, 比對, 驗證」等字眼, Claude 就會反覆迭代, 而不是做完一次就停下來。</p>
+    <pre class="code-block">write the migration, run it against the dev database, and confirm the schema matches</pre>
+
+    <h3>指出一個參考對象</h3>
+    <p>指名一個既有的檔案, 測試或模式作為對照, 新程式碼就會與你現有的東西保持一致。</p>
+    <pre class="code-block">add a settings page that follows the same layout as the profile page</pre>
+
+    <h3>陳述可衡量的目標</h3>
+    <p>當目標是效能或覆蓋率時, 給出具體指標與門檻, 完成的定義就不會模糊。</p>
+    <pre class="code-block">get the bundle size under 200KB and show me what you removed</pre>
+
+    <h3>提供實際素材</h3>
+    <p>直接貼上錯誤訊息, 日誌, 截圖與 plan 輸出, 或用 <span class="key">@</span> 引用檔案。Claude 會讀取原始素材, 而不是你對它的描述。</p>
+    <pre class="code-block">why is the build failing? @build.log</pre>
+
+    <h3>說明你想要的回答方式</h3>
+    <p>指定格式, 長度或閱讀對象, 讓說明符合你實際的使用情境。</p>
+    <pre class="code-block">explain how the payment retry logic works as an HTML page with a diagram, then open it in my browser</pre>
+
+    <div class="takeaway">
+      <p>重點回顧: 好的提示詞描述結果而非步驟, 內建自我驗證迴圈, 指向具體參考或素材, 並清楚說明期望的輸出格式。掌握這些模式後, 你可以把任何一則範例改寫成適合自己專案的提示詞。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>這些提示詞的來源與延伸資源</h2>
+    <div class="info-box">
+      <span class="tag">來源</span>
+      <p>這些提示詞整理自已發表的 Anthropic 資源: Common workflows (核心任務逐步指南), Best practices (提示技巧與專案設定), How Anthropic teams use Claude Code (工程, 產品, 設計, 資料團隊的實際工作流程, 含法務, 行銷, 資安深入案例), 以及 Scaling agentic coding guide (企業導入指南)。</p>
+    </div>
+    <p>本頁的提示詞是起點。當某一則對你的專案奏效後, 下一步是讓它可以重複使用: 存成 skill 讓團隊任何人都能以 <span class="key">/command</span> 執行, 並把 Claude 學到的慣例記錄進 CLAUDE.md, 讓每個新 session 都從這個脈絡開始, 而不必重新摸索。對於更大或風險較高的變更, plan mode 會在任何編輯發生前先列出將異動的檔案清單。</p>
+  </section>
+</main>
+
+<script>
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+  }
+
+  const PL_BUNDLE = {"prompts":[{"id":"get-oriented-in-a","sdlc":"discover","cat":"Onboard","startN":1,"roles":[],"prompt":"give me an overview of this codebase: architecture, key directories, and how the pieces connect","nextHref":"/en/memory","src":"workflows","title":"Get oriented in a new repository","teaches":"Describe what you want to know, not which files to read. Claude explores the project on its own and returns a summary of how it fits together.","next":"Run `/init` to set up `CLAUDE.md` so Claude remembers this every session"},{"id":"explain-unfamiliar-code","sdlc":"discover","cat":"Understand","roles":[],"prompt":"explain what {path} does and how data flows through it. write it up as {format}","slots":{"path":"src/scheduler/queue.ts","format":"an HTML page with a diagram, then open it in my browser"},"nextHref":"/en/output-styles","src":"workflows","title":"Explain unfamiliar code","teaches":"Name the file and say what format you want the answer in. Swap the HTML page for a diagram, bullet points, or whatever fits how you learn.","next":"Set an output style so Claude always explains in your preferred format"},{"id":"find-where-something-happens","sdlc":"discover","cat":"Understand","startN":2,"roles":[],"prompt":"where do we {behavior}?","slots":{"behavior":"validate uploaded file types"},"src":"workflows","title":"Find where something happens","teaches":"Search by behavior instead of by filename. The search works even when you don't know what the file is called or which directory it lives in."},{"id":"see-what-depends-on","sdlc":"discover","cat":"Understand","roles":[],"prompt":"what would break if I deleted {target}?","slots":{"target":"the retryWithBackoff helper"},"src":"workflows","title":"Check what breaks before you delete","teaches":"Ask before you remove anything. The list of callers and downstream effects tells you whether you're looking at a one-line cleanup or a change you need to coordinate."},{"id":"trace-how-code-evolved","sdlc":"discover","cat":"Understand","roles":[],"prompt":"look through the commit history of {path} and summarize how it evolved and why","slots":{"path":"internal/auth/session.go"},"src":"best-practices","title":"Trace how code evolved","teaches":"Point at commit history when the question is why, not what. Claude reads the log and blame for whatever version control you use and explains the decisions behind the current implementation."},{"id":"scope-a-change-before","sdlc":"discover","cat":"Understand","roles":["pm","design"],"prompt":"which files would I need to touch to {change}?","slots":{"change":"add a dark mode toggle to settings"},"src":"teams","title":"Scope a change before you start","teaches":"Size the work before you commit it to a roadmap. The file list tells you whether you're looking at one component or a cross-cutting change."},{"id":"ask-the-codebase-a","sdlc":"discover","cat":"Understand","roles":["pm"],"prompt":"I am a {role}. walk me through what happens when a user {action}, from the UI down to the result","slots":{"role":"PM","action":"clicks Export to PDF"},"nextHref":"/en/output-styles","src":"teams","title":"Ask the codebase a product question","teaches":"State your role so the answer is pitched at the right level. Claude explains what the product actually does from the source code, without you needing to read it.","next":"Set an output style so Claude always pitches answers at this level"},{"id":"plan-a-multi-file","sdlc":"design","cat":"Plan","roles":["pm","design"],"prompt":"plan how to refactor the {target} to {goal}. list the files you would change, but don't edit anything yet","slots":{"target":"payment module","goal":"support multiple currencies"},"src":"workflows","title":"Plan a multi-file change before touching code","teaches":"Adding \"don't edit yet\" separates exploration from changes, so you see the approach before any code moves. To make plan-first the default on every prompt, press Shift+Tab for [plan mode](/en/permission-modes#analyze-before-you-edit-with-plan-mode)."},{"id":"draft-a-spec-by","sdlc":"design","cat":"Plan","roles":["pm"],"prompt":"I want to build {feature}. interview me about implementation, UX, edge cases, and tradeoffs until we have covered everything, then write the spec to SPEC.md","slots":{"feature":"per-workspace rate limits"},"nextHref":"/en/skills","src":"best-practices","title":"Draft a spec by interview","teaches":"Ask to be interviewed instead of writing the spec yourself. Claude asks you structured questions until the requirements are complete, then writes the result to a file.","next":"Save your interview questions as a `/spec` skill so every spec starts the same way"},{"id":"turn-a-meeting-into","sdlc":"design","cat":"Plan","roles":["pm"],"prompt":"read {input} and write up the action items, then create a {tracker} ticket for each with acceptance criteria","slots":{"input":"@meeting-notes.md","tracker":"Linear"},"needs":"tracker","nextHref":"/en/skills","src":"teams","title":"Turn a meeting into tickets","teaches":"Skip the transcription step. Claude pulls action items from the unstructured input and writes them straight into your tracker via [MCP](/en/mcp), so you review the tickets, not the transcript.","next":"Save this as a `/tickets` skill"},{"id":"map-edge-cases-before","sdlc":"design","cat":"Plan","roles":["design","pm"],"prompt":"list the error states, empty states, and edge cases for {feature} that the design needs to cover","slots":{"feature":"the file upload flow"},"src":"teams","title":"Map edge cases before building","teaches":"Ask for what's missing, not what's there. Claude lists the error states, empty states, and edge cases a happy-path design tends to skip."},{"id":"turn-a-mockup-into","sdlc":"design","cat":"Prototype","roles":["design","pm","marketing"],"paste":"mockup","prompt":"here is a mockup. build a working prototype I can click through, matching the layout and states shown","src":"teams","title":"Turn a mockup into a working prototype","teaches":"A clickable prototype answers questions a static mockup can't. Hand the working code to engineering instead of explaining the interactions in a doc."},{"id":"implement-from-a-screenshot","sdlc":"design","cat":"Prototype","roles":["design"],"paste":"design","needs":"browser","prompt":"implement this design, then take a screenshot of the result, compare it to the original, and fix any differences","nextHref":"/en/goal","src":"best-practices","title":"Implement from a screenshot and self-check","teaches":"This gives Claude a verification loop: it renders, compares against the source image, and iterates without you pointing out each gap.","next":"Use `/goal` to keep Claude iterating until the screenshots match"},{"id":"follow-an-existing-pattern","sdlc":"build","cat":"Implement","roles":[],"prompt":"look at how {example} is implemented to understand the pattern, then build {new} the same way","slots":{"example":"the GitHub webhook handler","new":"a Stripe webhook handler"},"nextHref":"/en/memory","src":"best-practices","title":"Follow an existing pattern","teaches":"Point at code you already like. Without a reference, Claude defaults to general best practices. With one, it matches the conventions your codebase actually uses.","next":"Ask Claude to write the pattern it followed into `CLAUDE.md` so future sessions match it without the reference"},{"id":"generate-docs-for-code","sdlc":"build","cat":"Implement","roles":["docs"],"prompt":"find {scope} without {format} comments and add them, matching the style already used in the file","slots":{"scope":"the public functions in src/auth/","format":"JSDoc"},"src":"workflows","title":"Generate docs for undocumented code","teaches":"Name the scope and the format. Claude finds what's missing and matches the comment style already in the file, so the new docs read like the rest."},{"id":"add-a-small-well","sdlc":"build","cat":"Implement","roles":[],"prompt":"add a {endpoint} endpoint that returns {payload}","slots":{"endpoint":"/health","payload":"the app version and uptime"},"src":"workflows","title":"Add a small, well-defined feature","teaches":"State the inputs and outputs, not how to build it. Claude finds where similar code lives and adds yours alongside it."},{"id":"build-a-small-internal","sdlc":"build","cat":"Implement","roles":["pm","design","marketing","docs"],"prompt":"create a {tool} using HTML, CSS, and vanilla JavaScript, then open it in my browser","slots":{"tool":"drag-and-drop Kanban board with three columns"},"src":"teams","title":"Build a small internal tool from scratch","teaches":"You don't need a project, a framework, or a build step. Describe the tool and ask Claude to open it so you see it working immediately."},{"id":"work-an-issue-end","sdlc":"build","cat":"Implement","roles":[],"prompt":"read issue #{issue}, implement the fix, and run the tests","slots":{"issue":"312"},"needs":"gh","src":"workflows","title":"Work an issue end to end","teaches":"Give the issue number, not a summary. Claude reads the full ticket itself, so requirements you'd forget to mention come through, and it validates the change before reporting back."},{"id":"find-and-update-copy","sdlc":"build","cat":"Implement","roles":["design","docs","marketing"],"prompt":"find every place we say \"{copy}\" or a close variant, show me each one in context, then update them all to \"{new}\". leave tests and the changelog alone","slots":{"copy":"Sign up free","new":"Start free trial"},"src":"teams","title":"Find and update copy across the codebase","teaches":"Ask for variants and say what to skip. Claude finds phrasings a literal search would miss and leaves test fixtures and history untouched, so you review only the copy users actually see."},{"id":"draft-from-past-examples","sdlc":"build","cat":"Implement","roles":["docs","marketing","pm"],"prompt":"read the {examples} in {folder} to learn the structure and voice, then draft a new one for {topic}","slots":{"examples":"privacy impact assessments","folder":"legal/pia/","topic":"the new analytics integration"},"nextHref":"/en/skills","src":"legal","title":"Draft a document from past examples","teaches":"Point at a folder of finished work instead of describing your style. Claude learns the structure and voice from what you've already shipped, so the first draft reads like one of yours.","next":"Save the voice as a skill so every draft starts there"},{"id":"write-tests-run-them","sdlc":"build","cat":"Test","startN":4,"roles":[],"prompt":"write tests for {path}, run them, and fix any failures","slots":{"path":"app/parsers/feed.py"},"nextHref":"/en/memory","src":"workflows","title":"Write tests, run them, fix failures","teaches":"Ask for write, run, and fix together so Claude iterates without stopping for instructions.","next":"Run `/init` so Claude learns your test command automatically"},{"id":"drive-implementation-from-tests","sdlc":"build","cat":"Test","roles":[],"prompt":"write tests for {feature} first, then implement it until they pass","slots":{"feature":"the password reset flow"},"src":"ebook","title":"Drive implementation from tests","teaches":"Test-driven development: the tests define when the work is complete, and Claude iterates on the implementation until they pass."},{"id":"fill-gaps-from-a","sdlc":"build","cat":"Test","roles":[],"prompt":"read {report} and add tests for the lowest-covered files until each is above {target}%","slots":{"report":"coverage/coverage-summary.json","target":"80"},"nextHref":"/en/goal","src":"workflows","title":"Fill gaps from a coverage report","teaches":"Point at the coverage report instead of guessing what's untested. Claude reads the actual numbers and writes tests for the files that need them most.","next":"Set this as a `/goal` so Claude keeps writing tests until coverage hits the target"},{"id":"migrate-a-pattern-across","sdlc":"build","cat":"Refactor","roles":[],"prompt":"migrate everything from {from} to {to}: identify every place that needs to change, then make the changes","slots":{"from":"the old logging API","to":"the structured logger"},"src":"workflows","title":"Migrate a pattern across the codebase","teaches":"Describe the old pattern and the new one. Asking Claude to identify every place first means the call sites are listed in the response, so you can check none were missed."},{"id":"port-code-between-languages","sdlc":"build","cat":"Refactor","roles":[],"prompt":"port {source} to {target}, keeping the same {keep}","slots":{"source":"this Python module","target":"Rust","keep":"public API and test behavior"},"src":"teams","title":"Port code to another language","teaches":"Say what to preserve, not just the target language. Naming the API or behavior that must stay the same gives Claude a contract to check the port against."},{"id":"optimize-against-a-measurable","sdlc":"build","cat":"Refactor","roles":["data"],"prompt":"optimize {target} to bring {metric} from {current} down to under {goal}","slots":{"target":"the search query","metric":"p95 latency","current":"2s","goal":"500ms"},"nextHref":"/en/goal","src":"ebook","title":"Optimize against a measurable target","teaches":"Stating the metric and target gives Claude a clear definition of done.","next":"Set this as a `/goal` so Claude keeps measuring and iterating until it hits the number"},{"id":"fix-a-precise-visual","sdlc":"build","cat":"Refactor","roles":["design"],"prompt":"the {element} extends {amount} beyond the {container} on {viewport}. fix it.","slots":{"element":"login button","amount":"20px","container":"card border","viewport":"mobile"},"nextHref":"/en/desktop#preview-your-app","src":"ebook","title":"Fix a precise visual bug","teaches":"Precise visual feedback gets a precise fix. State the exact element, measurement, and viewport.","next":"Add a preview tool so Claude screenshots and verifies the fix itself"},{"id":"review-your-changes-before","sdlc":"build","cat":"Review","startN":5,"roles":[],"prompt":"review my uncommitted changes and flag anything that looks risky before I commit","nextHref":"/en/commands","src":"workflows","title":"Review your changes before you commit","teaches":"Catch problems while they're still cheap to fix. Claude reads the changed files in full, not just the diff lines, so it spots issues a quick self-review misses.","next":"Run `/code-review` for the same check in one command"},{"id":"review-a-pull-request","sdlc":"build","cat":"Review","roles":[],"prompt":"review PR #{pr} and summarize what changed, then list any concerns","slots":{"pr":"247"},"needs":"gh","nextHref":"/en/code-review","src":"workflows","title":"Review a pull request","teaches":"Claude reviews with the whole codebase in context, not just the diff. It reads the changed code and what it calls, so it catches problems a diff-only review would miss.","next":"Turn this on for every PR with Code Review"},{"id":"review-infrastructure-changes-before","sdlc":"build","cat":"Review","roles":["security","ops"],"paste":"plan","prompt":"here is my Terraform plan output. what is this going to do, and is anything here going to cause problems?","src":"teams","title":"Review infrastructure changes before applying","teaches":"Plan output is dense and hard to scan. Pasting it gets you a plain-language summary of what's actually going to change before you apply it."},{"id":"run-a-security-review","sdlc":"build","cat":"Review","roles":["security"],"prompt":"use a subagent to review {path} for security issues and report what it finds","slots":{"path":"src/api/"},"nextHref":"/en/sub-agents","src":"best-practices","title":"Run a security review with a subagent","teaches":"A [subagent](/en/sub-agents) runs the audit in its own context window and reports back a summary, so a long security review doesn't fill up your main session. The built-in general-purpose subagent handles this without extra setup.","next":"Set up a dedicated security-review subagent your whole team can use"},{"id":"review-content-before-sending","sdlc":"build","cat":"Review","roles":["marketing","docs"],"prompt":"review {file} for {concerns} and list anything I should fix before it goes to {reviewer}","slots":{"file":"launch-post.md","concerns":"unsupported claims, missing attributions, and brand-guideline issues","reviewer":"legal"},"nextHref":"/en/skills","src":"legal","title":"Catch issues before formal review","teaches":"Get a first pass before a human spends time on it. Name the concerns you want checked so the review is focused, then fix what it finds and send a cleaner draft.","next":"Capture your review checklist as a skill your whole team can run"},{"id":"course-correct-a-wrong","sdlc":"build","cat":"Steer","roles":[],"prompt":"that is not right: {feedback}. try a different approach","slots":{"feedback":"the function signature needs to stay backward-compatible"},"nextHref":"/en/checkpointing","src":"best-practices","title":"Course-correct a wrong approach","teaches":"Name the constraint Claude missed, not just that it's wrong. A specific reason gives Claude a concrete constraint to satisfy on the retry, instead of guessing again.","next":"Press `Esc` twice to open the rewind menu and restore code and conversation so the retry starts clean"},{"id":"narrow-the-scope-of","sdlc":"build","cat":"Steer","roles":[],"prompt":"that is too much. keep only the changes to {scope} and undo your other edits","slots":{"scope":"the validation logic in src/forms/"},"src":"best-practices","title":"Narrow the scope of a change","teaches":"When the direction is right but the change went too broad, ask Claude to keep part of it rather than rewinding everything. A stated boundary keeps a small fix from becoming a refactor."},{"id":"turn-a-correction-into","sdlc":"build","cat":"Steer","roles":[],"prompt":"you keep {mistake}. add a rule to CLAUDE.md so this stops happening","slots":{"mistake":"using default exports when this project uses named exports"},"nextHref":"/en/memory","src":"best-practices","title":"Turn a correction into a rule","teaches":"A correction in chat isn't shared with your team. A rule in the project's [CLAUDE.md](/en/memory) is shared once you commit it, and Claude reads it at the start of every session.","next":"Open `/memory` to review what Claude wrote"},{"id":"resolve-merge-conflicts","sdlc":"ship","cat":"Git","roles":[],"prompt":"resolve the merge conflicts in this branch and explain what you kept from each side","src":"workflows","title":"Resolve merge conflicts","teaches":"Say what state you want, not which markers to keep. Asking for the reasoning makes the merge reviewable instead of a black box."},{"id":"commit-with-a-generated","sdlc":"ship","cat":"Git","roles":[],"prompt":"commit these changes with a message that summarizes what I did","src":"workflows","title":"Commit with a generated message","teaches":"Let Claude derive the message from the diff. It matches your repository's existing commit style."},{"id":"open-a-pull-request","sdlc":"ship","cat":"Git","roles":[],"prompt":"find the {tracker} ticket about {topic} and open a PR that implements it","slots":{"tracker":"Linear","topic":"the login timeout"},"needs":"tracker","src":"workflows","title":"Open a pull request from a ticket","teaches":"Skip the context switch between tracker, editor, and GitHub. One prompt reads the spec, makes the change, and opens the PR."},{"id":"draft-release-notes-from","sdlc":"ship","cat":"Release","roles":["pm","docs","marketing"],"prompt":"compare {from} to {to} and draft release notes grouped by feature, fix, and breaking change","slots":{"from":"v2.3.0","to":"v2.4.0"},"nextHref":"/en/skills","src":"workflows","title":"Draft release notes from git history","teaches":"Give two reference points and the structure you want. Claude reads the commit log between them and drafts a changelog you can edit.","next":"Save this as a `/changelog` skill"},{"id":"write-a-ci-workflow","sdlc":"ship","cat":"Release","roles":["ops"],"prompt":"write a GitHub Actions workflow that {steps} on every push to {branch}","slots":{"steps":"runs the tests and deploys to staging","branch":"main"},"src":"workflows","title":"Write a CI workflow","teaches":"Describe when it should run and what it should do; the YAML is generated for you, matched to your project's build and test commands."},{"id":"find-and-fix-a","sdlc":"operate","cat":"Debug","startN":3,"roles":[],"prompt":"the {test} test is failing, find out why and fix it","slots":{"test":"UserAuth"},"src":"workflows","title":"Find and fix a failing test","teaches":"Describe the symptom; you don't need to know which file is broken. Claude runs the test to see the failure, traces it into source, and fixes it."},{"id":"investigate-a-reported-error","sdlc":"operate","cat":"Debug","roles":["ops"],"prompt":"users are seeing {symptom} on {where}. investigate and tell me what is going on","slots":{"symptom":"500 errors","where":"/api/settings"},"nextHref":"/en/web-quickstart#pre-fill-sessions","src":"workflows","title":"Investigate a reported error","teaches":"Describe the symptom and location; Claude reads the relevant code path and traces likely causes. Paste stack traces or logs if you have them.","next":"Put a deeplink in your runbook that opens Claude with this prompt pre-filled"},{"id":"fix-a-build-error","sdlc":"operate","cat":"Debug","roles":["ops"],"paste":"error","prompt":"here is a build error. fix the root cause and verify the build succeeds","src":"best-practices","title":"Fix a build error at the root","teaches":"Asking for root cause and verification prevents surface-level patches that suppress the error without fixing it."},{"id":"investigate-a-production-incident","sdlc":"operate","cat":"Incident","roles":["ops","security"],"prompt":"{symptom}. check the logs, recent deploys, and config changes, then tell me the most likely cause","slots":{"symptom":"the checkout endpoint started returning 500s an hour ago"},"nextHref":"/en/mcp","src":"workflows","title":"Investigate a production incident","teaches":"List the evidence sources to correlate, not the steps to take. Claude reads logs, git history, and config together to narrow the cause.","next":"Connect Sentry or your log store via MCP"},{"id":"diagnose-from-a-console","sdlc":"operate","cat":"Incident","roles":["ops","data"],"paste":"screenshot","prompt":"here is a screenshot of {console}. walk me through why {resource} is failing and give me the exact commands to fix it","slots":{"console":"the GCP Kubernetes dashboard","resource":"this pod"},"src":"teams","title":"Diagnose from a console screenshot","teaches":"Cloud consoles show you the problem but not the commands to fix it. Claude reads the screenshot and translates the dashboard into the kubectl, gcloud, or aws commands to run."},{"id":"query-logs-in-plain","sdlc":"operate","cat":"Incident","roles":["security","ops","data"],"prompt":"show me all {events} for {scope} over {timeframe}. write the query, run it, and tell me what stands out","slots":{"events":"failed logins","scope":"the auth service","timeframe":"the past 24 hours"},"needs":"db","src":"cybersecurity","title":"Query logs in plain English","teaches":"Ask the question instead of writing the SQL. Claude builds the query, runs it against your connected logs, and shows both the query and the result so you can check what ran."},{"id":"analyze-a-data-file","sdlc":"operate","cat":"Data","roles":["data","pm","marketing"],"paste":"csv","prompt":"read {file}, summarize the key patterns, and write the results to {output}","slots":{"file":"@reports/q1-signups.csv","output":"an HTML page with charts, then open it in my browser"},"nextHref":"/en/mcp","src":"teams","title":"Analyze a data file","teaches":"A one-off question doesn't need a one-off script. Point at a file in your project folder and Claude reads it directly, finds the patterns, and writes the output where you ask.","next":"Connect the data source via MCP instead of exporting files"},{"id":"generate-variations-from-performance","sdlc":"operate","cat":"Data","roles":["marketing","data"],"paste":"csv","prompt":"read {file}, find the underperforming {items}, and generate {n} new variations that stay under {limit} characters","slots":{"file":"@ads-performance.csv","items":"headlines","n":"20","limit":"90"},"nextHref":"/en/mcp","src":"teams","title":"Generate variations from performance data","teaches":"State the constraint at the start so generation stays within the limit. Claude reads the metrics, picks what to replace, and produces alternatives that fit.","next":"Connect the ad platform via MCP instead of exporting a file"},{"id":"turn-a-recurring-task","sdlc":"operate","cat":"Automate","roles":[],"prompt":"create a /{name} skill for this project that {steps}","slots":{"name":"ship","steps":"runs the linter and tests, then drafts a commit message"},"src":"workflows","title":"Turn a recurring task into a skill","teaches":"Name the steps once; reuse them as a command. Claude writes a [skill](/en/skills) anyone on your team can run."},{"id":"add-a-hook-for","sdlc":"operate","cat":"Automate","roles":[],"prompt":"write a hook that {action} after every {event}","slots":{"action":"runs prettier","event":"edit to a .ts or .tsx file"},"src":"best-practices","title":"Add a hook for repeat behavior","teaches":"Hooks make a behavior automatic instead of something you have to remember to ask for. Describe the trigger and action and Claude writes the [hook](/en/hooks) configuration."},{"id":"connect-a-tool-with","sdlc":"operate","cat":"Automate","roles":[],"prompt":"set up the {server} MCP server so you can read my {data} directly","slots":{"server":"Sentry","data":"error reports"},"src":"workflows","title":"Connect a tool with MCP","teaches":"Connect the source once instead of pasting data every session. After [MCP](/en/mcp) setup, Claude reads from the tool directly when you ask about it."},{"id":"capture-what-to-remember","sdlc":"operate","cat":"Automate","roles":["pm","docs"],"prompt":"summarize what we did this session and suggest what to add to CLAUDE.md","src":"teams","title":"Capture what to remember for next time","teaches":"Ask before you forget. Claude knows what it had to figure out this session and proposes [CLAUDE.md](/en/memory) entries so the next session starts with that context."}],"catLabels":{"Onboard":"Onboard","Understand":"Understand","Plan":"Plan","Prototype":"Prototype","Implement":"Implement","Test":"Test","Refactor":"Refactor","Review":"Review","Steer":"Steer","Git":"Git","Release":"Release","Debug":"Debug","Incident":"Incident","Data":"Data","Automate":"Automate"},"phaseLabels":{"discover":"Discover","design":"Design","build":"Build","ship":"Ship","operate":"Operate"}};
+  const PL_PROMPTS = PL_BUNDLE.prompts;
+  const PL_PHASE_LABELS = { discover: '探索', design: '設計', build: '建構', ship: '上線', operate: '維運' };
+  const PL_CAT_LABELS = PL_BUNDLE.catLabels;
+  const PL_ROLE_LABELS = { pm: '產品', design: '設計', docs: '文件', marketing: '行銷', security: '安全', ops: '值班', data: '資料' };
+
+  let plActiveTag = null;
+  let plOpen = new Set();
+
+  function plTagsOf(p) {
+    const tags = [p.sdlc, ...(p.roles || [])];
+    return tags;
+  }
+
+  function plInit() {
+    document.getElementById('plTotal').textContent = PL_PROMPTS.length;
+    const tags = ['discover','design','build','ship','operate','pm','design','docs','marketing','security','ops','data'];
+    const uniq = [...new Set(tags)];
+    const chipRow = document.getElementById('plChips');
+    chipRow.innerHTML = '<span class="chip-label">依階段 / 角色篩選:</span>' +
+      uniq.map(k => {
+        const label = PL_PHASE_LABELS[k] || PL_ROLE_LABELS[k] || k;
+        return `<button class="chip" data-tag="${k}" onclick="plToggleTag('${k}')">${label}</button>`;
+      }).join('');
+    plRender();
+  }
+
+  function plToggleTag(tag) {
+    plActiveTag = plActiveTag === tag ? null : tag;
+    document.querySelectorAll('#plChips .chip').forEach(c => c.classList.toggle('active', c.dataset.tag === plActiveTag));
+    plRender();
+  }
+
+  function plAssemble(p) {
+    if (!p.slots) return p.prompt;
+    return p.prompt.replace(/\{(\w+)\}/g, (_, k) => (p.slots && p.slots[k]) || k);
+  }
+
+  function plRender() {
+    const q = document.getElementById('plSearch').value.trim().toLowerCase();
+    const list = document.getElementById('plList');
+    const filtered = PL_PROMPTS.filter(p => {
+      if (plActiveTag && !plTagsOf(p).includes(plActiveTag)) return false;
+      if (q) {
+        const hay = (p.title + ' ' + plAssemble(p) + ' ' + (p.teaches || '')).toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+    const html = filtered.map(p => {
+      const isOpen = plOpen.has(p.id);
+      return `<div class="pl-card${isOpen ? ' open' : ''}" data-id="${p.id}">
+        <div class="pl-head" onclick="plToggleCard('${p.id}')">
+          <span class="pl-title">${p.title}</span>
+          <span class="pl-badge">${PL_PHASE_LABELS[p.sdlc] || p.sdlc}</span>
+        </div>
+        <div class="pl-body">
+          <div class="pl-prompt-box">${plAssemble(p).replace(/</g,'&lt;')}</div>
+          <div class="pl-teaches">${(p.teaches || '').replace(/</g,'&lt;')}</div>
+          ${p.next ? `<div class="pl-next">下一步: ${p.next.replace(/</g,'&lt;')}</div>` : ''}
+          <div class="pl-src">分類: ${PL_CAT_LABELS[p.cat] || p.cat}</div>
+        </div>
+      </div>`;
+    }).join('');
+    list.innerHTML = html || '<div class="pl-empty">沒有符合條件的提示詞</div>';
+    document.getElementById('plCount').textContent = `顯示 ${filtered.length} / ${PL_PROMPTS.length} 則提示詞`;
+  }
+
+  function plToggleCard(id) {
+    const el = document.querySelector(`.pl-card[data-id="${id}"]`);
+    if (plOpen.has(id)) { plOpen.delete(id); el.classList.remove('open'); }
+    else { plOpen.add(id); el.classList.add('open'); }
+  }
+
+  function plExpandAll(open) {
+    if (open) PL_PROMPTS.forEach(p => plOpen.add(p.id));
+    else plOpen.clear();
+    plRender();
+  }
+
+  plInit();
+</script>
+</body>
+</html>

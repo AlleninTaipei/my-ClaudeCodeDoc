@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Claude Code on Google Vertex AI</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+ul { margin: 8px 0 8px 20px; color: #4a5568; }
+li { margin-bottom: 6px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 150px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p, body.dark ul  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; }
+body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Claude Code on Google Vertex AI</h1>
+  <p>透過 Google Vertex AI 設定 Claude Code, 涵蓋登入精靈, 手動環境變數設定, IAM 權限與疑難排解</p>
+</header>
+
+<main>
+
+<section>
+  <h2>Prerequisites 前置需求</h2>
+  <p>開始設定 Vertex AI 之前, 請先確認以下條件都已就緒:</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">GCP 帳戶</div><div class="desc">已啟用計費功能的 Google Cloud Platform 帳戶</div></div>
+    <div class="field"><div class="name">Vertex AI API</div><div class="desc">GCP 專案已啟用 Vertex AI API</div></div>
+    <div class="field"><div class="name">模型存取權</div><div class="desc">可存取所需的 Claude 模型, 例如 Claude Sonnet 4.6</div></div>
+    <div class="field"><div class="name">gcloud SDK</div><div class="desc">已安裝並設定 Google Cloud SDK</div></div>
+    <div class="field"><div class="name">配額</div><div class="desc">所需 GCP 區域已配置足夠配額</div></div>
+  </div>
+  <div class="info-box">
+    <span class="tag">路徑選擇</span>
+    <p>個人登入請參考下方 Sign in with Vertex AI 精靈; 若要在團隊間部署, 請採用手動設定並在推出前先釘選模型版本。</p>
+  </div>
+</section>
+
+<section>
+  <h2>Sign in with Vertex AI 登入精靈</h2>
+  <p>擁有 Google Cloud 憑證時, 登入精靈會引導完成整個流程。GCP 端前置作業每個專案只需完成一次, 後續由精靈處理 Claude Code 端設定。</p>
+  <div class="info-box">
+    <span class="tag">版本需求</span>
+    <p>Vertex AI 設定精靈需要 Claude Code v2.1.98 以上版本, 執行 <code>claude --version</code> 確認。</p>
+  </div>
+
+  <div class="stage-tabs">
+    <div class="gv1-tab stage-tab active" onclick="gv1GoTo(0)">1 · 啟用模型</div>
+    <div class="gv1-tab stage-tab" onclick="gv1GoTo(1)">2 · 啟動並選擇</div>
+    <div class="gv1-tab stage-tab" onclick="gv1GoTo(2)">3 · 依精靈提示</div>
+  </div>
+
+  <div class="gv1-panel demo-panel visible" id="gv1-p0">
+    <div class="col-card">
+      <div class="col-card-title">Enable Claude models in your GCP project</div>
+      <p>先啟用 Vertex AI API, 再到 Vertex AI Model Garden 申請想要的 Claude 模型存取權。所需的 IAM 權限詳見下方 IAM configuration 段落。</p>
+    </div>
+  </div>
+  <div class="gv1-panel demo-panel" id="gv1-p1">
+    <div class="col-card">
+      <div class="col-card-title">Start Claude Code and choose Vertex AI</div>
+      <p>執行 <code>claude</code>, 在登入畫面選擇 <strong>3rd-party platform</strong>, 再選擇 <strong>Google Vertex AI</strong>。</p>
+    </div>
+  </div>
+  <div class="gv1-panel demo-panel" id="gv1-p2">
+    <div class="col-card">
+      <div class="col-card-title">Follow the wizard prompts</div>
+      <p>選擇驗證方式: gcloud 的 Application Default Credentials, 服務帳戶金鑰檔案, 或環境中既有的憑證。精靈會偵測專案與區域, 驗證可呼叫的模型並讓你釘選版本, 結果會寫入使用者設定檔的 env 區塊。</p>
+    </div>
+  </div>
+
+  <div style="display:flex; align-items:center; gap:10px; margin-top:16px;">
+    <button class="btn btn-ghost" id="gv1Prev" disabled onclick="gv1GoTo(gv1Step-1)">← Back</button>
+    <button class="btn btn-primary" id="gv1Next" onclick="gv1GoTo(gv1Step+1)">Next →</button>
+    <span class="step-indicator" id="gv1Indicator">Step 1 of 3</span>
+  </div>
+
+  <p style="margin-top:16px;">登入完成後, 隨時執行 <code>/setup-vertex</code> 即可重新開啟精靈, 變更憑證, 專案, 區域或釘選的模型。</p>
+</section>
+
+<section>
+  <h2>Region configuration 區域設定</h2>
+  <p>Claude Code 支援 Vertex AI 的 global, 多區域與特定區域端點。將 <code>CLOUD_ML_REGION</code> 設為 <code>global</code>, 多區域位置如 <code>eu</code> 或 <code>us</code>, 或特定區域如 <code>us-east5</code>。Claude Code 會為每種形式選擇正確的 Vertex AI 主機名稱。</p>
+  <div class="info-box">
+    <span class="tag">注意</span>
+    <p>Vertex AI 未必在每種端點類型都支援 Claude Code 的預設模型, 模型可用性依區域, 多區域位置與 global 端點而異, 可能需要切換到支援的位置或指定支援的模型。</p>
+  </div>
+</section>
+
+<section>
+  <h2>Set up manually 手動設定</h2>
+  <p>若要透過環境變數設定 Vertex AI, 例如在 CI 或自動化企業部署腳本中, 依下列步驟操作。</p>
+
+  <div class="stage-tabs">
+    <div class="gv2-tab stage-tab active" onclick="gv2GoTo(0)">1 · 啟用 API</div>
+    <div class="gv2-tab stage-tab" onclick="gv2GoTo(1)">2 · 申請模型存取</div>
+    <div class="gv2-tab stage-tab" onclick="gv2GoTo(2)">3 · 設定憑證</div>
+    <div class="gv2-tab stage-tab" onclick="gv2GoTo(3)">4 · 設定 Claude Code</div>
+    <div class="gv2-tab stage-tab" onclick="gv2GoTo(4)">5 · 釘選模型版本</div>
+  </div>
+
+  <div class="gv2-panel demo-panel visible" id="gv2-p0">
+    <pre class="code-block"><span class="cmt"># 設定你的專案 ID</span>
+gcloud config set project YOUR-PROJECT-ID
+
+<span class="cmt"># 啟用 Vertex AI API</span>
+gcloud services enable aiplatform.googleapis.com</pre>
+  </div>
+
+  <div class="gv2-panel demo-panel" id="gv2-p1">
+    <ul>
+      <li>前往 Vertex AI Model Garden</li>
+      <li>搜尋 "Claude" 模型</li>
+      <li>申請所需 Claude 模型的存取權, 例如 Claude Sonnet 4.6</li>
+      <li>等待核准 (可能需要 24 到 48 小時)</li>
+    </ul>
+  </div>
+
+  <div class="gv2-panel demo-panel" id="gv2-p2">
+    <p>Claude Code 使用標準的 Google Cloud 驗證方式。Claude Code v2.1.121 以上支援透過相同的 Application Default Credentials 鏈結進行 X.509 憑證式 Workload Identity Federation, 將 <code>GOOGLE_APPLICATION_CREDENTIALS</code> 設為憑證設定檔路徑。</p>
+    <div class="info-box">
+      <span class="tag">專案 ID 解析順序</span>
+      <p>Claude Code 使用 <code>ANTHROPIC_VERTEX_PROJECT_ID</code> 作為 Vertex AI 請求的專案 ID。<code>GCLOUD_PROJECT</code>, <code>GOOGLE_CLOUD_PROJECT</code> 與 <code>GOOGLE_APPLICATION_CREDENTIALS</code> 指向的憑證檔案優先權更高, 若都未設定, 則從 gcloud 設定或已附掛的服務帳戶解析。</p>
+    </div>
+    <h3>Advanced credential configuration</h3>
+    <p>透過 <code>gcpAuthRefresh</code> 設定支援 GCP 憑證自動更新, 當偵測到憑證過期或無法載入時, 會執行此指令取得新憑證後重試。</p>
+    <pre class="code-block">{
+  <span class="str">"gcpAuthRefresh"</span>: <span class="str">"gcloud auth application-default login"</span>,
+  <span class="str">"env"</span>: {
+    <span class="str">"ANTHROPIC_VERTEX_PROJECT_ID"</span>: <span class="str">"your-project-id"</span>
+  }
+}</pre>
+    <p>指令的輸出會顯示給使用者, 但不支援互動式輸入, 適合瀏覽器驗證流程。更新指令逾時時間為三分鐘。若在專案設定如 <code>.claude/settings.json</code> 中設定, 只有在使用者接受工作區信任提示後才會執行。</p>
+  </div>
+
+  <div class="gv2-panel demo-panel" id="gv2-p3">
+    <pre class="code-block"><span class="cmt"># 啟用 Vertex AI 整合</span>
+<span class="kw">export</span> CLAUDE_CODE_USE_VERTEX=1
+<span class="kw">export</span> CLOUD_ML_REGION=global
+<span class="kw">export</span> ANTHROPIC_VERTEX_PROJECT_ID=YOUR-PROJECT-ID
+
+<span class="cmt"># 選用: 覆寫自訂端點或閘道的 Vertex 端點網址</span>
+<span class="cmt"># export ANTHROPIC_VERTEX_BASE_URL=https://aiplatform.googleapis.com</span>
+
+<span class="cmt"># 選用: 停用 prompt caching</span>
+<span class="kw">export</span> DISABLE_PROMPT_CACHING=1
+
+<span class="cmt"># 選用: 要求 1 小時 prompt cache TTL, 取代預設 5 分鐘</span>
+<span class="kw">export</span> ENABLE_PROMPT_CACHING_1H=1
+
+<span class="cmt"># 當 CLOUD_ML_REGION=global 時, 為不支援 global 端點的模型覆寫區域</span>
+<span class="kw">export</span> VERTEX_REGION_CLAUDE_HAIKU_4_5=us-east5
+<span class="kw">export</span> VERTEX_REGION_CLAUDE_4_6_SONNET=europe-west1</pre>
+    <p>大部分模型版本都有對應的 <code>VERTEX_REGION_CLAUDE_*</code> 變數。Prompt caching 預設自動啟用, 停用請設 <code>DISABLE_PROMPT_CACHING=1</code>。使用 Vertex AI 時, <code>/logout</code> 指令無法使用, 因為驗證透過 Google Cloud 憑證處理。Claude Code 在 Vertex AI 上預設停用 MCP tool search, 讓 MCP 工具定義預先載入; Vertex AI 對 Claude Sonnet 4.5 以上與 Claude Opus 4.5 以上支援 tool search, 設定 <code>ENABLE_TOOL_SEARCH=true</code> 即可啟用。</p>
+  </div>
+
+  <div class="gv2-panel demo-panel" id="gv2-p4">
+    <div class="info-box">
+      <span class="tag">Warning</span>
+      <p>部署給多位使用者時務必釘選特定模型版本。未釘選時, 模型別名如 sonnet 與 opus 會解析為 Claude Code 針對 Vertex AI 的內建預設值, 可能落後最新版本, 也可能尚未在你的專案啟用。</p>
+    </div>
+    <pre class="code-block"><span class="kw">export</span> ANTHROPIC_DEFAULT_OPUS_MODEL=<span class="str">'claude-opus-4-8'</span>
+<span class="kw">export</span> ANTHROPIC_DEFAULT_SONNET_MODEL=<span class="str">'claude-sonnet-5'</span>
+<span class="kw">export</span> ANTHROPIC_DEFAULT_HAIKU_MODEL=<span class="str">'claude-haiku-4-5@20251001'</span></pre>
+    <div class="response-box">
+      <div class="response-field"><div class="rf-key">Primary model</div><div class="rf-val">claude-sonnet-4-5@20250929 (未釘選時的預設值)</div></div>
+      <div class="response-field"><div class="rf-key">Small/fast model</div><div class="rf-val">與 primary model 相同</div></div>
+    </div>
+    <p>背景任務 (如 session 標題產生) 使用小型快速模型, 通常是 Haiku 等級。在 Vertex AI 上, Claude Code 預設將其導向 primary model, 因為每個專案或區域未必都啟用 Haiku。</p>
+  </div>
+
+  <div style="display:flex; align-items:center; gap:10px; margin-top:16px;">
+    <button class="btn btn-ghost" id="gv2Prev" disabled onclick="gv2GoTo(gv2Step-1)">← Back</button>
+    <button class="btn btn-primary" id="gv2Next" onclick="gv2GoTo(gv2Step+1)">Next →</button>
+    <span class="step-indicator" id="gv2Indicator">Step 1 of 5</span>
+  </div>
+</section>
+
+<section>
+  <h2>Startup model checks 啟動時的模型檢查</h2>
+  <p>Claude Code 啟動並設定 Vertex AI 時, 會驗證要使用的模型在你的專案中是否可存取 (需要 v2.1.98 以上)。</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">已釘選較舊版本</span><span class="event-desc">若專案可呼叫更新版本, Claude Code 會提示更新釘選; 接受後寫入使用者設定檔並重新啟動</span></div>
+    <div class="event-item"><span class="event-name">未釘選且預設不可用</span><span class="event-desc">Claude Code 會在目前 session 回退到前一版本並顯示提示, 此回退不會被保存</span></div>
+    <div class="event-item"><span class="event-name">永久解決方式</span><span class="event-desc">在 Model Garden 啟用新模型, 或釘選特定版本使選擇永久生效</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>IAM configuration IAM 權限設定</h2>
+  <p>指派所需的 IAM 權限。<code>roles/aiplatform.user</code> 角色已包含所需權限:</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">aiplatform.endpoints.predict</div><div class="desc">呼叫模型與計算 token 數量所需的權限</div></div>
+  </div>
+  <div class="info-box">
+    <span class="tag">建議</span>
+    <p>為 Claude Code 建立專用的 GCP 專案, 簡化成本追蹤與存取控制。如需更嚴格的權限, 可依上述權限自訂角色。</p>
+  </div>
+</section>
+
+<section>
+  <h2>1M token context window <span class="scope-badge" style="background:#fef3c7;color:#92400e;border:1px solid #fcd34d;">VERTEX-SPECIFIC</span></h2>
+  <p>Claude Sonnet 5, Opus 4.6 以上, 以及 Sonnet 4.6 在 Vertex AI 上支援 1M token 情境視窗。Sonnet 5 永遠以 1M 視窗執行, 沒有 <code>[1m]</code> 變體可選。其他模型則在選擇 1M 模型變體時自動啟用延伸情境視窗。</p>
+  <div class="takeaway">
+    <p>設定精靈會在釘選模型時提供 1M 情境選項; 若要為手動釘選的模型啟用, 在模型 ID 後方加上 <code>[1m]</code> 即可。</p>
+  </div>
+</section>
+
+<section>
+  <h2>Troubleshooting 疑難排解</h2>
+  <div class="chip-row">
+    <span class="chip-label">選擇錯誤類型:</span>
+    <div class="gv-chip chip active" onclick="gvChipShow(0)">憑證錯誤</div>
+    <div class="gv-chip chip" onclick="gvChipShow(1)">配額問題</div>
+    <div class="gv-chip chip" onclick="gvChipShow(2)">模型 404</div>
+    <div class="gv-chip chip" onclick="gvChipShow(3)">429 錯誤</div>
+  </div>
+  <div class="gv-chip-panel" id="gv-chip-0">
+    <div class="col-card">
+      <div class="col-card-title">Could not load the default credentials</div>
+      <p>執行 <code>gcloud auth application-default login</code> 設定 Application Default Credentials, 或將 <code>GOOGLE_APPLICATION_CREDENTIALS</code> 設為服務帳戶金鑰檔案路徑。</p>
+    </div>
+  </div>
+  <div class="gv-chip-panel" id="gv-chip-1" style="display:none;">
+    <div class="col-card">
+      <div class="col-card-title">配額問題</div>
+      <p>透過 Cloud Console 檢查目前配額或申請提高配額。</p>
+    </div>
+  </div>
+  <div class="gv-chip-panel" id="gv-chip-2" style="display:none;">
+    <div class="col-card">
+      <div class="col-card-title">model not found 404 錯誤</div>
+      <p>確認模型已在 Model Garden 啟用; 確認模型在指定位置可用, 部分模型僅在 global 或 eu, us 等多區域提供; 若使用 <code>CLOUD_ML_REGION=global</code>, 確認模型支援 global 端點, 否則改用 <code>ANTHROPIC_MODEL</code> 指定支援的模型, 或用 <code>VERTEX_REGION_&lt;MODEL_NAME&gt;</code> 設定區域。</p>
+    </div>
+  </div>
+  <div class="gv-chip-panel" id="gv-chip-3" style="display:none;">
+    <div class="col-card">
+      <div class="col-card-title">429 錯誤</div>
+      <p>對於特定區域端點, 確認 primary model 與 small/fast model 在所選區域皆受支援; 考慮改用 <code>CLOUD_ML_REGION=global</code> 以獲得更好的可用性。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Additional resources 延伸資源</h2>
+  <ul>
+    <li>Vertex AI documentation</li>
+    <li>Vertex AI pricing</li>
+    <li>Vertex AI quotas and limits</li>
+  </ul>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+let gv1Step = 0;
+const GV1_MAX = 2;
+function gv1GoTo(n) {
+  gv1Step = Math.max(0, Math.min(GV1_MAX, n));
+  document.querySelectorAll('.gv1-panel').forEach((el, i) => el.classList.toggle('visible', i === gv1Step));
+  document.querySelectorAll('.gv1-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === gv1Step) t.classList.add('active'); else if (i < gv1Step) t.classList.add('done');
+  });
+  document.getElementById('gv1Prev').disabled = gv1Step === 0;
+  const next = document.getElementById('gv1Next');
+  next.disabled = gv1Step === GV1_MAX;
+  next.textContent = gv1Step === GV1_MAX ? 'Done ✓' : 'Next →';
+  document.getElementById('gv1Indicator').textContent = `Step ${gv1Step + 1} of ${GV1_MAX + 1}`;
+}
+gv1GoTo(0);
+
+let gv2Step = 0;
+const GV2_MAX = 4;
+function gv2GoTo(n) {
+  gv2Step = Math.max(0, Math.min(GV2_MAX, n));
+  document.querySelectorAll('.gv2-panel').forEach((el, i) => el.classList.toggle('visible', i === gv2Step));
+  document.querySelectorAll('.gv2-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === gv2Step) t.classList.add('active'); else if (i < gv2Step) t.classList.add('done');
+  });
+  document.getElementById('gv2Prev').disabled = gv2Step === 0;
+  const next = document.getElementById('gv2Next');
+  next.disabled = gv2Step === GV2_MAX;
+  next.textContent = gv2Step === GV2_MAX ? 'Done ✓' : 'Next →';
+  document.getElementById('gv2Indicator').textContent = `Step ${gv2Step + 1} of ${GV2_MAX + 1}`;
+}
+gv2GoTo(0);
+
+function gvChipShow(n) {
+  document.querySelectorAll('.gv-chip').forEach((c, i) => c.classList.toggle('active', i === n));
+  document.querySelectorAll('.gv-chip-panel').forEach((p, i) => p.style.display = i === n ? 'block' : 'none');
+}
+</script>
+</body>
+</html>

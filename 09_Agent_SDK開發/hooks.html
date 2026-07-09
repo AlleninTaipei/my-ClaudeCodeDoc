@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>用 Hooks 攔截並控制 Agent 行為</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; }
+.fn  { color: #16a34a; }
+.str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; }
+.key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 150px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; }
+body.dark .fn  { color: #68d391; }
+body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; }
+body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; }
+body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; }
+body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; }
+body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; }
+body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>用 Hooks 攔截並控制 Agent 行為</h1>
+  <p>在關鍵執行點攔截並自訂 agent 行為: 封鎖危險操作, 稽核工具呼叫, 轉換輸入輸出</p>
+</header>
+
+<main>
+
+  <section>
+    <h2>Hooks 如何運作</h2>
+    <div class="stage-tabs">
+      <div class="hw-tab stage-tab active" onclick="hwGoTo(0)">1 · 事件觸發</div>
+      <div class="hw-tab stage-tab" onclick="hwGoTo(1)">2 · SDK 收集已註冊的 hooks</div>
+      <div class="hw-tab stage-tab" onclick="hwGoTo(2)">3 · Matcher 過濾</div>
+      <div class="hw-tab stage-tab" onclick="hwGoTo(3)">4 · Callback 執行</div>
+      <div class="hw-tab stage-tab" onclick="hwGoTo(4)">5 · 回傳決策</div>
+    </div>
+    <div class="hw-panel demo-panel visible" id="hw-p0"><p>agent 執行過程中發生某件事: 工具即將被呼叫 (PreToolUse), 工具回傳結果 (PostToolUse), subagent 開始或結束, agent 閒置, 或執行結束。</p></div>
+    <div class="hw-panel demo-panel" id="hw-p1"><p>SDK 檢查該事件類型是否有已註冊的 hooks, 包含 options.hooks 中的 callback 與設定檔中的 shell 指令 hooks。</p></div>
+    <div class="hw-panel demo-panel" id="hw-p2"><p>若 hook 有 matcher pattern (例如 "Write|Edit"), SDK 會拿它與事件目標 (例如工具名稱) 比對, 沒有 matcher 的 hook 對每個該類型事件都會執行。</p></div>
+    <div class="hw-panel demo-panel" id="hw-p3"><p>每個符合的 hook 的 callback 函式會收到相關資訊: 工具名稱, 參數, session ID, 以及其他事件專屬細節。</p></div>
+    <div class="hw-panel demo-panel" id="hw-p4"><p>執行完任何操作 (記錄, API 呼叫, 驗證) 後, callback 回傳一個輸出物件告訴 agent 該怎麼做: 允許, 封鎖, 修改輸入, 或注入 context。</p></div>
+    <div>
+      <button class="btn btn-ghost" id="hwPrev" disabled onclick="hwGoTo(hwStep-1)">← Back</button>
+      <button class="btn btn-primary" id="hwNext" onclick="hwGoTo(hwStep+1)">Next →</button>
+      <span class="step-indicator" id="hwIndicator">Step 1 of 5</span>
+    </div>
+
+    <pre class="code-block"><span class="kw">async def</span> <span class="fn">protect_env_files</span>(input_data, tool_use_id, context):
+    file_path = input_data[<span class="str">"tool_input"</span>].get(<span class="str">"file_path"</span>, <span class="str">""</span>)
+    <span class="kw">if</span> file_path.<span class="fn">split</span>(<span class="str">"/"</span>)[-1] == <span class="str">".env"</span>:
+        <span class="kw">return</span> {
+            <span class="str">"hookSpecificOutput"</span>: {
+                <span class="str">"hookEventName"</span>: input_data[<span class="str">"hook_event_name"</span>],
+                <span class="str">"permissionDecision"</span>: <span class="str">"deny"</span>,
+                <span class="str">"permissionDecisionReason"</span>: <span class="str">"Cannot modify .env files"</span>,
+            }
+        }
+    <span class="kw">return</span> {}</pre>
+  </section>
+
+  <section>
+    <h2>可用的 Hooks</h2>
+    <p>SDK 在 agent 執行的不同階段提供 hooks, 部分只在 TypeScript SDK 提供。</p>
+    <div class="event-list">
+      <div class="event-item"><div class="event-name">PreToolUse</div><div class="event-desc">工具呼叫請求, 可封鎖或修改, 例如封鎖危險的 shell 指令</div></div>
+      <div class="event-item"><div class="event-name">PostToolUse</div><div class="event-desc">工具執行結果, 例如記錄所有檔案變更到稽核軌跡</div></div>
+      <div class="event-item"><div class="event-name">PostToolUseFailure</div><div class="event-desc">工具執行失敗, 用於處理或記錄工具錯誤</div></div>
+      <div class="event-item"><div class="event-name">UserPromptSubmit</div><div class="event-desc">使用者送出 prompt, 可注入額外 context</div></div>
+      <div class="event-item"><div class="event-name">Stop</div><div class="event-desc">agent 執行停止, 用於離開前儲存 session 狀態</div></div>
+      <div class="event-item"><div class="event-name">SubagentStart / SubagentStop</div><div class="event-desc">subagent 初始化或完成, 用於追蹤平行任務</div></div>
+      <div class="event-item"><div class="event-name">PreCompact</div><div class="event-desc">對話壓縮請求, 用於在摘要前封存完整逐字稿</div></div>
+      <div class="event-item"><div class="event-name">PermissionRequest</div><div class="event-desc">即將顯示權限對話框, 用於自訂權限處理</div></div>
+      <div class="event-item"><div class="event-name">SessionStart / SessionEnd (TS 限定)</div><div class="event-desc">session 初始化或終止</div></div>
+      <div class="event-item"><div class="event-name">Notification</div><div class="event-desc">agent 狀態訊息, 例如轉發到 Slack 或 PagerDuty</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>設定 Hooks 與 Matchers</h2>
+    <p>透過 agent options 的 hooks 欄位設定 hook, 鍵是事件名稱, 值是 matcher 與 callback 的陣列。</p>
+    <pre class="code-block">options = ClaudeAgentOptions(
+    hooks={<span class="str">"PreToolUse"</span>: [HookMatcher(matcher=<span class="str">"Bash"</span>, hooks=[my_callback])]}
+)</pre>
+    <p>只包含字母, 數字, 底線, 連字號, 空格, 逗號, 或直線的 matcher 會以精確字串比對, 例如 Write|Edit 恰好比對這兩個工具。包含其他字元的 matcher 會以未錨定的正則表達式評估, 例如 ^mcp__ 會比對所有 MCP 工具。</p>
+    <div class="info-box">
+      <span class="tag">提示</span>
+      <p>盡量使用 matcher 鎖定特定工具, 省略 pattern 會讓 callback 對每次該事件都執行。對於工具型 hooks, matcher 只比對工具名稱, 若要依檔案路徑過濾, 需在 callback 內檢查 tool_input.file_path。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Callback 的輸入與輸出</h2>
+    <div class="two-col">
+      <div class="col-card">
+        <div class="col-card-title">輸入</div>
+        <p>型別化的事件詳情物件, 每種 hook 類型有各自形狀, 皆共用 session_id, cwd, hook_event_name。</p>
+        <p>工具使用 ID: 關聯同一次工具呼叫的 PreToolUse 與 PostToolUse。</p>
+      </div>
+      <div class="col-card">
+        <div class="col-card-title">輸出</div>
+        <p>頂層欄位: systemMessage 顯示訊息給使用者, continue 決定 hook 後 agent 是否繼續。</p>
+        <p>hookSpecificOutput: 控制目前操作, 例如 PreToolUse 的 permissionDecision (allow/deny/ask/defer)。</p>
+      </div>
+    </div>
+    <div class="info-box">
+      <span class="tag">注意</span>
+      <p>當多個 hooks 或權限規則同時適用時, deny 優先於 defer, defer 優先於 ask, ask 優先於 allow。任一 hook 回傳 deny, 操作就會被封鎖。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>範例</h2>
+    <div class="chip-row">
+      <span class="chip-label">選擇範例:</span>
+      <span class="chip active" onclick="exShow(0,this)">修改工具輸入</span>
+      <span class="chip" onclick="exShow(1,this)">新增 context 並封鎖</span>
+      <span class="chip" onclick="exShow(2,this)">自動核准唯讀工具</span>
+      <span class="chip" onclick="exShow(3,this)">追蹤 subagent 活動</span>
+    </div>
+    <div class="ex-panel demo-panel visible" id="ex-p0">
+      <p>攔截 Write 呼叫並在 file_path 前加上 /sandbox, 把所有寫入導向沙箱目錄。回傳 updatedInput 時必須同時附上 permissionDecision: 'allow' 才會自動核准修改後的輸入。</p>
+      <pre class="code-block"><span class="kw">return</span> {
+    <span class="str">"hookSpecificOutput"</span>: {
+        <span class="str">"hookEventName"</span>: input_data[<span class="str">"hook_event_name"</span>],
+        <span class="str">"permissionDecision"</span>: <span class="str">"allow"</span>,
+        <span class="str">"updatedInput"</span>: {**input_data[<span class="str">"tool_input"</span>], <span class="str">"file_path"</span>: <span class="str">f"/sandbox{original_path}"</span>},
+    }
+}</pre>
+    </div>
+    <div class="ex-panel demo-panel" id="ex-p1">
+      <p>封鎖對 /etc 的寫入並同時告知模型與使用者原因: permissionDecisionReason 說給模型聽避免重試, systemMessage 顯示給使用者看。</p>
+      <pre class="code-block"><span class="kw">if</span> file_path.<span class="fn">startswith</span>(<span class="str">"/etc"</span>):
+    <span class="kw">return</span> {
+        <span class="str">"systemMessage"</span>: <span class="str">"Remember: system directories like /etc are protected."</span>,
+        <span class="str">"hookSpecificOutput"</span>: {<span class="str">"permissionDecision"</span>: <span class="str">"deny"</span>, <span class="str">"permissionDecisionReason"</span>: <span class="str">"..."</span>},
+    }</pre>
+    </div>
+    <div class="ex-panel demo-panel" id="ex-p2">
+      <p>自動核准 Read, Glob, Grep 等唯讀工具, 讓它們不需使用者確認即可執行, 其餘工具仍走正常權限流程。</p>
+      <pre class="code-block">read_only_tools = [<span class="str">"Read"</span>, <span class="str">"Glob"</span>, <span class="str">"Grep"</span>]
+<span class="kw">if</span> input_data[<span class="str">"tool_name"</span>] <span class="kw">in</span> read_only_tools:
+    <span class="kw">return</span> {<span class="str">"hookSpecificOutput"</span>: {<span class="str">"permissionDecision"</span>: <span class="str">"allow"</span>, ...}}</pre>
+    </div>
+    <div class="ex-panel demo-panel" id="ex-p3">
+      <p>用 SubagentStop hook 監控 subagent 何時完成, 記錄 agent_id, transcript 路徑與工具使用 ID。</p>
+      <pre class="code-block"><span class="kw">async def</span> <span class="fn">subagent_tracker</span>(input_data, tool_use_id, context):
+    <span class="fn">print</span>(<span class="str">f"[SUBAGENT] Completed: {input_data['agent_id']}"</span>)
+    <span class="kw">return</span> {}</pre>
+    </div>
+  </section>
+
+  <section>
+    <h2>修正常見問題</h2>
+    <div class="event-list">
+      <div class="event-item"><div class="event-name">Hook 未觸發</div><div class="event-desc">檢查事件名稱大小寫是否正確, matcher 是否精確比對工具名稱</div></div>
+      <div class="event-item"><div class="event-name">Matcher 過濾異常</div><div class="event-desc">Matcher 只比對工具名稱, 若要依檔案路徑過濾需在 callback 內自行檢查</div></div>
+      <div class="event-item"><div class="event-name">Hook 逾時</div><div class="event-desc">提高 HookMatcher 的 timeout 值, 或用 AbortSignal 處理取消</div></div>
+      <div class="event-item"><div class="event-name">工具被意外封鎖</div><div class="event-desc">檢查所有 PreToolUse hooks 是否回傳 deny, 確認 matcher 沒有過寬</div></div>
+      <div class="event-item"><div class="event-name">修改的輸入未生效</div><div class="event-desc">確認 updatedInput 放在 hookSpecificOutput 內而非頂層</div></div>
+      <div class="event-item"><div class="event-name">Subagent 重複要求權限</div><div class="event-desc">Subagent 不會自動繼承父層權限, 用 PreToolUse hooks 自動核准特定工具</div></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+  }
+
+  let hwStep = 0;
+  const HW_MAX = 4;
+  function hwGoTo(n) {
+    hwStep = Math.max(0, Math.min(HW_MAX, n));
+    document.querySelectorAll('.hw-panel').forEach((el, i) => el.classList.toggle('visible', i === hwStep));
+    document.querySelectorAll('.hw-tab').forEach((t, i) => {
+      t.classList.remove('active', 'done');
+      if (i === hwStep) t.classList.add('active');
+      else if (i < hwStep) t.classList.add('done');
+    });
+    document.getElementById('hwPrev').disabled = hwStep === 0;
+    const next = document.getElementById('hwNext');
+    next.disabled = hwStep === HW_MAX;
+    next.textContent = hwStep === HW_MAX ? 'Done ✓' : 'Next →';
+    document.getElementById('hwIndicator').textContent = `Step ${hwStep + 1} of ${HW_MAX + 1}`;
+  }
+  hwGoTo(0);
+
+  function exShow(n, el) {
+    document.querySelectorAll('.ex-panel').forEach((p, i) => p.classList.toggle('visible', i === n));
+    document.querySelectorAll('.chip-row .chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>

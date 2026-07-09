@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Observability with OpenTelemetry 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%); border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c; overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; } .cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a; min-width: 210px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 150px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Observability with OpenTelemetry</h1>
+  <p>透過 OpenTelemetry 從 Agent SDK 匯出 traces, metrics 與 events 到你的可觀測性後端</p>
+</header>
+
+<main>
+
+<section id="how-flows">
+  <h2>How telemetry flows from the SDK</h2>
+  <p>Agent SDK 以子行程執行 Claude Code CLI, 透過本機 pipe 溝通。CLI 內建 OpenTelemetry 儀器化: 記錄每次模型請求與工具執行的 span, 發出 token 與成本計數器的 metrics, 並發出提示與工具結果的結構化日誌事件。SDK 本身不產生遙測資料, 只是把設定傳給 CLI 行程, 由 CLI 直接匯出到你的收集器。</p>
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">Process environment</div>
+      <p>在應用程式啟動前, 於 shell, 容器或協調器中設定變數。每次 query() 呼叫自動套用, 無需改程式碼, 為正式環境建議做法。</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">Per-call options</div>
+      <p>在 ClaudeAgentOptions.env 設定變數。適用同一行程中不同代理需要不同遙測設定。TypeScript 的 env 會整個取代繼承的環境, 需自行展開 process.env。</p>
+    </div>
+  </div>
+  <h3>三種獨立訊號</h3>
+  <div class="api-fields">
+    <div class="field"><div class="name">Metrics</div><div class="desc">token, 成本, session, 程式碼行數, 工具決策計數器 — OTEL_METRICS_EXPORTER</div></div>
+    <div class="field"><div class="name">Log events</div><div class="desc">每則提示, API 請求, API 錯誤, 工具結果的結構化紀錄 — OTEL_LOGS_EXPORTER</div></div>
+    <div class="field"><div class="name">Traces (beta)</div><div class="desc">每次互動, 模型請求, 工具呼叫, hook 的 span — OTEL_TRACES_EXPORTER + CLAUDE_CODE_ENHANCED_TELEMETRY_BETA=1</div></div>
+  </div>
+</section>
+
+<section id="enable">
+  <h2>Enable telemetry export</h2>
+  <p>遙測預設關閉, 需設定 <code>CLAUDE_CODE_ENABLE_TELEMETRY=1</code> 並選擇至少一個匯出器。</p>
+  <div class="chip-row">
+    <div class="chip active" data-lang="py" onclick="obSetLang('py')">Python</div>
+    <div class="chip" data-lang="ts" onclick="obSetLang('ts')">TypeScript</div>
+  </div>
+  <div class="ob-panel visible" data-lang="py">
+    <pre class="code-block">OTEL_ENV = {
+    <span class="str">"CLAUDE_CODE_ENABLE_TELEMETRY"</span>: <span class="str">"1"</span>,
+    <span class="str">"CLAUDE_CODE_ENHANCED_TELEMETRY_BETA"</span>: <span class="str">"1"</span>,  <span class="cmt"># traces 需要, metrics/logs 不需要</span>
+    <span class="str">"OTEL_TRACES_EXPORTER"</span>: <span class="str">"otlp"</span>, <span class="str">"OTEL_METRICS_EXPORTER"</span>: <span class="str">"otlp"</span>, <span class="str">"OTEL_LOGS_EXPORTER"</span>: <span class="str">"otlp"</span>,
+    <span class="str">"OTEL_EXPORTER_OTLP_ENDPOINT"</span>: <span class="str">"http://collector.example.com:4318"</span>,
+}
+options = ClaudeAgentOptions(env=OTEL_ENV)</pre>
+  </div>
+  <div class="ob-panel" data-lang="ts">
+    <pre class="code-block"><span class="kw">const</span> otelEnv = {
+  CLAUDE_CODE_ENABLE_TELEMETRY: <span class="str">"1"</span>,
+  CLAUDE_CODE_ENHANCED_TELEMETRY_BETA: <span class="str">"1"</span>,
+  OTEL_TRACES_EXPORTER: <span class="str">"otlp"</span>, OTEL_METRICS_EXPORTER: <span class="str">"otlp"</span>, OTEL_LOGS_EXPORTER: <span class="str">"otlp"</span>,
+  OTEL_EXPORTER_OTLP_ENDPOINT: <span class="str">"http://collector.example.com:4318"</span>,
+};
+<span class="cmt">// env 會取代繼承的環境, 記得展開 ...process.env</span>
+options: { env: { ...process.env, ...otelEnv } }</pre>
+  </div>
+  <div class="info-box"><span class="tag">注意</span><p>不要把 console 設為匯出器, 因為 SDK 用 stdout 作為訊息通道。要在本機檢視遙測, 改指向本機收集器或 Jaeger 容器。</p></div>
+  <h3>Flush telemetry from short-lived calls</h3>
+  <p>CLI 會批次匯出遙測資料, 預設 metrics 每 60 秒, traces 與 logs 每 5 秒匯出一次。若行程在 CLI 關閉前被強制結束, 緩衝區內的資料會遺失, 可縮短匯出間隔降低風險。</p>
+</section>
+
+<section id="traces">
+  <h2>Read agent traces</h2>
+  <p>設定 <code>CLAUDE_CODE_ENHANCED_TELEMETRY_BETA=1</code> 後, agent loop 每個步驟都會變成可在追蹤後端檢視的 span。</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">claude_code.interaction</span><span class="event-desc">包裹 agent loop 單一輪次, 從收到提示到產生回應</span></div>
+    <div class="event-item"><span class="event-name">claude_code.llm_request</span><span class="event-desc">包裹每次 Claude API 呼叫, 含模型名稱, 延遲, token 數</span></div>
+    <div class="event-item"><span class="event-name">claude_code.tool</span><span class="event-desc">包裹每次工具呼叫, 子 span 含權限等待與執行過程</span></div>
+    <div class="event-item"><span class="event-name">claude_code.hook</span><span class="event-desc">包裹每次 hook 執行, 需額外的 detailed beta tracing 變數</span></div>
+  </div>
+  <p>當代理透過 Task 工具產生子代理, 子代理的 span 會巢狀掛在父代理的 claude_code.tool span 下, 整條委派鏈成為同一條 trace。所有 span 預設帶有 <code>session.id</code> 屬性, 方便依 session 過濾。</p>
+</section>
+
+<section id="link-tag">
+  <h2>Link traces 與 Tag telemetry</h2>
+  <p>SDK 會自動把 W3C trace context 傳遞到 CLI 子行程。在應用程式中有作用中的 OpenTelemetry span 時呼叫 query(), SDK 會注入 TRACEPARENT/TRACESTATE, 讓 CLI 的 interaction span 成為你的 span 的子節點, 代理執行會出現在你應用程式的 trace 中, 而非獨立的根節點。</p>
+  <p>啟用 trace context 傳遞後, CLI 也會將 TRACEPARENT 轉發給每個 Bash 與 PowerShell 指令。</p>
+  <pre class="code-block">options = ClaudeAgentOptions(
+    env={
+        <span class="str">"OTEL_SERVICE_NAME"</span>: <span class="str">"support-triage-agent"</span>,
+        <span class="str">"OTEL_RESOURCE_ATTRIBUTES"</span>: <span class="str">"service.version=1.4.0,deployment.environment=production"</span>,
+    },
+)</pre>
+  <p>執行多個代理或與其他服務共用同一收集器時, 可覆寫 service name 並附加資源屬性, 方便在後端依代理過濾。</p>
+</section>
+
+<section id="attribute-users">
+  <h2>Attribute actions to your end users</h2>
+  <p>CLI 會依所用的憑證為每個事件附加身分屬性, 這辨識的是你服務的憑證, 而非代表哪位終端使用者行動。若要讓工具呼叫與 MCP 活動能歸因到終端使用者, 需在每次 query() 呼叫時注入使用者身分作為資源屬性。</p>
+  <pre class="code-block">OTEL_RESOURCE_ATTRIBUTES: <span class="str">`enduser.id=${encodeURIComponent(request.userId)},tenant.id=${encodeURIComponent(request.tenantId)}`</span></pre>
+  <div class="takeaway"><p>附上終端使用者身分後, tool_decision, tool_result, mcp_server_connection, permission_mode_changed 等事件就成為可轉送給 SIEM 平台的逐使用者稽核軌跡。</p></div>
+</section>
+
+<section id="sensitive-data">
+  <h2>Control sensitive data in exports</h2>
+  <p>遙測預設是結構性的: 持續時間, 模型名稱, 工具名稱都會記錄, 但代理讀寫的內容預設不會被記錄。以下變數為選擇性加入內容:</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">OTEL_LOG_USER_PROMPTS=1</div><div class="desc">在 user_prompt 事件與 interaction span 上加入提示文字</div></div>
+    <div class="field"><div class="name">OTEL_LOG_TOOL_DETAILS=1</div><div class="desc">在 tool_result 事件上加入工具輸入參數 (檔案路徑, shell 指令等)</div></div>
+    <div class="field"><div class="name">OTEL_LOG_TOOL_CONTENT=1</div><div class="desc">在 claude_code.tool 上加入完整工具輸入輸出內容, 截斷於 60 KB, 需啟用 tracing</div></div>
+    <div class="field"><div class="name">OTEL_LOG_RAW_API_BODIES</div><div class="desc">完整 Messages API 請求/回應 JSON, 啟用即代表同意揭露上述三者的所有內容</div></div>
+  </div>
+  <div class="info-box"><span class="tag">注意</span><p>除非可觀測性流程已核准儲存代理處理的資料, 否則不要設定這些變數。</p></div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+function obSetLang(lang) {
+  document.querySelectorAll('.chip[data-lang]').forEach(c => c.classList.toggle('active', c.dataset.lang === lang));
+  document.querySelectorAll('.ob-panel').forEach(p => p.classList.toggle('visible', p.dataset.lang === lang));
+}
+</script>
+</body>
+</html>

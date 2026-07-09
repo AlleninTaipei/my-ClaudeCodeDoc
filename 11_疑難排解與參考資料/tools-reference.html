@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tools reference 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%); border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 640px; margin-inline: auto; }
+main    { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px; font-family: monospace; font-size: 0.8rem; color: #1a202c; overflow-x: auto; margin-top: 10px; line-height: 1.6; white-space: pre-wrap; }
+.key { color: #2563eb; } .str { color: #d97706; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.search-box { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #cbd5e0; font-size: 0.85rem; margin-bottom: 14px; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+table.tool-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+table.tool-table th, table.tool-table td { text-align: left; padding: 8px 10px; font-size: 0.8rem; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+table.tool-table th { color: #6b7280; font-size: 0.7rem; text-transform: uppercase; letter-spacing: .05em; }
+table.tool-table .tname { font-family: monospace; color: #16a34a; font-weight: 600; white-space: nowrap; }
+.perm-badge { display: inline-block; font-size: 0.65rem; font-weight: 700; padding: 1px 8px; border-radius: 10px; }
+.perm-yes { background: #fee2e2; color: #b91c1c; }
+.perm-no { background: #dcfce7; color: #166534; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.demo-panel { display: none; } .demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a; min-width: 130px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .key { color: #63b3ed; } body.dark .str { color: #f6ad55; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .search-box { background: #1a202c; border-color: #2d3748; color: #e2e8f0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark table.tool-table th, body.dark table.tool-table td { border-bottom-color: #2d3748; color: #a0aec0; }
+body.dark table.tool-table th { color: #718096; }
+body.dark table.tool-table .tname { color: #68d391; }
+body.dark .perm-yes { background: #4a1e1e; color: #fca5a5; }
+body.dark .perm-no { background: #1a3a28; color: #68d391; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Tools reference</h1>
+  <p>Claude Code 可用工具的完整參考, 包含權限需求與各工具的行為細節</p>
+</header>
+
+<main>
+
+<section>
+  <h2>工具總覽表</h2>
+  <p>工具名稱是你在 permission rules, subagent tool 列表, 以及 hook matcher 中使用的確切字串。搜尋或依權限篩選找到你要的工具。</p>
+  <div class="chip-row" id="permChips"><span class="chip-label">篩選:</span></div>
+  <input type="text" class="search-box" id="toolSearch" placeholder="搜尋工具名稱或描述..." oninput="renderTools()">
+  <table class="tool-table">
+    <thead><tr><th>工具</th><th>描述</th><th>需要權限</th></tr></thead>
+    <tbody id="toolBody"></tbody>
+  </table>
+</section>
+
+<section>
+  <h2>用權限規則與 hooks 設定工具</h2>
+  <p>多數情況下 Claude 會自行決定何時使用這些工具, 但在定義權限與其他設定時你會直接參照工具名稱, 使用同一種規則格式 <code>ToolName(specifier)</code>。</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">Bash(npm run *)</span><span class="event-desc">Bash, Monitor 共用命令樣式比對</span></div>
+    <div class="event-item"><span class="event-name">Read(~/secrets/**)</span><span class="event-desc">Read, Grep, Glob, LSP 共用路徑樣式比對</span></div>
+    <div class="event-item"><span class="event-name">Edit(/src/**)</span><span class="event-desc">Edit, Write, NotebookEdit 共用路徑樣式比對, 也會一併授予對應路徑的讀取權</span></div>
+    <div class="event-item"><span class="event-name">Skill(deploy *)</span><span class="event-desc">Skill 名稱比對</span></div>
+    <div class="event-item"><span class="event-name">Agent(Explore)</span><span class="event-desc">Subagent 類型比對</span></div>
+    <div class="event-item"><span class="event-name">WebFetch(domain:example.com)</span><span class="event-desc">網域比對</span></div>
+    <div class="event-item"><span class="event-name">WebSearch</span><span class="event-desc">不需要 specifier, 整體允許或拒絕</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>個別工具行為</h2>
+  <p>切換分頁查看每個核心工具的具體行為細節。</p>
+  <div class="stage-tabs" id="toolTabs"></div>
+  <div id="toolPanels"></div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+const TOOLS = [
+  ['Agent','產生一個有自己 context window 的 subagent 來處理任務',false],
+  ['Artifact','將 HTML 或 Markdown 檔案發布為 claude.ai 上的私人互動頁面',true],
+  ['AskUserQuestion','提出多選題以收集需求或釐清模糊之處',false],
+  ['Bash','在你的環境中執行 shell 命令',true],
+  ['CronCreate / CronDelete / CronList','在目前 session 中排程一次性或重複性 prompt',false],
+  ['Edit','對特定檔案進行精確的字串替換編輯',true],
+  ['Glob','依檔名樣式尋找檔案',false],
+  ['Grep','在檔案內容中搜尋樣式, 底層使用 ripgrep',false],
+  ['LSP','透過語言伺服器提供程式碼智慧: 跳到定義, 尋找參照, 型別錯誤',false],
+  ['Monitor','在背景執行命令並將每行輸出回饋給 Claude, 或連接 WebSocket',true],
+  ['NotebookEdit','逐格修改 Jupyter notebook',true],
+  ['PowerShell','原生執行 PowerShell 命令',true],
+  ['Read','讀取檔案內容, 也能處理圖片, PDF, Jupyter notebook',false],
+  ['WebFetch','抓取指定網址內容並轉為 Markdown, 用小型模型依 prompt 萃取',true],
+  ['WebSearch','執行網頁搜尋, 最多可在單次呼叫中進行 8 次後端搜尋',true],
+  ['Workflow','執行在背景協調多個 subagent 的腳本, 回傳彙整結果',true],
+  ['Write','建立新檔案或覆寫既有檔案的完整內容',true],
+  ['TaskCreate / TaskGet / TaskList / TaskUpdate','管理 session 任務清單',false],
+  ['ToolSearch','啟用 MCP tool search 時搜尋並載入延遲載入的工具',false],
+  ['ReportFindings','以結構化列表回報 code-review 發現',false],
+  ['ScheduleWakeup','重新排程自我步調 /loop 的下一次迭代',false],
+  ['SendMessage','傳送訊息給 agent team 隊友, 或以 agent ID 恢復 subagent',false],
+  ['PushNotification','傳送桌面通知, 若已連接 Remote Control 也會傳送手機推播',false],
+  ['EnterPlanMode / ExitPlanMode','切換進入或離開 plan mode',true],
+  ['EnterWorktree / ExitWorktree','建立並切換到隔離的 git worktree, 或離開',false],
+  ['ShareOnboardingGuide','上傳 ONBOARDING.md 並回傳分享連結',true]
+];
+const permChips = document.getElementById('permChips');
+let activePerm = 'all';
+[['all','全部'],['true','需要權限'],['false','不需要權限']].forEach(([k,l]) => {
+  const chip = document.createElement('span');
+  chip.className = 'chip' + (k==='all'?' active':'');
+  chip.textContent = l;
+  chip.onclick = () => { activePerm = k; document.querySelectorAll('#permChips .chip').forEach(c=>c.classList.remove('active')); chip.classList.add('active'); renderTools(); };
+  permChips.appendChild(chip);
+});
+function renderTools() {
+  const q = document.getElementById('toolSearch').value.trim().toLowerCase();
+  const rows = TOOLS.filter(([name,desc,perm]) => {
+    const matchPerm = activePerm === 'all' || String(perm) === activePerm;
+    const matchQ = !q || (name+' '+desc).toLowerCase().includes(q);
+    return matchPerm && matchQ;
+  });
+  document.getElementById('toolBody').innerHTML = rows.map(([name,desc,perm]) =>
+    '<tr><td class="tname">'+name+'</td><td>'+desc+'</td><td><span class="perm-badge '+(perm?'perm-yes':'perm-no')+'">'+(perm?'需要':'不需要')+'</span></td></tr>'
+  ).join('') || '<tr><td colspan="3" style="text-align:center;color:#9ca3af;padding:16px">沒有符合的工具</td></tr>';
+}
+renderTools();
+
+const BEHAVIORS = [
+  {name:'Agent', html:'<p>Agent 工具在獨立的 context window 中產生一個 subagent。subagent 自主完成任務後, 只回傳一段文字結果給主對話, 主對話看不到中間的工具呼叫或輸出。同一個 Agent 工具在啟用 fork 模式時也會啟動 forked subagent, 這種 subagent 會繼承完整的父對話而非從零開始, 且一律在背景執行。</p><p>named subagent 可用的工具取決於 tools 與 disallowedTools 欄位: 都沒設定則繼承父層所有工具; 只設 tools 則只拿到列出的工具; 只設 disallowedTools 則拿到除了列出項目外的所有父層工具; 兩者都設時 disallowedTools 優先。</p>'},
+  {name:'Bash', html:'<p>Bash 工具會在獨立的程序中執行每個命令。當 Claude 在主 session 執行 cd, 只要新目錄仍在專案目錄或用 --add-dir 加入的額外目錄內, 之後的 Bash 命令都會沿用這個新目錄; subagent session 則不會保留目錄變更。環境變數不會在命令之間保留, 一個命令中的 export 不會在下一個命令中生效。</p><p>兩個限制會套用在每個命令上: 逾時預設兩分鐘, Claude 最多可要求到 10 分鐘; 輸出長度預設 30000 字元, 超過時完整輸出會存成檔案並提供路徑與開頭預覽。</p>'},
+  {name:'Edit', html:'<p>Edit 工具執行精確的字串替換, 接收 old_string 與 new_string, 用後者替換前者, 不使用正規表示式或模糊比對。要成功套用編輯必須通過三項檢查: 必須先在目前對話中讀取過該檔案且磁碟內容未變; old_string 必須完全比對檔案中的內容; old_string 必須恰好只出現一次, 否則要提供更長的上下文或設定 replace_all。</p>'},
+  {name:'Glob', html:'<p>Glob 工具依檔名樣式尋找檔案, 支援標準 glob 語法, 包含遞迴比對的 **。結果依修改時間排序並上限 100 個檔案, 超過上限時 Claude 會看到截斷旗標並可縮小樣式。Glob 預設不遵守 .gitignore, 會找到 gitignore 中的檔案, 這點與 Grep 不同。</p>'},
+  {name:'Grep', html:'<p>Grep 工具在檔案內容中搜尋樣式, 底層基於 ripgrep, 使用其正規表示式語法而非 POSIX grep。三種輸出模式: files_with_matches (預設, 只回傳檔案路徑), content (回傳比對到的行與行號), count (每個檔案的比對次數)。Grep 遵守 .gitignore, 會跳過被忽略的檔案。</p>'},
+  {name:'Read', html:'<p>Read 工具接收檔案路徑並回傳含行號的內容。預設從檔案開頭回傳, 若整檔讀取超過 token 上限, 會回傳第一頁並附帶 PARTIAL view 提示。Read 也能處理圖片 (以視覺內容回傳), PDF (超過 10 頁時分段讀取), 以及 Jupyter notebook (回傳所有 cell 與其輸出)。Read 只能讀檔案, 不能讀目錄。</p>'},
+  {name:'Write', html:'<p>Write 工具建立新檔案, 或用提供的完整內容覆寫既有檔案, 不會附加或合併內容。若目標路徑已存在, Claude 必須在目前對話中至少讀取過一次該檔案才能覆寫, 否則寫入會失敗, 這個限制不適用於新檔案。針對既有檔案的部分變更, Claude 會改用 Edit。</p>'},
+  {name:'WebFetch', html:'<p>WebFetch 接收網址與描述要萃取內容的 prompt, 抓取頁面後將 HTML 回應轉成 Markdown, 再用一個小型快速模型依 prompt 執行萃取。多數情況下 Claude 收到的是該模型的答案而非原始頁面, 這代表 WebFetch 依設計是有損的: 萃取 prompt 決定了 Claude 能看到什麼。回應會快取 15 分鐘, 網址跳轉到不同主機時 WebFetch 不會自動跟隨, 而是回傳原始網址與跳轉目標讓 Claude 再發一次請求。</p>'},
+  {name:'WebSearch', html:'<p>WebSearch 對 Anthropic 的網頁搜尋後端執行查詢, 回傳結果標題與網址, 不會抓取結果頁面。單次呼叫最多可發出 8 次後端搜尋以在內部精煉查詢。可用 allowed_domains 或 blocked_domains 限縮結果, 但兩者不能同時用在同一次呼叫中。</p>'}
+];
+const tabRow = document.getElementById('toolTabs');
+const panelRow = document.getElementById('toolPanels');
+BEHAVIORS.forEach((b,i) => {
+  const tab = document.createElement('div');
+  tab.className = 'stage-tab' + (i===0?' active':'');
+  tab.textContent = b.name;
+  tab.onclick = () => trGoTo(i);
+  tabRow.appendChild(tab);
+  const panel = document.createElement('div');
+  panel.className = 'demo-panel' + (i===0?' visible':'');
+  panel.innerHTML = b.html;
+  panelRow.appendChild(panel);
+});
+function trGoTo(n) {
+  document.querySelectorAll('#toolTabs .stage-tab').forEach((t,i)=>t.classList.toggle('active', i===n));
+  document.querySelectorAll('#toolPanels .demo-panel').forEach((p,i)=>p.classList.toggle('visible', i===n));
+}
+</script>
+</body>
+</html>

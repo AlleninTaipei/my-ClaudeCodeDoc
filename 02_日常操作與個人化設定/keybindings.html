@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>自訂鍵盤快捷鍵 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 190px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 150px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>自訂鍵盤快捷鍵</h1>
+  <p>透過 keybindings.json 設定檔, 為 Claude Code 客製化每個情境下的按鍵行為</p>
+</header>
+
+<main>
+
+<section>
+  <h2>設定檔結構</h2>
+  <p>執行 <code>/keybindings</code> 建立或開啟位於 <code>~/.claude/keybindings.json</code> 的設定檔。此檔案是一個包含 <code>bindings</code> 陣列的物件, 每個區塊指定一個情境 (context) 與按鍵對應動作的映射表。修改後會自動偵測並套用, 不需要重新啟動。</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">$schema</div><div class="desc">選用的 JSON Schema URL, 供編輯器自動完成</div></div>
+    <div class="field"><div class="name">$docs</div><div class="desc">選用的文件說明 URL</div></div>
+    <div class="field"><div class="name">bindings</div><div class="desc">依情境分組的綁定區塊陣列</div></div>
+  </div>
+  <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"$schema"</span>: <span class="str">"https://www.schemastore.org/claude-code-keybindings.json"</span>,
+  <span class="str">"$docs"</span>: <span class="str">"https://code.claude.com/docs/en/keybindings"</span>,
+  <span class="str">"bindings"</span>: [
+    <span class="kw">{</span>
+      <span class="str">"context"</span>: <span class="str">"Chat"</span>,
+      <span class="str">"bindings"</span>: <span class="kw">{</span>
+        <span class="str">"ctrl+e"</span>: <span class="str">"chat:externalEditor"</span>,
+        <span class="str">"ctrl+u"</span>: null
+      <span class="kw">}</span>
+    <span class="kw">}</span>
+  ]
+<span class="kw">}</span></pre>
+  <div class="info-box"><span class="tag">範例說明</span><p>此範例將 Ctrl+E 綁定為在聊天情境開啟外部編輯器, 並取消綁定 Ctrl+U。</p></div>
+</section>
+
+<section>
+  <h2>情境 (Contexts)</h2>
+  <p>每個綁定區塊都要指定套用的情境。點擊下方分類瀏覽所有可用情境。</p>
+  <div class="chip-row" id="ctxChips"></div>
+  <div class="response-box" id="ctxDisplay"></div>
+</section>
+
+<section>
+  <h2>可用動作 (Available Actions)</h2>
+  <p>動作採用 <code>namespace:action</code> 格式, 例如 <code>chat:submit</code> 送出訊息, 或 <code>app:toggleTodos</code> 顯示任務清單。每個情境有各自可用的動作, 點選下方分類查看對應的動作清單與預設按鍵。</p>
+  <div class="chip-row" id="actionChips"></div>
+  <div class="event-list" id="actionList"></div>
+</section>
+
+<section>
+  <h2>按鍵語法 (Keystroke Syntax)</h2>
+  <div class="stage-tabs">
+    <div class="ks-tab stage-tab active" onclick="ksGoTo(0)">1 · 修飾鍵</div>
+    <div class="ks-tab stage-tab" onclick="ksGoTo(1)">2 · 大寫字母</div>
+    <div class="ks-tab stage-tab" onclick="ksGoTo(2)">3 · 組合鍵 (Chords)</div>
+    <div class="ks-tab stage-tab" onclick="ksGoTo(3)">4 · 特殊按鍵</div>
+  </div>
+  <div class="ks-panel demo-panel visible" id="ks-p0">
+    <p>使用 <code>+</code> 分隔修飾鍵:</p>
+    <div class="api-fields">
+      <div class="field"><div class="name">ctrl / control</div><div class="desc">Control 鍵</div></div>
+      <div class="field"><div class="name">shift</div><div class="desc">Shift 鍵</div></div>
+      <div class="field"><div class="name">alt / opt / option / meta</div><div class="desc">Windows/Linux 的 Alt 鍵, macOS 的 Option 鍵</div></div>
+      <div class="field"><div class="name">cmd / command / super / win</div><div class="desc">macOS 的 Command 鍵, Windows 鍵, Linux 的 Super 鍵</div></div>
+    </div>
+    <div class="info-box"><span class="tag">注意</span><p>cmd 群組只有在支援 Kitty keyboard protocol 或 xterm modifyOtherKeys 模式的終端機才會被偵測到, 大多數終端機不會送出此訊號, 建議使用 ctrl 或 meta 以確保跨終端機皆可運作。</p></div>
+    <pre class="code-block"><span class="cmt">ctrl+k          </span>Ctrl + K
+<span class="cmt">shift+tab       </span>Shift + Tab
+<span class="cmt">meta+p          </span>macOS 上為 Option + P, 其他系統為 Alt + P
+<span class="cmt">ctrl+shift+c    </span>多重修飾鍵</pre>
+  </div>
+  <div class="ks-panel demo-panel" id="ks-p1">
+    <p>單獨的大寫字母隱含 Shift, 例如 <code>K</code> 等同於 <code>shift+k</code>, 適用於 vim 風格的綁定 (大小寫代表不同意義)。</p>
+    <div class="info-box"><span class="tag">差異</span><p>搭配修飾鍵的大寫字母 (例如 ctrl+K) 視為風格性寫法, 不隱含 Shift: ctrl+K 等同於 ctrl+k。</p></div>
+  </div>
+  <div class="ks-panel demo-panel" id="ks-p2">
+    <p>Chords 是以空白分隔的按鍵序列:</p>
+    <pre class="code-block"><span class="cmt">ctrl+k ctrl+s   </span>按下 Ctrl+K, 放開後再按 Ctrl+S</pre>
+  </div>
+  <div class="ks-panel demo-panel" id="ks-p3">
+    <div class="api-fields">
+      <div class="field"><div class="name">escape / esc</div><div class="desc">Escape 鍵</div></div>
+      <div class="field"><div class="name">enter / return</div><div class="desc">Enter 鍵</div></div>
+      <div class="field"><div class="name">tab</div><div class="desc">Tab 鍵</div></div>
+      <div class="field"><div class="name">space</div><div class="desc">空白鍵</div></div>
+      <div class="field"><div class="name">up / down / left / right</div><div class="desc">方向鍵</div></div>
+      <div class="field"><div class="name">backspace / delete</div><div class="desc">刪除鍵</div></div>
+    </div>
+  </div>
+  <div>
+    <button class="btn btn-ghost" id="ksPrev" disabled onclick="ksGoTo(KSStep-1)">← Back</button>
+    <button class="btn btn-primary" id="ksNext" onclick="ksGoTo(KSStep+1)">Next →</button>
+    <span class="step-indicator" id="ksIndicator">Step 1 of 4</span>
+  </div>
+</section>
+
+<section>
+  <h2>取消綁定預設快捷鍵</h2>
+  <p>將動作設為 <code>null</code> 即可取消綁定預設快捷鍵, 對 chord 綁定也同樣適用。取消綁定某個前綴下所有的 chord, 該前綴就會釋放出來供單鍵綁定使用。</p>
+  <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"bindings"</span>: [
+    <span class="kw">{</span>
+      <span class="str">"context"</span>: <span class="str">"Chat"</span>,
+      <span class="str">"bindings"</span>: <span class="kw">{</span>
+        <span class="str">"ctrl+x ctrl+k"</span>: null,
+        <span class="str">"ctrl+x ctrl+e"</span>: null,
+        <span class="str">"ctrl+x"</span>: <span class="str">"chat:newline"</span>
+      <span class="kw">}</span>
+    <span class="kw">}</span>
+  ]
+<span class="kw">}</span></pre>
+  <div class="info-box"><span class="tag">提示</span><p>如果只取消綁定某個前綴下的部分 chord, 按下該前綴仍會進入等待 chord 的狀態, 等待其餘尚存的綁定。</p></div>
+</section>
+
+<section>
+  <h2>保留快捷鍵與終端機衝突</h2>
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">無法重新綁定的快捷鍵</div>
+      <p><b>Ctrl+C</b> — 硬編碼的中斷/取消</p>
+      <p><b>Ctrl+D</b> — 硬編碼的結束</p>
+      <p><b>Ctrl+M</b> — 在終端機中等同 Enter (皆送出 CR)</p>
+      <p><b>Caps Lock</b> — 不會傳遞給終端機應用程式</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">可能與終端機多工工具衝突</div>
+      <p><b>Ctrl+B</b> — tmux 前綴鍵 (按兩次才送出)</p>
+      <p><b>Ctrl+A</b> — GNU screen 前綴鍵</p>
+      <p><b>Ctrl+Z</b> — Unix 行程暫停 (SIGTSTP)</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Vim 模式互動</h2>
+  <p>透過 <code>/config</code> → Editor mode 啟用 vim 模式後, 鍵盤綁定與 vim 模式各自獨立運作:</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">Vim 模式</span><span class="event-desc">在文字輸入層級處理輸入 (游標移動, 模式, 動作)</span></div>
+    <div class="event-item"><span class="event-name">Keybindings</span><span class="event-desc">在元件層級處理動作 (切換任務清單, 送出訊息等)</span></div>
+    <div class="event-item"><span class="event-name">Escape (vim)</span><span class="event-desc">從 INSERT 切換到 NORMAL 模式, 不會觸發 chat:cancel</span></div>
+    <div class="event-item"><span class="event-name">Ctrl+按鍵</span><span class="event-desc">大多數 Ctrl 快捷鍵會穿透 vim 模式傳給鍵盤綁定系統</span></div>
+    <div class="event-item"><span class="event-name">? (NORMAL 模式)</span><span class="event-desc">顯示說明選單 (vim 行為)</span></div>
+    <div class="event-item"><span class="event-name">/ (NORMAL 模式)</span><span class="event-desc">開啟歷史搜尋, 與標準模式下的 Ctrl+R 相同</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>驗證</h2>
+  <p>Claude Code 會驗證你的鍵盤綁定設定, 並針對以下情況顯示警告:</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">解析錯誤</span><span class="event-desc">無效的 JSON 或結構</span></div>
+    <div class="event-item"><span class="event-name">無效情境名稱</span><span class="event-desc">拼寫錯誤或不存在的 context</span></div>
+    <div class="event-item"><span class="event-name">保留快捷鍵衝突</span><span class="event-desc">嘗試重新綁定無法變更的快捷鍵</span></div>
+    <div class="event-item"><span class="event-name">終端機多工衝突</span><span class="event-desc">與 tmux, screen 等工具的前綴鍵衝突</span></div>
+    <div class="event-item"><span class="event-name">重複綁定</span><span class="event-desc">同一情境內出現重複的按鍵綁定</span></div>
+  </div>
+  <div class="takeaway"><p>執行 <code>/doctor</code> 可以看到所有鍵盤綁定相關的警告訊息。</p></div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+const CONTEXTS = [
+  {k:'Global', d:'套用於應用程式中的任何位置'},
+  {k:'Chat', d:'主要聊天輸入區'},
+  {k:'Autocomplete', d:'自動完成選單開啟時'},
+  {k:'Settings', d:'設定選單'},
+  {k:'Confirmation', d:'權限與確認對話框'},
+  {k:'Tabs', d:'分頁導覽元件'},
+  {k:'Help', d:'說明選單顯示時'},
+  {k:'Transcript', d:'逐字稿檢視器'},
+  {k:'HistorySearch', d:'歷史搜尋模式 (Ctrl+R)'},
+  {k:'Task', d:'背景任務執行中'},
+  {k:'ThemePicker', d:'主題選擇對話框'},
+  {k:'Attachments', d:'選擇對話框中的圖片附件導覽'},
+  {k:'Footer', d:'頁尾指示器導覽 (任務, 團隊, diff)'},
+  {k:'MessageSelector', d:'倒轉與摘要對話框的訊息選擇'},
+  {k:'DiffDialog', d:'差異檢視器導覽'},
+  {k:'ModelPicker', d:'模型選擇器的努力等級'},
+  {k:'Select', d:'一般選取/清單元件'},
+  {k:'Plugin', d:'外掛對話框 (瀏覽, 探索, 管理)'},
+  {k:'Scroll', d:'全螢幕模式下的對話捲動與文字選取'},
+  {k:'Doctor', d:'/doctor 診斷畫面'},
+];
+
+const ctxChipsEl = document.getElementById('ctxChips');
+const ctxDisplayEl = document.getElementById('ctxDisplay');
+CONTEXTS.forEach((c, i) => {
+  const chip = document.createElement('div');
+  chip.className = 'chip' + (i === 0 ? ' active' : '');
+  chip.textContent = c.k;
+  chip.onclick = () => {
+    document.querySelectorAll('#ctxChips .chip').forEach(el => el.classList.remove('active'));
+    chip.classList.add('active');
+    ctxDisplayEl.innerHTML = `<div class="response-field"><div class="rf-key">${c.k}</div><div class="rf-val">${c.d}</div></div>`;
+  };
+  ctxChipsEl.appendChild(chip);
+});
+ctxDisplayEl.innerHTML = `<div class="response-field"><div class="rf-key">${CONTEXTS[0].k}</div><div class="rf-val">${CONTEXTS[0].d}</div></div>`;
+
+const ACTIONS = {
+  'App': [
+    ['app:interrupt','Ctrl+C','取消目前操作'],
+    ['app:exit','Ctrl+D','結束 Claude Code'],
+    ['app:redraw','(未綁定)','強制終端機重繪'],
+    ['app:toggleTodos','Ctrl+T','切換任務清單顯示'],
+    ['app:toggleTranscript','Ctrl+O','切換詳細逐字稿'],
+  ],
+  'History': [
+    ['history:search','Ctrl+R','開啟歷史搜尋'],
+    ['history:previous','Up','上一筆歷史紀錄'],
+    ['history:next','Down','下一筆歷史紀錄'],
+  ],
+  'Chat': [
+    ['chat:cancel','Escape','取消目前輸入'],
+    ['chat:clearInput','Ctrl+L','強制全螢幕重繪, 保留輸入內容'],
+    ['chat:clearScreen','Cmd+K','全螢幕模式下兩秒內按兩次執行 /clear'],
+    ['chat:killAgents','Ctrl+X Ctrl+K','停止此 session 中所有背景子代理'],
+    ['chat:cycleMode','Shift+Tab','循環切換權限模式'],
+    ['chat:modelPicker','Meta+P','開啟模型選擇器'],
+    ['chat:fastMode','Meta+O','切換快速模式'],
+    ['chat:thinkingToggle','Meta+T','切換延伸思考'],
+    ['chat:submit','Enter','送出訊息'],
+    ['chat:newline','Ctrl+J','插入換行但不送出'],
+    ['chat:undo','Ctrl+_, Ctrl+Shift+-','復原上一個動作'],
+    ['chat:externalEditor','Ctrl+G, Ctrl+X Ctrl+E','在外部編輯器開啟'],
+    ['chat:stash','Ctrl+S','暫存目前提示內容'],
+    ['chat:imagePaste','Ctrl+V (Windows/WSL 為 Alt+V)','從剪貼簿貼上圖片'],
+  ],
+  'Autocomplete': [
+    ['autocomplete:accept','Tab','接受建議'],
+    ['autocomplete:dismiss','Escape','關閉選單'],
+    ['autocomplete:previous','Up','上一個建議'],
+    ['autocomplete:next','Down','下一個建議'],
+  ],
+  'Confirmation': [
+    ['confirm:yes','Y, Enter','確認動作'],
+    ['confirm:no','N, Escape','拒絕動作'],
+    ['confirm:previous','Up','上一個選項'],
+    ['confirm:next','Down','下一個選項'],
+    ['confirm:nextField','Tab','下一個欄位'],
+    ['confirm:previousField','(未綁定)','上一個欄位'],
+    ['confirm:toggle','Space','切換選取'],
+    ['confirm:cycleMode','Shift+Tab','循環切換權限模式'],
+    ['confirm:toggleExplanation','Ctrl+E','切換權限說明'],
+  ],
+  'Permission': [
+    ['permission:toggleDebug','(未綁定)','切換權限除錯資訊 (v2.1.146 移除預設 Ctrl+D, 因為與 app:exit 衝突)'],
+  ],
+  'Transcript': [
+    ['transcript:toggleShowAll','Ctrl+E','切換顯示全部內容'],
+    ['transcript:exit','q, Ctrl+C, Escape','離開逐字稿檢視'],
+  ],
+  'HistorySearch': [
+    ['historySearch:next','Ctrl+R','下一筆符合項目'],
+    ['historySearch:accept','Escape, Tab','接受選取項目'],
+    ['historySearch:cancel','Ctrl+C','取消搜尋'],
+    ['historySearch:execute','Enter','執行選取的指令'],
+    ['historySearch:cycleScope','Ctrl+S','循環切換範圍: session, project, everywhere'],
+  ],
+  'Task': [
+    ['task:background','Ctrl+B, Ctrl+X Ctrl+B','將目前任務轉為背景執行'],
+  ],
+  'Theme': [
+    ['theme:toggleSyntaxHighlighting','Ctrl+T','切換語法高亮'],
+  ],
+  'Help': [
+    ['help:dismiss','Escape','關閉說明選單'],
+  ],
+  'Tabs': [
+    ['tabs:next','Tab, Right','下一個分頁'],
+    ['tabs:previous','Shift+Tab, Left','上一個分頁'],
+  ],
+  'Attachments': [
+    ['attachments:next','Right','下一個附件'],
+    ['attachments:previous','Left','上一個附件'],
+    ['attachments:remove','Backspace, Delete','移除選取的附件'],
+    ['attachments:exit','Down, Escape','離開附件導覽'],
+  ],
+  'Footer': [
+    ['footer:next','Right','下一個頁尾項目'],
+    ['footer:previous','Left','上一個頁尾項目'],
+    ['footer:up','Up','在頁尾向上導覽 (最上方會取消選取)'],
+    ['footer:down','Down','在頁尾向下導覽'],
+    ['footer:openSelected','Enter','開啟選取的頁尾項目'],
+    ['footer:clearSelection','Escape','清除頁尾選取'],
+  ],
+  'MessageSelector': [
+    ['messageSelector:up','Up, K, Ctrl+P','在清單中向上移動'],
+    ['messageSelector:down','Down, J, Ctrl+N','在清單中向下移動'],
+    ['messageSelector:top','Ctrl+Up, Shift+Up, Meta+Up, Shift+K','跳到最上方'],
+    ['messageSelector:bottom','Ctrl+Down, Shift+Down, Meta+Down, Shift+J','跳到最下方'],
+    ['messageSelector:select','Enter','選取訊息'],
+  ],
+  'DiffDialog': [
+    ['diff:dismiss','Escape','關閉差異檢視器'],
+    ['diff:previousSource','Left','上一個差異來源'],
+    ['diff:nextSource','Right','下一個差異來源'],
+    ['diff:previousFile','Up, K','上一個檔案 (詳細檢視則向上捲動一行)'],
+    ['diff:nextFile','Down, J','下一個檔案 (詳細檢視則向下捲動一行)'],
+    ['diff:viewDetails','Enter','檢視差異詳情'],
+    ['diff:back','(依情境而定)','返回差異檢視器上一畫面'],
+  ],
+  'ModelPicker': [
+    ['modelPicker:decreaseEffort','Left','降低努力等級'],
+    ['modelPicker:increaseEffort','Right','提高努力等級'],
+    ['modelPicker:thisSessionOnly','s','僅此 session 套用醒目提示的模型'],
+  ],
+  'Select': [
+    ['select:next','Down, J, Ctrl+N','下一個選項'],
+    ['select:previous','Up, K, Ctrl+P','上一個選項'],
+    ['select:accept','Enter','接受選取'],
+    ['select:cancel','Escape','取消選取'],
+  ],
+  'Plugin': [
+    ['plugin:toggle','Space','切換外掛選取'],
+    ['plugin:install','I','安裝選取的外掛'],
+    ['plugin:favorite','F','將選取的外掛加入最愛, 排序至已安裝分頁的前段'],
+  ],
+  'Settings': [
+    ['settings:search','/','進入搜尋模式'],
+    ['settings:retry','R','重新載入發生錯誤的使用量資料'],
+    ['select:accept','Enter, Space','變更選取的設定或開啟其子選單'],
+    ['confirm:no','Escape','關閉面板 (變更已即時儲存)'],
+  ],
+  'Doctor': [
+    ['doctor:fix','F','將診斷報告送給 Claude 修復問題 (僅在發現問題時可用)'],
+  ],
+  'Voice': [
+    ['voice:pushToTalk','Space','語音輸入提示 (依 /voice 模式決定按住或輕點)'],
+  ],
+  'Scroll': [
+    ['scroll:lineUp / lineDown','(未綁定)','向上/向下捲動一行, 滑鼠滾輪會觸發此動作'],
+    ['scroll:pageUp / pageDown','PageUp / PageDown','向上/向下捲動半個畫面高度'],
+    ['scroll:top / bottom','Ctrl+Home / Ctrl+End','跳到對話開頭 / 最新訊息並重新啟用自動跟隨'],
+    ['selection:copy','Ctrl+Shift+C / Cmd+C','複製選取文字到剪貼簿'],
+    ['selection:extendLeft/Right/Up/Down','Shift+方向鍵','延伸選取範圍'],
+  ],
+};
+
+const actionChipsEl = document.getElementById('actionChips');
+const actionListEl = document.getElementById('actionList');
+function renderActions(key) {
+  actionListEl.innerHTML = ACTIONS[key].map(([name, def, desc]) =>
+    `<div class="event-item"><span class="event-name">${name}</span><span class="event-desc"><b>${def}</b> — ${desc}</span></div>`
+  ).join('');
+}
+Object.keys(ACTIONS).forEach((key, i) => {
+  const chip = document.createElement('div');
+  chip.className = 'chip' + (i === 0 ? ' active' : '');
+  chip.textContent = key;
+  chip.onclick = () => {
+    document.querySelectorAll('#actionChips .chip').forEach(el => el.classList.remove('active'));
+    chip.classList.add('active');
+    renderActions(key);
+  };
+  actionChipsEl.appendChild(chip);
+});
+renderActions(Object.keys(ACTIONS)[0]);
+
+let KSStep = 0;
+const KS_MAX = 3;
+function ksGoTo(n) {
+  KSStep = Math.max(0, Math.min(KS_MAX, n));
+  document.querySelectorAll('.ks-panel').forEach((el, i) => el.classList.toggle('visible', i === KSStep));
+  document.querySelectorAll('.ks-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === KSStep) t.classList.add('active');
+    else if (i < KSStep) t.classList.add('done');
+  });
+  document.getElementById('ksPrev').disabled = KSStep === 0;
+  const next = document.getElementById('ksNext');
+  next.disabled = KSStep === KS_MAX;
+  next.textContent = KSStep === KS_MAX ? 'Done ✓' : 'Next →';
+  document.getElementById('ksIndicator').textContent = `Step ${KSStep + 1} of ${KS_MAX + 1}`;
+}
+ksGoTo(0);
+</script>
+</body>
+</html>

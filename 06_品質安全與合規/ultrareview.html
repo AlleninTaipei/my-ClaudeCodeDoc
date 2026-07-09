@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ultrareview 深度多代理程式碼審查</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; }
+.fn  { color: #16a34a; }
+.str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; }
+.key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 140px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.cmp-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 0.82rem; }
+.cmp-table th, .cmp-table td { border: 1px solid #cbd5e0; padding: 10px 12px; text-align: left; }
+.cmp-table th { background: #e2e8f0; color: #1e3a5f; font-weight: 700; }
+.cmp-table td { background: #fff; color: #4a5568; }
+.cmp-wrap { overflow-x: auto; }
+@media (max-width: 640px) { .api-fields { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; }
+body.dark .fn  { color: #68d391; }
+body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; }
+body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; }
+body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; }
+body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; }
+body.dark .rf-val { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark .cmp-table th { background: #1a202c; color: #90cdf4; }
+body.dark .cmp-table td { background: #0f1117; color: #a0aec0; }
+body.dark .cmp-table th, body.dark .cmp-table td { border-color: #2d3748; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Ultrareview</h1>
+  <p>用 /code-review ultra 在雲端執行深度多代理程式碼審查, 於合併前找出並驗證真正的錯誤</p>
+</header>
+
+<main>
+
+  <section>
+    <h2>從 CLI 執行 ultrareview</h2>
+    <p>在任何 git 儲存庫中的 Claude Code CLI 啟動審查:</p>
+    <pre class="code-block">/code-review ultra</pre>
+    <p>不帶參數時, ultrareview 會比較目前分支與預設分支的 diff, 包含工作樹中未提交與已暫存的變更。要改為審查 GitHub pull request, 傳入 PR 編號:</p>
+    <pre class="code-block">/code-review ultra <span class="key">1234</span></pre>
+    <div class="info-box">
+      <span class="tag">Tip</span>
+      <p>若儲存庫太大無法打包, Claude Code 會提示改用 PR 模式: 推送分支, 開一個 draft PR, 再執行 /code-review ultra &lt;PR-number&gt;。若 PR 的 diff 太大, Claude Code 會在審查開始前直接拒絕並提供縮小範圍的建議。</p>
+    </div>
+    <p>啟動前, Claude Code 會顯示確認對話框, 包含審查範圍 (審查分支時含檔案與行數), 剩餘免費次數與預估費用。確認後審查在背景繼續進行, 你可以繼續使用 session。</p>
+  </section>
+
+  <section>
+    <h2>計費與免費次數</h2>
+    <p>Ultrareview 是計入使用額度而非方案內建用量的進階功能。</p>
+    <table class="cmp-table">
+      <thead><tr><th>方案</th><th>內含免費次數</th><th>用完後</th></tr></thead>
+      <tbody>
+        <tr><td>Pro</td><td>3 次</td><td>計入使用額度</td></tr>
+        <tr><td>Max</td><td>3 次</td><td>計入使用額度</td></tr>
+        <tr><td>Team 與 Enterprise</td><td>無</td><td>計入使用額度</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:12px;">Pro 與 Max 訂閱者可獲得三次免費試用, 這是帳號一次性額度, 不會重新整理。用完後, 每次審查依變更大小計費, 通常介於 5 到 20 美元。即使提早停止或審查失敗未完成, 仍會消耗一次免費次數; 付費審查則只針對實際執行的部分收費。</p>
+    <div class="takeaway">
+      <p>重點: 帳號或組織必須先開啟使用額度功能才能啟動付費審查, 可用 /usage-credits 檢查或變更目前設定。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>追蹤執行中的審查</h2>
+    <div class="event-list">
+      <div class="event-item"><div class="event-name">典型時長</div><div class="event-desc">5 到 10 分鐘, 以背景任務執行, 可繼續工作或關閉終端機</div></div>
+      <div class="event-item"><div class="event-name">/tasks</div><div class="event-desc">查看執行中與已完成的審查, 開啟詳細檢視, 或停止進行中的審查</div></div>
+      <div class="event-item"><div class="event-name">停止審查</div><div class="event-desc">會封存雲端 session, 部分結果不會回傳</div></div>
+      <div class="event-item"><div class="event-name">完成通知</div><div class="event-desc">已驗證的發現會以通知形式出現在 session 中, 附檔案位置與問題說明</div></div>
+      </div>
+  </section>
+
+  <section>
+    <h2>非互動式執行 ultrareview</h2>
+    <p>使用 claude ultrareview 子指令從 CI 或腳本啟動審查, 不需要互動式 session, 會阻塞直到遠端審查完成, 將發現印到 stdout:</p>
+    <pre class="code-block">claude ultrareview
+claude ultrareview <span class="key">1234</span>
+claude ultrareview <span class="key">origin/main</span></pre>
+    <p>不帶參數時審查目前分支與預設分支的 diff; 傳入 PR 編號審查該 PR; 傳入分支名稱則與該分支比較。</p>
+    <div class="api-fields">
+      <div class="field"><div class="name">--json</div><div class="desc">印出原始 bugs.json 內容而非格式化後的發現</div></div>
+      <div class="field"><div class="name">--timeout &lt;minutes&gt;</div><div class="desc">等待審查完成的最長分鐘數, 預設 30</div></div>
+    </div>
+    <p style="margin-top:12px;">退出碼 0 表示審查完成 (含有無發現), 1 表示啟動失敗或逾時, 130 表示以 Ctrl-C 中斷。中斷子指令後, 遠端審查仍會繼續執行, 可依 stderr 印出的 session 網址於瀏覽器追蹤。</p>
+  </section>
+
+  <section>
+    <h2>Ultrareview 與 /code-review, /review 的比較</h2>
+    <div class="cmp-wrap">
+    <table class="cmp-table">
+      <thead><tr><th></th><th>/code-review</th><th>/review &lt;pr&gt;</th><th>/code-review ultra</th></tr></thead>
+      <tbody>
+        <tr><td>目標</td><td>你的工作 diff</td><td>GitHub pull request</td><td>工作 diff 或 pull request</td></tr>
+        <tr><td>執行位置</td><td>本機 session</td><td>本機 session</td><td>遠端雲端沙箱</td></tr>
+        <tr><td>深度</td><td>依 effort 參數調整</td><td>中等 code-review 引擎</td><td>多代理艦隊, 獨立驗證</td></tr>
+        <tr><td>時長</td><td>數秒到數分鐘</td><td>數分鐘</td><td>約 5 到 10 分鐘</td></tr>
+        <tr><td>成本</td><td>計入一般用量</td><td>計入一般用量</td><td>免費次數後約 5 到 20 美元</td></tr>
+        <tr><td>最適合</td><td>迭代時快速回饋</td><td>核准前審查隊友的 PR</td><td>合併重大變更前的高信心把關</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Error reference 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 640px; margin-inline: auto; }
+main    { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.8rem; color: #1a202c;
+  overflow-x: auto; margin-top: 10px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.83rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+.search-box { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #cbd5e0; font-size: 0.85rem; margin-bottom: 14px; }
+.err-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; margin-bottom: 12px; display: none; }
+.err-card.visible { display: block; }
+.err-card h4 { font-size: 0.95rem; color: #1e40af; margin-bottom: 6px; }
+.err-card .fix-label { font-size: 0.72rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: #6b7280; margin: 10px 0 6px; }
+.err-card ul { padding-left: 18px; font-size: 0.83rem; color: #4a5568; }
+.err-card ul li { margin-bottom: 4px; }
+.empty-note { color: #9ca3af; font-size: 0.85rem; text-align: center; padding: 20px; }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+@media (max-width: 640px) { .api-fields { grid-template-columns: 1fr; } }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark .search-box { background: #1a202c; border-color: #2d3748; color: #e2e8f0; }
+body.dark .err-card { background: #1a202c; border-color: #2d3748; }
+body.dark .err-card h4 { color: #90cdf4; }
+body.dark .err-card .fix-label { color: #718096; }
+body.dark .err-card ul { color: #a0aec0; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Error reference</h1>
+  <p>查詢 Claude Code 執行期的錯誤訊息, 了解每一則代表什麼意義以及如何修復。這些錯誤與復原方式適用於 CLI, Desktop app, 以及 Claude Code on the web, 因為三者都包裝同一個 Claude Code CLI。</p>
+</header>
+
+<main>
+
+<section>
+  <h2>找到你的錯誤</h2>
+  <p>用分類篩選, 或直接搜尋錯誤訊息中的關鍵字。</p>
+  <div class="chip-row" id="catChips"><span class="chip-label">分類:</span></div>
+  <input type="text" class="search-box" id="errSearch" placeholder="搜尋錯誤訊息關鍵字, 例如 429, session limit, SSL..." oninput="renderErrors()">
+  <div id="errList"></div>
+  <div class="empty-note" id="emptyNote" style="display:none">沒有符合的錯誤, 換個關鍵字試試</div>
+</section>
+
+<section>
+  <h2>自動重試機制</h2>
+  <p>Claude Code 在顯示錯誤前, 會先自動重試暫時性失敗。伺服器錯誤, overloaded 回應, request timeout, 暫時性 429 節流, 以及斷線, 都會以指數退避方式重試最多 10 次。當你看到本頁列出的錯誤時, 代表這些重試已經用盡。</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">CLAUDE_CODE_MAX_RETRIES</div><div class="desc">重試次數, 預設 10, v2.1.186 起上限為 15</div></div>
+    <div class="field"><div class="name">CLAUDE_CODE_RETRY_WATCHDOG</div><div class="desc">在無人值守的 session (如 CI) 設為 1, 對 429/529 容量錯誤無限重試而非在達到上限後失敗</div></div>
+    <div class="field"><div class="name">API_TIMEOUT_MS</div><div class="desc">每個請求的逾時毫秒數, 預設 600000, 網路慢或走 proxy 時可調高</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>回應品質似乎變差時該檢查什麼</h2>
+  <p>若沒有錯誤訊息但回答品質不如預期, 通常是對話狀態而非模型本身的問題。Claude Code 不會悄悄切換模型版本, 只有三種特定情況會 fallback。</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">模型選擇</div><div class="desc">執行 /model 確認目前用的模型, 先前的選擇或 ANTHROPIC_MODEL 可能讓你停在較小的模型上</div></div>
+    <div class="field"><div class="name">Effort 等級</div><div class="desc">執行 /effort 檢查目前推理等級, 困難的除錯或設計工作可調高</div></div>
+    <div class="field"><div class="name">Context 壓力</div><div class="desc">執行 /context 查看視窗使用狀況, 接近上限時執行 /compact 或 /clear</div></div>
+    <div class="field"><div class="name">過時的指令</div><div class="desc">過大或過時的 CLAUDE.md 與 MCP 工具定義會佔用 context 並影響回應, /doctor 會標記過大的 memory 檔案</div></div>
+  </div>
+  <div class="takeaway"><p>回應出錯時, rewind 通常比在對話中糾正更有效。按兩下 Esc 或執行 /rewind 回到錯誤發生前, 再用更具體的說法重新描述, 避免錯誤的嘗試殘留在 context 中影響後續回答。</p></div>
+</section>
+
+<section>
+  <h2>回報錯誤</h2>
+  <p>本頁涵蓋來自 Claude API 的錯誤。其他 Claude Code 元件的錯誤請見對應指南: MCP server 連線或認證失敗見 MCP 頁面, hook 腳本失敗見 Debug hooks, 安裝時的權限或檔案系統錯誤見 Troubleshoot installation。</p>
+  <div class="info-box">
+    <span class="tag">仍未解決</span>
+    <p>執行 /feedback 將逐字稿與描述送給 Anthropic, 該指令也會提供開啟預填 GitHub issue 的選項。也可以執行 /doctor 檢查本機設定問題, 或查看 status.claude.com 的服務事件。</p>
+  </div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+const ERRORS = [
+  {cat:'server', title:'API Error: 500 Internal server error', msg:'API Error: 500 Internal server error. 通常是暫時性的伺服器端問題', fixes:['檢查 status.claude.com 或對應 provider 的狀態頁是否有事件','等一分鐘後重新傳送訊息, 長 prompt 可直接輸入「try again」','若持續發生且沒有公告事件, 執行 /feedback 回報']},
+  {cat:'server', title:'API Error: Repeated 529 Overloaded errors', msg:'API 暫時全面達到容量上限, 已經重試多次後才顯示這則訊息', fixes:['檢查 status.claude.com 的容量公告','幾分鐘後再試一次','執行 /model 切換到其他模型, 因為容量是依模型分別追蹤的']},
+  {cat:'server', title:'Request timed out', msg:'API 在連線期限前沒有回應, 預設請求逾時為 10 分鐘', fixes:['重試該請求','將長時間任務拆成較小的 prompt','若因慢速網路或 proxy 造成, 調高 API_TIMEOUT_MS','若頻繁發生且網路正常, 參考網路錯誤章節']},
+  {cat:'server', title:'Auto mode cannot determine the safety of an action', msg:'auto mode 用來分類動作安全性的模型無法產生決策', fixes:['幾秒後重試, Claude 通常會自動重試','若持續失敗, 先做唯讀任務, 稍後再回來處理被擋的動作','若是分類器回應無法解析, 用 claude --debug 查看詳細內容']},
+  {cat:'limits', title:"You've hit your session limit", msg:"You've hit your session limit · resets 3:45pm / weekly limit · resets Mon 12:00am", fixes:['等待訊息中顯示的重置時間','執行 /usage 查看方案額度與重置時間','執行 /usage-credits 購買額外用量, 或向 Team/Enterprise 管理員申請','升級方案以取得更高的基礎額度']},
+  {cat:'limits', title:'Usage credits required for 1M context', msg:'選用的模型使用 1M-token 延伸 context window, 而方案僅透過 usage credits 提供此功能', fixes:['執行 /model 選擇不含 [1m] 後綴的變體回到標準 context window','執行 /usage-credits 開啟計量計費','若問題持續, 檢查是否有其他地方仍設定 1M 模型 ID']},
+  {cat:'limits', title:'Server is temporarily limiting requests', msg:'API 套用了與方案額度無關的短期節流', fixes:['稍等後重試','若持續發生檢查 status.claude.com']},
+  {cat:'limits', title:'Request rejected (429)', msg:'觸及了 API key, Bedrock, 或 Vertex AI 專案設定的速率限制', fixes:['執行 /status 確認目前使用的憑證是預期的那一個','檢查你的 provider 主控台上目前的限制並視需要申請更高等級','降低併發, 調低 CLAUDE_CODE_MAX_TOOL_USE_CONCURRENCY 或改用較小的模型']},
+  {cat:'limits', title:'Credit balance is too low', msg:'Console 組織的預付額度已用完', fixes:['在 platform.claude.com 加值, 並可開啟自動加值','若持有 Pro/Max/Team/Enterprise 方案, 用 /login 改用訂閱認證','在 Console 設定每個 workspace 的花費上限']},
+  {cat:'auth', title:'Not logged in', msg:'Not logged in · Please run /login', fixes:['執行 /login 進行認證','若預期用環境變數認證, 確認 ANTHROPIC_API_KEY 已在啟動 claude 的 shell 中設定並匯出','CI 或自動化環境可設定 apiKeyHelper 腳本']},
+  {cat:'auth', title:'Could not resolve authentication method', msg:'session 在沒有任何憑證的情況下到達了 API client, 常見於 background/cloud session', fixes:['若在 background/cloud session 中出現且憑證已設定, 升級到 v2.1.174 以後','確認 ANTHROPIC_API_KEY, CLAUDE_CODE_OAUTH_TOKEN, 或雲端供應商憑證是設定在啟動 worker 的環境中']},
+  {cat:'auth', title:'Invalid API key', msg:'ANTHROPIC_API_KEY 或 apiKeyHelper 腳本回傳了被 API 拒絕的金鑰', fixes:['檢查是否打錯字, 並確認金鑰未在 Console 中被撤銷','執行 env | grep ANTHROPIC 檢查是否有工具載入了舊金鑰','unset ANTHROPIC_API_KEY 後執行 /login 改用訂閱認證']},
+  {cat:'auth', title:'This organization has been disabled', msg:'一個來自已停用 Console 組織的舊 ANTHROPIC_API_KEY 覆蓋了你的訂閱登入', fixes:['在目前 shell unset ANTHROPIC_API_KEY 並從 shell profile 移除, 再重啟 claude','之後執行 /status 確認生效的憑證是訂閱']},
+  {cat:'auth', title:'OAuth token revoked or expired', msg:'儲存的登入已失效, 撤銷代表已在所有地方登出, 過期代表自動刷新失敗', fixes:['執行 /login 重新登入','若同一 session 內再次出現, 先執行 /logout 完整清除再 /login']},
+  {cat:'network', title:'Unable to connect to API', msg:'到 API 的 TCP 連線失敗或從未完成, 常見原因為無網路存取, VPN 封鎖, 或需要設定 proxy', fixes:['用 curl -I https://api.anthropic.com 確認能否連到 API host','若在公司 proxy 後方, 啟動前設定 HTTPS_PROXY','若透過 LLM gateway, 設定 ANTHROPIC_BASE_URL 指向該位址']},
+  {cat:'network', title:'SSL certificate errors', msg:'網路上的 proxy 或安全設備正在攔截 TLS 流量並用自己的憑證, 而 Claude Code 不信任它', fixes:['匯出組織的 CA bundle, 並用 NODE_EXTRA_CA_CERTS 指向它','不要設定 NODE_TLS_REJECT_UNAUTHORIZED=0, 那會完全停用憑證驗證']},
+  {cat:'network', title:'Host not allowed in a cloud session', msg:'cloud session 或 routine 的對外 HTTP 請求被環境的網路政策擋下', fixes:['開啟該 routine 或啟動 cloud session 的環境設定','將 Network access 從 Trusted 改為 Custom 並加入被擋的網域','或選擇 Full 取得不受限制的存取']},
+  {cat:'request', title:'Prompt is too long', msg:'對話加上附加檔案超過模型的 context window', fixes:['執行 /compact 摘要先前的回合, 或 /clear 重新開始','執行 /context 查看佔用明細','用 /mcp disable <name> 停用不需要的 MCP server']},
+  {cat:'request', title:'Error during compaction: Conversation too long', msg:'/compact 本身失敗, 因為沒有足夠的可用 context 容納它產生的摘要', fixes:['按兩下 Esc 開啟訊息列表往回幾則, 再重新執行 /compact','若仍不足, 執行 /clear 開始新 session, 舊對話可用 /resume 找回']},
+  {cat:'request', title:'Request too large', msg:'HTTP 請求主體在斷詞前就超過 API 的位元組上限, 通常因為貼上大型檔案或附件', fixes:['按兩下 Esc 回到上傳大型內容之前的回合','改用檔案路徑參照大型檔案, 讓 Claude 分段讀取']},
+  {cat:'request', title:'Image was too large', msg:'貼上或附加的圖片超過 API 的大小或尺寸限制', fixes:['貼上前先縮小圖片','針對相關區域截取更精準的畫面, 而非整個螢幕']},
+  {cat:'request', title:"There's an issue with the selected model", msg:'設定的模型名稱無法識別, 或帳號沒有該模型的存取權限', fixes:['互動式 CLI: 執行 /model 從帳號可用的模型中選擇','非互動模式: 傳入 --model 或設定 ANTHROPIC_MODEL','改用 sonnet 或 opus 這類別名而非完整版本化 ID']},
+  {cat:'request', title:'Tool use or thinking block mismatch', msg:'對話歷史以不一致的狀態到達 API, 通常發生在工具呼叫被中斷或回合被中途編輯之後', fixes:['執行 /rewind 或按兩下 Esc 回到損壞回合之前的檢查點','若使用 Opus 4.7/4.8 且版本早於 v2.1.156, 先執行 claude update']},
+  {cat:'request', title:'Usage Policy refusal', msg:'API 因對話中的內容觸發 Usage Policy 檢查而拒絕回應', fixes:['按兩下 Esc 或執行 /rewind 回到觸發拒絕之前的檢查點, 再換個說法','若無法定位是哪個回合, 執行 /clear 開始新對話']}
+];
+
+const CATS = [
+  {key:'all', label:'全部'},
+  {key:'server', label:'伺服器錯誤'},
+  {key:'limits', label:'用量限制'},
+  {key:'auth', label:'認證錯誤'},
+  {key:'network', label:'網路連線'},
+  {key:'request', label:'請求錯誤'}
+];
+let activeCat = 'all';
+const catRow = document.getElementById('catChips');
+CATS.forEach(c => {
+  const chip = document.createElement('span');
+  chip.className = 'chip' + (c.key==='all' ? ' active' : '');
+  chip.textContent = c.label;
+  chip.onclick = () => { activeCat = c.key; document.querySelectorAll('#catChips .chip').forEach(el=>el.classList.remove('active')); chip.classList.add('active'); renderErrors(); };
+  catRow.appendChild(chip);
+});
+
+const listEl = document.getElementById('errList');
+ERRORS.forEach((e,i) => {
+  const card = document.createElement('div');
+  card.className = 'err-card';
+  card.dataset.cat = e.cat;
+  card.dataset.text = (e.title + ' ' + e.msg).toLowerCase();
+  card.innerHTML = '<h4>' + e.title + '</h4><pre class="code-block">' + e.msg + '</pre>' +
+    '<div class="fix-label">該怎麼做</div><ul>' + e.fixes.map(f=>'<li>'+f+'</li>').join('') + '</ul>';
+  listEl.appendChild(card);
+});
+
+function renderErrors() {
+  const q = document.getElementById('errSearch').value.trim().toLowerCase();
+  let shown = 0;
+  document.querySelectorAll('.err-card').forEach(card => {
+    const matchCat = activeCat === 'all' || card.dataset.cat === activeCat;
+    const matchQ = !q || card.dataset.text.includes(q);
+    const visible = matchCat && matchQ;
+    card.classList.toggle('visible', visible);
+    if (visible) shown++;
+  });
+  document.getElementById('emptyNote').style.display = shown === 0 ? 'block' : 'none';
+}
+renderErrors();
+</script>
+</body>
+</html>

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Interactive Mode 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%); border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c; overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; } .cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a; min-width: 150px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 150px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } .response-field { flex-direction: column; gap: 4px; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; } body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Interactive Mode</h1>
+  <p>Claude Code session 中鍵盤快捷鍵, 輸入模式與互動功能的完整參考</p>
+</header>
+
+<main>
+
+<section>
+  <h2>鍵盤快捷鍵</h2>
+  <p>鍵盤快捷鍵可能因平台與終端機而異。點選分類查看對應快捷鍵。</p>
+  <div class="chip-row" id="kbChips">
+    <span class="chip-label">分類:</span>
+    <span class="chip active" data-group="general">一般控制</span>
+    <span class="chip" data-group="edit">文字編輯</span>
+    <span class="chip" data-group="multi">多行輸入</span>
+    <span class="chip" data-group="quick">快速指令</span>
+    <span class="chip" data-group="transcript">逐字稿檢視器</span>
+    <span class="chip" data-group="voice">語音輸入</span>
+  </div>
+
+  <div class="event-list kb-panel" data-group="general">
+    <div class="event-item"><span class="event-name">Ctrl+C</span><span class="event-desc">中斷或清除輸入; 無執行中操作時第一次清空提示, 第二次結束 Claude Code</span></div>
+    <div class="event-item"><span class="event-name">Ctrl+X Ctrl+K</span><span class="event-desc">停止此 session 所有執行中的背景 subagent, 三秒內按兩次確認</span></div>
+    <div class="event-item"><span class="event-name">Ctrl+D</span><span class="event-desc">結束 Claude Code session (EOF 信號)</span></div>
+    <div class="event-item"><span class="event-name">Ctrl+G</span><span class="event-desc">在預設文字編輯器中開啟提示或自訂回應</span></div>
+    <div class="event-item"><span class="event-name">Ctrl+L</span><span class="event-desc">強制重繪整個終端機畫面, 保留輸入與對話歷史</span></div>
+    <div class="event-item"><span class="event-name">Ctrl+O</span><span class="event-desc">切換逐字稿檢視器, 顯示詳細工具使用與執行</span></div>
+    <div class="event-item"><span class="event-name">Ctrl+R</span><span class="event-desc">反向搜尋指令歷史</span></div>
+    <div class="event-item"><span class="event-name">Ctrl+V</span><span class="event-desc">貼上剪貼簿中的圖片</span></div>
+    <div class="event-item"><span class="event-name">Ctrl+B</span><span class="event-desc">將執行中的任務移到背景</span></div>
+    <div class="event-item"><span class="event-name">Ctrl+T</span><span class="event-desc">切換任務清單顯示</span></div>
+    <div class="event-item"><span class="event-name">Esc</span><span class="event-desc">中斷 Claude 目前的回應或工具呼叫</span></div>
+    <div class="event-item"><span class="event-name">Esc + Esc</span><span class="event-desc">清除輸入草稿, 或在輸入為空時開啟倒回選單</span></div>
+    <div class="event-item"><span class="event-name">Shift+Tab</span><span class="event-desc">循環切換權限模式</span></div>
+    <div class="event-item"><span class="event-name">Option+P / Alt+P</span><span class="event-desc">切換模型</span></div>
+    <div class="event-item"><span class="event-name">Option+T / Alt+T</span><span class="event-desc">切換延伸思考模式</span></div>
+    <div class="event-item"><span class="event-name">Option+O / Alt+O</span><span class="event-desc">切換 fast mode</span></div>
+  </div>
+
+  <div class="event-list kb-panel" data-group="edit" style="display:none">
+    <div class="event-item"><span class="event-name">Ctrl+A / Ctrl+E</span><span class="event-desc">移到目前行的開頭或結尾</span></div>
+    <div class="event-item"><span class="event-name">Ctrl+K</span><span class="event-desc">刪到行尾, 儲存以供貼上</span></div>
+    <div class="event-item"><span class="event-name">Ctrl+U</span><span class="event-desc">從游標刪到行首, 重複可跨行清除</span></div>
+    <div class="event-item"><span class="event-name">Ctrl+W</span><span class="event-desc">刪除前一個字詞</span></div>
+    <div class="event-item"><span class="event-name">Ctrl+Y</span><span class="event-desc">貼上以 Ctrl+K/U/W 刪除的文字</span></div>
+    <div class="event-item"><span class="event-name">Alt+Y</span><span class="event-desc">貼上後循環貼上歷史</span></div>
+    <div class="event-item"><span class="event-name">Alt+B / Alt+F</span><span class="event-desc">往前或往後移動一個字詞</span></div>
+  </div>
+
+  <div class="event-list kb-panel" data-group="multi" style="display:none">
+    <div class="event-item"><span class="event-name">\ + Enter</span><span class="event-desc">快速跳脫, 適用所有終端機</span></div>
+    <div class="event-item"><span class="event-name">Option+Enter</span><span class="event-desc">macOS 啟用 Option as Meta 後可用</span></div>
+    <div class="event-item"><span class="event-name">Shift+Enter</span><span class="event-desc">iTerm2, WezTerm, Ghostty, Kitty, Warp 等原生支援</span></div>
+    <div class="event-item"><span class="event-name">Ctrl+J</span><span class="event-desc">任何終端機皆可用, 無需設定</span></div>
+    <div class="event-item"><span class="event-name">直接貼上</span><span class="event-desc">適合貼上程式碼區塊或日誌</span></div>
+  </div>
+
+  <div class="event-list kb-panel" data-group="quick" style="display:none">
+    <div class="event-item"><span class="event-name">/ 開頭</span><span class="event-desc">指令或 skill</span></div>
+    <div class="event-item"><span class="event-name">! 開頭</span><span class="event-desc">Shell 模式, 直接執行指令並加入 session</span></div>
+    <div class="event-item"><span class="event-name">@</span><span class="event-desc">觸發檔案路徑自動完成</span></div>
+  </div>
+
+  <div class="event-list kb-panel" data-group="transcript" style="display:none">
+    <div class="event-item"><span class="event-name">?</span><span class="event-desc">切換鍵盤快捷鍵說明面板, 需 fullscreen rendering</span></div>
+    <div class="event-item"><span class="event-name">{ / }</span><span class="event-desc">跳到上一個或下一個使用者提示</span></div>
+    <div class="event-item"><span class="event-name">Ctrl+E</span><span class="event-desc">切換顯示全部內容</span></div>
+    <div class="event-item"><span class="event-name">[</span><span class="event-desc">將完整對話寫入終端機原生 scrollback</span></div>
+    <div class="event-item"><span class="event-name">q / Ctrl+C / Esc</span><span class="event-desc">結束逐字稿檢視</span></div>
+  </div>
+
+  <div class="event-list kb-panel" data-group="voice" style="display:none">
+    <div class="event-item"><span class="event-name">按住或點按 Space</span><span class="event-desc">語音輸入, 需啟用語音聽寫功能</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>指令</h2>
+  <div class="info-box"><span class="tag">說明</span><p>在 Claude Code 輸入 / 可看到所有可用指令, 或輸入 / 加字母篩選。/ 選單顯示內建指令, 使用者自訂 skill, 以及來自 plugin 與 MCP 伺服器的指令。完整清單見 commands 參考文件。</p></div>
+</section>
+
+<section>
+  <h2>Vim 編輯模式</h2>
+  <p>透過 /config → Editor mode 啟用 vim 風格編輯。</p>
+  <div class="chip-row" id="vimChips">
+    <span class="chip-label">分類:</span>
+    <span class="chip active" data-group="mode">模式切換</span>
+    <span class="chip" data-group="nav">導覽 (NORMAL)</span>
+    <span class="chip" data-group="editv">編輯 (NORMAL)</span>
+    <span class="chip" data-group="visual">視覺模式</span>
+  </div>
+  <div class="event-list vim-panel" data-group="mode">
+    <div class="event-item"><span class="event-name">Esc</span><span class="event-desc">進入 NORMAL 模式</span></div>
+    <div class="event-item"><span class="event-name">i / I / a / A</span><span class="event-desc">在游標前 / 行首 / 游標後 / 行尾插入</span></div>
+    <div class="event-item"><span class="event-name">o / O</span><span class="event-desc">在下方或上方開新行</span></div>
+    <div class="event-item"><span class="event-name">v / V</span><span class="event-desc">開始字元式或行式視覺選取</span></div>
+  </div>
+  <div class="event-list vim-panel" data-group="nav" style="display:none">
+    <div class="event-item"><span class="event-name">h j k l</span><span class="event-desc">左下上右移動</span></div>
+    <div class="event-item"><span class="event-name">w / e / b</span><span class="event-desc">下一個字詞 / 字詞結尾 / 上一個字詞</span></div>
+    <div class="event-item"><span class="event-name">0 / $ / ^</span><span class="event-desc">行首 / 行尾 / 第一個非空白字元</span></div>
+    <div class="event-item"><span class="event-name">gg / G</span><span class="event-desc">輸入開頭 / 結尾</span></div>
+    <div class="event-item"><span class="event-name">f{char} / F{char}</span><span class="event-desc">跳到下一個或上一個指定字元</span></div>
+  </div>
+  <div class="event-list vim-panel" data-group="editv" style="display:none">
+    <div class="event-item"><span class="event-name">x / dd / D</span><span class="event-desc">刪除字元 / 整行 / 刪到行尾</span></div>
+    <div class="event-item"><span class="event-name">cc / C</span><span class="event-desc">變更整行 / 變更到行尾</span></div>
+    <div class="event-item"><span class="event-name">yy / Y</span><span class="event-desc">複製整行</span></div>
+    <div class="event-item"><span class="event-name">p / P</span><span class="event-desc">在游標後或前貼上</span></div>
+    <div class="event-item"><span class="event-name">u / .</span><span class="event-desc">復原 / 重複上一次變更</span></div>
+  </div>
+  <div class="event-list vim-panel" data-group="visual" style="display:none">
+    <div class="event-item"><span class="event-name">d / x</span><span class="event-desc">刪除選取內容</span></div>
+    <div class="event-item"><span class="event-name">y</span><span class="event-desc">複製選取內容</span></div>
+    <div class="event-item"><span class="event-name">c / s</span><span class="event-desc">變更選取內容</span></div>
+    <div class="event-item"><span class="event-name">~ / u / U</span><span class="event-desc">切換, 轉小寫, 轉大寫選取內容</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>指令歷史</h2>
+  <p>Claude Code 為目前 session 維護指令歷史, 依工作目錄儲存, 執行 /clear 後歷史會重置。</p>
+  <h3>用 Ctrl+R 反向搜尋</h3>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">1</span><span class="event-desc">按 Ctrl+R 啟動反向歷史搜尋</span></div>
+    <div class="event-item"><span class="event-name">2</span><span class="event-desc">輸入查詢文字, 符合處會反白</span></div>
+    <div class="event-item"><span class="event-name">3</span><span class="event-desc">再按 Ctrl+R 循環瀏覽較舊的符合項</span></div>
+    <div class="event-item"><span class="event-name">4</span><span class="event-desc">按 Ctrl+S 切換範圍: session, 專案, 全部</span></div>
+    <div class="event-item"><span class="event-name">5</span><span class="event-desc">Tab 或 Esc 接受並繼續編輯, Enter 直接接受並執行</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>背景 Bash 指令</h2>
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">運作方式</div>
+      <p>Claude Code 會非同步執行指令, 立即回傳背景任務 ID</p>
+      <p>輸出寫入檔案, Claude 可用 Read 工具取得</p>
+      <p>輸出超過 5GB 會自動終止任務</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">Shell 模式 (! 前綴)</div>
+      <p>直接執行指令而不經 Claude 判斷或核准</p>
+      <p>將指令與輸出加入對話 context</p>
+      <p>支援基於歷史的自動完成, 輸入部分指令按 Tab 補全</p>
+    </div>
+  </div>
+  <div class="info-box"><span class="tag">說明</span><p>v2.1.186 起, Shell 模式指令的輸出送達逐字稿後 Claude 會自動回應, 例如執行 ! npm test 後可直接取得失敗原因說明, 無需再送出第二個提示。</p></div>
+</section>
+
+<section>
+  <h2>提示語建議</h2>
+  <div class="info-box"><span class="tag">說明</span><p>第一次開啟 session 時, 輸入框會顯示灰色範例指令, 依專案 git 歷史挑選。Claude 回應後, 建議會依對話歷史持續出現。按 Tab 或右方向鍵套用建議, 開始輸入即可略過。</p></div>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">重用快取</span><span class="event-desc">建議以背景請求執行, 重用父對話的 prompt cache, 額外成本很低</span></div>
+    <div class="event-item"><span class="event-name">跳過條件</span><span class="event-desc">Cache 未預熱時跳過建議產生, 對話第一回合後與 plan mode 中自動略過</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>用 /btw 提出側問</h2>
+  <p>用 /btw 快速詢問目前工作相關問題, 不會加入對話歷史。</p>
+  <div class="code-block"><span class="cmt">/btw what was the name of that config file again?</span></div>
+  <div class="response-box">
+    <div class="response-field"><div class="rf-key">Space / Enter / Escape</div><div class="rf-val">關閉答案並回到提示</div></div>
+    <div class="response-field"><div class="rf-key">Up / Down</div><div class="rf-val">捲動答案內容</div></div>
+    <div class="response-field"><div class="rf-key">c</div><div class="rf-val">將答案以 Markdown 複製到剪貼簿</div></div>
+    <div class="response-field"><div class="rf-key">f</div><div class="rf-val">分岔成新 session, 繼承完整對話並保有完整工具存取權</div></div>
+  </div>
+  <div class="takeaway"><p>/btw 是 subagent 的反面: 它能看見完整對話但沒有工具, subagent 有完整工具但從空 context 開始。</p></div>
+</section>
+
+<section>
+  <h2>任務清單</h2>
+  <div class="info-box"><span class="tag">說明</span><p>處理複雜多步驟工作時, Claude 會建立任務清單追蹤進度, 顯示在終端機狀態區。按 Ctrl+T 切換任務清單檢視, 最多顯示 5 個任務。任務在 context 壓縮後仍會保留。</p></div>
+</section>
+
+<section>
+  <h2>Session 回顧</h2>
+  <div class="info-box"><span class="tag">說明</span><p>離開終端機一段時間後回來, Claude Code 會顯示一行摘要說明 session 目前的進度。摘要在最後一次完成的回合後至少三分鐘且終端機失去焦點時於背景產生。執行 /recap 可隨時手動產生摘要。</p></div>
+</section>
+
+<section>
+  <h2>PR 審查狀態</h2>
+  <p>在有開啟中 pull request 的分支上工作時, 頁尾會顯示可點擊的 PR 連結, 底線顏色代表審查狀態:</p>
+  <div class="response-box">
+    <div class="response-field"><div class="rf-key">綠色</div><div class="rf-val">已核准</div></div>
+    <div class="response-field"><div class="rf-key">黃色</div><div class="rf-val">審查中</div></div>
+    <div class="response-field"><div class="rf-key">紅色</div><div class="rf-val">要求變更</div></div>
+    <div class="response-field"><div class="rf-key">灰色</div><div class="rf-val">草稿</div></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+function setupChipSwitcher(chipContainerId, panelSelector) {
+  const container = document.getElementById(chipContainerId);
+  const chips = container.querySelectorAll('.chip');
+  const panels = document.querySelectorAll(panelSelector);
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      chips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      const group = chip.dataset.group;
+      panels.forEach(p => { p.style.display = (p.dataset.group === group) ? '' : 'none'; });
+    });
+  });
+}
+setupChipSwitcher('kbChips', '.kb-panel');
+setupChipSwitcher('vimChips', '.vim-panel');
+</script>
+</body>
+</html>

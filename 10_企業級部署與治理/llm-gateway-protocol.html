@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gateway Protocol Reference 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px;
+  font-family: monospace; font-size: 0.82rem; color: #1a202c; overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; } .cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a; min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.8rem; color: #d97706; width: 190px; flex-shrink: 0; }
+.rf-val { font-size: 0.83rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; } .btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; } .btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; } .demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; } .col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; } body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; } body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; } body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; } body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; } body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; } body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; } body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; } body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; } body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; } body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Gateway Protocol Reference</h1>
+  <p>Claude Code 與 LLM gateway 之間的 API 契約: 端點, 需轉發的表頭與欄位, 功能降級行為, 歸屬表頭與 model discovery</p>
+</header>
+
+<main>
+
+  <section>
+    <h2>API 格式</h2>
+    <p>Gateway 至少要提供下表其中一種格式. 客戶端說哪種格式, 由設定的變數決定.</p>
+    <div class="api-fields">
+      <div class="field"><div class="name">Anthropic Messages</div><div class="desc">由 ANTHROPIC_BASE_URL 選用, 端點為 /v1/messages, 需轉發 anthropic-beta 與 anthropic-version 表頭</div></div>
+      <div class="field"><div class="name">Bedrock InvokeModel</div><div class="desc">由 ANTHROPIC_BEDROCK_BASE_URL + CLAUDE_CODE_USE_BEDROCK=1 選用, 需轉發 anthropic_beta 與 anthropic_version 請求欄位</div></div>
+      <div class="field"><div class="name">Agent Platform rawPredict</div><div class="desc">由 ANTHROPIC_VERTEX_BASE_URL + CLAUDE_CODE_USE_VERTEX=1 選用</div></div>
+      <div class="field"><div class="name">Foundry / Claude Platform on AWS</div><div class="desc">實作 Anthropic Messages 格式, 但透過各自的 base URL 變數路由</div></div>
+    </div>
+    <div class="info-box"><span class="tag">NOTE</span><p>回應必須串流, 緩衝完整回應再轉發會使客戶端卡住. Token 計數端點是唯一可選的, 缺少時 Claude Code 會在本地估算 context 用量.</p></div>
+  </section>
+
+  <section>
+    <h2>請求表頭</h2>
+    <p>表頭名稱在傳輸中不分大小寫. anthropic-version 與 anthropic-beta 必須原樣轉發, 其餘可供 gateway 消費做路由或追蹤.</p>
+    <div class="response-box">
+      <div class="response-field"><span class="rf-key">Authorization / x-api-key</span><span class="rf-val">開發者的 gateway 憑證</span></div>
+      <div class="response-field"><span class="rf-key">anthropic-version</span><span class="rf-val">API 版本, 目前為 2023-06-01, 必須轉發</span></div>
+      <div class="response-field"><span class="rf-key">anthropic-beta</span><span class="rf-val">逗號分隔的能力值, 必須逐字轉發, 不要白名單個別值</span></div>
+      <div class="response-field"><span class="rf-key">x-claude-code-session-id</span><span class="rf-val">目前 session 的唯一識別碼, 可用來聚合同一 session 的所有請求</span></div>
+      <div class="response-field"><span class="rf-key">x-claude-code-agent-id</span><span class="rf-val">產生請求的 subagent 識別碼, 僅在 Claude Code 生成的 agent 請求上出現</span></div>
+    </div>
+    <div class="takeaway"><p>把表頭與請求主體欄位視為開放清單而非封閉清單. Claude Code 每次發布都會新增能力, 釘選觀察到的清單會在下一個能力上線時就漏轉發.</p></div>
+  </section>
+
+  <section>
+    <h2>系統提示歸屬區塊</h2>
+    <p>Claude Code 會在系統提示前加上一段簡短的歸屬區塊, 內含版本與對話指紋. api.anthropic.com 端點會在處理前剝除此區塊, 其他上游則會收到它作為提示的一部分.</p>
+    <div class="info-box"><span class="tag">v2.1.181+</span><p>此後區塊在整個對話生命週期保持穩定, 讓 gateway 端以完整請求主體為 key 的提示快取可以正常運作, 不需要停用歸屬表頭.</p></div>
+  </section>
+
+  <section>
+    <h2>功能轉發表</h2>
+    <p>點選功能查看轉發需求與異常時的症狀.</p>
+    <div class="chip-row">
+      <span class="chip-label">功能:</span>
+      <div class="fp-chip chip active" onclick="fpSelect(0)">Adaptive reasoning</div>
+      <div class="fp-chip chip" onclick="fpSelect(1)">Context management</div>
+      <div class="fp-chip chip" onclick="fpSelect(2)">Extended context / interleaved thinking</div>
+      <div class="fp-chip chip" onclick="fpSelect(3)">Beta tool fields</div>
+      <div class="fp-chip chip" onclick="fpSelect(4)">Effort / structured outputs</div>
+    </div>
+    <div class="fp-panel demo-panel visible" id="fp-p0">
+      <p>無 beta 表頭. Claude Code 對 Claude 4.6 以上模型送出 thinking: adaptive. 若上游不支援, 會回傳 400 並提及 thinking 或 adaptive 欄位.</p>
+      <p>修復方式: 升級上游, 或在 Opus 4.6 / Sonnet 4.6 上設定 CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1.</p>
+    </div>
+    <div class="fp-panel demo-panel" id="fp-p1">
+      <p>beta 表頭與 context_management 請求欄位成對出現. 若 gateway 轉發到 Bedrock 卻沒有橋接欄位, 會出現 400 Extra inputs are not permitted.</p>
+      <p>修復方式: 兩者都轉發, 或設定 CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1.</p>
+    </div>
+    <div class="fp-panel demo-panel" id="fp-p2">
+      <p>只有 beta 表頭, 沒有請求主體欄位. 表頭被剝除時會悄悄地無法使用, 上游永遠不會看到能力請求.</p>
+      <p>修復方式: 逐字轉發 anthropic-beta.</p>
+    </div>
+    <div class="fp-panel demo-panel" id="fp-p3">
+      <p>工具相關 beta 表頭與 strict, defer_loading 等工具結構欄位成對. 主體通過但表頭被剝除時, 會出現命名該欄位的 400.</p>
+      <p>修復方式: 兩者都轉發, 或 CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1.</p>
+    </div>
+    <div class="fp-panel demo-panel" id="fp-p4">
+      <p>output_config 請求欄位帶有 effort, 結構化輸出格式與任務預算設定, 各自搭配自己的 beta 表頭. 在 Bedrock 與 Agent Platform 上游常見 400 提及 output_config.</p>
+      <p>修復方式: 欄位與表頭一起轉發.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Model Discovery</h2>
+    <p>當 ANTHROPIC_BASE_URL 指向支援 Anthropic Messages 格式的 gateway 時, Claude Code 可以在啟動時查詢 gateway 的 /v1/models 端點.</p>
+    <div class="stage-tabs">
+      <div class="md-tab stage-tab active" onclick="mdGoTo(0)">1 · 啟用</div>
+      <div class="md-tab stage-tab" onclick="mdGoTo(1)">2 · 請求與回應</div>
+      <div class="md-tab stage-tab" onclick="mdGoTo(2)">3 · 選單與快取</div>
+    </div>
+    <div class="md-panel demo-panel visible" id="md-p0">
+      <p>開發者設定 CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1 才會啟用, 預設關閉, 避免共用金鑰把每個模型都曝露給每位使用者. 需要 v2.1.129 以上.</p>
+    </div>
+    <div class="md-panel demo-panel" id="md-p1">
+      <pre class="code-block"><span class="fn">GET</span> /v1/models?limit=1000  <span class="cmt">// 3 秒逾時, 任何重新導向都視為失敗</span>
+
+{
+  <span class="str">"data"</span>: [
+    { <span class="str">"id"</span>: <span class="str">"claude-sonnet-4-6"</span>, <span class="str">"display_name"</span>: <span class="str">"Claude Sonnet 4.6"</span> }
+  ]
+}</pre>
+    </div>
+    <div class="md-panel demo-panel" id="md-p2">
+      <p>每個發現到的項目標示為 From gateway, 結果快取到 ~/.claude/cache/gateway-models.json, 每次啟動時重新整理. 查詢失敗則回退到快取清單或內建模型清單.</p>
+    </div>
+    <div>
+      <button class="btn btn-ghost" id="mdPrev" disabled onclick="mdGoTo(mdStep-1)">← 上一步</button>
+      <button class="btn btn-primary" id="mdNext" onclick="mdGoTo(mdStep+1)">下一步 →</button>
+      <span class="step-indicator" id="mdIndicator">Step 1 of 3</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>相關資源</h2>
+    <div class="api-fields">
+      <div class="field"><div class="name">Gateway overview</div><div class="desc">什麼是 gateway, 以及如何在產品間選擇</div></div>
+      <div class="field"><div class="name">Other LLM gateways</div><div class="desc">如何為組織導入 gateway, 以及與訂閱的互動</div></div>
+      <div class="field"><div class="name">Roll out an LLM gateway</div><div class="desc">使用本契約的管理員導入檢查清單</div></div>
+      <div class="field"><div class="name">Connect Claude Code to an LLM gateway</div><div class="desc">每位開發者的設定步驟與疑難排解表</div></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+  }
+  function chipSelect(prefix, n) {
+    document.querySelectorAll(`.${prefix}-panel`).forEach((el, i) => el.classList.toggle('visible', i === n));
+    document.querySelectorAll(`.${prefix}-chip`).forEach((c, i) => c.classList.toggle('active', i === n));
+  }
+  function fpSelect(n){ chipSelect('fp', n); }
+
+  let mdStep = 0; const MD_MAX = 2;
+  function mdGoTo(n) {
+    mdStep = Math.max(0, Math.min(MD_MAX, n));
+    document.querySelectorAll('.md-panel').forEach((el, i) => el.classList.toggle('visible', i === mdStep));
+    document.querySelectorAll('.md-tab').forEach((t, i) => {
+      t.classList.remove('active', 'done');
+      if (i === mdStep) t.classList.add('active'); else if (i < mdStep) t.classList.add('done');
+    });
+    document.getElementById('mdPrev').disabled = mdStep === 0;
+    const next = document.getElementById('mdNext');
+    next.disabled = mdStep === MD_MAX;
+    next.textContent = mdStep === MD_MAX ? '完成 ✓' : '下一步 →';
+    document.getElementById('mdIndicator').textContent = `Step ${mdStep + 1} of ${MD_MAX + 1}`;
+  }
+  mdGoTo(0);
+</script>
+</body>
+</html>

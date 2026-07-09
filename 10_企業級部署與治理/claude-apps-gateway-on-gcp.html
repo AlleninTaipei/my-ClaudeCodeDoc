@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>在 Google Cloud 部署 Claude apps gateway</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+
+main    { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.8rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; }
+.fn  { color: #16a34a; }
+.str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; }
+.key { color: #2563eb; }
+
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 190px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 220px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+
+.scope-badge { display: inline-block; font-size: 0.58rem; font-weight: 700;
+  letter-spacing: 0.07em; text-transform: uppercase; padding: 2px 8px;
+  border-radius: 4px; vertical-align: middle; margin-left: 10px;
+  position: relative; top: -2px; }
+.scope-universal { background: #dcfce7; color: #166534; border: 1px solid #4ade80; }
+.scope-api       { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.scope-specific  { background: #ede9fe; color: #6d28d9; border: 1px solid #a78bfa; }
+.scope-legend { display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  background: #e2e8f0; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 10px 18px; margin-bottom: 36px; }
+.scope-legend-label { font-size: 0.72rem; color: #4a5568; font-weight: 700; }
+.scope-legend-item  { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: #374151; }
+
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+
+@media (max-width: 640px) {
+  .api-fields, .two-col { grid-template-columns: 1fr; }
+  .rf-key { width: 140px; }
+}
+
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; }
+body.dark .fn  { color: #68d391; }
+body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; }
+body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; }
+body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; }
+body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; }
+body.dark .rf-val { color: #a0aec0; }
+body.dark .scope-universal { background: #1a3a28; color: #68d391; border-color: #276749; }
+body.dark .scope-api       { background: #3a2a10; color: #f6ad55; border-color: #7a5a20; }
+body.dark .scope-specific  { background: #2d1f4a; color: #b794f4; border-color: #553c8b; }
+body.dark .scope-legend { background: #1a202c; border-color: #2d3748; }
+body.dark .scope-legend-label { color: #4a5568; }
+body.dark .scope-legend-item  { color: #718096; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; }
+body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>在 Google Cloud 部署 Claude apps gateway</h1>
+  <p>以 Cloud Run 或 GKE, Cloud SQL for PostgreSQL, Secret Manager 與服務帳號驗證 Agent Platform 的完整範例</p>
+</header>
+
+<main>
+
+<section>
+  <h2>你將建置什麼</h2>
+  <p>此範例以 Google Cloud 的 Agent Platform 作為模型上游, 用 Cloud Run 或 GKE 其中一種運算方式部署 Claude apps gateway, 並以 Google Workspace 作為範例身分提供者 (IdP), 但任何符合 OpenID Connect (OIDC) 的 IdP 都可以使用。</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">Cloud Run / GKE</div><div class="desc">執行 Gateway 容器的服務或 Deployment</div></div>
+    <div class="field"><div class="name">Artifact Registry</div><div class="desc">存放 Gateway 映像檔的 repository</div></div>
+    <div class="field"><div class="name">Cloud SQL for PostgreSQL</div><div class="desc">僅限私有 IP, 作為 Gateway 的 store</div></div>
+    <div class="field"><div class="name">Secret Manager</div><div class="desc">存放 gateway.yaml, JWT 簽章金鑰, OIDC client secret 與 Postgres URL</div></div>
+    <div class="field"><div class="name">服務帳號</div><div class="desc">具備 roles/aiplatform.user, 在 Cloud Run 上直接附加, 在 GKE 上透過 Workload Identity 綁定</div></div>
+    <div class="field"><div class="name">內部負載平衡器</div><div class="desc">Cloud Run 用內部 Application Load Balancer, GKE 用 class 為 gce-internal 的內部 Ingress</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>事前準備</h2>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">GCP 專案</span><span class="event-desc">已啟用計費, 且具備建立上述資源的權限</span></div>
+    <div class="event-item"><span class="event-name">CLI 工具</span><span class="event-desc">已用 gcloud auth login 認證的 gcloud CLI, 以及本機安裝的 Docker</span></div>
+    <div class="event-item"><span class="event-name">GKE 路線</span><span class="event-desc">額外需要 kubectl, 以及建立在 Cloud SQL 所在 VPC 上的 GKE 叢集</span></div>
+    <div class="event-item"><span class="event-name">Model Garden</span><span class="event-desc">在會發佈這些模型的地區, 具備所需 Claude 模型的存取權</span></div>
+    <div class="event-item"><span class="event-name">OAuth Client</span><span class="event-desc">Google Workspace OAuth 2.0 web-application client, redirect URI 為 https://&lt;gateway-host&gt;/oauth/callback</span></div>
+    <div class="event-item"><span class="event-name">TLS 主機名稱</span><span class="event-desc">Gateway 的網域, 通常是指向負載平衡器的內部 DNS 名稱</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>部署 Gateway</h2>
+  <div class="stage-tabs" id="stepTabs"></div>
+  <div id="stepPanels"></div>
+  <div>
+    <button class="btn btn-ghost" id="stepPrev" disabled onclick="stepGoTo(gcpStep-1)">← 上一步</button>
+    <button class="btn btn-primary" id="stepNext" onclick="stepGoTo(gcpStep+1)">下一步 →</button>
+    <span class="step-indicator" id="stepIndicator">Step 1 of 8</span>
+  </div>
+</section>
+
+<section>
+  <h2>Terraform 參考資源</h2>
+  <p>官方參考部署套件會自動化 Cloud Run 路線, 其中的設定與映像檔資產同時適用於兩種路線。</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">setup.sh</div><div class="desc">冪等的 gcloud 佈建腳本, 從啟用 API 到第一次部署走完整條 Cloud Run 路線</div></div>
+    <div class="field"><div class="name">terraform/</div><div class="desc">用基礎設施即程式碼實作相同部署, 適合全新環境</div></div>
+    <div class="field"><div class="name">gateway.yaml.example / Dockerfile</div><div class="desc">distroless 執行期映像檔的設定範例</div></div>
+  </div>
+  <div class="info-box"><span class="tag">注意</span><p>套件預設把 Cloud Run ingress 設為 internal, 不需要負載平衡器; 若要對齊本頁以 ALB 部署到生產環境的做法, 執行 setup.sh 時加上 INGRESS=internal-and-cloud-load-balancing, 或把 Terraform 變數 ingress 設為 INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER。這些資產是可運作的範例, 並非受支援的正式產物, 使用前請自行檢視並調整。</p></div>
+</section>
+
+<section>
+  <h2>疑難排解</h2>
+  <div class="response-box">
+    <div class="response-field"><div class="rf-key">Cloud Run 回傳 403</div><div class="rf-val">invoker IAM 檢查仍然啟用, 用 --no-invoker-iam-check 部署, 或用 --allow-unauthenticated 授予 allUsers run.invoker</div></div>
+    <div class="response-field"><div class="rf-key">--no-invoker-iam-check 被拒</div><div class="rf-val">受 constraints/run.managed.requireInvokerIam 限制, 改用 --allow-unauthenticated, 若組織的網域限制共用也擋下這個選項, 改走 GKE 路線</div></div>
+    <div class="response-field"><div class="rf-key">映像檔架構不符</div><div class="rf-val">映像檔是在非 amd64 主機建置, 或 buildx 產出 OCI image index, 需用 --platform=linux/amd64 --provenance=false 重新建置</div></div>
+    <div class="response-field"><div class="rf-key">Postgres 連線逾時</div><div class="rf-val">服務未連上 VPC, 或 Cloud SQL 在該 VPC 上沒有私有 IP, 需用 --network 與 --subnet 部署並以 --no-assign-ip 建立 Cloud SQL 實例</div></div>
+    <div class="response-field"><div class="rf-key">Agent Platform 回傳 403</div><div class="rf-val">執行環境未使用 claude-gateway 服務帳號, 或該地區的 Model Garden 未啟用此模型</div></div>
+    <div class="response-field"><div class="rf-key">串流回應被截斷</div><div class="rf-val">前端請求逾時: GKE Ingress 背後的負載平衡器預設 30 秒, Cloud Run 預設 300 秒, 分別用 BackendConfig 或 --timeout=3600 調整</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>下一步</h2>
+  <div class="api-fields">
+    <div class="field"><div class="name">設定參考</div><div class="desc">gateway.yaml 每個選項, 包含 managed.policies 與 telemetry</div></div>
+    <div class="field"><div class="name">部署與維運</div><div class="desc">IdP 設定, 健康檢查, JWT 金鑰輪替, 升級與安全模型</div></div>
+    <div class="field"><div class="name">Claude apps gateway overview</div><div class="desc">快速入門與開發者連接方式</div></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+const GCP_STEPS = [
+  {
+    title: '1 · 啟用 API',
+    body: `<p>啟用此範例會用到的服務 API:</p>
+<pre class="code-block"><span class="kw">gcloud</span> services enable \\
+  aiplatform.googleapis.com \\
+  artifactregistry.googleapis.com \\
+  sqladmin.googleapis.com \\
+  secretmanager.googleapis.com \\
+  iamcredentials.googleapis.com \\
+  iam.googleapis.com \\
+  compute.googleapis.com \\
+  servicenetworking.googleapis.com \\
+  run.googleapis.com \\
+  container.googleapis.com</pre>
+<div class="api-fields">
+  <div class="field"><div class="name">compute / servicenetworking</div><div class="desc">私有 IP Cloud SQL 路線需要</div></div>
+  <div class="field"><div class="name">run</div><div class="desc">僅 Cloud Run 路線需要</div></div>
+  <div class="field"><div class="name">container</div><div class="desc">僅 GKE 路線需要</div></div>
+</div>`
+  },
+  {
+    title: '2 · 建立服務帳號',
+    body: `<p>Gateway 以專屬服務帳號執行, 具備呼叫 Agent Platform 的權限。它透過 VPC 以密碼使用者連到 Cloud SQL, 因此不需要 Cloud SQL IAM 角色。</p>
+<pre class="code-block"><span class="kw">gcloud</span> iam service-accounts create claude-gateway --display-name=<span class="str">"Claude apps gateway"</span>
+SA=<span class="str">"claude-gateway@\${PROJECT_ID}.iam.gserviceaccount.com"</span>
+
+<span class="kw">gcloud</span> projects add-iam-policy-binding <span class="str">"$PROJECT_ID"</span> \\
+  --member=<span class="str">"serviceAccount:\${SA}"</span> --role=<span class="str">"roles/aiplatform.user"</span> --condition=None</pre>
+<p>接著在 Model Garden 為專案啟用所需的 Claude 模型, 模型會發佈到特定地區, 需逐一檢查。</p>`
+  },
+  {
+    title: '3 · 建置並推送映像檔',
+    body: `<p>依容器映像檔規格建置, 使用 linux-x64 glibc 二進位檔, 再推送到 Artifact Registry。</p>
+<pre class="code-block"><span class="kw">gcloud</span> artifacts repositories create claude-gateway \\
+  --repository-format=docker --location=<span class="str">"$REGION"</span>
+<span class="kw">gcloud</span> auth configure-docker <span class="str">"\${REGION}-docker.pkg.dev"</span> --quiet
+
+<span class="cmt"># Cloud Run 需要 linux/amd64; --provenance=false 避免 buildx 產出 Cloud Run 拒收的 OCI image index</span>
+<span class="kw">docker</span> build --platform=linux/amd64 --provenance=false \\
+  -t <span class="str">"\${REGION}-docker.pkg.dev/\${PROJECT_ID}/claude-gateway/gateway:&lt;version&gt;"</span> .
+<span class="kw">docker</span> push <span class="str">"\${REGION}-docker.pkg.dev/\${PROJECT_ID}/claude-gateway/gateway:&lt;version&gt;"</span></pre>`
+  },
+  {
+    title: '4 · 佈建 Cloud SQL',
+    body: `<p>透過 Private Services Access 在 VPC 上建立實例, 使其沒有公開 IP, 同時滿足強制執行 constraints/sql.restrictPublicIp 的專案要求。</p>
+<pre class="code-block">VPC=cc-gateway-vpc
+<span class="kw">gcloud</span> compute networks create <span class="str">"$VPC"</span> --subnet-mode=custom
+<span class="kw">gcloud</span> compute networks subnets create cc-gateway-subnet \\
+  --network=<span class="str">"$VPC"</span> --region=<span class="str">"$REGION"</span> --range=10.0.0.0/24
+
+<span class="kw">gcloud</span> sql instances create claude-gateway-db \\
+  --database-version=POSTGRES_16 --tier=db-g1-small --region=<span class="str">"$REGION"</span> \\
+  --network=<span class="str">"projects/\${PROJECT_ID}/global/networks/\${VPC}"</span> --no-assign-ip
+<span class="kw">gcloud</span> sql databases create claude_gateway --instance=claude-gateway-db</pre>
+<p>Cloud Run 或 GKE 執行環境必須位於, 或路由進入這個 VPC。</p>`
+  },
+  {
+    title: '5 · 撰寫 gateway.yaml',
+    body: `<p>upstreams 區塊指向 Agent Platform, auth 留空代表用執行環境服務帳號的 Application Default Credentials 認證。</p>
+<pre class="code-block"><span class="key">listen</span>:
+  <span class="key">host</span>: 0.0.0.0
+  <span class="key">port</span>: 8080
+  <span class="key">public_url</span>: https://claude-gateway.internal.example.com
+  <span class="key">trusted_proxies</span>: [169.254.0.0/16, &lt;your-proxy-only-subnet-cidr&gt;]
+
+<span class="key">oidc</span>:
+  <span class="key">issuer</span>: https://accounts.google.com
+  <span class="key">client_id</span>: &lt;your-oauth-client-id&gt;
+  <span class="key">client_secret</span>: \${OIDC_CLIENT_SECRET}
+  <span class="key">allowed_email_domains</span>: [example.com]
+  <span class="key">scopes</span>: [openid, profile, email]
+
+<span class="key">session</span>:
+  <span class="key">jwt_secret</span>: \${GATEWAY_JWT_SECRET}
+
+<span class="key">store</span>:
+  <span class="key">postgres_url</span>: \${GATEWAY_POSTGRES_URL}
+
+<span class="key">upstreams</span>:
+  - <span class="key">provider</span>: vertex
+    <span class="key">region</span>: &lt;your-region&gt;
+    <span class="key">project_id</span>: &lt;your-project&gt;
+    <span class="key">auth</span>: {}</pre>
+<div class="info-box"><span class="tag">注意</span><p>public_url 在 Cloud Run 或 GKE Ingress 背後是必填欄位, Gateway 只會用這個值建構 IdP redirect_uri, 不會參考 X-Forwarded-* 標頭。Google id_token 不帶 groups claim, 要在 Google Workspace 上使用群組政策, 需另外設定 oidc.google_groups。</p></div>`
+  },
+  {
+    title: '6 · 存放機密於 Secret Manager',
+    body: `<p>建立四個機密, 並授予 claude-gateway 服務帳號 roles/secretmanager.secretAccessor。</p>
+<div class="response-box">
+  <div class="response-field"><div class="rf-key">gateway-jwt-secret</div><div class="rf-val">openssl rand -base64 32</div></div>
+  <div class="response-field"><div class="rf-key">gateway-oidc-client-secret</div><div class="rf-val">Google Cloud Console 的 OAuth client</div></div>
+  <div class="response-field"><div class="rf-key">gateway-postgres-url</div><div class="rf-val">上一步驟取得的 GATEWAY_POSTGRES_URL</div></div>
+  <div class="response-field"><div class="rf-key">gateway-config</div><div class="rf-val">完整的 gateway.yaml 內容</div></div>
+</div>
+<p>GKE 上這些機密以檔案形式透過 Secret Manager CSI driver 掛載; Cloud Run 因為無法把多個機密掛載進同一目錄, gateway.yaml 以檔案掛載, 其餘三個則以環境變數注入。</p>`
+  },
+  {
+    title: '7 · 部署',
+    body: `<div class="chip-row" id="deployChips">
+  <span class="chip-label">部署方式</span>
+  <div class="chip active" onclick="deployShow(0)">Cloud Run</div>
+  <div class="chip" onclick="deployShow(1)">GKE</div>
+</div>
+<div class="demo-panel visible" id="deploy-0">
+<pre class="code-block"><span class="kw">gcloud</span> run deploy claude-gateway \\
+  --image=<span class="str">"\${REGION}-docker.pkg.dev/\${PROJECT_ID}/claude-gateway/gateway:&lt;version&gt;"</span> \\
+  --region=<span class="str">"$REGION"</span> \\
+  --service-account=<span class="str">"claude-gateway@\${PROJECT_ID}.iam.gserviceaccount.com"</span> \\
+  --min-instances=1 --timeout=3600 \\
+  --ingress=internal-and-cloud-load-balancing \\
+  --network=<span class="str">"$VPC"</span> --subnet=cc-gateway-subnet --vpc-egress=private-ranges-only \\
+  --set-secrets=/etc/claude/gateway.yaml=gateway-config:latest,GATEWAY_JWT_SECRET=gateway-jwt-secret:latest,OIDC_CLIENT_SECRET=gateway-oidc-client-secret:latest,GATEWAY_POSTGRES_URL=gateway-postgres-url:latest \\
+  --no-invoker-iam-check</pre>
+<p>invoker IAM 檢查必須開放或停用, 因為 Gateway 自己處理 OIDC 登入, --no-invoker-iam-check 不需管理 allUsers 綁定, 且在 Domain Restricted Sharing 下也能使用; 若組織不允許, 改用 --allow-unauthenticated。</p>
+<div class="info-box"><span class="tag">私有主機名稱</span><p>Cloud Run 的 *.run.app 網址預設解析為公開位址, 會被 /login 的私有網路檢查拒絕。需要內部 Application Load Balancer, 或已有 Private Service Connect 端點與私有 DNS 解析的網路團隊配合。</p></div>
+</div>
+<div class="demo-panel" id="deploy-1">
+<pre class="code-block"><span class="kw">gcloud</span> container clusters update &lt;cluster&gt; --region=<span class="str">"$REGION"</span> \\
+  --workload-pool=<span class="str">"\${PROJECT_ID}.svc.id.goog"</span>
+
+<span class="kw">kubectl</span> create namespace claude-gateway
+<span class="kw">kubectl</span> create serviceaccount gateway -n claude-gateway
+
+<span class="kw">gcloud</span> iam service-accounts add-iam-policy-binding \\
+  <span class="str">"claude-gateway@\${PROJECT_ID}.iam.gserviceaccount.com"</span> \\
+  --role roles/iam.workloadIdentityUser \\
+  --member <span class="str">"serviceAccount:\${PROJECT_ID}.svc.id.goog[claude-gateway/gateway]"</span></pre>
+<p>叢集必須位於 Cloud SQL 所在的 VPC 上, 因為 Pod 需要直接連到資料庫的私有 IP, VPC peering 本身不夠, 因為 Cloud SQL 私有 IP 是非傳遞性的對等網路。需替 Gateway Service 附加提高 timeoutSec 的 BackendConfig, 因為 GKE Ingress 背後的負載平衡器預設 30 秒逾時會截斷長時間串流回應。</p>
+</div>`
+  },
+  {
+    title: '8 · 推送 Gateway 網址',
+    body: `<p>Gateway 現在已經在執行, 但開發者要能從 /login 連上它之前, 這個網址得先送到開發者的機器上。透過 MDM 部署的 managed settings 檔案設定 forceLoginMethod 與 forceLoginGatewayUrl, 因為登入方式選單裡沒有讓開發者手動挑選 Gateway 的選項。</p>`
+  }
+];
+
+let gcpStep = 0;
+const GCP_MAX = GCP_STEPS.length - 1;
+
+function gcpRender() {
+  document.getElementById('stepTabs').innerHTML = GCP_STEPS.map((s, i) =>
+    `<div class="stage-tab" onclick="stepGoTo(${i})">${s.title}</div>`).join('');
+  document.getElementById('stepPanels').innerHTML = GCP_STEPS.map((s, i) =>
+    `<div class="gcp-panel demo-panel" id="gcp-p${i}">${s.body}</div>`).join('');
+}
+
+function stepGoTo(n) {
+  gcpStep = Math.max(0, Math.min(GCP_MAX, n));
+  document.querySelectorAll('.gcp-panel').forEach((el, i) => el.classList.toggle('visible', i === gcpStep));
+  document.querySelectorAll('#stepTabs .stage-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === gcpStep) t.classList.add('active');
+    else if (i < gcpStep) t.classList.add('done');
+  });
+  document.getElementById('stepPrev').disabled = gcpStep === 0;
+  const next = document.getElementById('stepNext');
+  next.disabled = gcpStep === GCP_MAX;
+  next.textContent = gcpStep === GCP_MAX ? '完成 ✓' : '下一步 →';
+  document.getElementById('stepIndicator').textContent = `Step ${gcpStep + 1} of ${GCP_MAX + 1}`;
+}
+
+gcpRender();
+stepGoTo(0);
+
+function deployShow(idx) {
+  document.querySelectorAll('#deployChips .chip').forEach((c, i) => c.classList.toggle('active', i === idx));
+  document.getElementById('deploy-0').classList.toggle('visible', idx === 0);
+  document.getElementById('deploy-1').classList.toggle('visible', idx === 1);
+}
+</script>
+</body>
+</html>

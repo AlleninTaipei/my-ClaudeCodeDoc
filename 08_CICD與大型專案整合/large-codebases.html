@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>大型程式碼庫與 Monorepo 設定 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%); border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; } header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; } section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; } p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c; overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; } .cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; } .takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; } .field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a; min-width: 190px; flex-shrink: 0; } .event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; } .response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 220px; flex-shrink: 0; } .rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; } .btn-primary:hover:not(:disabled) { background: #1d4ed8; } .btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; } .btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; } .btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; } .stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; } .demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; } .col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; } .chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+table.cmp { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 0.82rem; }
+table.cmp th, table.cmp td { border: 1px solid #cbd5e0; padding: 8px 10px; text-align: left; } table.cmp th { background: #e2e8f0; color: #374151; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; } body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; } body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; } body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; } body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; } body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; } body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; } body.dark .response-field { border-bottom-color: #2d3748; } body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; } body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; } body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; } body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; } body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; } body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; } body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; } body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark table.cmp th, body.dark table.cmp td { border-color: #2d3748; } body.dark table.cmp th { background: #1a202c; color: #a0aec0; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); } body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+<header>
+  <h1>在 Monorepo 或大型程式碼庫設定 Claude Code</h1>
+  <p>用分層 CLAUDE.md, 稀疏 worktree, 程式碼智能與各目錄專屬 skills, 讓 Claude 聚焦於你正在處理的程式碼</p>
+</header>
+<main>
+
+<section>
+  <h2>本頁涵蓋的設定總覽</h2>
+  <p>下表每一項設定都是獨立的, 彼此疊加而非互相取代, 依你的儲存庫需求挑選採用。</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">分層 CLAUDE.md</div><div class="desc">只載入你所觸碰程式碼的慣例, 而非一份涵蓋全部子系統的根檔案</div></div>
+    <div class="field"><div class="name">claudeMdExcludes</div><div class="desc">排除你從不參與的套件的 CLAUDE.md</div></div>
+    <div class="field"><div class="name">Read 拒絕規則</div><div class="desc">阻擋 Claude 開啟建置產物, 產生的程式碼與 vendored 相依套件</div></div>
+    <div class="field"><div class="name">程式碼智能外掛</div><div class="desc">透過 language server 尋找定義與呼叫者, 而非掃描檔案</div></div>
+    <div class="field"><div class="name">worktree.sparsePaths</div><div class="desc">建立 worktree 時只 checkout 任務需要的目錄</div></div>
+    <div class="field"><div class="name">--add-dir</div><div class="desc">在同一個 session 中讀取編輯相鄰套件或另一個儲存庫</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>範例 Monorepo 結構</h2>
+  <p>本頁所有範例都參照這個含三個套件的 monorepo, 相同模式也適用於大型單一樹狀結構的程式碼庫。</p>
+  <pre class="code-block">monorepo/
+  CLAUDE.md                     <span class="cmt"># 根層級指示</span>
+  packages/
+    api/
+      CLAUDE.md                 <span class="cmt"># API 專屬指示</span>
+      .claude/skills/
+      src/
+    web/
+      CLAUDE.md                 <span class="cmt"># 前端專屬指示</span>
+      .claude/skills/
+      src/
+    shared/
+      CLAUDE.md                 <span class="cmt"># 共用函式庫指示</span>
+      src/</pre>
+</section>
+
+<section>
+  <h2>選擇從哪裡啟動 Claude</h2>
+  <p>啟動 claude 的位置決定了可存取哪些檔案, 啟動時載入哪些 CLAUDE.md, 以及套用哪些專案設定。</p>
+  <table class="cmp">
+    <tr><th>啟動位置</th><th>檔案存取</th><th>啟動時載入的 CLAUDE.md</th><th>適用時機</th></tr>
+    <tr><td>儲存庫根目錄</td><td>每個檔案</td><td>只有根層級, 子目錄檔案在讀取時按需載入</td><td>任務跨越多個套件或子系統</td></tr>
+    <tr><td>子目錄</td><td>只有該子樹, 除非授予更多權限</td><td>該目錄與每個祖先目錄的檔案</td><td>工作僅限於一個套件或子系統</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>依目錄分層 CLAUDE.md</h2>
+  <p>常見的分層方式是兩層: 根層級 CLAUDE.md 涵蓋通用規則, 每個子目錄各自新增該領域堆疊的慣例。</p>
+  <div class="stage-tabs">
+    <div class="lc-tab stage-tab active" onclick="lcGoTo(0)">根 CLAUDE.md</div>
+    <div class="lc-tab stage-tab" onclick="lcGoTo(1)">packages/api/CLAUDE.md</div>
+  </div>
+  <div class="lc-panel demo-panel visible" id="lc-p0"><pre class="code-block"><span class="cmt">This is a monorepo with three packages under packages/:</span>
+
+- packages/api: Node.js REST API with Express, TypeScript, PostgreSQL
+- packages/web: React frontend with Vite, TypeScript, TailwindCSS
+- packages/shared: shared TypeScript utilities
+
+Run commands from the package directory, not the monorepo root.</pre></div>
+  <div class="lc-panel demo-panel" id="lc-p1"><pre class="code-block"><span class="cmt">This package is the REST API server.</span>
+
+- Run tests: npm test (uses Vitest)
+- Run dev server: npm run dev (port 3001)
+
+API routes are in src/routes/. Database queries use Knex in src/db/.
+Never write raw SQL strings in route handlers.</pre></div>
+  <div>
+    <button class="btn btn-ghost" id="lcPrev" disabled onclick="lcGoTo(lcStep-1)">← 上一步</button>
+    <button class="btn btn-primary" id="lcNext" onclick="lcGoTo(lcStep+1)">下一步 →</button>
+    <span class="step-indicator" id="lcIndicator">步驟 1 / 2</span>
+  </div>
+  <div class="info-box" style="margin-top:16px"><span class="tag">維護技巧</span><p>在 PR 中審查 CLAUDE.md 變更; 模型升級後重新檢視是否有過時的變通指示; 用 Stop hook 在 session 結束後提議更新。</p></div>
+</section>
+
+<section>
+  <h2>減少 Claude 的讀取量</h2>
+  <div class="response-box">
+    <div class="response-field"><span class="rf-key">阻擋產生的與 vendored 程式碼</span><span class="rf-val">在 permissions.deny 加入 Read 拒絕規則, 阻擋開啟已提交的建置產物</span></div>
+    <div class="response-field"><span class="rf-key">程式碼智能外掛</span><span class="rf-val">連接 language server, 直接跳到定義, 找到參照, 呈現型別錯誤</span></div>
+  </div>
+  <pre class="code-block">{
+  <span class="str">"permissions"</span>: {
+    <span class="str">"deny"</span>: [
+      <span class="str">"Read(./**/dist/**)"</span>,
+      <span class="str">"Read(./**/build/**)"</span>,
+      <span class="str">"Read(./vendor/**)"</span>
+    ]
+  }
+}</pre>
+</section>
+
+<section>
+  <h2>Worktree 與跨目錄存取範圍</h2>
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">worktree.sparsePaths</div>
+      <p>用 git sparse-checkout 只寫入列出的目錄加上根層級檔案</p>
+      <p>對 subagent worktree 隔離特別有幫助</p>
+      <p>搭配 symlinkDirectories 避免重複 node_modules</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">additionalDirectories</div>
+      <p>從子目錄啟動時, 授予存取相鄰套件或另一個儲存庫</p>
+      <p>也可在啟動時傳入 --add-dir</p>
+      <p>CLAUDE.md 與 skills 是否載入依新增方式而異</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>各目錄專屬 skills</h2>
+  <p>任何子目錄都能定義專屬於自己技術堆疊的 skills, 只在 Claude 判斷相關時才載入。</p>
+  <pre class="code-block">packages/api/.claude/skills/api-testing/SKILL.md
+
+<span class="kw">---</span>
+<span class="key">name</span>: api-testing
+<span class="key">description</span>: Testing patterns for the API package.
+<span class="kw">---</span>
+
+## Test structure
+Tests are in src/__tests__/ mirroring the src/ directory structure.</pre>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">從子目錄啟動</span><span class="event-desc">該目錄, 每個祖先目錄, 加上使用者與企業層級的 skills</span></div>
+    <div class="event-item"><span class="event-name">從儲存庫根目錄啟動</span><span class="event-desc">Claude 接觸到的每個子目錄的 skills, 可能累積到數百個</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>當分層方式不再擴展時</h2>
+  <p>隨程式碼庫成長, 每個目錄各自的 CLAUDE.md 可能難以治理。把慣例移到按需載入的機制中。</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">Skills</div><div class="desc">只在任務相關時才載入的參考資料</div></div>
+    <div class="field"><div class="name">Plugins</div><div class="desc">平台團隊集中維護的版本化 skills, hooks, commands 套件</div></div>
+    <div class="field"><div class="name">MCP servers</div><div class="desc">把既有的程式碼搜尋或 RAG 索引暴露成 MCP 工具</div></div>
+  </div>
+  <div class="takeaway"><p>跨套件的變更, 把整個變更與所有呼叫端一次交給 Claude 保持決策一致; 並先把計畫存成檔案, 因為長 session 沿途會壓縮上下文, 但存檔的計畫會留存。</p></div>
+</section>
+
+</main>
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+let lcStep = 0; const LC_MAX = 1;
+function lcGoTo(n) {
+  lcStep = Math.max(0, Math.min(LC_MAX, n));
+  document.querySelectorAll('.lc-panel').forEach((el,i)=>el.classList.toggle('visible', i===lcStep));
+  document.querySelectorAll('.lc-tab').forEach((t,i)=>{ t.classList.remove('active','done'); if (i===lcStep) t.classList.add('active'); else if (i<lcStep) t.classList.add('done'); });
+  document.getElementById('lcPrev').disabled = lcStep===0;
+  const next = document.getElementById('lcNext'); next.disabled = lcStep===LC_MAX; next.textContent = lcStep===LC_MAX ? '完成 ✓' : '下一步 →';
+  document.getElementById('lcIndicator').textContent = `步驟 ${lcStep+1} / ${LC_MAX+1}`;
+}
+lcGoTo(0);
+</script>
+</body>
+</html>

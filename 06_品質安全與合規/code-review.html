@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Code Review 自動化程式碼審查</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px;
+  font-family: monospace; font-size: 0.82rem; color: #1a202c; overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; } .cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a; min-width: 180px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 160px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; } .btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; } .btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; } .demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; } .col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; } body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; } body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; } body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; } body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; } body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; } body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; } body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; } body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; } body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; } body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; } body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; } body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; } body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Code Review</h1>
+  <p>透過多代理程式分析你完整的程式碼庫, 建立能捕捉邏輯錯誤, 安全漏洞與回歸問題的自動化 PR 審查</p>
+</header>
+
+<main>
+
+<section>
+  <h2>審查如何運作</h2>
+  <p>Owner 為組織啟用 Code Review 後, 審查會依照每個儲存庫設定的行為, 在 PR 開啟時, 每次 push, 或手動要求時觸發。留言 <code>@claude review</code> 可在任何模式下啟動審查。</p>
+  <div class="event-list">
+    <div class="event-item"><div class="event-name">1 · 並行分析</div><div class="event-desc">多個代理在 Anthropic 基礎架構上平行分析 diff 與周邊程式碼, 各自負責不同類型的問題</div></div>
+    <div class="event-item"><div class="event-name">2 · 驗證</div><div class="event-desc">驗證步驟會根據實際程式碼行為檢查候選發現, 過濾掉偽陽性</div></div>
+    <div class="event-item"><div class="event-name">3 · 去重與排序</div><div class="event-desc">結果去除重複, 依嚴重程度排序</div></div>
+    <div class="event-item"><div class="event-name">4 · 發佈</div><div class="event-desc">在發現問題的具體行號張貼行內留言, 並在審查內文中附上摘要</div></div>
+  </div>
+  <p>審查成本會隨 PR 大小與複雜度而變化, 平均耗時 20 分鐘。</p>
+
+  <h3>嚴重程度等級</h3>
+  <div class="response-box">
+    <div class="response-field"><div class="rf-key">Important</div><div class="rf-val">合併前應修正的 bug</div></div>
+    <div class="response-field"><div class="rf-key">Nit</div><div class="rf-val">值得修正但不會阻擋合併的小問題</div></div>
+    <div class="response-field"><div class="rf-key">Pre-existing</div><div class="rf-val">程式碼庫中原本就存在, 並非此 PR 引入的 bug</div></div>
+  </div>
+
+  <div class="info-box">
+    <span class="tag">check run</span>
+    <p>Check run 永遠以 neutral 狀態完成, 不會透過分支保護規則阻擋合併。最後一行文字是機器可解析的註解, 可用 <code>gh</code> 與 <code>jq</code> 解析, 例如 <code>{"normal": 2, "nit": 1, "pre_existing": 0}</code>。</p>
+  </div>
+</section>
+
+<section>
+  <h2>設定 Code Review</h2>
+  <p>Owner 為整個組織啟用一次 Code Review, 並選擇要納入的儲存庫。</p>
+
+  <div class="stage-tabs">
+    <div class="cr-tab stage-tab active" onclick="crGoTo(0)">1 · 開啟管理設定</div>
+    <div class="cr-tab stage-tab" onclick="crGoTo(1)">2 · 開始設定</div>
+    <div class="cr-tab stage-tab" onclick="crGoTo(2)">3 · 安裝 GitHub App</div>
+    <div class="cr-tab stage-tab" onclick="crGoTo(3)">4 · 選擇儲存庫</div>
+    <div class="cr-tab stage-tab" onclick="crGoTo(4)">5 · 設定觸發時機</div>
+  </div>
+
+  <div class="cr-panel demo-panel visible" id="cr-p0"><p>前往 claude.ai/admin-settings/claude-code 找到 Code Review 區塊。需要 Owner 或 Primary Owner 角色, 以及在 GitHub 組織中安裝 GitHub App 的權限。</p></div>
+  <div class="cr-panel demo-panel" id="cr-p1"><p>點選 Setup, 開始 GitHub App 安裝流程。</p></div>
+  <div class="cr-panel demo-panel" id="cr-p2">
+    <p>依提示將 Claude GitHub App 安裝到你的 GitHub 組織。此 App 會請求以下儲存庫權限:</p>
+    <div class="api-fields">
+      <div class="field"><div class="name">Contents</div><div class="desc">read and write</div></div>
+      <div class="field"><div class="name">Issues</div><div class="desc">read and write</div></div>
+      <div class="field"><div class="name">Pull requests</div><div class="desc">read and write</div></div>
+    </div>
+  </div>
+  <div class="cr-panel demo-panel" id="cr-p3"><p>選擇要啟用 Code Review 的儲存庫。若看不到某個儲存庫, 請確認安裝時已授權該儲存庫的存取權, 之後仍可再新增。</p></div>
+  <div class="cr-panel demo-panel" id="cr-p4">
+    <p>為每個儲存庫使用 Review Behavior 下拉選單設定審查觸發時機:</p>
+    <div class="response-box">
+      <div class="response-field"><div class="rf-key">Once</div><div class="rf-val">PR 開啟或標記為 ready for review 時審查一次</div></div>
+      <div class="response-field"><div class="rf-key">After every push</div><div class="rf-val">每次 push 都審查, 並在問題修正後自動解決討論串</div></div>
+      <div class="response-field"><div class="rf-key">Manual</div><div class="rf-val">只有在留言 @claude review 或 @claude review once 時才啟動</div></div>
+    </div>
+  </div>
+
+  <div>
+    <button class="btn btn-ghost" id="crPrev" disabled onclick="crGoTo(crStep-1)">← 上一步</button>
+    <button class="btn btn-primary" id="crNext" onclick="crGoTo(crStep+1)">下一步 →</button>
+    <span class="step-indicator" id="crIndicator">Step 1 of 5</span>
+  </div>
+</section>
+
+<section>
+  <h2>手動觸發審查</h2>
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">@claude review</div>
+      <p>啟動審查, 並將此 PR 訂閱未來 push 觸發的審查</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">@claude review once</div>
+      <p>啟動單次審查, 不訂閱未來 push 的審查</p>
+    </div>
+  </div>
+  <div class="info-box">
+    <span class="tag">觸發條件</span>
+    <p>必須以頂層 PR 留言方式張貼 (非行內留言), 指令需放在留言開頭, 且你需要對該儲存庫有 owner, member 或 collaborator 存取權, PR 必須是開啟狀態。手動觸發也能在 draft PR 上運作。</p>
+  </div>
+</section>
+
+<section>
+  <h2>自訂審查行為</h2>
+  <div class="chip-row">
+    <span class="chip-label">選擇檔案:</span>
+    <div class="cust-chip chip active" data-idx="0" onclick="custShow(0)">CLAUDE.md</div>
+    <div class="cust-chip chip" data-idx="1" onclick="custShow(1)">REVIEW.md</div>
+  </div>
+  <div class="cust-panel demo-panel visible" id="cust-0">
+    <p>Code Review 會讀取儲存庫各層級的 <code>CLAUDE.md</code>, 並將新引入的違規標記為 Nit 等級。這是雙向的: 若你的 PR 讓 CLAUDE.md 的敘述過時, Claude 也會標記文件需要更新。</p>
+  </div>
+  <div class="cust-panel demo-panel" id="cust-1">
+    <p><code>REVIEW.md</code> 位於儲存庫根目錄, 其內容會以最高優先權注入審查流程中每個代理的系統提示。因為是原文貼入, <code>@</code> import 語法不會被展開。</p>
+    <pre class="code-block"><span class="cmt"># Review instructions</span>
+
+<span class="kw">## What Important means here</span>
+Reserve Important for findings that would break behavior, leak data,
+or block a rollback.
+
+<span class="kw">## Cap the nits</span>
+Report at most five Nits per review.
+
+<span class="kw">## Do not report</span>
+- Anything CI already enforces: lint, formatting, type errors
+- Generated files under <span class="str">src/gen/</span></pre>
+  </div>
+</section>
+
+<section>
+  <h2>使用量分析</h2>
+  <div class="response-box">
+    <div class="response-field"><div class="rf-key">PRs reviewed</div><div class="rf-val">選定時間範圍內每日審查的 PR 數量</div></div>
+    <div class="response-field"><div class="rf-key">Cost weekly</div><div class="rf-val">Code Review 的每週花費</div></div>
+    <div class="response-field"><div class="rf-key">Feedback</div><div class="rf-val">因開發者修正問題而自動解決的審查留言數</div></div>
+    <div class="response-field"><div class="rf-key">Repository breakdown</div><div class="rf-val">各儲存庫審查與解決留言的數量</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>定價</h2>
+  <div class="api-fields">
+    <div class="field"><div class="name">每次審查</div><div class="desc">依 token 使用量計費, 平均 15 到 25 美元, 依 PR 大小與複雜度而定</div></div>
+    <div class="field"><div class="name">Once after PR creation</div><div class="desc">每個 PR 執行一次</div></div>
+    <div class="field"><div class="name">After every push</div><div class="desc">每次 push 都執行, 成本隨 push 次數增加</div></div>
+    <div class="field"><div class="name">Manual</div><div class="desc">除非有人留言 @claude review, 否則不會審查</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>疑難排解</h2>
+  <div class="event-list">
+    <div class="event-item"><div class="event-name">審查失敗或逾時</div><div class="event-desc">留言 @claude review once 重新啟動一次不訂閱未來 push 的審查</div></div>
+    <div class="event-item"><div class="event-name">觸及花費上限</div><div class="event-desc">下個計費週期自動恢復, 或由管理員提高上限後立即恢復</div></div>
+    <div class="event-item"><div class="event-name">找不到行內留言</div><div class="event-desc">查看 Check run Details, Files changed 標籤的 annotation, 或審查內文的 Additional findings</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>在本機審查 diff</h2>
+  <p>執行 <code>/code-review</code> 指令可在終端機審查 diff, 不需安裝 GitHub App。可加上 <code>--comment</code> 張貼為行內 PR 留言, 或 <code>--fix</code> 在審查後套用修正。</p>
+  <pre class="code-block"><span class="fn">/code-review</span> ultra --fix</pre>
+  <div class="info-box">
+    <span class="tag">效力等級</span>
+    <p>較低的 effort 等級會回傳較少但較高信心的發現; high 到 max 則涵蓋範圍更廣, 可能包含不確定的發現。</p>
+  </div>
+</section>
+
+<section>
+  <h2>相關資源</h2>
+  <div class="event-list">
+    <div class="event-item"><div class="event-name">Commands</div><div class="event-desc">在本機 session 執行 /code-review 檢查 diff</div></div>
+    <div class="event-item"><div class="event-name">GitHub Actions</div><div class="event-desc">在自己的 GitHub Actions workflow 中執行 Claude</div></div>
+    <div class="event-item"><div class="event-name">GitLab CI/CD</div><div class="event-desc">自架的 Claude 整合方案</div></div>
+    <div class="event-item"><div class="event-name">Memory</div><div class="event-desc">CLAUDE.md 如何運作</div></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+let crStep = 0;
+const CR_MAX = 4;
+function crGoTo(n) {
+  crStep = Math.max(0, Math.min(CR_MAX, n));
+  document.querySelectorAll('.cr-panel').forEach((el, i) => el.classList.toggle('visible', i === crStep));
+  document.querySelectorAll('.cr-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === crStep) t.classList.add('active');
+    else if (i < crStep) t.classList.add('done');
+  });
+  document.getElementById('crPrev').disabled = crStep === 0;
+  const next = document.getElementById('crNext');
+  next.disabled = crStep === CR_MAX;
+  next.textContent = crStep === CR_MAX ? '完成 ✓' : '下一步 →';
+  document.getElementById('crIndicator').textContent = `Step ${crStep + 1} of ${CR_MAX + 1}`;
+}
+crGoTo(0);
+
+function custShow(idx) {
+  document.querySelectorAll('.cust-panel').forEach((el, i) => el.classList.toggle('visible', i === idx));
+  document.querySelectorAll('.cust-chip').forEach((c, i) => c.classList.toggle('active', i === idx));
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Configure the Sandboxed Bash Tool 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; }
+.fn  { color: #16a34a; }
+.str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; }
+.key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 190px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 220px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; }
+body.dark .fn  { color: #68d391; }
+body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; }
+body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; }
+body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; }
+body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; }
+body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; }
+body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Configure the Sandboxed Bash Tool</h1>
+  <p>了解 Claude Code 內建的 sandboxed Bash tool 如何提供檔案系統與網路隔離, 讓 agent 能更安全, 更自主地執行。</p>
+</header>
+
+<main>
+
+<section>
+  <h2>Get started 開始使用</h2>
+  <div class="stage-tabs">
+    <div class="sb-tab stage-tab active" onclick="sbGoTo(0)">1 · 執行 /sandbox</div>
+    <div class="sb-tab stage-tab" onclick="sbGoTo(1)">2 · 選擇模式</div>
+    <div class="sb-tab stage-tab" onclick="sbGoTo(2)">3 · 執行 Bash 指令</div>
+  </div>
+  <div class="sb-panel demo-panel visible" id="sb-p0">
+    <p>啟動 Claude Code session 後執行 <code>/sandbox</code>, 會開啟含三個分頁的沙盒面板: <b>Mode</b> (核准方式), <b>Overrides</b> (是否允許失敗時退回非沙盒執行), <b>Config</b> (檢視已解析的沙盒設定)。若只看到 Dependencies 分頁, 表示缺少必要套件。</p>
+  </div>
+  <div class="sb-panel demo-panel" id="sb-p1">
+    <p>在 Mode 分頁選擇 auto-allow 或一般權限。Auto-allow 會直接執行沙盒化指令不詢問, 一般權限則維持提示。</p>
+  </div>
+  <div class="sb-panel demo-panel" id="sb-p2">
+    <p>請 Claude 執行指令, 例如 build 或測試。預設沙盒化指令只能寫入工作目錄與 session 暫存目錄, 第一次需要新網域時會提示核准。</p>
+  </div>
+  <div>
+    <button class="btn btn-ghost" id="sbPrev" disabled onclick="sbGoTo(sbStep-1)">← Back</button>
+    <button class="btn btn-primary" id="sbNext" onclick="sbGoTo(sbStep+1)">Next →</button>
+    <span class="step-indicator" id="sbIndicator">Step 1 of 3</span>
+  </div>
+
+  <h3>Set up Linux and WSL2</h3>
+  <p>Linux 與 WSL2 上, 沙盒需要兩個套件: <code>bubblewrap</code> (檔案系統隔離) 與 <code>socat</code> (網路流量轉送)。</p>
+  <div class="chip-row">
+    <span class="chip-label">選擇發行版:</span>
+    <div class="sb-install-chip chip active" onclick="sbInstallGoTo(0)">Ubuntu/Debian</div>
+    <div class="sb-install-chip chip" onclick="sbInstallGoTo(1)">Fedora</div>
+  </div>
+  <div class="sb-install-panel demo-panel visible" id="sb-install-p0"><pre class="code-block"><span class="fn">sudo</span> apt-get install bubblewrap socat</pre></div>
+  <div class="sb-install-panel demo-panel" id="sb-install-p1"><pre class="code-block"><span class="fn">sudo</span> dnf install bubblewrap socat</pre></div>
+  <div class="info-box"><span class="tag">NOTE</span><p>Ubuntu 24.04 以上版本, 預設 AppArmor 政策會阻止 bubblewrap 建立所需的 user namespace, 需另外新增 AppArmor profile 授權。WSL1 不支援沙盒, 需升級到 WSL2。</p></div>
+
+  <h3>Sandbox modes</h3>
+  <div class="two-col">
+    <div class="col-card"><div class="col-card-title">Auto-allow mode</div><p>Bash 指令會嘗試在沙盒中執行並自動核准, 無法沙盒化的指令 (如需要存取未允許主機) 則退回一般權限流程。</p></div>
+    <div class="col-card"><div class="col-card-title">Regular permissions mode</div><p>所有 Bash 指令都走一般權限流程, 即使已沙盒化。控制力更高, 但需要更多核准。</p></div>
+  </div>
+  <p>即使在 auto-allow 模式下, 明確的 deny 規則, 針對 <code>/</code> 或家目錄的 <code>rm</code>, 以及內容範圍的 ask 規則 (如 <code>Bash(git push *)</code>) 仍然適用。</p>
+</section>
+
+<section>
+  <h2>Configure sandboxing 設定沙盒</h2>
+  <p>透過 <code>settings.json</code> 自訂沙盒行為。預設沙盒化指令只能寫入目前工作目錄與 session 暫存目錄, 可用 <code>sandbox.filesystem.allowWrite</code> 授權額外路徑:</p>
+  <pre class="code-block">{
+  <span class="str">"sandbox"</span>: {
+    <span class="str">"enabled"</span>: <span class="kw">true</span>,
+    <span class="str">"filesystem"</span>: {
+      <span class="str">"allowWrite"</span>: [<span class="str">"~/.kube"</span>, <span class="str">"/tmp/build"</span>]
+    }
+  }
+}</pre>
+  <p>路徑前綴的解析規則:</p>
+  <div class="response-box">
+    <div class="response-field"><span class="rf-key">/ (絕對路徑)</span><span class="rf-val">從檔案系統根目錄, 例如 /tmp/build 維持 /tmp/build</span></div>
+    <div class="response-field"><span class="rf-key">~/ (家目錄相對)</span><span class="rf-val">相對於家目錄, 例如 ~/.kube 變成 $HOME/.kube</span></div>
+    <div class="response-field"><span class="rf-key">./ 或無前綴</span><span class="rf-val">相對於專案根目錄 (專案設定) 或 ~/.claude (使用者設定)</span></div>
+  </div>
+
+  <h3>Protect credentials</h3>
+  <p><code>sandbox.credentials</code> 設定可宣告沙盒化指令不得存取的憑證檔案與環境變數 (需 Claude Code v2.1.187 以上):</p>
+  <pre class="code-block">{
+  <span class="str">"sandbox"</span>: {
+    <span class="str">"enabled"</span>: <span class="kw">true</span>,
+    <span class="str">"credentials"</span>: {
+      <span class="str">"files"</span>: [
+        { <span class="str">"path"</span>: <span class="str">"~/.aws/credentials"</span>, <span class="str">"mode"</span>: <span class="str">"deny"</span> },
+        { <span class="str">"path"</span>: <span class="str">"~/.ssh"</span>, <span class="str">"mode"</span>: <span class="str">"deny"</span> }
+      ],
+      <span class="str">"envVars"</span>: [
+        { <span class="str">"name"</span>: <span class="str">"GITHUB_TOKEN"</span>, <span class="str">"mode"</span>: <span class="str">"deny"</span> },
+        { <span class="str">"name"</span>: <span class="str">"NPM_TOKEN"</span>, <span class="str">"mode"</span>: <span class="str">"deny"</span> }
+      ]
+    }
+  }
+}</pre>
+  <div class="info-box"><span class="tag">NOTE</span><p>沒有內建的憑證封鎖清單, 只有你列出的檔案與變數才會被限制。此設定只影響沙盒化的 Bash 指令。</p></div>
+</section>
+
+<section>
+  <h2>How sandboxing works 運作原理</h2>
+  <div class="chip-row">
+    <span class="chip-label">選擇面向:</span>
+    <div class="sb-how-chip chip active" onclick="sbHowGoTo(0)">檔案系統隔離</div>
+    <div class="sb-how-chip chip" onclick="sbHowGoTo(1)">網路隔離</div>
+    <div class="sb-how-chip chip" onclick="sbHowGoTo(2)">OS 層級強制</div>
+  </div>
+  <div class="sb-how-panel demo-panel visible" id="sb-how-p0">
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">預設寫入行為</span><span class="event-desc">讀寫目前工作目錄及其子目錄, 加上 $TMPDIR 指向的 session 暫存目錄</span></div>
+      <div class="event-item"><span class="event-name">預設讀取行為</span><span class="event-desc">可讀取整台電腦, 除特定拒絕目錄外; 仍可讀取 ~/.aws/credentials 等憑證檔案, 需另用 sandbox.credentials 封鎖</span></div>
+      <div class="event-item"><span class="event-name">封鎖存取</span><span class="event-desc">無法修改工作目錄與暫存目錄以外的檔案, 包含 ~/.bashrc 與 /bin/ 下的系統執行檔</span></div>
+    </div>
+  </div>
+  <div class="sb-how-panel demo-panel" id="sb-how-p1">
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">網域限制</span><span class="event-desc">預設沒有任何網域被允許, 第一次需要新網域時會提示核准, 之後同一台主機不再詢問 (v2.1.191 起)</span></div>
+      <div class="event-item"><span class="event-name">Managed lockdown</span><span class="event-desc">設定 allowManagedDomainsOnly 後, 未核准網域會被自動封鎖而非提示</span></div>
+      <div class="event-item"><span class="event-name">自訂 proxy</span><span class="event-desc">進階使用者可自行實作對外流量的規則</span></div>
+    </div>
+  </div>
+  <div class="sb-how-panel demo-panel" id="sb-how-p2">
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">macOS</span><span class="event-desc">使用 Seatbelt 強制執行沙盒</span></div>
+      <div class="event-item"><span class="event-name">Linux</span><span class="event-desc">使用 bubblewrap 進行隔離</span></div>
+      <div class="event-item"><span class="event-name">WSL2</span><span class="event-desc">與 Linux 相同使用 bubblewrap; WSL1 不支援</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>How sandboxing relates to permissions and permission modes</h2>
+  <p>沙盒, 權限規則與權限模式是互補的三層機制。</p>
+  <div class="two-col">
+    <div class="col-card"><div class="col-card-title">Permission rules</div><p>控制 Claude Code 能使用哪些工具, 在任何工具執行前先評估, 適用於 Bash, Read, Edit, WebFetch, MCP 等全部工具。</p></div>
+    <div class="col-card"><div class="col-card-title">Sandboxing</div><p>提供 OS 層級的強制執行, 限制 Bash 指令與其子行程在檔案系統與網路層面能存取的範圍, 只適用於 Bash。</p></div>
+  </div>
+  <p>兩者的強制方式也不同: 權限決策在指令執行前依指令字串評估, 而作業系統則在執行中的行程上強制執行沙盒邊界, 因此不論模型選擇執行什麼, 邊界都持續有效。</p>
+  <h3>Permission modes</h3>
+  <div class="response-box">
+    <div class="response-field"><span class="rf-key">/sandbox</span><span class="rf-val">控制 Bash 指令執行後能存取什麼; 由沙盒邊界本身取代提示 (auto-allow 模式下)</span></div>
+    <div class="response-field"><span class="rf-key">Auto mode</span><span class="rf-val">控制每個工具呼叫是否執行; 由分類器審查動作取代提示</span></div>
+    <div class="response-field"><span class="rf-key">--dangerously-skip-permissions</span><span class="rf-val">控制每個工具呼叫是否執行; 不用任何東西取代提示, 只有明確 ask 規則與刪除根目錄/家目錄仍會提示</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>Configure the sandbox for your organization</h2>
+  <p>管理員可要求所有使用者都啟用沙盒, 防止開發者放寬政策, 並讓沙盒流量走企業 proxy。</p>
+  <h3>Enforce sandboxing with managed settings</h3>
+  <pre class="code-block">{
+  <span class="str">"sandbox"</span>: {
+    <span class="str">"enabled"</span>: <span class="kw">true</span>,
+    <span class="str">"failIfUnavailable"</span>: <span class="kw">true</span>,
+    <span class="str">"allowUnsandboxedCommands"</span>: <span class="kw">false</span>
+  }
+}</pre>
+  <div class="api-fields">
+    <div class="field"><div class="name">failIfUnavailable</div><div class="desc">缺少相依套件 (如 Linux 上的 bubblewrap) 時, 直接阻止 Claude Code 啟動而非退回非沙盒執行</div></div>
+    <div class="field"><div class="name">allowUnsandboxedCommands: false</div><div class="desc">忽略 dangerouslyDisableSandbox 逃生機制, 沙盒失敗的指令無法退回非沙盒重試</div></div>
+  </div>
+  <h3>Keep developers from widening the policy</h3>
+  <p>布林鍵 (如 <code>enabled</code>) 一律採用 managed 值, 忽略開發者本機設定; 陣列鍵 (如 <code>excludedCommands</code>) 則會合併各層級項目。設定 <code>allowManagedReadPathsOnly</code> 可鎖定只採用 managed settings 的 <code>allowRead</code> 項目。</p>
+  <h3>Custom proxy configuration</h3>
+  <pre class="code-block">{
+  <span class="str">"sandbox"</span>: {
+    <span class="str">"network"</span>: {
+      <span class="str">"httpProxyPort"</span>: <span class="kw">8080</span>,
+      <span class="str">"socksProxyPort"</span>: <span class="kw">8081</span>
+    }
+  }
+}</pre>
+</section>
+
+<section>
+  <h2>Troubleshooting</h2>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">host-not-allowed 錯誤</span><span class="event-desc">提示時授權, 該主機會加入允許清單供未來使用</span></div>
+    <div class="event-item"><span class="event-name">jest 卡住或失敗</span><span class="event-desc">watchman 與沙盒不相容, 改用 jest --no-watchman</span></div>
+    <div class="event-item"><span class="event-name">Go CLI TLS 驗證失敗 (macOS)</span><span class="event-desc">gh, gcloud, terraform 等工具加入 excludedCommands, 或搭配 MITM proxy 時設定 enableWeakerNetworkIsolation</span></div>
+    <div class="event-item"><span class="event-name">open / osascript 失敗 (-600)</span><span class="event-desc">沙盒預設封鎖 Apple Events, 需設定 allowAppleEvents 為 true (會移除程式碼執行隔離)</span></div>
+    <div class="event-item"><span class="event-name">docker 指令失敗</span><span class="event-desc">docker 與沙盒不相容, 將 docker * 加入 excludedCommands</span></div>
+    <div class="event-item"><span class="event-name">容器內 bubblewrap 無法啟動</span><span class="event-desc">非特權容器需設定 enableWeakerNestedSandbox</span></div>
+    <div class="event-item"><span class="event-name">--dangerously-skip-permissions 以 root 執行失敗</span><span class="event-desc">Linux/macOS 上以 root 或 sudo 執行時會被封鎖, 在辨識出的沙盒內會自動略過此檢查</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>Limitations 限制</h2>
+  <div class="chip-row">
+    <span class="chip-label">選擇分類:</span>
+    <div class="sb-lim-chip chip active" onclick="sbLimGoTo(0)">安全性限制</div>
+    <div class="sb-lim-chip chip" onclick="sbLimGoTo(1)">平台與工具相容性</div>
+    <div class="sb-lim-chip chip" onclick="sbLimGoTo(2)">範圍</div>
+  </div>
+  <div class="sb-lim-panel demo-panel visible" id="sb-lim-p0">
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">網路過濾</span><span class="event-desc">內建 proxy 不終止或檢查 TLS, 因此無法檢視加密連線內容, 允許過寬的網域 (如 github.com) 可能形成資料外洩管道</span></div>
+      <div class="event-item"><span class="event-name">Unix socket 提權</span><span class="event-desc">allowUnixSockets 可能意外授予存取強大系統服務的能力, 例如 docker.sock 等同取得主機存取權</span></div>
+      <div class="event-item"><span class="event-name">檔案系統權限提升</span><span class="event-desc">允許寫入 $PATH 中的目錄, 系統設定目錄或 shell 設定檔 (.bashrc 等) 可能導致跨安全情境的程式碼執行</span></div>
+    </div>
+  </div>
+  <div class="sb-lim-panel demo-panel" id="sb-lim-p1">
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">平台支援</span><span class="event-desc">支援 macOS, Linux, WSL2; 不支援 WSL1 與原生 Windows</span></div>
+      <div class="event-item"><span class="event-name">效能開銷</span><span class="event-desc">極小, 部分檔案系統操作可能稍慢</span></div>
+      <div class="event-item"><span class="event-name">工具相容性</span><span class="event-desc">部分需要特殊系統存取模式的工具可能需要調整設定, 或需在沙盒外執行</span></div>
+    </div>
+  </div>
+  <div class="sb-lim-panel demo-panel" id="sb-lim-p2">
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">內建檔案工具</span><span class="event-desc">Read, Edit, Write 直接使用權限系統, 不透過沙盒</span></div>
+      <div class="event-item"><span class="event-name">Computer use</span><span class="event-desc">Claude 開啟應用程式與控制螢幕時運行在實際桌面上, 而非隔離環境, 改由逐應用程式的權限提示把關</span></div>
+      <div class="event-item"><span class="event-name">Subagents</span><span class="event-desc">與父 session 使用相同的沙盒設定, 沙盒啟用時 subagent 內的 Bash 指令也會被沙盒化</span></div>
+    </div>
+  </div>
+  <div class="takeaway"><p>有效的沙盒需要同時具備檔案系統與網路隔離。放寬其中一側的限制時, 請確認沒有連帶抵銷另一側的保護。</p></div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+let sbStep = 0;
+const SB_MAX = 2;
+function sbGoTo(n) {
+  sbStep = Math.max(0, Math.min(SB_MAX, n));
+  document.querySelectorAll('.sb-panel').forEach((el, i) => el.classList.toggle('visible', i === sbStep));
+  document.querySelectorAll('.sb-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === sbStep) t.classList.add('active');
+    else if (i < sbStep) t.classList.add('done');
+  });
+  document.getElementById('sbPrev').disabled = sbStep === 0;
+  const next = document.getElementById('sbNext');
+  next.disabled = sbStep === SB_MAX;
+  next.textContent = sbStep === SB_MAX ? 'Done ✓' : 'Next →';
+  document.getElementById('sbIndicator').textContent = `Step ${sbStep + 1} of ${SB_MAX + 1}`;
+}
+sbGoTo(0);
+
+function sbInstallGoTo(n) {
+  document.querySelectorAll('.sb-install-panel').forEach((el, i) => el.classList.toggle('visible', i === n));
+  document.querySelectorAll('.sb-install-chip').forEach((c, i) => c.classList.toggle('active', i === n));
+}
+function sbHowGoTo(n) {
+  document.querySelectorAll('.sb-how-panel').forEach((el, i) => el.classList.toggle('visible', i === n));
+  document.querySelectorAll('.sb-how-chip').forEach((c, i) => c.classList.toggle('active', i === n));
+}
+function sbLimGoTo(n) {
+  document.querySelectorAll('.sb-lim-panel').forEach((el, i) => el.classList.toggle('visible', i === n));
+  document.querySelectorAll('.sb-lim-chip').forEach((c, i) => c.classList.toggle('active', i === n));
+}
+</script>
+</body>
+</html>

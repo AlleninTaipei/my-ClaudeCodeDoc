@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Agent SDK Overview 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; }
+.fn  { color: #16a34a; }
+.str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; }
+.key { color: #2563eb; }
+
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 130px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+
+.scope-badge { display: inline-block; font-size: 0.58rem; font-weight: 700;
+  letter-spacing: 0.07em; text-transform: uppercase; padding: 2px 8px;
+  border-radius: 4px; vertical-align: middle; margin-left: 10px;
+  position: relative; top: -2px; }
+.scope-universal { background: #dcfce7; color: #166534; border: 1px solid #4ade80; }
+.scope-api       { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.scope-specific  { background: #ede9fe; color: #6d28d9; border: 1px solid #a78bfa; }
+.scope-legend { display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  background: #e2e8f0; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 10px 18px; margin-bottom: 36px; }
+.scope-legend-label { font-size: 0.72rem; color: #4a5568; font-weight: 700; }
+.scope-legend-item  { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: #374151; }
+
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+
+@media (max-width: 640px) {
+  .api-fields, .two-col { grid-template-columns: 1fr; }
+}
+
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; }
+body.dark .fn  { color: #68d391; }
+body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; }
+body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; }
+body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; }
+body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; }
+body.dark .rf-val { color: #a0aec0; }
+body.dark .scope-universal { background: #1a3a28; color: #68d391; border-color: #276749; }
+body.dark .scope-api       { background: #3a2a10; color: #f6ad55; border-color: #7a5a20; }
+body.dark .scope-specific  { background: #2d1f4a; color: #b794f4; border-color: #553c8b; }
+body.dark .scope-legend { background: #1a202c; border-color: #2d3748; }
+body.dark .scope-legend-label { color: #4a5568; }
+body.dark .scope-legend-item  { color: #718096; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; }
+body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Agent SDK Overview</h1>
+  <p>用 Claude Code 作為函式庫, 打造能自主讀檔, 執行指令, 搜尋網頁, 編輯程式碼的正式環境 AI 代理</p>
+</header>
+
+<main>
+
+<section id="intro">
+  <h2>簡介</h2>
+  <p>Agent SDK 提供與 Claude Code 相同的工具, agent loop 與上下文管理能力, 讓你能以 Python 或 TypeScript 撰寫程式來驅動代理。內建工具已經處理好執行細節, 不需要自己實作工具執行邏輯。</p>
+
+  <div class="chip-row">
+    <span class="chip-label">選擇語言查看範例:</span>
+    <div class="chip active" data-lang="py" onclick="ovSetLang('py')">Python</div>
+    <div class="chip" data-lang="ts" onclick="ovSetLang('ts')">TypeScript</div>
+  </div>
+
+  <div class="ov-lang-panel visible" data-lang="py">
+    <pre class="code-block"><span class="kw">import</span> asyncio
+<span class="kw">from</span> claude_agent_sdk <span class="kw">import</span> query, ClaudeAgentOptions
+
+<span class="kw">async def</span> <span class="fn">main</span>():
+    <span class="kw">async for</span> message <span class="kw">in</span> <span class="fn">query</span>(
+        prompt=<span class="str">"Find and fix the bug in auth.py"</span>,
+        options=ClaudeAgentOptions(allowed_tools=[<span class="str">"Read"</span>, <span class="str">"Edit"</span>, <span class="str">"Bash"</span>]),
+    ):
+        <span class="fn">print</span>(message)  <span class="cmt"># Claude 讀檔, 找出錯誤, 修改它</span>
+
+asyncio.run(<span class="fn">main</span>())</pre>
+  </div>
+  <div class="ov-lang-panel" data-lang="ts">
+    <pre class="code-block"><span class="kw">import</span> { query } <span class="kw">from</span> <span class="str">"@anthropic-ai/claude-agent-sdk"</span>;
+
+<span class="kw">for await</span> (<span class="kw">const</span> message <span class="kw">of</span> <span class="fn">query</span>({
+  prompt: <span class="str">"Find and fix the bug in auth.ts"</span>,
+  options: { allowedTools: [<span class="str">"Read"</span>, <span class="str">"Edit"</span>, <span class="str">"Bash"</span>] }
+})) {
+  console.<span class="fn">log</span>(message); <span class="cmt">// Claude 讀檔, 找出錯誤, 修改它</span>
+}</pre>
+  </div>
+
+  <div class="info-box">
+    <span class="tag">要開始建置嗎</span>
+    <p>跟著 Quickstart 打造一個能在幾分鐘內找出並修復程式錯誤的代理。</p>
+  </div>
+</section>
+
+<section id="get-started">
+  <h2>Get started</h2>
+  <p>從安裝到跑出第一個代理, 只需要三個步驟。</p>
+
+  <div class="stage-tabs">
+    <div class="gs-tab stage-tab active" onclick="gsGoTo(0)">1 · 安裝 SDK</div>
+    <div class="gs-tab stage-tab" onclick="gsGoTo(1)">2 · 設定 API 金鑰</div>
+    <div class="gs-tab stage-tab" onclick="gsGoTo(2)">3 · 執行第一個代理</div>
+  </div>
+
+  <div class="gs-panel demo-panel visible" id="gs-p0">
+    <div class="two-col">
+      <div class="col-card">
+        <div class="col-card-title">TypeScript</div>
+        <pre class="code-block">npm install @anthropic-ai/claude-agent-sdk</pre>
+        <p>內建打包對應平台的 Claude Code 二進位檔, 不需要另外安裝 Claude Code。</p>
+      </div>
+      <div class="col-card">
+        <div class="col-card-title">Python</div>
+        <pre class="code-block">pip install claude-agent-sdk</pre>
+        <p>需要 Python 3.10 以上版本。若出現 <code>No matching distribution</code> 錯誤, 代表直譯器版本過舊。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="gs-panel demo-panel" id="gs-p1">
+    <pre class="code-block"><span class="kw">export</span> ANTHROPIC_API_KEY=your-api-key</pre>
+    <div class="api-fields">
+      <div class="field"><div class="name">CLAUDE_CODE_USE_BEDROCK=1</div><div class="desc">透過 Amazon Bedrock 驗證, 需搭配 AWS 憑證</div></div>
+      <div class="field"><div class="name">CLAUDE_CODE_USE_ANTHROPIC_AWS=1</div><div class="desc">Claude Platform on AWS, 搭配 ANTHROPIC_AWS_WORKSPACE_ID</div></div>
+      <div class="field"><div class="name">CLAUDE_CODE_USE_VERTEX=1</div><div class="desc">透過 Google Vertex AI 驗證, 需搭配 GCP 憑證</div></div>
+      <div class="field"><div class="name">CLAUDE_CODE_USE_FOUNDRY=1</div><div class="desc">透過 Microsoft Azure 驗證, 需搭配 Azure 憑證</div></div>
+    </div>
+    <div class="info-box">
+      <span class="tag">注意</span>
+      <p>除非事先取得核准, Anthropic 不允許第三方開發者為以 Agent SDK 建置的產品提供 claude.ai 登入或速率限制, 請使用本頁所述的 API 金鑰驗證方式。</p>
+    </div>
+  </div>
+
+  <div class="gs-panel demo-panel" id="gs-p2">
+    <pre class="code-block"><span class="kw">import</span> asyncio
+<span class="kw">from</span> claude_agent_sdk <span class="kw">import</span> query, ClaudeAgentOptions
+
+<span class="kw">async def</span> <span class="fn">main</span>():
+    <span class="kw">async for</span> message <span class="kw">in</span> <span class="fn">query</span>(
+        prompt=<span class="str">"What files are in this directory?"</span>,
+        options=ClaudeAgentOptions(allowed_tools=[<span class="str">"Bash"</span>, <span class="str">"Glob"</span>]),
+    ):
+        <span class="kw">if</span> <span class="fn">hasattr</span>(message, <span class="str">"result"</span>):
+            <span class="fn">print</span>(message.result)
+
+asyncio.run(<span class="fn">main</span>())</pre>
+  </div>
+
+  <div>
+    <button class="btn btn-ghost" id="gsPrev" disabled onclick="gsGoTo(gsStep-1)">← 上一步</button>
+    <button class="btn btn-primary" id="gsNext" onclick="gsGoTo(gsStep+1)">下一步 →</button>
+    <span class="step-indicator" id="gsIndicator">Step 1 of 3</span>
+  </div>
+</section>
+
+<section id="capabilities">
+  <h2>Capabilities</h2>
+  <p>Claude Code 強大的功能, 在 SDK 中同樣都能用:</p>
+
+  <div class="chip-row">
+    <div class="chip active" onclick="capGoTo(0)">內建工具</div>
+    <div class="chip" onclick="capGoTo(1)">Hooks</div>
+    <div class="chip" onclick="capGoTo(2)">Subagents</div>
+    <div class="chip" onclick="capGoTo(3)">MCP</div>
+    <div class="chip" onclick="capGoTo(4)">Permissions</div>
+    <div class="chip" onclick="capGoTo(5)">Sessions</div>
+  </div>
+
+  <div class="cap-panel demo-panel visible" id="cap-p0">
+    <p>代理可以直接讀檔, 執行指令, 搜尋程式碼庫, 無需額外設定:</p>
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">Read / Write / Edit</span><span class="event-desc">讀取, 建立, 精準修改檔案</span></div>
+      <div class="event-item"><span class="event-name">Bash</span><span class="event-desc">執行終端機指令, 腳本, git 操作</span></div>
+      <div class="event-item"><span class="event-name">Monitor</span><span class="event-desc">監看背景腳本, 針對每行輸出做出反應</span></div>
+      <div class="event-item"><span class="event-name">Glob / Grep</span><span class="event-desc">依樣式尋找檔案 / 用正規表示式搜尋內容</span></div>
+      <div class="event-item"><span class="event-name">WebSearch / WebFetch</span><span class="event-desc">搜尋網路最新資訊 / 抓取並解析網頁內容</span></div>
+      <div class="event-item"><span class="event-name">AskUserQuestion</span><span class="event-desc">以多選題方式向使用者提出釐清問題</span></div>
+    </div>
+  </div>
+
+  <div class="cap-panel demo-panel" id="cap-p1">
+    <p>在代理生命週期的關鍵時間點執行自訂程式碼。SDK hooks 透過回呼函式驗證, 記錄, 阻擋或轉換代理行為。</p>
+    <p><strong>可用 hooks:</strong> PreToolUse, PostToolUse, Stop, SessionStart, SessionEnd, UserPromptSubmit 等。</p>
+    <div class="info-box"><span class="tag">範例</span><p>可設定 PostToolUse hook, 在每次 Edit 或 Write 後把修改的檔案路徑寫入稽核日誌。</p></div>
+  </div>
+
+  <div class="cap-panel demo-panel" id="cap-p2">
+    <p>可派生專門處理特定子任務的代理。主代理委派工作, 子代理回報結果。透過 <code>agents</code> 選項定義自訂代理, 並在 <code>allowedTools</code> 中加入 <code>Agent</code> 以自動核准呼叫。</p>
+    <div class="info-box"><span class="tag">追蹤</span><p>子代理情境中的訊息帶有 <code>parent_tool_use_id</code> 欄位, 方便追蹤訊息所屬的子代理執行。</p></div>
+  </div>
+
+  <div class="cap-panel demo-panel" id="cap-p3">
+    <p>透過 Model Context Protocol 連接外部系統: 資料庫, 瀏覽器, API, 以及數百個社群伺服器。</p>
+    <div class="info-box"><span class="tag">範例</span><p>接上 Playwright MCP 伺服器, 賦予代理瀏覽器自動化能力, 只需在 <code>mcp_servers</code> 設定 command 與 args。</p></div>
+  </div>
+
+  <div class="cap-panel demo-panel" id="cap-p4">
+    <p>精確控制代理能使用哪些工具。允許安全操作, 封鎖危險操作, 或要求對敏感操作進行核准。</p>
+    <div class="info-box"><span class="tag">範例</span><p><code>allowed_tools=["Read", "Glob", "Grep"]</code> 可建立唯讀代理, 只能分析不能修改程式碼。</p></div>
+  </div>
+
+  <div class="cap-panel demo-panel" id="cap-p5">
+    <p>跨多輪交流維持上下文。Claude 記得讀過的檔案, 做過的分析, 對話歷史。稍後可恢復 session, 或分支出去探索不同做法。</p>
+    <div class="info-box"><span class="tag">範例</span><p>從第一次查詢擷取 <code>session_id</code>, 之後用 <code>resume=session_id</code> 恢復完整上下文繼續對話。</p></div>
+  </div>
+
+  <h3>Claude Code 檔案系統設定</h3>
+  <p>SDK 也支援 Claude Code 以檔案系統為基礎的設定, 預設從工作目錄下的 <code>.claude/</code> 與 <code>~/.claude/</code> 載入, 可用 <code>setting_sources</code> 限制來源。</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">Skills</div><div class="desc">.claude/skills/*/SKILL.md — Claude 自動使用或以 /name 呼叫的專門能力</div></div>
+    <div class="field"><div class="name">Commands</div><div class="desc">.claude/commands/*.md — 舊格式自訂指令, 新指令建議改用 skills</div></div>
+    <div class="field"><div class="name">Memory</div><div class="desc">CLAUDE.md 或 .claude/CLAUDE.md — 專案情境與指示</div></div>
+    <div class="field"><div class="name">Plugins</div><div class="desc">透過 plugins 選項以程式化方式擴充 skills, agents, hooks, MCP 伺服器</div></div>
+  </div>
+</section>
+
+<section id="compare">
+  <h2>Compare the Agent SDK to other Claude tools</h2>
+  <p>Claude Platform 提供多種建置方式, 以下說明 Agent SDK 在其中的定位。</p>
+
+  <div class="chip-row">
+    <div class="chip active" onclick="cmpGoTo(0)">vs Client SDK</div>
+    <div class="chip" onclick="cmpGoTo(1)">vs Claude Code CLI</div>
+    <div class="chip" onclick="cmpGoTo(2)">vs Managed Agents</div>
+  </div>
+
+  <div class="cmp-panel demo-panel visible" id="cmp-p0">
+    <p>Client SDK 給你直接的 API 存取: 自己傳送提示並實作工具執行邏輯。Agent SDK 則內建工具執行能力。</p>
+    <div class="two-col">
+      <div class="col-card">
+        <div class="col-card-title">Client SDK</div>
+        <p>需要自行實作 tool loop, 手動處理 <code>stop_reason === "tool_use"</code> 的迴圈。</p>
+      </div>
+      <div class="col-card">
+        <div class="col-card-title">Agent SDK</div>
+        <p>Claude 自主處理工具呼叫, 只需疊代 <code>query()</code> 傳回的訊息串流。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cmp-panel demo-panel" id="cmp-p1">
+    <p>相同能力, 不同介面。</p>
+    <div class="response-box">
+      <div class="response-field"><div class="rf-key">互動式開發</div><div class="rf-val">CLI</div></div>
+      <div class="response-field"><div class="rf-key">CI/CD 流程</div><div class="rf-val">SDK</div></div>
+      <div class="response-field"><div class="rf-key">自訂應用程式</div><div class="rf-val">SDK</div></div>
+      <div class="response-field"><div class="rf-key">一次性任務</div><div class="rf-val">CLI</div></div>
+      <div class="response-field"><div class="rf-key">正式環境自動化</div><div class="rf-val">SDK</div></div>
+    </div>
+    <p>許多團隊兩者並用: CLI 用於日常開發, SDK 用於正式環境, 工作流程可以直接互轉。</p>
+  </div>
+
+  <div class="cmp-panel demo-panel" id="cmp-p2">
+    <p>Managed Agents 是託管的 REST API, 由 Anthropic 執行代理與沙盒；Agent SDK 是在自己的行程中執行 agent loop 的函式庫。</p>
+    <div class="two-col">
+      <div class="col-card">
+        <div class="col-card-title">Agent SDK</div>
+        <p>執行於自己的行程與基礎設施, Python/TypeScript 函式庫, 適合本機原型與需要直接操作檔案系統的代理。</p>
+      </div>
+      <div class="col-card">
+        <div class="col-card-title">Managed Agents</div>
+        <p>執行於 Anthropic 管理的基礎設施, REST API 介面, 每個 session 有獨立管理的沙盒, 適合不想自行維運沙盒或 session 基礎設施的正式環境代理。</p>
+      </div>
+    </div>
+    <div class="takeaway"><p>常見路徑: 先用 Agent SDK 在本機做原型, 再轉移到 Managed Agents 上線。</p></div>
+  </div>
+</section>
+
+<section id="resources">
+  <h2>資源與規範</h2>
+  <div class="api-fields">
+    <div class="field"><div class="name">Changelog</div><div class="desc">TypeScript / Python SDK 各自的 CHANGELOG.md, 記錄更新, 錯誤修正與新功能</div></div>
+    <div class="field"><div class="name">Reporting bugs</div><div class="desc">在對應語言的 GitHub repo 回報問題</div></div>
+    <div class="field"><div class="name">Branding guidelines</div><div class="desc">可使用 "Claude Agent" 或 "{YourAgentName} Powered by Claude", 不可使用 "Claude Code" 字樣或相關視覺元素</div></div>
+    <div class="field"><div class="name">License and terms</div><div class="desc">使用 Agent SDK 受 Anthropic 商業服務條款規範, 包含用於自有客戶的產品與服務</div></div>
+  </div>
+</section>
+
+<section id="next-steps">
+  <h2>Next steps</h2>
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">Quickstart</div>
+      <p>打造一個能在幾分鐘內找出並修復程式錯誤的代理。</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">Example agents</div>
+      <p>信件助理, 研究代理等更多範例。</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">TypeScript SDK</div>
+      <p>完整 TypeScript API 參考與範例。</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">Python SDK</div>
+      <p>完整 Python API 參考與範例。</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+function ovSetLang(lang) {
+  document.querySelectorAll('.chip[data-lang]').forEach(c => c.classList.toggle('active', c.dataset.lang === lang));
+  document.querySelectorAll('.ov-lang-panel').forEach(p => p.classList.toggle('visible', p.dataset.lang === lang));
+}
+
+let gsStep = 0;
+const GS_MAX = 2;
+function gsGoTo(n) {
+  gsStep = Math.max(0, Math.min(GS_MAX, n));
+  document.querySelectorAll('.gs-panel').forEach((el, i) => el.classList.toggle('visible', i === gsStep));
+  document.querySelectorAll('.gs-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === gsStep) t.classList.add('active');
+    else if (i < gsStep) t.classList.add('done');
+  });
+  document.getElementById('gsPrev').disabled = gsStep === 0;
+  const next = document.getElementById('gsNext');
+  next.disabled = gsStep === GS_MAX;
+  next.textContent = gsStep === GS_MAX ? '完成 ✓' : '下一步 →';
+  document.getElementById('gsIndicator').textContent = `Step ${gsStep + 1} of ${GS_MAX + 1}`;
+}
+gsGoTo(0);
+
+function capGoTo(n) {
+  document.querySelectorAll('.cap-panel').forEach((el, i) => el.classList.toggle('visible', i === n));
+  document.querySelectorAll('#capabilities .chip').forEach((c, i) => c.classList.toggle('active', i === n));
+}
+
+function cmpGoTo(n) {
+  document.querySelectorAll('.cmp-panel').forEach((el, i) => el.classList.toggle('visible', i === n));
+  document.querySelectorAll('#compare .chip').forEach((c, i) => c.classList.toggle('active', i === n));
+}
+</script>
+</body>
+</html>

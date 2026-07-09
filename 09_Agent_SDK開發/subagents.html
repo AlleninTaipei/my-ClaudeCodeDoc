@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SDK 中的 Subagents 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a; min-width: 180px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; }
+body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>SDK 中的 Subagents</h1>
+  <p>定義並呼叫 subagents 以隔離脈絡, 平行執行任務, 並在 Claude Agent SDK 應用中套用專門化指示.</p>
+</header>
+
+<main>
+
+  <section>
+    <h2>概觀</h2>
+    <p>Subagents 是主要 agent 可以產生出來處理特定子任務的獨立 agent 實例. 用它們來隔離脈絡, 平行執行多個分析, 並套用專門指示而不需增加主 agent prompt 的長度.</p>
+    <div class="event-list">
+      <div class="event-item"><div class="event-name">程式化定義</div><div class="event-desc">在 query() 選項中使用 agents 參數, SDK 應用建議採用此方式</div></div>
+      <div class="event-item"><div class="event-name">檔案系統定義</div><div class="event-desc">在 .claude/agents/ 目錄中以 markdown 檔案定義</div></div>
+      <div class="event-item"><div class="event-name">內建 general-purpose</div><div class="event-desc">Claude 可隨時透過 Agent 工具呼叫內建的 general-purpose subagent, 不需你額外定義</div></div>
+    </div>
+    <div class="info-box">
+      <span class="tag">如何被觸發</span>
+      <p>定義 subagent 後, Claude 會根據每個 subagent 的 description 欄位判斷是否要呼叫它. 撰寫清楚的描述, Claude 就能自動把任務指派給合適的 subagent, 你也可以在 prompt 中直接指名要求使用某個 subagent.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>使用 Subagents 的優點</h2>
+    <div class="api-fields">
+      <div class="field"><div class="name">脈絡隔離</div><div class="desc">每個 subagent 都在自己全新的對話中執行, 中間的工具呼叫與結果都留在 subagent 內, 只有最終訊息回傳給父層. 例如 research-assistant subagent 可以探索數十個檔案而不會讓內容累積到主對話中</div></div>
+      <div class="field"><div class="name">平行化</div><div class="desc">多個 subagents 可以同時執行, 讓獨立子任務的完成時間等於最慢的那一個, 而不是全部加總. 例如程式碼審查時可同時執行 style-checker, security-scanner, test-coverage</div></div>
+      <div class="field"><div class="name">專門化指示與知識</div><div class="desc">每個 subagent 都可以有量身打造的系統 prompt, 包含特定專業知識, 最佳實務與限制. 例如 database-migration subagent 可具備 SQL 最佳實務與回滾策略等專門知識</div></div>
+      <div class="field"><div class="name">工具限制</div><div class="desc">Subagents 可被限制只能使用特定工具, 降低意外操作的風險. 例如 doc-reviewer subagent 只給 Read 和 Grep, 確保它只能分析而不會意外修改文件</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>建立 Subagents</h2>
+    <p>用 agents 參數在程式碼中直接定義 subagents. 以下範例建立一個唯讀存取的程式碼審查者與一個可執行指令的測試執行者. Claude 透過 Agent 工具呼叫 subagents, 因此需將 Agent 加入 allowedTools 以自動核准呼叫.</p>
+    <div class="chip-row">
+      <span class="chip-label">選擇語言:</span>
+      <div class="chip active" onclick="saSwitch(this,'py','create')">Python</div>
+      <div class="chip" onclick="saSwitch(this,'ts','create')">TypeScript</div>
+    </div>
+    <div id="create-py" class="code-block">
+<span class="kw">from</span> claude_agent_sdk <span class="kw">import</span> query, ClaudeAgentOptions, AgentDefinition
+
+<span class="kw">async def</span> <span class="fn">main</span>():
+    <span class="kw">async for</span> message <span class="kw">in</span> <span class="fn">query</span>(
+        prompt=<span class="str">"Review the authentication module for security issues"</span>,
+        options=<span class="fn">ClaudeAgentOptions</span>(
+            allowed_tools=[<span class="str">"Read"</span>, <span class="str">"Grep"</span>, <span class="str">"Glob"</span>, <span class="str">"Agent"</span>],
+            agents={
+                <span class="str">"code-reviewer"</span>: <span class="fn">AgentDefinition</span>(
+                    description=<span class="str">"Expert code review specialist."</span>,
+                    prompt=<span class="str">"You are a code review specialist..."</span>,
+                    tools=[<span class="str">"Read"</span>, <span class="str">"Grep"</span>, <span class="str">"Glob"</span>],
+                    model=<span class="str">"sonnet"</span>,
+                ),
+                <span class="str">"test-runner"</span>: <span class="fn">AgentDefinition</span>(
+                    description=<span class="str">"Runs and analyzes test suites."</span>,
+                    prompt=<span class="str">"You are a test execution specialist..."</span>,
+                    tools=[<span class="str">"Bash"</span>, <span class="str">"Read"</span>, <span class="str">"Grep"</span>],
+                ),
+            },
+        ),
+    ):
+        <span class="kw">if</span> <span class="fn">hasattr</span>(message, <span class="str">"result"</span>):
+            <span class="fn">print</span>(message.result)</div>
+    <div id="create-ts" class="code-block" style="display:none">
+<span class="kw">import</span> { query } <span class="kw">from</span> <span class="str">"@anthropic-ai/claude-agent-sdk"</span>;
+
+<span class="kw">for await</span> (<span class="kw">const</span> <span class="key">message</span> <span class="kw">of</span> <span class="fn">query</span>({
+  prompt: <span class="str">"Review the authentication module for security issues"</span>,
+  options: {
+    allowedTools: [<span class="str">"Read"</span>, <span class="str">"Grep"</span>, <span class="str">"Glob"</span>, <span class="str">"Agent"</span>],
+    agents: {
+      <span class="str">"code-reviewer"</span>: {
+        description: <span class="str">"Expert code review specialist."</span>,
+        prompt: <span class="str">"You are a code review specialist..."</span>,
+        tools: [<span class="str">"Read"</span>, <span class="str">"Grep"</span>, <span class="str">"Glob"</span>],
+        model: <span class="str">"sonnet"</span>
+      },
+      <span class="str">"test-runner"</span>: {
+        description: <span class="str">"Runs and analyzes test suites."</span>,
+        prompt: <span class="str">"You are a test execution specialist..."</span>,
+        tools: [<span class="str">"Bash"</span>, <span class="str">"Read"</span>, <span class="str">"Grep"</span>]
+      }
+    }
+  }
+})) {
+  <span class="kw">if</span> (<span class="str">"result"</span> <span class="kw">in</span> <span class="key">message</span>) <span class="key">console</span>.<span class="fn">log</span>(<span class="key">message</span>.result);
+}</div>
+
+    <h3>AgentDefinition 設定欄位</h3>
+    <div class="api-fields">
+      <div class="field"><div class="name">description (必要)</div><div class="desc">此 agent 何時該被使用的自然語言描述</div></div>
+      <div class="field"><div class="name">prompt (必要)</div><div class="desc">定義 agent 角色與行為的系統 prompt</div></div>
+      <div class="field"><div class="name">tools</div><div class="desc">允許的工具名稱陣列, 省略則繼承全部工具</div></div>
+      <div class="field"><div class="name">disallowedTools</div><div class="desc">從工具集中移除的工具名稱, 也支援 mcp__server 這類 MCP 伺服器層級的樣式</div></div>
+      <div class="field"><div class="name">model</div><div class="desc">覆寫此 agent 的模型, 可用 fable, opus, sonnet, haiku, inherit 或完整模型 ID</div></div>
+      <div class="field"><div class="name">skills</div><div class="desc">在啟動時預先載入到此 agent 脈絡的 skill 名稱清單</div></div>
+      <div class="field"><div class="name">memory</div><div class="desc">此 agent 的記憶來源, 'user' | 'project' | 'local'</div></div>
+      <div class="field"><div class="name">mcpServers</div><div class="desc">此 agent 可用的 MCP servers, 用名稱或內嵌設定指定</div></div>
+      <div class="field"><div class="name">maxTurns</div><div class="desc">此 agent 停止前的最大 agentic 輪數</div></div>
+      <div class="field"><div class="name">background</div><div class="desc">被呼叫時是否以非阻塞的背景任務執行</div></div>
+      <div class="field"><div class="name">effort</div><div class="desc">推理強度等級: low, medium, high, xhigh, max 或數值</div></div>
+      <div class="field"><div class="name">permissionMode</div><div class="desc">此 agent 內工具執行的權限模式</div></div>
+    </div>
+    <div class="info-box">
+      <span class="tag">巢狀 Subagent</span>
+      <p>自 Claude Code v2.1.172 起, subagent 可以再產生自己的 subagent. 主 agent 以下第五層的 subagent 無法再產生 subagent (無論前景或背景執行). 若要防止某 subagent 產生其他 subagent, 從其 tools 中省略 Agent 或將其加入 disallowedTools.</p>
+    </div>
+    <div class="info-box">
+      <span class="tag">檔案系統定義</span>
+      <p>也可在 .claude/agents/ 目錄以 markdown 檔案定義 subagents. 程式化定義的 agent 若與檔案系統定義同名, 會優先套用程式化定義. 即使沒有自訂 subagent, Claude 仍可呼叫內建的 general-purpose subagent.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Subagent 會繼承什麼</h2>
+    <p>Subagent 的脈絡從空白開始 (沒有父層對話), 但並非完全空白. 父層傳給 subagent 的唯一管道是 Agent 工具的 prompt 字串, 因此請把 subagent 需要的檔案路徑, 錯誤訊息或決策直接寫進該 prompt.</p>
+    <div class="two-col">
+      <div class="col-card">
+        <div class="col-card-title">Subagent 會收到</div>
+        <p>自己的系統 prompt 與 Agent 工具的 prompt</p>
+        <p>專案 CLAUDE.md (透過 settingSources 載入)</p>
+        <p>工具定義 (繼承自父層, 或 tools 指定的子集)</p>
+      </div>
+      <div class="col-card">
+        <div class="col-card-title">Subagent 不會收到</div>
+        <p>父層的對話歷史或工具結果</p>
+        <p>預先載入的 skill 內容, 除非列在 AgentDefinition.skills 中</p>
+        <p>父層的系統 prompt</p>
+      </div>
+    </div>
+    <div class="info-box">
+      <span class="tag">保留原始輸出</span>
+      <p>父層會原封不動收到 subagent 的最終訊息作為 Agent 工具結果, 但父層自己的回應中可能會加以摘要. 若要在使用者可見的回應中保留 subagent 輸出原文, 需在傳給主要 query() 呼叫的 prompt 或 systemPrompt 選項中明確加入指示.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>呼叫 Subagents</h2>
+    <div class="stage-tabs">
+      <div class="sa-tab stage-tab active" onclick="saGoTo(0)">1 · 自動呼叫</div>
+      <div class="sa-tab stage-tab" onclick="saGoTo(1)">2 · 明確呼叫</div>
+      <div class="sa-tab stage-tab" onclick="saGoTo(2)">3 · 動態設定</div>
+    </div>
+    <div class="sa-panel demo-panel visible" id="sa-p0">
+      <p>Claude 會根據任務內容與每個 subagent 的 description 自動決定是否呼叫. 例如若你定義了一個描述為 "Performance optimization specialist for query tuning" 的 performance-optimizer subagent, 當 prompt 提到優化查詢時 Claude 就會自動呼叫它. 撰寫清楚具體的描述, 才能讓 Claude 正確配對任務與 subagent.</p>
+    </div>
+    <div class="sa-panel demo-panel" id="sa-p1">
+      <p>要確保 Claude 使用特定 subagent, 可在 prompt 中直接指名:</p>
+      <div class="code-block"><span class="str">"Use the code-reviewer agent to check the authentication module"</span></div>
+      <p>這會略過自動配對機制, 直接呼叫指定的 subagent.</p>
+    </div>
+    <div class="sa-panel demo-panel" id="sa-p2">
+      <p>你可以依據執行期條件動態建立 agent 定義. 以下範例建立一個依嚴格程度使用不同模型的安全審查者, 嚴格模式使用更強大的模型.</p>
+      <div class="code-block">
+<span class="kw">def</span> <span class="fn">create_security_agent</span>(security_level: <span class="key">str</span>) -> AgentDefinition:
+    is_strict = security_level == <span class="str">"strict"</span>
+    <span class="kw">return</span> <span class="fn">AgentDefinition</span>(
+        description=<span class="str">"Security code reviewer"</span>,
+        prompt=<span class="str">f"You are a {'strict' if is_strict else 'balanced'} security reviewer..."</span>,
+        tools=[<span class="str">"Read"</span>, <span class="str">"Grep"</span>, <span class="str">"Glob"</span>],
+        model=<span class="str">"opus"</span> <span class="kw">if</span> is_strict <span class="kw">else</span> <span class="str">"sonnet"</span>,
+    )</div>
+    </div>
+    <div>
+      <button class="btn btn-ghost" id="saPrev" disabled onclick="saGoTo(saStep-1)">← 上一步</button>
+      <button class="btn btn-primary" id="saNext" onclick="saGoTo(saStep+1)">下一步 →</button>
+      <span class="step-indicator" id="saIndicator">Step 1 of 3</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>偵測呼叫與恢復執行</h2>
+    <p>Subagents 透過 Agent 工具被呼叫. 要偵測何時呼叫了 subagent, 檢查 name 為 "Agent" 的 tool_use 區塊 (v2.1.63 之前為 "Task", 建議兩者都檢查以確保相容性). Subagent 脈絡內的訊息會帶有 parent_tool_use_id 欄位.</p>
+    <div class="event-list">
+      <div class="event-item"><div class="event-name">1. 擷取 session_id</div><div class="event-desc">在第一次 query 期間從訊息中取得</div></div>
+      <div class="event-item"><div class="event-name">2. 擷取 agentId</div><div class="event-desc">從 Agent 工具結果文字中解析出 agentId: &lt;id&gt;</div></div>
+      <div class="event-item"><div class="event-name">3. 恢復 session</div><div class="event-desc">在第二次 query 選項中傳入 resume: sessionId, 並在 prompt 中包含 agent ID</div></div>
+    </div>
+    <div class="info-box">
+      <span class="tag">注意</span>
+      <p>必須恢復同一個 session 才能存取 subagent 的完整記錄, 每次 query() 呼叫預設會開啟新 session. 內建的 Explore 與 Plan agents 是一次性的, 不會回傳 agentId, 需要恢復時請改用自訂 agent 或 general-purpose. Subagent 記錄獨立於主對話持續存在: 主對話壓縮不會影響它們, 且依 cleanupPeriodDays 設定 (預設 30 天) 自動清除.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>工具限制與常見組合</h2>
+    <div class="api-fields">
+      <div class="field"><div class="name">唯讀分析</div><div class="desc">Read, Grep, Glob — 可檢查程式碼但無法修改或執行</div></div>
+      <div class="field"><div class="name">測試執行</div><div class="desc">Bash, Read, Grep — 可執行指令並分析輸出</div></div>
+      <div class="field"><div class="name">程式碼修改</div><div class="desc">Read, Edit, Write, Grep, Glob — 完整讀寫存取但不能執行指令</div></div>
+      <div class="field"><div class="name">完整存取</div><div class="desc">所有工具 — 省略 tools 欄位, 繼承父層全部工具</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>擴大規模與疑難排解</h2>
+    <p>Subagents 適合每輪少量的委派任務. 若要協調數十到數百個 agent, 改用 Workflow 工具, 將協調邏輯移到執行期外部的腳本中執行. Workflow 工具自 TypeScript Agent SDK v0.3.149 起提供.</p>
+    <div class="event-list">
+      <div class="event-item"><div class="event-name">Claude 未委派給 subagent</div><div class="event-desc">確認 Agent 已加入 allowedTools; 用明確 prompt 指名 subagent; 撰寫清楚的 description</div></div>
+      <div class="event-item"><div class="event-name">檔案系統 agent 未載入</div><div class="event-desc">.claude/agents/ 中的 agent 只在啟動時載入, 新增檔案後需重啟 session</div></div>
+      <div class="event-item"><div class="event-name">Windows 長 prompt 失敗</div><div class="event-desc">命令列長度限制 (8191 字元) 可能導致失敗, 請精簡 prompt 或改用檔案系統定義</div></div>
+    </div>
+    <div class="takeaway">
+      <p>Subagents 是隔離脈絡, 平行處理與套用專門知識的核心機制. 少量委派任務用程式化或檔案系統定義的 subagent 即可, 若需要協調大量 agent, 則應改用 Workflow 工具.</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+function saSwitch(el, lang, group) {
+  el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(group + '-py').style.display = lang === 'py' ? 'block' : 'none';
+  document.getElementById(group + '-ts').style.display = lang === 'ts' ? 'block' : 'none';
+}
+let saStep = 0;
+const SA_MAX = 2;
+function saGoTo(n) {
+  saStep = Math.max(0, Math.min(SA_MAX, n));
+  document.querySelectorAll('.sa-panel').forEach((el, i) => el.classList.toggle('visible', i === saStep));
+  document.querySelectorAll('.sa-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === saStep) t.classList.add('active');
+    else if (i < saStep) t.classList.add('done');
+  });
+  document.getElementById('saPrev').disabled = saStep === 0;
+  const next = document.getElementById('saNext');
+  next.disabled = saStep === SA_MAX;
+  next.textContent = saStep === SA_MAX ? 'Done ✓' : '下一步 →';
+  document.getElementById('saIndicator').textContent = `Step ${saStep + 1} of ${SA_MAX + 1}`;
+}
+saGoTo(0);
+</script>
+</body>
+</html>

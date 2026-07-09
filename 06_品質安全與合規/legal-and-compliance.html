@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Legal and Compliance 法律與合規互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+@media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; }
+body.dark .event-desc { color: #718096; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; }
+body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Legal and Compliance 法律與合規</h1>
+  <p>Claude Code 的法律協議, 合規認證與安全資訊總覽</p>
+</header>
+
+<main>
+
+  <section>
+    <h2>法律協議</h2>
+    <div class="two-col">
+      <div class="col-card">
+        <div class="col-card-title">授權條款</div>
+        <p>Commercial Terms: 適用於 Team, Enterprise, Claude API 使用者</p>
+        <p>Consumer Terms of Service: 適用於 Free, Pro, Max 使用者</p>
+      </div>
+      <div class="col-card">
+        <div class="col-card-title">商業協議</div>
+        <p>無論直接使用 Claude API (1P) 或透過 Amazon Bedrock, Google Vertex (3P) 存取, 既有商業協議都適用於 Claude Code 使用情境, 除非雙方另有約定。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>合規</h2>
+    <div class="info-box">
+      <span class="tag">醫療合規 BAA</span>
+      <p>若客戶已與 Anthropic 簽署 Business Associate Agreement (BAA), 且啟用了 Zero Data Retention (ZDR), 該 BAA 會自動延伸涵蓋 Claude Code, 適用於透過 Claude Code 流動的該客戶 API 流量。ZDR 是逐組織啟用, 因此每個組織都須各自啟用 ZDR 才能受 BAA 涵蓋。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>使用政策</h2>
+    <p>Claude Code 的使用受 Anthropic Usage Policy 規範。Pro 與 Max 方案公告的使用額度, 假設是一般個人使用 Claude Code 與 Agent SDK 的情境。</p>
+
+    <h3>驗證與憑證使用</h3>
+    <p>Claude Code 透過 OAuth token 或 API key 向 Anthropic 伺服器驗證, 兩種方式用途不同:</p>
+
+    <div class="chip-row">
+      <span class="chip-label">選擇驗證方式:</span>
+      <div class="chip active" onclick="lcSelect(0,this)">OAuth 驗證</div>
+      <div class="chip" onclick="lcSelect(1,this)">API Key 驗證</div>
+    </div>
+
+    <div class="lc-panel demo-panel visible" id="lc-p0">
+      <div class="col-card">
+        <div class="col-card-title">適用對象</div>
+        <p>專供 Claude Free, Pro, Max, Team, Enterprise 訂閱方案購買者使用, 目的是支援 Claude Code 與其他原生 Anthropic 應用程式的一般使用情境。</p>
+      </div>
+    </div>
+    <div class="lc-panel demo-panel" id="lc-p1">
+      <div class="col-card">
+        <div class="col-card-title">適用對象</div>
+        <p>開發者若建構與 Claude 能力互動的產品或服務 (包含使用 Agent SDK), 應透過 Claude Console 或受支援的雲端供應商使用 API key 驗證。Anthropic 不允許第三方開發者代表其使用者提供 Claude.ai 登入或透過 Free, Pro, Max 方案憑證路由請求。</p>
+      </div>
+    </div>
+
+    <div class="takeaway">
+      <p>重點: Anthropic 保留執行這些限制的權利, 且可能不會事先通知。若對使用情境的驗證方式有疑問, 應聯繫業務團隊確認。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>安全性與信任</h2>
+    <div class="event-list">
+      <div class="event-item"><div class="event-name">Trust Center</div><div class="event-desc">可於 trust.anthropic.com 與 Transparency Hub 取得更多資訊</div></div>
+      <div class="event-item"><div class="event-name">安全漏洞回報</div><div class="event-desc">Anthropic 透過 HackerOne 管理安全計畫, 可使用表單提交漏洞回報</div></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+function lcSelect(n, el) {
+  document.querySelectorAll('.lc-panel').forEach((p, i) => p.classList.toggle('visible', i === n));
+  el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>

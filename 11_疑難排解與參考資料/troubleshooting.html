@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Troubleshooting 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%); border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 620px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c; overflow-x: auto; margin-top: 10px; line-height: 1.6; white-space: pre; }
+.kw { color: #7c3aed; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a; min-width: 220px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+.demo-panel { display: none; } .demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+ol.steps { padding-left: 20px; color: #4a5568; font-size: 0.88rem; }
+ol.steps li { margin-bottom: 6px; }
+.tabs-os { display: flex; gap: 6px; margin: 10px 0; flex-wrap: wrap; }
+.tab-os { padding: 5px 12px; border-radius: 6px; font-size: 0.78rem; cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #4a5568; }
+.tab-os.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; }
+body.dark p, body.dark ol.steps  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw { color: #9f7aea; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark .tab-os { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .tab-os.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Troubleshooting</h1>
+  <p>修復 Claude Code 的高 CPU 或記憶體用量, 卡住, auto-compact 抖動, 以及搜尋問題, 並找到其他問題該去哪一頁</p>
+</header>
+
+<main>
+
+<section>
+  <h2>先找到你該去哪一頁</h2>
+  <p>本頁涵蓋 Claude Code 執行起來之後的效能, 穩定性, 搜尋問題。若是其他狀況, 從對應症狀找到正確的頁面。</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">command not found, 安裝失敗, PATH 問題</span><span class="event-desc">Troubleshoot installation and login</span></div>
+    <div class="event-item"><span class="event-name">登入迴圈, OAuth 錯誤, 403 Forbidden</span><span class="event-desc">Troubleshoot installation and login</span></div>
+    <div class="event-item"><span class="event-name">設定沒生效, hooks 沒觸發, MCP 沒載入</span><span class="event-desc">Debug your configuration</span></div>
+    <div class="event-item"><span class="event-name">API Error 5xx, 529, 429</span><span class="event-desc">Error reference</span></div>
+    <div class="event-item"><span class="event-name">model not found</span><span class="event-desc">Error reference</span></div>
+  </div>
+  <div class="info-box"><span class="tag">還是不確定?</span><p>在 Claude Code 內執行 /doctor 進行安裝, 設定, MCP servers, context 用量的自動化檢查。若 claude 完全無法啟動, 改在 shell 中執行 claude doctor。</p></div>
+</section>
+
+<section>
+  <h2>效能與穩定性</h2>
+  <div class="chip-row" id="perfChips"></div>
+  <div id="perfPanels"></div>
+</section>
+
+<section>
+  <h2>取得更多協助</h2>
+  <ol class="steps">
+    <li>執行 /doctor 一次檢查安裝健康狀態, 設定有效性, MCP 設定, 與 context 用量</li>
+    <li>在 Claude Code 內用 /feedback 直接向 Anthropic 回報問題</li>
+    <li>查看 GitHub repository 的已知問題</li>
+    <li>直接詢問 Claude 它的能力與功能, Claude 內建了自己的文件存取能力</li>
+  </ol>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+const PERF = [
+  {name:'高 CPU 或記憶體用量', html:'<ol class="steps"><li>定期使用 /compact 縮減 context 大小</li><li>在重大任務之間關閉並重啟 Claude Code</li><li>將大型 build 目錄加入 .gitignore</li><li>用 claude --safe-mode 重啟, 檢查是否是 plugin, MCP server, 或 hook 造成的</li></ol><p>若記憶體用量仍偏高, 執行 /heapdump 將 JS heap snapshot 與記憶體明細寫到桌面, 回報 GitHub issue 時附上兩個檔案。</p>'},
+  {name:'Auto-compact 抖動', html:'<p>若看到 "Autocompact is thrashing" 訊息, 代表自動壓縮成功了, 但某個檔案或工具輸出立刻又把 context window 填滿好幾次, Claude Code 會停止重試以避免浪費 API 呼叫。</p><ol class="steps"><li>要求 Claude 分段讀取過大的檔案, 例如指定行號範圍或函式</li><li>執行 /compact 並指定焦點, 例如 /compact keep only the plan and the diff</li><li>將大型檔案的工作移到 subagent 中, 讓它在獨立的 context window 執行</li><li>若先前對話已不需要, 執行 /clear</li></ol>'},
+  {name:'命令卡住或凍結', html:'<ol class="steps"><li>按 Ctrl+C 嘗試取消目前操作</li><li>若無回應, 可能需要關閉終端機並重啟</li></ol><p>重啟不會遺失對話, 在同一個目錄執行 claude --resume 即可接續。</p>'},
+  {name:'編輯器內建終端機文字亂碼', html:'<p>若在 VS Code, Cursor, 或 Devin Desktop 的整合終端機中字元顯示成方塊, 模糊, 或錯誤字形, 通常是終端機的 GPU renderer 造成的。在 Claude Code 內執行 /terminal-setup 將 terminal.integrated.gpuAcceleration 設為 off, 或在編輯器設定中手動設定並重新載入視窗。</p>'},
+  {name:'搜尋與探索問題', html:'<p>若 Search 工具, @file 提及, 自訂 agent 或 skill 找不到檔案, 可能是內建的 ripgrep 執行檔在你的系統上無法執行。安裝你平台的 ripgrep 套件, 並設定 USE_BUILTIN_RIPGREP=0。</p><div class="tabs-os" id="osTabs"></div><div id="osPanels"></div>'},
+  {name:'WSL 上搜尋緩慢或不完整', html:'<p>在 WSL 上跨檔案系統工作時的磁碟讀取效能損耗, 可能導致比預期更少的比對結果, 搜尋仍能運作, 但結果比原生檔案系統上少。/doctor 在此情況下仍會顯示 Search 為 OK。</p><ol class="steps"><li>提交更具體的搜尋, 縮小搜尋的檔案數量, 指定目錄或檔案類型</li><li>盡量將專案移到 Linux 檔案系統 (/home/) 而非 Windows 檔案系統 (/mnt/c/)</li><li>考慮在 Windows 上原生執行 Claude Code, 而非透過 WSL, 以取得更好的檔案系統效能</li></ol>'}
+];
+const chipRow = document.getElementById('perfChips');
+const panelRow = document.getElementById('perfPanels');
+PERF.forEach((p,i) => {
+  const chip = document.createElement('span');
+  chip.className = 'chip' + (i===0?' active':'');
+  chip.textContent = p.name;
+  chip.onclick = () => perfGoTo(i);
+  chipRow.appendChild(chip);
+  const panel = document.createElement('div');
+  panel.className = 'demo-panel' + (i===0?' visible':'');
+  panel.innerHTML = p.html;
+  panelRow.appendChild(panel);
+});
+function perfGoTo(n) {
+  document.querySelectorAll('#perfChips .chip').forEach((c,i)=>c.classList.toggle('active', i===n));
+  document.querySelectorAll('#perfPanels .demo-panel').forEach((p,i)=>p.classList.toggle('visible', i===n));
+}
+
+const OS_CMDS = {
+  'macOS': 'brew install ripgrep',
+  'Ubuntu/Debian': 'sudo apt install ripgrep',
+  'Alpine': 'apk add ripgrep',
+  'Arch': 'pacman -S ripgrep',
+  'Windows': 'winget install BurntSushi.ripgrep.MSVC'
+};
+const osTabRow = document.getElementById('osTabs');
+const osPanelRow = document.getElementById('osPanels');
+let osI = 0;
+Object.keys(OS_CMDS).forEach((os,i) => {
+  const t = document.createElement('div');
+  t.className = 'tab-os' + (i===0?' active':'');
+  t.textContent = os;
+  t.onclick = () => { osI=i; document.querySelectorAll('#osTabs .tab-os').forEach((x,j)=>x.classList.toggle('active',j===i)); renderOs(); };
+  osTabRow.appendChild(t);
+});
+function renderOs() {
+  const os = Object.keys(OS_CMDS)[osI];
+  osPanelRow.innerHTML = '<pre class="code-block"><span class="kw">$</span> ' + OS_CMDS[os] + '</pre>';
+}
+renderOs();
+</script>
+</body>
+</html>

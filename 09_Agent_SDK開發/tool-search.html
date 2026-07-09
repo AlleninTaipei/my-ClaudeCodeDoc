@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tool Search 大規模工具搜尋互動課程</title>
+<style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+           background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+
+    header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+             border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+    header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+    header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+                max-width: 600px; margin-inline: auto; }
+
+    main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+    section { margin-bottom: 52px; }
+    h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+         border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+    h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+    p  { color: #4a5568; margin-bottom: 12px; }
+
+    .code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+      padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+      overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+    .kw  { color: #7c3aed; }
+    .fn  { color: #16a34a; }
+    .str { color: #d97706; }
+    .cmt { color: #94a3b8; font-style: italic; }
+    .key { color: #2563eb; }
+
+    .info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+      padding: 16px 20px; margin-top: 14px; }
+    .info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+      font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+      margin-bottom: 10px; letter-spacing: 0.05em; }
+    .info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+
+    .takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+      border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+    .takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+
+    .api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+    .field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+    .field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+    .field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+
+    .event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+    .event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+      padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+    .event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+      min-width: 160px; flex-shrink: 0; }
+    .event-desc { font-size: 0.82rem; color: #4a5568; }
+
+    .response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+      padding: 20px; margin-top: 16px; }
+    .response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+    .response-field:last-child { border-bottom: none; }
+    .rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 150px; flex-shrink: 0; }
+    .rf-val { font-size: 0.85rem; color: #374151; }
+
+    .scope-badge { display: inline-block; font-size: 0.58rem; font-weight: 700;
+      letter-spacing: 0.07em; text-transform: uppercase; padding: 2px 8px;
+      border-radius: 4px; vertical-align: middle; margin-left: 10px;
+      position: relative; top: -2px; }
+    .scope-universal { background: #dcfce7; color: #166534; border: 1px solid #4ade80; }
+    .scope-api       { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+    .scope-specific  { background: #ede9fe; color: #6d28d9; border: 1px solid #a78bfa; }
+    .scope-legend { display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+      background: #e2e8f0; border: 1px solid #cbd5e0; border-radius: 8px;
+      padding: 10px 18px; margin-bottom: 36px; }
+    .scope-legend-label { font-size: 0.72rem; color: #4a5568; font-weight: 700; }
+    .scope-legend-item  { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: #374151; }
+
+    .btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; border: none; transition: all 0.2s; }
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+    .btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+    .btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+    .btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+    .btn-ghost:disabled { opacity: 0.4; cursor: default; }
+    .step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+
+    .stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+    .stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+    .stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+
+    .demo-panel { display: none; }
+    .demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+    .col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+    .col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+      text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+    .col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+    .col-card p:last-child { margin-bottom: 0; }
+
+    .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .chip-label { font-size: 0.75rem; color: #6b7280; }
+    .chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+      cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+    .chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+
+    @media (max-width: 640px) {
+      .api-fields, .two-col { grid-template-columns: 1fr; }
+    }
+
+    #themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+      padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+      cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+      transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+    #themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+
+    body.dark { background: #0f1117; color: #e2e8f0; }
+    body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+    body.dark header h1 { color: #f7fafc; }
+    body.dark header p  { color: #a0aec0; }
+    body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+    body.dark h3 { color: #e2e8f0; }
+    body.dark p  { color: #a0aec0; }
+    body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+    body.dark .kw  { color: #9f7aea; }
+    body.dark .fn  { color: #68d391; }
+    body.dark .str { color: #f6ad55; }
+    body.dark .cmt { color: #4a5568; }
+    body.dark .key { color: #63b3ed; }
+    body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+    body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+    body.dark .info-box p { color: #a0aec0; }
+    body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+    body.dark .takeaway p { color: #c6f6d5; }
+    body.dark .field { background: #1a202c; border-color: #2d3748; }
+    body.dark .field .name { color: #68d391; }
+    body.dark .field .desc { color: #718096; }
+    body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+    body.dark .event-name { color: #68d391; }
+    body.dark .event-desc { color: #718096; }
+    body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+    body.dark .response-field { border-bottom-color: #2d3748; }
+    body.dark .rf-key { color: #f6ad55; }
+    body.dark .rf-val { color: #a0aec0; }
+    body.dark .scope-universal { background: #1a3a28; color: #68d391; border-color: #276749; }
+    body.dark .scope-api       { background: #3a2a10; color: #f6ad55; border-color: #7a5a20; }
+    body.dark .scope-specific  { background: #2d1f4a; color: #b794f4; border-color: #553c8b; }
+    body.dark .scope-legend { background: #1a202c; border-color: #2d3748; }
+    body.dark .scope-legend-label { color: #4a5568; }
+    body.dark .scope-legend-item  { color: #718096; }
+    body.dark .btn-primary { background: #2b6cb0; }
+    body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+    body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+    body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+    body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+    body.dark .step-indicator { color: #718096; }
+    body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+    body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+    body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+    body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+    body.dark .col-card-title { color: #4a5568; }
+    body.dark .col-card p { color: #a0aec0; }
+    body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+    body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+    body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+    body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Tool Search 大規模工具搜尋</h1>
+  <p>透過依需要動態發現與載入工具, 讓 agent 能擴充運用成百上千個工具, 而不必把所有定義都塞進 context window。</p>
+</header>
+
+<main>
+
+  <div class="scope-legend">
+    <span class="scope-legend-label">範圍圖例</span>
+    <span class="scope-legend-item"><span class="scope-badge scope-universal" style="margin-left:0;">UNIVERSAL</span> 各平台皆適用</span>
+    <span class="scope-legend-item"><span class="scope-badge scope-specific" style="margin-left:0;">TOOL-SPECIFIC</span> 依平台 / 代理環境而異</span>
+  </div>
+
+  <section id="sec-why">
+    <h2>為什麼需要 Tool Search<span class="scope-badge scope-universal">UNIVERSAL</span></h2>
+    <p>Tool search 讓 agent 能運用數百甚至數千個工具, 做法是依需要動態發現並載入工具, 而不是一開始就把所有工具定義都載入 context window, 只搜尋並載入真正需要的工具。</p>
+    <p>隨著工具庫規模增加, 這個做法解決了兩個挑戰:</p>
+    <div class="api-fields">
+      <div class="field"><div class="name">Context 效率</div><div class="desc">工具定義可能佔用大量 context window, 50 個工具可能耗用 10 到 20K tokens, 壓縮實際工作可用的空間</div></div>
+      <div class="field"><div class="name">工具選擇準確度</div><div class="desc">同時載入超過 30 到 50 個工具時, 工具選擇準確度會下降</div></div>
+    </div>
+    <div class="info-box">
+      <span class="tag">預設行為</span>
+      <p>Tool search 預設為開啟狀態。除 Haiku 以外的每個 Claude 模型都支援 Tool search。</p>
+    </div>
+  </section>
+
+  <section id="sec-how">
+    <h2>運作原理</h2>
+    <p>當 Tool search 啟用時, 工具定義不會出現在 context window 中, agent 只會收到可用工具的摘要, 需要時再搜尋相關工具。</p>
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">工具定義保留</span><span class="event-desc">工具定義不會提前放入 context window</span></div>
+      <div class="event-item"><span class="event-name">收到摘要</span><span class="event-desc">agent 收到可用工具的摘要, 當任務需要尚未載入的能力時進行搜尋</span></div>
+      <div class="event-item"><span class="event-name">載入 3-5 個工具</span><span class="event-desc">最相關的 3 到 5 個工具被載入 context, 供後續回合持續使用</span></div>
+      <div class="event-item"><span class="event-name">壓縮後重新搜尋</span><span class="event-desc">若對話夠長導致 SDK 壓縮先前訊息以釋放空間, 先前發現的工具可能被移除, agent 會依需要再次搜尋</span></div>
+    </div>
+    <div class="takeaway">
+      <p>Tool search 在 Claude 第一次發現工具時會增加一次額外的往返 (搜尋步驟), 但對於龐大工具集而言, 每個回合更小的 context 會抵銷這個成本。若工具數少於約 10 個, 一開始就全部載入通常反而更快。</p>
+    </div>
+  </section>
+
+  <section id="sec-config">
+    <h2>設定 Tool Search<span class="scope-badge scope-specific">TOOL-SPECIFIC</span></h2>
+    <p>Tool search 預設開啟。在 Vertex AI 上預設為關閉 (僅 Claude Sonnet 4.5 以上與 Claude Opus 4.5 以上支援), 當 <code>ANTHROPIC_BASE_URL</code> 指向非官方主機時也預設關閉, 因為多數代理伺服器不會轉發 <code>tool_reference</code> 區塊。可用 <code>ENABLE_TOOL_SEARCH</code> 環境變數覆寫預設值。</p>
+
+    <div class="response-box">
+      <div class="response-field"><div class="rf-key">(未設定)</div><div class="rf-val">Tool search 開啟, 工具定義延後並依需要發現。在 Vertex AI 或非官方 ANTHROPIC_BASE_URL 時回退為提前載入</div></div>
+      <div class="response-field"><div class="rf-key">true</div><div class="rf-val">Tool search 永遠開啟, 即使在 Vertex AI 或透過代理伺服器也會送出 beta header, 若平台不支援會導致請求失敗</div></div>
+      <div class="response-field"><div class="rf-key">auto</div><div class="rf-val">比對所有工具定義的合併 token 數與模型 context window, 超過 10% 時啟用 tool search, 未超過則正常全部載入</div></div>
+      <div class="response-field"><div class="rf-key">auto:N</div><div class="rf-val">與 auto 相同, 但可自訂百分比, 例如 auto:5 在工具定義超過 5% 時啟用, 數值越低啟用越早</div></div>
+      <div class="response-field"><div class="rf-key">false</div><div class="rf-val">Tool search 關閉, 每個回合都載入所有工具定義</div></div>
+    </div>
+
+    <h3>設定範例</h3>
+    <p>連接一個暴露許多工具的遠端 MCP server, 用萬用字元預先核准全部工具, 並用 <code>auto:5</code> 讓工具定義超過 context window 的 5% 時才啟用 tool search:</p>
+    <div class="chip-row" id="chips-cfg">
+      <span class="chip-label">語言:</span>
+      <button class="chip active" data-lang="ts" onclick="langToggle(this,'code-cfg','ts')">TypeScript</button>
+      <button class="chip" data-lang="py" onclick="langToggle(this,'code-cfg','py')">Python</button>
+    </div>
+    <div id="code-cfg">
+      <pre class="code-block" data-lang="ts" style="display:block;"><span class="kw">import</span> { query } <span class="kw">from</span> <span class="str">"@anthropic-ai/claude-agent-sdk"</span>;
+
+<span class="kw">for await</span> (<span class="kw">const</span> <span class="key">message</span> <span class="kw">of</span> <span class="fn">query</span>({
+  prompt: <span class="str">"Find and run the appropriate database query"</span>,
+  options: {
+    mcpServers: {
+      <span class="str">"enterprise-tools"</span>: { type: <span class="str">"http"</span>, url: <span class="str">"https://tools.example.com/mcp"</span> }
+    },
+    allowedTools: [<span class="str">"mcp__enterprise-tools__*"</span>], <span class="cmt">// 萬用字元預先核准此 server 的所有工具</span>
+    env: { ENABLE_TOOL_SEARCH: <span class="str">"auto:5"</span> } <span class="cmt">// 超過 context window 5% 時啟用</span>
+  }
+})) {
+  <span class="kw">if</span> (<span class="key">message</span>.type === <span class="str">"result"</span> && <span class="key">message</span>.subtype === <span class="str">"success"</span>) {
+    <span class="fn">console.log</span>(<span class="key">message</span>.result);
+  }
+}</pre>
+      <pre class="code-block" data-lang="py" style="display:none;"><span class="kw">import</span> asyncio
+<span class="kw">from</span> claude_agent_sdk <span class="kw">import</span> query, ClaudeAgentOptions, ResultMessage
+
+<span class="kw">async def</span> <span class="fn">main</span>():
+    options = <span class="fn">ClaudeAgentOptions</span>(
+        mcp_servers={<span class="str">"enterprise-tools"</span>: {<span class="str">"type"</span>: <span class="str">"http"</span>, <span class="str">"url"</span>: <span class="str">"https://tools.example.com/mcp"</span>}},
+        allowed_tools=[<span class="str">"mcp__enterprise-tools__*"</span>],
+        env={<span class="str">"ENABLE_TOOL_SEARCH"</span>: <span class="str">"auto:5"</span>},
+    )
+    <span class="kw">async for</span> <span class="key">message</span> <span class="kw">in</span> <span class="fn">query</span>(prompt=<span class="str">"Find and run the appropriate database query"</span>, options=options):
+        <span class="kw">if</span> <span class="fn">isinstance</span>(<span class="key">message</span>, ResultMessage) <span class="kw">and</span> <span class="key">message</span>.subtype == <span class="str">"success"</span>:
+            <span class="fn">print</span>(<span class="key">message</span>.result)
+
+asyncio.<span class="fn">run</span>(<span class="fn">main</span>())</pre>
+    </div>
+    <p>將 <code>ENABLE_TOOL_SEARCH</code> 設為 <code>"false"</code> 會關閉 tool search 並在每個回合載入所有工具定義, 這會移除搜尋往返, 當工具數量少 (少於約 10 個) 且定義可以輕鬆放入 context window 時速度會更快。</p>
+  </section>
+
+  <section id="sec-optimize">
+    <h2>優化工具發現</h2>
+    <p>搜尋機制會將查詢與工具名稱及描述做比對, 名稱和描述取得越具體, 越容易被相關查詢命中。</p>
+    <div class="two-col">
+      <div class="col-card">
+        <div class="col-card-title">較容易被搜尋到</div>
+        <p>名稱: <code>search_slack_messages</code></p>
+        <p>描述: "Search Slack messages by keyword, channel, or date range"</p>
+      </div>
+      <div class="col-card">
+        <div class="col-card-title">較不容易被搜尋到</div>
+        <p>名稱: <code>query_slack</code></p>
+        <p>描述: "Query Slack"</p>
+      </div>
+    </div>
+    <p>也可以在系統提示中加入一段列出可用工具分類的說明, 讓 agent 了解有哪些種類的工具可供搜尋:</p>
+    <pre class="code-block">You can search for tools to interact with Slack, GitHub, and Jira.</pre>
+  </section>
+
+  <section id="sec-limits">
+    <h2>限制</h2>
+    <div class="api-fields">
+      <div class="field"><div class="name">工具目錄上限</div><div class="desc">10,000 個工具</div></div>
+      <div class="field"><div class="name">搜尋結果數量</div><div class="desc">每次搜尋回傳 3 到 5 個最相關的工具</div></div>
+      <div class="field"><div class="name">模型支援</div><div class="desc">除 Haiku 以外的每個 Claude 模型</div></div>
+    </div>
+  </section>
+
+  <section id="sec-related">
+    <h2>相關文件</h2>
+    <div class="info-box">
+      <span class="tag">延伸閱讀</span>
+      <p>API 中的 Tool search / 連接 MCP servers / 自訂工具 / TypeScript SDK reference / Python SDK reference</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+  }
+
+  function langToggle(btn, codeId, lang) {
+    document.getElementById(codeId).querySelectorAll('.code-block').forEach(function(el){
+      el.style.display = (el.dataset.lang === lang) ? 'block' : 'none';
+    });
+    var row = btn.parentElement;
+    row.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('active'); });
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>

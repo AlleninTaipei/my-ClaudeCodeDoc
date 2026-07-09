@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>給予 Claude 自訂工具</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; }
+.fn  { color: #16a34a; }
+.str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; }
+.key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 150px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; }
+body.dark .fn  { color: #68d391; }
+body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; }
+body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; }
+body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; }
+body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; }
+body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; }
+body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>給予 Claude 自訂工具</h1>
+  <p>使用 Agent SDK 的行程內 MCP server 定義自訂工具, 讓 Claude 呼叫你的函式, 存取你的 API</p>
+</header>
+
+<main>
+
+  <section>
+    <h2>快速參考</h2>
+    <div class="api-fields">
+      <div class="field"><div class="name">定義工具</div><div class="desc">使用 tool() 或 @tool, 提供名稱, 描述, schema 與 handler</div></div>
+      <div class="field"><div class="name">註冊工具</div><div class="desc">包進 create_sdk_mcp_server, 傳入 query() 的 mcpServers</div></div>
+      <div class="field"><div class="name">預先核准工具</div><div class="desc">加入 allowedTools 清單</div></div>
+      <div class="field"><div class="name">平行呼叫工具</div><div class="desc">對無副作用的工具設定 readOnlyHint: true</div></div>
+      <div class="field"><div class="name">處理錯誤不中止</div><div class="desc">回傳 isError: true 而非拋出例外</div></div>
+      <div class="field"><div class="name">擴充到大量工具</div><div class="desc">使用 tool search 按需載入工具</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>建立與呼叫自訂工具</h2>
+    <p>工具由四個部分組成: 名稱, 描述, 輸入 schema, 與 handler。</p>
+
+    <div class="stage-tabs">
+      <div class="ct-tab stage-tab active" onclick="ctGoTo(0)">1 · 定義工具</div>
+      <div class="ct-tab stage-tab" onclick="ctGoTo(1)">2 · 包成 MCP server</div>
+      <div class="ct-tab stage-tab" onclick="ctGoTo(2)">3 · 呼叫工具</div>
+      <div class="ct-tab stage-tab" onclick="ctGoTo(3)">4 · 新增更多工具</div>
+    </div>
+
+    <div class="ct-panel demo-panel visible" id="ct-p0">
+      <pre class="code-block"><span class="kw">const</span> getTemperature = <span class="fn">tool</span>(
+  <span class="str">"get_temperature"</span>,
+  <span class="str">"Get the current temperature at a location"</span>,
+  {
+    latitude: z.<span class="fn">number</span>(),
+    longitude: z.<span class="fn">number</span>()
+  },
+  <span class="kw">async</span> (args) => {
+    <span class="kw">const</span> response = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`https://api.open-meteo.com/...`</span>);
+    <span class="kw">const</span> data = <span class="kw">await</span> response.<span class="fn">json</span>();
+    <span class="kw">return</span> { content: [{ type: <span class="str">"text"</span>, text: <span class="str">`Temperature: ${data.current.temperature_2m}°F`</span> }] };
+  }
+);</pre>
+    </div>
+    <div class="ct-panel demo-panel" id="ct-p1">
+      <pre class="code-block"><span class="kw">const</span> weatherServer = <span class="fn">createSdkMcpServer</span>({
+  name: <span class="str">"weather"</span>,
+  version: <span class="str">"1.0.0"</span>,
+  tools: [getTemperature]
+});</pre>
+      <p>Server 在你的應用程式行程內執行, 不是獨立行程。</p>
+    </div>
+    <div class="ct-panel demo-panel" id="ct-p2">
+      <pre class="code-block"><span class="kw">for await</span> (<span class="kw">const</span> message <span class="kw">of</span> <span class="fn">query</span>({
+  prompt: <span class="str">"What's the temperature in San Francisco?"</span>,
+  options: {
+    mcpServers: { weather: weatherServer },
+    allowedTools: [<span class="str">"mcp__weather__get_temperature"</span>]
+  }
+})) { ... }</pre>
+      <p>mcpServers 的 key 會成為工具全名的 {server_name} 區段: mcp__{server_name}__{tool_name}。</p>
+    </div>
+    <div class="ct-panel demo-panel" id="ct-p3">
+      <pre class="code-block"><span class="kw">const</span> weatherServer = <span class="fn">createSdkMcpServer</span>({
+  name: <span class="str">"weather"</span>,
+  version: <span class="str">"1.0.0"</span>,
+  tools: [getTemperature, getPrecipitationChance]
+});
+<span class="cmt">// 用萬用字元一次允許整個 server 的所有工具</span>
+allowedTools: [<span class="str">"mcp__weather__*"</span>]</pre>
+    </div>
+    <div>
+      <button class="btn btn-ghost" id="ctPrev" disabled onclick="ctGoTo(ctStep-1)">← Back</button>
+      <button class="btn btn-primary" id="ctNext" onclick="ctGoTo(ctStep+1)">Next →</button>
+      <span class="step-indicator" id="ctIndicator">Step 1 of 4</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>新增工具註解</h2>
+    <p>Tool annotations 是描述工具行為的選用中繼資料, 所有欄位都是布林值。</p>
+    <div class="api-fields">
+      <div class="field"><div class="name">readOnlyHint (預設 false)</div><div class="desc">工具不修改環境, 控制能否與其他唯讀工具平行呼叫</div></div>
+      <div class="field"><div class="name">destructiveHint (預設 true)</div><div class="desc">工具可能執行破壞性更新, 僅供參考</div></div>
+      <div class="field"><div class="name">idempotentHint (預設 false)</div><div class="desc">相同參數重複呼叫沒有額外效果, 僅供參考</div></div>
+      <div class="field"><div class="name">openWorldHint (預設 true)</div><div class="desc">工具會連到行程外部的系統, 僅供參考</div></div>
+    </div>
+    <div class="info-box">
+      <span class="tag">注意</span>
+      <p>Annotations 是中繼資料而非強制規則。標記 readOnlyHint: true 的工具若 handler 真的寫入磁碟, 依然會寫入, 請確保標記與 handler 行為一致。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>控制工具存取</h2>
+    <p>tools 選項與 allowed/disallowed 清單影響兩個層面: 可用性 (工具是否出現在 context 中) 與權限 (呼叫是否需要核准)。</p>
+    <div class="api-fields">
+      <div class="field"><div class="name">tools: [...]</div><div class="desc">可用性層面, 只有列出的內建工具會出現在 context 中</div></div>
+      <div class="field"><div class="name">tools: []</div><div class="desc">移除所有內建工具, Claude 只能使用你的 MCP 工具</div></div>
+      <div class="field"><div class="name">allowedTools</div><div class="desc">權限層面, 列出的工具無需核准即可執行</div></div>
+      <div class="field"><div class="name">disallowedTools</div><div class="desc">裸名稱同時影響兩層, 範圍規則 (如 Bash(rm *)) 只影響權限</div></div>
+    </div>
+    <p>MCP 工具名稱格式固定為 mcp__{server_name}__{tool_name}, 例如 weather server 的 get_temperature 會變成 mcp__weather__get_temperature。</p>
+  </section>
+
+  <section>
+    <h2>處理錯誤</h2>
+    <div class="two-col">
+      <div class="col-card">
+        <div class="col-card-title">Handler 拋出未捕捉例外</div>
+        <p>Agent loop 停止, Claude 永遠看不到錯誤, query 呼叫直接失敗。</p>
+      </div>
+      <div class="col-card">
+        <div class="col-card-title">Handler 回傳 isError: true</div>
+        <p>Agent loop 繼續, Claude 把錯誤當成資料看待, 可以重試, 換工具, 或向使用者解釋失敗原因。</p>
+      </div>
+    </div>
+    <pre class="code-block"><span class="kw">try</span> {
+  <span class="kw">const</span> response = <span class="kw">await</span> <span class="fn">fetch</span>(args.endpoint);
+  <span class="kw">if</span> (!response.ok) {
+    <span class="kw">return</span> { content: [{ type: <span class="str">"text"</span>, text: <span class="str">`API error: ${response.status}`</span> }], isError: <span class="kw">true</span> };
+  }
+  ...
+} <span class="kw">catch</span> (error) {
+  <span class="cmt">// 在這裡捕捉能讓 agent loop 存活, 未捕捉的拋出會終止整個 query</span>
+  <span class="kw">return</span> { content: [{ type: <span class="str">"text"</span>, text: <span class="str">`Failed: ${error}`</span> }], isError: <span class="kw">true</span> };
+}</pre>
+  </section>
+
+  <section>
+    <h2>回傳圖片與資源</h2>
+    <div class="chip-row">
+      <span class="chip-label">選擇內容類型:</span>
+      <span class="chip active" onclick="irShow(0,this)">image 區塊</span>
+      <span class="chip" onclick="irShow(1,this)">resource 區塊</span>
+    </div>
+    <div class="ir-panel demo-panel visible" id="ir-p0">
+      <div class="api-fields">
+        <div class="field"><div class="name">type: "image"</div><div class="desc">固定值</div></div>
+        <div class="field"><div class="name">data: string</div><div class="desc">Base64 編碼的原始位元組, 不含 data: 前綴</div></div>
+        <div class="field"><div class="name">mimeType: string</div><div class="desc">必填, 例如 image/png, image/jpeg</div></div>
+      </div>
+      <p>圖片沒有 URL 欄位, 若要回傳位於某個網址的圖片, 需在 handler 內先 fetch 再 base64 編碼。</p>
+    </div>
+    <div class="ir-panel demo-panel" id="ir-p1">
+      <div class="api-fields">
+        <div class="field"><div class="name">resource.uri</div><div class="desc">內容的識別字串, 任何 URI scheme 皆可</div></div>
+        <div class="field"><div class="name">resource.text / blob</div><div class="desc">文字或二進位內容, 擇一提供</div></div>
+        <div class="field"><div class="name">resource.mimeType</div><div class="desc">選填</div></div>
+      </div>
+      <p>URI 只是 Claude 可以之後參照的標籤, SDK 不會實際去讀那個路徑。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>回傳結構化資料與範例</h2>
+    <p>structuredContent 是結果上獨立於 content 陣列的選填 JSON 物件, 讓 Claude 讀取精確欄位而非從文字或圖片中解析。</p>
+    <pre class="code-block"><span class="kw">return</span> {
+  content: [{ type: <span class="str">"image"</span>, data: chartPngBuffer.<span class="fn">toString</span>(<span class="str">"base64"</span>), mimeType: <span class="str">"image/png"</span> }],
+  structuredContent: { series: <span class="str">"temperature_2m"</span>, points: [<span class="str">62.1</span>, <span class="str">63.4</span>] }
+};</pre>
+    <div class="takeaway">
+      <p>設定 structuredContent 時, Claude 會收到 JSON 加上任何圖片或資源區塊, content 中的文字區塊不會被轉發, 因為系統假設它們與結構化資料重複。單位轉換器範例展示了 enum schema 與不支援輸入時回傳 isError 的完整模式。</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+  }
+
+  let ctStep = 0;
+  const CT_MAX = 3;
+  function ctGoTo(n) {
+    ctStep = Math.max(0, Math.min(CT_MAX, n));
+    document.querySelectorAll('.ct-panel').forEach((el, i) => el.classList.toggle('visible', i === ctStep));
+    document.querySelectorAll('.ct-tab').forEach((t, i) => {
+      t.classList.remove('active', 'done');
+      if (i === ctStep) t.classList.add('active');
+      else if (i < ctStep) t.classList.add('done');
+    });
+    document.getElementById('ctPrev').disabled = ctStep === 0;
+    const next = document.getElementById('ctNext');
+    next.disabled = ctStep === CT_MAX;
+    next.textContent = ctStep === CT_MAX ? 'Done ✓' : 'Next →';
+    document.getElementById('ctIndicator').textContent = `Step ${ctStep + 1} of ${CT_MAX + 1}`;
+  }
+  ctGoTo(0);
+
+  function irShow(n, el) {
+    document.querySelectorAll('.ir-panel').forEach((p, i) => p.classList.toggle('visible', i === n));
+    document.querySelectorAll('.chip-row .chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>

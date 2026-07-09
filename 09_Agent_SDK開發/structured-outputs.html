@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>從 Agent 取得結構化輸出互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 260px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; }
+body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>從 Agent 取得結構化輸出</h1>
+  <p>用 JSON Schema, Zod 或 Pydantic 定義輸出形狀, 讓多輪工具使用後的結果變成經過驗證的型別安全資料.</p>
+</header>
+
+<main>
+
+  <section>
+    <h2>為什麼需要結構化輸出?</h2>
+    <p>Agent 預設回傳自由格式文字, 適合聊天但不適合程式化使用. 結構化輸出讓你取得可直接傳給應用程式邏輯, 資料庫或 UI 元件的型別化資料.</p>
+    <div class="chip-row">
+      <span class="chip-label">比較:</span>
+      <div class="chip active" onclick="soSwap(this,'without')">沒有結構化輸出</div>
+      <div class="chip" onclick="soSwap(this,'with')">有結構化輸出</div>
+    </div>
+    <div id="so-without" class="code-block">Here's a classic chocolate chip cookie recipe!
+
+**Chocolate Chip Cookies**
+Prep time: 15 minutes | Cook time: 10 minutes
+
+Ingredients:
+- 2 1/4 cups all-purpose flour
+- 1 cup butter, softened
+...</div>
+    <div id="so-with" class="code-block" style="display:none">{
+  <span class="str">"name"</span>: <span class="str">"Chocolate Chip Cookies"</span>,
+  <span class="str">"prep_time_minutes"</span>: <span class="key">15</span>,
+  <span class="str">"cook_time_minutes"</span>: <span class="key">10</span>,
+  <span class="str">"ingredients"</span>: [
+    { <span class="str">"item"</span>: <span class="str">"all-purpose flour"</span>, <span class="str">"amount"</span>: <span class="key">2.25</span>, <span class="str">"unit"</span>: <span class="str">"cups"</span> }
+  ],
+  <span class="str">"steps"</span>: [<span class="str">"Preheat oven to 375°F"</span>, <span class="str">"Cream butter and sugar"</span>]
+}</div>
+    <div class="info-box">
+      <span class="tag">差異</span>
+      <p>沒有結構化輸出時, 你得自己解析標題, 把 "15 minutes" 轉成數字, 拆分食材與步驟, 並處理不一致的格式. 有結構化輸出時, 你定義好想要的形狀, 就能直接在應用程式中使用型別化資料.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>快速上手</h2>
+    <p>定義描述你要的資料形狀的 JSON Schema, 再透過 query() 的 outputFormat (TypeScript) 或 output_format (Python) 選項傳入. Agent 完成後, 結果訊息會包含符合你 schema 的 structured_output 欄位.</p>
+    <div class="chip-row">
+      <span class="chip-label">選擇語言:</span>
+      <div class="chip active" onclick="soSwitch(this,'ts','qs')">TypeScript</div>
+      <div class="chip" onclick="soSwitch(this,'py','qs')">Python</div>
+    </div>
+    <div id="qs-ts" class="code-block">
+<span class="kw">import</span> { query } <span class="kw">from</span> <span class="str">"@anthropic-ai/claude-agent-sdk"</span>;
+
+<span class="kw">const</span> <span class="key">schema</span> = {
+  type: <span class="str">"object"</span>,
+  properties: {
+    company_name: { type: <span class="str">"string"</span> },
+    founded_year: { type: <span class="str">"number"</span> },
+    headquarters: { type: <span class="str">"string"</span> }
+  },
+  required: [<span class="str">"company_name"</span>]
+};
+
+<span class="kw">for await</span> (<span class="kw">const</span> <span class="key">message</span> <span class="kw">of</span> <span class="fn">query</span>({
+  prompt: <span class="str">"Research Anthropic and provide key company information"</span>,
+  options: { outputFormat: { type: <span class="str">"json_schema"</span>, schema: <span class="key">schema</span> } }
+})) {
+  <span class="kw">if</span> (<span class="key">message</span>.type === <span class="str">"result"</span> && <span class="key">message</span>.subtype === <span class="str">"success"</span> && <span class="key">message</span>.structured_output) {
+    <span class="key">console</span>.<span class="fn">log</span>(<span class="key">message</span>.structured_output);
+    <span class="cmt">// { company_name: "Anthropic", founded_year: 2021, headquarters: "San Francisco, CA" }</span>
+  }
+}</div>
+    <div id="qs-py" class="code-block" style="display:none">
+<span class="kw">import</span> asyncio
+<span class="kw">from</span> claude_agent_sdk <span class="kw">import</span> query, ClaudeAgentOptions, ResultMessage
+
+schema = {
+    <span class="str">"type"</span>: <span class="str">"object"</span>,
+    <span class="str">"properties"</span>: {
+        <span class="str">"company_name"</span>: {<span class="str">"type"</span>: <span class="str">"string"</span>},
+        <span class="str">"founded_year"</span>: {<span class="str">"type"</span>: <span class="str">"number"</span>},
+        <span class="str">"headquarters"</span>: {<span class="str">"type"</span>: <span class="str">"string"</span>},
+    },
+    <span class="str">"required"</span>: [<span class="str">"company_name"</span>],
+}
+
+<span class="kw">async def</span> <span class="fn">main</span>():
+    <span class="kw">async for</span> message <span class="kw">in</span> <span class="fn">query</span>(
+        prompt=<span class="str">"Research Anthropic and provide key company information"</span>,
+        options=<span class="fn">ClaudeAgentOptions</span>(output_format={<span class="str">"type"</span>: <span class="str">"json_schema"</span>, <span class="str">"schema"</span>: schema}),
+    ):
+        <span class="kw">if</span> <span class="fn">isinstance</span>(message, ResultMessage) <span class="kw">and</span> message.structured_output:
+            <span class="fn">print</span>(message.structured_output)
+
+asyncio.<span class="fn">run</span>(main())</div>
+  </section>
+
+  <section>
+    <h2>用 Zod 與 Pydantic 建立型別安全 Schema</h2>
+    <p>不用手寫 JSON Schema, 可改用 Zod (TypeScript) 或 Pydantic (Python) 定義 schema. 這些函式庫會自動產生 JSON Schema, 並讓你將回應解析為具有自動完成與型別檢查的完整型別物件.</p>
+    <div class="api-fields">
+      <div class="field"><div class="name">完整型別推論</div><div class="desc">TypeScript 型別推論與 Python 型別提示</div></div>
+      <div class="field"><div class="name">執行期驗證</div><div class="desc">用 safeParse() 或 model_validate() 驗證</div></div>
+      <div class="field"><div class="name">更好的錯誤訊息</div><div class="desc">驗證失敗時提供清楚的錯誤說明</div></div>
+      <div class="field"><div class="name">可組合可重用</div><div class="desc">Schema 可以被組合與跨專案重用</div></div>
+    </div>
+    <div class="chip-row">
+      <span class="chip-label">選擇語言:</span>
+      <div class="chip active" onclick="soSwitch(this,'ts','zod')">TypeScript (Zod)</div>
+      <div class="chip" onclick="soSwitch(this,'py','zod')">Python (Pydantic)</div>
+    </div>
+    <div id="zod-ts" class="code-block">
+<span class="kw">import</span> { z } <span class="kw">from</span> <span class="str">"zod"</span>;
+<span class="kw">import</span> { query } <span class="kw">from</span> <span class="str">"@anthropic-ai/claude-agent-sdk"</span>;
+
+<span class="kw">const</span> <span class="key">FeaturePlan</span> = z.<span class="fn">object</span>({
+  feature_name: z.<span class="fn">string</span>(),
+  summary: z.<span class="fn">string</span>(),
+  steps: z.<span class="fn">array</span>(z.<span class="fn">object</span>({
+    step_number: z.<span class="fn">number</span>(),
+    description: z.<span class="fn">string</span>(),
+    estimated_complexity: z.<span class="fn">enum</span>([<span class="str">"low"</span>, <span class="str">"medium"</span>, <span class="str">"high"</span>])
+  })),
+  risks: z.<span class="fn">array</span>(z.<span class="fn">string</span>())
+});
+
+<span class="kw">const</span> <span class="key">schema</span> = z.<span class="fn">toJSONSchema</span>(<span class="key">FeaturePlan</span>);
+
+<span class="kw">for await</span> (<span class="kw">const</span> <span class="key">message</span> <span class="kw">of</span> <span class="fn">query</span>({
+  prompt: <span class="str">"Plan how to add dark mode support to a React app."</span>,
+  options: { outputFormat: { type: <span class="str">"json_schema"</span>, schema: <span class="key">schema</span> } }
+})) {
+  <span class="kw">if</span> (<span class="key">message</span>.type === <span class="str">"result"</span> && <span class="key">message</span>.structured_output) {
+    <span class="kw">const</span> <span class="key">parsed</span> = <span class="key">FeaturePlan</span>.<span class="fn">safeParse</span>(<span class="key">message</span>.structured_output);
+    <span class="kw">if</span> (<span class="key">parsed</span>.success) {
+      <span class="key">console</span>.<span class="fn">log</span>(<span class="key">parsed</span>.data.feature_name);
+    }
+  }
+}</div>
+    <div id="zod-py" class="code-block" style="display:none">
+<span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel
+<span class="kw">from</span> claude_agent_sdk <span class="kw">import</span> query, ClaudeAgentOptions, ResultMessage
+
+<span class="kw">class</span> <span class="fn">Step</span>(BaseModel):
+    step_number: <span class="key">int</span>
+    description: <span class="key">str</span>
+    estimated_complexity: <span class="key">str</span>
+
+<span class="kw">class</span> <span class="fn">FeaturePlan</span>(BaseModel):
+    feature_name: <span class="key">str</span>
+    summary: <span class="key">str</span>
+    steps: <span class="fn">list</span>[Step]
+    risks: <span class="fn">list</span>[<span class="key">str</span>]
+
+<span class="kw">async def</span> <span class="fn">main</span>():
+    <span class="kw">async for</span> message <span class="kw">in</span> <span class="fn">query</span>(
+        prompt=<span class="str">"Plan how to add dark mode support to a React app."</span>,
+        options=<span class="fn">ClaudeAgentOptions</span>(output_format={<span class="str">"type"</span>: <span class="str">"json_schema"</span>, <span class="str">"schema"</span>: FeaturePlan.<span class="fn">model_json_schema</span>()}),
+    ):
+        <span class="kw">if</span> <span class="fn">isinstance</span>(message, ResultMessage) <span class="kw">and</span> message.structured_output:
+            plan = FeaturePlan.<span class="fn">model_validate</span>(message.structured_output)
+            <span class="fn">print</span>(plan.feature_name)</div>
+  </section>
+
+  <section>
+    <h2>輸出格式設定</h2>
+    <div class="api-fields">
+      <div class="field"><div class="name">type</div><div class="desc">設為 "json_schema" 以啟用結構化輸出</div></div>
+      <div class="field"><div class="name">schema</div><div class="desc">定義輸出結構的 JSON Schema 物件, 可用 z.toJSONSchema() 或 .model_json_schema() 產生</div></div>
+    </div>
+    <p>SDK 支援標準 JSON Schema 功能, 包含所有基本型別 (object, array, string, number, boolean, null), enum, const, required, 巢狀物件以及 $ref 定義.</p>
+  </section>
+
+  <section>
+    <h2>範例: TODO 追蹤 Agent</h2>
+    <p>此範例展示結構化輸出如何搭配多步驟工具使用. Agent 需要在程式碼庫中尋找 TODO 註解, 再對每一筆查詢 git blame 資訊, 自主決定要用哪些工具 (Grep 搜尋, Bash 執行 git 指令), 並把結果整合成單一結構化回應.</p>
+    <div class="code-block">
+<span class="key">todo_schema</span> = {
+    <span class="str">"type"</span>: <span class="str">"object"</span>,
+    <span class="str">"properties"</span>: {
+        <span class="str">"todos"</span>: {
+            <span class="str">"type"</span>: <span class="str">"array"</span>,
+            <span class="str">"items"</span>: {
+                <span class="str">"type"</span>: <span class="str">"object"</span>,
+                <span class="str">"properties"</span>: {
+                    <span class="str">"text"</span>: {<span class="str">"type"</span>: <span class="str">"string"</span>}, <span class="str">"file"</span>: {<span class="str">"type"</span>: <span class="str">"string"</span>},
+                    <span class="str">"line"</span>: {<span class="str">"type"</span>: <span class="str">"number"</span>}, <span class="str">"author"</span>: {<span class="str">"type"</span>: <span class="str">"string"</span>}, <span class="str">"date"</span>: {<span class="str">"type"</span>: <span class="str">"string"</span>}
+                },
+                <span class="str">"required"</span>: [<span class="str">"text"</span>, <span class="str">"file"</span>, <span class="str">"line"</span>]
+            }
+        },
+        <span class="str">"total_count"</span>: {<span class="str">"type"</span>: <span class="str">"number"</span>}
+    },
+    <span class="str">"required"</span>: [<span class="str">"todos"</span>, <span class="str">"total_count"</span>]
+}</div>
+    <div class="info-box">
+      <span class="tag">設計重點</span>
+      <p>schema 中的 author 與 date 為選填欄位, 因為並非每個檔案都能取得 git blame 資訊. Agent 會填入能找到的內容, 其餘欄位省略.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>錯誤處理</h2>
+    <p>當 schema 過於複雜, 任務本身模糊不清, 或 agent 達到重試上限時, 結構化輸出可能失敗. 也可能在沒有驗證失敗的情況下發生: 模型 fallback 可能會在串流中途撤回已完成的輸出, 若沒有重試補上就會以相同錯誤結束.</p>
+    <div class="response-box">
+      <div class="response-field"><div class="rf-key">success</div><div class="rf-val">輸出已成功產生並通過驗證</div></div>
+      <div class="response-field"><div class="rf-key">error_max_structured_output_retries</div><div class="rf-val">多次嘗試後仍無有效輸出 (驗證失敗, 或模型 fallback 撤回且無成功重試)</div></div>
+    </div>
+    <div class="takeaway">
+      <p>避免錯誤的技巧: 保持 schema 精簡, 深度巢狀且必填欄位過多的 schema 較難滿足; 讓 schema 貼合任務, 若任務可能缺少某些資訊就把該欄位設為選填; 使用清楚的 prompt, 模糊的 prompt 會讓 agent 更難判斷該產出什麼.</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+function soSwap(el, which) {
+  el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('so-without').style.display = which === 'without' ? 'block' : 'none';
+  document.getElementById('so-with').style.display = which === 'with' ? 'block' : 'none';
+}
+function soSwitch(el, lang, group) {
+  el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(group + '-ts').style.display = lang === 'ts' ? 'block' : 'none';
+  document.getElementById(group + '-py').style.display = lang === 'py' ? 'block' : 'none';
+}
+</script>
+</body>
+</html>

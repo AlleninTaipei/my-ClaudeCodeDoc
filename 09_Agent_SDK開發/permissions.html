@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Agent SDK 權限設定互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; }
+.fn  { color: #16a34a; }
+.str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; }
+.key { color: #2563eb; }
+
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 130px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+
+.scope-badge { display: inline-block; font-size: 0.58rem; font-weight: 700;
+  letter-spacing: 0.07em; text-transform: uppercase; padding: 2px 8px;
+  border-radius: 4px; vertical-align: middle; margin-left: 10px;
+  position: relative; top: -2px; }
+.scope-universal { background: #dcfce7; color: #166534; border: 1px solid #4ade80; }
+.scope-api       { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.scope-specific  { background: #ede9fe; color: #6d28d9; border: 1px solid #a78bfa; }
+.scope-legend { display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  background: #e2e8f0; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 10px 18px; margin-bottom: 36px; }
+.scope-legend-label { font-size: 0.72rem; color: #4a5568; font-weight: 700; }
+.scope-legend-item  { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: #374151; }
+
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+
+@media (max-width: 640px) {
+  .api-fields, .two-col { grid-template-columns: 1fr; }
+}
+
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; }
+body.dark .fn  { color: #68d391; }
+body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; }
+body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; }
+body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; }
+body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; }
+body.dark .rf-val { color: #a0aec0; }
+body.dark .scope-universal { background: #1a3a28; color: #68d391; border-color: #276749; }
+body.dark .scope-api       { background: #3a2a10; color: #f6ad55; border-color: #7a5a20; }
+body.dark .scope-specific  { background: #2d1f4a; color: #b794f4; border-color: #553c8b; }
+body.dark .scope-legend { background: #1a202c; border-color: #2d3748; }
+body.dark .scope-legend-label { color: #4a5568; }
+body.dark .scope-legend-item  { color: #718096; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; }
+body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>設定 Agent SDK 權限 (Configure permissions)</h1>
+  <p>透過權限模式, hooks 與宣告式允許/拒絕規則, 掌控你的 agent 如何使用工具。</p>
+</header>
+
+<main>
+
+<section>
+  <h2>權限評估的六個步驟</h2>
+  <p>當 Claude 請求使用工具時, SDK 會依照固定順序依序檢查, 任何一步做出決定就會停止往下評估。</p>
+
+  <div class="stage-tabs">
+    <div class="perm-tab stage-tab active" onclick="permGoTo(0)">1 · Hooks</div>
+    <div class="perm-tab stage-tab" onclick="permGoTo(1)">2 · 拒絕規則</div>
+    <div class="perm-tab stage-tab" onclick="permGoTo(2)">3 · 詢問規則</div>
+    <div class="perm-tab stage-tab" onclick="permGoTo(3)">4 · 權限模式</div>
+    <div class="perm-tab stage-tab" onclick="permGoTo(4)">5 · 允許規則</div>
+    <div class="perm-tab stage-tab" onclick="permGoTo(5)">6 · canUseTool 回呼</div>
+  </div>
+
+  <div class="perm-panel demo-panel visible" id="perm-p0">
+    <div class="info-box"><span class="tag">STEP 1</span>
+    <p>最先執行的是 hooks。hook 可以直接拒絕呼叫, 也可以放行讓流程繼續。即使 hook 回傳 allow, 仍不會跳過下方的拒絕與詢問規則, 那兩步一定會被評估。</p></div>
+  </div>
+  <div class="perm-panel demo-panel" id="perm-p1">
+    <div class="info-box"><span class="tag">STEP 2</span>
+    <p>檢查 disallowed_tools 與 settings.json 中的 deny 規則。一旦符合, 該工具就會被封鎖, 即使在 bypassPermissions 模式下也一樣。裸名規則 (例如 Bash) 會在此步驟之前就把整個工具從 Claude 的可視範圍移除, 只有像 Bash(rm *) 這種帶範圍的規則才會走到這裡才被檢查。</p></div>
+  </div>
+  <div class="perm-panel demo-panel" id="perm-p2">
+    <div class="info-box"><span class="tag">STEP 3</span>
+    <p>檢查 settings.json 中的 ask 規則。一旦符合, 呼叫會進入你的 canUseTool 回呼等待確認, 即使在 bypassPermissions 模式下也一樣。在 dontAsk 模式下, 符合的 ask 規則會直接變成拒絕, 因為該模式從不詢問。</p></div>
+  </div>
+  <div class="perm-panel demo-panel" id="perm-p3">
+    <div class="info-box"><span class="tag">STEP 4</span>
+    <p>套用目前生效的權限模式。bypassPermissions 會核准所有走到這一步的請求; acceptEdits 會核准檔案操作; plan 模式會讓所有檔案編輯與寫入類工具一律導向 canUseTool 回呼, 不受允許規則影響; 其餘模式則繼續往下評估。</p></div>
+  </div>
+  <div class="perm-panel demo-panel" id="perm-p4">
+    <div class="info-box"><span class="tag">STEP 5</span>
+    <p>檢查 allowed_tools 與 settings.json 中的 allow 規則。一旦符合就核准該工具。</p></div>
+  </div>
+  <div class="perm-panel demo-panel" id="perm-p5">
+    <div class="info-box"><span class="tag">STEP 6</span>
+    <p>若以上步驟都沒有決定結果, 就呼叫你的 canUseTool 回呼交由使用者判斷。在 dontAsk 模式下這一步會被跳過, 直接拒絕。</p></div>
+  </div>
+
+  <div>
+    <button class="btn btn-ghost" id="permPrev" disabled onclick="permGoTo(permStep-1)">← 上一步</button>
+    <button class="btn btn-primary" id="permNext" onclick="permGoTo(permStep+1)">下一步 →</button>
+    <span class="step-indicator" id="permIndicator">Step 1 of 6</span>
+  </div>
+</section>
+
+<section>
+  <h2>允許與拒絕規則</h2>
+  <p>allowed_tools 與 disallowed_tools 會加入上方評估流程中的允許與拒絕規則清單。允許規則只影響核准與否, 未列出的工具仍會落到權限模式繼續評估; 拒絕規則則依是否指定完整工具名稱, 或是限定範圍的樣式, 而有不同行為。</p>
+
+  <div class="api-fields">
+    <div class="field">
+      <div class="name">allowed_tools=["Read","Grep"]</div>
+      <div class="desc">Read 與 Grep 自動核准, 未列出的工具仍會落到權限模式與 canUseTool。</div>
+    </div>
+    <div class="field">
+      <div class="name">disallowed_tools=["Bash"]</div>
+      <div class="desc">Bash 工具定義會被整個移除, Claude 完全看不到也無法嘗試呼叫。</div>
+    </div>
+    <div class="field">
+      <div class="name">disallowed_tools=["Bash(rm *)"]</div>
+      <div class="desc">Bash 仍然可用, 但符合 rm * 的呼叫在任何模式下都會被拒絕, 包括 bypassPermissions。其餘 Bash 呼叫照常評估。</div>
+    </div>
+    <div class="field">
+      <div class="name">disallowed_tools=["*"]</div>
+      <div class="desc">移除所有工具定義。拒絕規則支援萬用字元, mcp__* 可比對所有伺服器的 MCP 工具。</div>
+    </div>
+  </div>
+
+  <h3>鎖定型 agent 範例</h3>
+  <pre class="code-block"><span class="kw">const</span> options = {
+  allowedTools: [<span class="str">"Read"</span>, <span class="str">"Glob"</span>, <span class="str">"Grep"</span>],
+  permissionMode: <span class="str">"dontAsk"</span>
+};</pre>
+
+  <div class="info-box"><span class="tag">注意</span>
+  <p>自動核准的工具永遠不會走到 canUseTool。透過更早步驟核准的呼叫 (acceptEdits, bypassPermissions, 或 allow 規則) 會直接跳過你的 canUseTool 回呼。若要確保每次呼叫都被檢查, 請改用 PreToolUse hook。</p></div>
+
+  <div class="info-box"><span class="tag">注意</span>
+  <p>allowed_tools 不會限制 bypassPermissions。設定 allowed_tools=["Read"] 同時搭配 permission_mode="bypassPermissions", 仍然會核准包含 Bash, Write, Edit 在內的所有工具。若需要 bypassPermissions 但要封鎖特定工具, 請改用 disallowed_tools。</p></div>
+</section>
+
+<section>
+  <h2>權限模式一覽</h2>
+  <p>權限模式提供全域層級的工具使用控管, 可以在建立 query() 時設定, 也能在串流 session 中動態切換。點選下方標籤查看各模式細節。</p>
+
+  <div class="chip-row">
+    <span class="chip-label">選擇模式:</span>
+    <div class="chip active" onclick="permModeShow(0,this)">default</div>
+    <div class="chip" onclick="permModeShow(1,this)">dontAsk</div>
+    <div class="chip" onclick="permModeShow(2,this)">acceptEdits</div>
+    <div class="chip" onclick="permModeShow(3,this)">bypassPermissions</div>
+    <div class="chip" onclick="permModeShow(4,this)">plan</div>
+    <div class="chip" onclick="permModeShow(5,this)">auto</div>
+  </div>
+
+  <div class="response-box permmode-panel" id="permmode-0">
+    <div class="response-field"><div class="rf-key">說明</div><div class="rf-val">標準權限行為, 沒有任何自動核准, 未比對到規則的工具都會觸發 canUseTool 回呼。</div></div>
+    <div class="response-field"><div class="rf-key">使用時機</div><div class="rf-val">預設模式, 適合一般互動情境, 由使用者逐一確認工具呼叫。</div></div>
+  </div>
+  <div class="response-box permmode-panel" id="permmode-1" style="display:none">
+    <div class="response-field"><div class="rf-key">說明</div><div class="rf-val">把任何原本要詢問的權限提示直接轉為拒絕。已被 allowed_tools, settings.json 或 hook 核准的工具照常執行, 其餘一律拒絕, canUseTool 不會被呼叫。</div></div>
+    <div class="response-field"><div class="rf-key">使用時機</div><div class="rf-val">適合 headless agent, 需要固定且明確的工具範圍, 寧可硬拒絕也不要隱性依賴 canUseTool。</div></div>
+  </div>
+  <div class="response-box permmode-panel" id="permmode-2" style="display:none">
+    <div class="response-field"><div class="rf-key">說明</div><div class="rf-val">自動核准檔案操作 (Edit, Write) 以及 mkdir, touch, rm, rmdir, mv, cp, sed 等檔案系統指令, 僅限工作目錄或 additionalDirectories 內的路徑; 其餘 Bash 指令仍需正常權限。</div></div>
+    <div class="response-field"><div class="rf-key">使用時機</div><div class="rf-val">信任 Claude 的編輯內容, 想要在雛型開發或隔離目錄中加快迭代速度時使用。</div></div>
+  </div>
+  <div class="response-box permmode-panel" id="permmode-3" style="display:none">
+    <div class="response-field"><div class="rf-key">說明</div><div class="rf-val">除非有明確的 ask 規則比對到, 否則所有工具都不經提示直接執行。hooks 仍會執行, 且必要時仍可封鎖操作。</div></div>
+    <div class="response-field"><div class="rf-key">使用時機</div><div class="rf-val">請謹慎使用, Claude 在此模式下擁有完整系統存取權, 僅限在你信任所有可能操作的受控環境中使用。</div></div>
+  </div>
+  <div class="response-box permmode-panel" id="permmode-4" style="display:none">
+    <div class="response-field"><div class="rf-key">說明</div><div class="rf-val">Claude 只探索與規劃, 不會編輯原始檔案。唯讀工具行為與 default 相同, 檔案編輯永遠不會自動核准, 一律導向 canUseTool 回呼, 必要時可用 AskUserQuestion 釐清需求。</div></div>
+    <div class="response-field"><div class="rf-key">使用時機</div><div class="rf-val">想讓 Claude 先提案再執行, 例如程式碼審查, 或需要在變更套用前先核准的情境。</div></div>
+  </div>
+  <div class="response-box permmode-panel" id="permmode-5" style="display:none">
+    <div class="response-field"><div class="rf-key">說明</div><div class="rf-val">僅限 TypeScript。由模型分類器針對每次工具呼叫自動判斷核准或拒絕。</div></div>
+    <div class="response-field"><div class="rf-key">使用時機</div><div class="rf-val">想要以模型判斷取代人工逐一核准, 減少提示次數, 適用性依版本而定。</div></div>
+  </div>
+
+  <div class="info-box"><span class="tag">SUBAGENT 繼承</span>
+  <p>當父層使用 bypassPermissions, acceptEdits 或 auto 時, 所有 subagent 都會繼承該模式且無法個別覆寫。subagent 可能擁有不同系統提示與較寬鬆的行為, 因此繼承 bypassPermissions 等於授予它們完整且自主的系統存取權。明確的 ask 規則仍會強制觸發提示。</p></div>
+</section>
+
+<section>
+  <h2>設定權限模式的兩種時機</h2>
+  <p>你可以在建立 query 時一次性設定權限模式, 也能在串流 session 進行中動態切換。</p>
+
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">查詢時設定</div>
+      <p>建立 query 時傳入 permission_mode (Python) 或 permissionMode (TypeScript), 此設定會套用在整個 session, 除非之後動態變更。</p>
+      <pre class="code-block">query({
+  prompt: <span class="str">"Help me refactor this code"</span>,
+  options: {
+    permissionMode: <span class="str">"default"</span>
+  }
+});</pre>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">串流過程中動態切換</div>
+      <p>呼叫 set_permission_mode() (Python) 或 setPermissionMode() (TypeScript) 可以在 session 中途改變模式, 新模式會立即套用到後續所有工具請求, 例如先從嚴格模式開始, 待建立信任後再放寬為 acceptEdits。</p>
+      <pre class="code-block"><span class="kw">await</span> q.<span class="fn">setPermissionMode</span>(<span class="str">"acceptEdits"</span>);</pre>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>相關資源</h2>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">user-input</span><span class="event-desc">處理互動式核准提示與釐清問題</span></div>
+    <div class="event-item"><span class="event-name">hooks</span><span class="event-desc">在 agent 生命週期的關鍵時間點執行自訂程式碼</span></div>
+    <div class="event-item"><span class="event-name">settings.json</span><span class="event-desc">宣告式允許/拒絕規則語法</span></div>
+  </div>
+
+  <div class="takeaway">
+  <p>權限評估永遠依照固定順序進行: hooks 先行, 接著拒絕規則, 詢問規則, 權限模式, 允許規則, 最後才是 canUseTool 回呼。理解這個順序, 才能正確預期哪一層規則會先生效。</p>
+  </div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+let permStep = 0;
+const PERM_MAX = 5;
+function permGoTo(n) {
+  permStep = Math.max(0, Math.min(PERM_MAX, n));
+  document.querySelectorAll('.perm-panel').forEach((el, i) => el.classList.toggle('visible', i === permStep));
+  document.querySelectorAll('.perm-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === permStep) t.classList.add('active');
+    else if (i < permStep) t.classList.add('done');
+  });
+  document.getElementById('permPrev').disabled = permStep === 0;
+  const next = document.getElementById('permNext');
+  next.disabled = permStep === PERM_MAX;
+  next.textContent = permStep === PERM_MAX ? 'Done ✓' : '下一步 →';
+  document.getElementById('permIndicator').textContent = `Step ${permStep + 1} of ${PERM_MAX + 1}`;
+}
+permGoTo(0);
+
+function permModeShow(n, el) {
+  document.querySelectorAll('.permmode-panel').forEach((p, i) => p.style.display = i === n ? 'block' : 'none');
+  el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>

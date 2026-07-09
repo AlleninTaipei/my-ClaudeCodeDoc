@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Claude Apps Gateway 設定參考互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%); border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
+main { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c; overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw{color:#7c3aed;} .fn{color:#16a34a;} .str{color:#d97706;} .cmt{color:#94a3b8;font-style:italic;} .key{color:#2563eb;}
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a; min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 170px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.scope-badge { display: inline-block; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; vertical-align: middle; margin-left: 10px; position: relative; top: -2px; }
+.scope-universal { background: #dcfce7; color: #166534; border: 1px solid #4ade80; }
+.scope-api { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.scope-specific { background: #ede9fe; color: #6d28d9; border: 1px solid #a78bfa; }
+.scope-legend { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; background: #e2e8f0; border: 1px solid #cbd5e0; border-radius: 8px; padding: 10px 18px; margin-bottom: 36px; }
+.scope-legend-label { font-size: 0.72rem; color: #4a5568; font-weight: 700; }
+.scope-legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; } body.dark p { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw{color:#9f7aea;} body.dark .fn{color:#68d391;} body.dark .str{color:#f6ad55;} body.dark .cmt{color:#4a5568;} body.dark .key{color:#63b3ed;}
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .scope-universal { background: #1a3a28; color: #68d391; border-color: #276749; }
+body.dark .scope-api { background: #3a2a10; color: #f6ad55; border-color: #7a5a20; }
+body.dark .scope-specific { background: #2d1f4a; color: #b794f4; border-color: #553c8b; }
+body.dark .scope-legend { background: #1a202c; border-color: #2d3748; }
+body.dark .scope-legend-label { color: #4a5568; } body.dark .scope-legend-item { color: #718096; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Claude Apps Gateway 設定參考</h1>
+  <p>gateway.yaml 每個欄位: 監聽與 TLS, OIDC, session, Postgres, 上游, 模型路由, managed 政策與遙測</p>
+</header>
+
+<main>
+
+<section id="structure">
+  <h2>檔案結構</h2>
+  <p>五個區段是必要的, 其餘為選用並採用預設值。未知的欄位會導致開機失敗, 因此打錯字會出現明確的錯誤而非被靜默忽略。</p>
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">必要區段</div>
+      <p>listen, oidc, session, store, upstreams</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">選用區段</div>
+      <p>admin, enforcement, models, managed, telemetry, access_control / limits / timeouts / rate_limits</p>
+    </div>
+  </div>
+  <div class="info-box"><div class="tag">機密展開</div><p>不要把 client_secret, jwt_secret, postgres_url 直接寫在 gateway.yaml 中, 改用 <code>${VAR}</code> (環境變數) 或 <code>${file:/path}</code> (檔案內容, 適用 Kubernetes Secret 或 Vault)。</p></div>
+</section>
+
+<section id="listen-oidc">
+  <h2>listen 與 oidc</h2>
+  <div class="chip-row">
+    <span class="chip-label">區段:</span>
+    <span class="cf-chip chip active" data-i="0" onclick="cfShow(0)">listen</span>
+    <span class="cf-chip chip" data-i="1" onclick="cfShow(1)">oidc</span>
+  </div>
+  <div class="cf-panel demo-panel visible" data-i="0">
+    <div class="api-fields">
+      <div class="field"><div class="name">host / port</div><div class="desc">預設 0.0.0.0 / 8080</div></div>
+      <div class="field"><div class="name">public_url</div><div class="desc">對外可見的 https 來源, 用於 IdP redirect_uri 與 discovery, 在 TLS 終止代理後方為必要</div></div>
+      <div class="field"><div class="name">tls.cert / tls.key</div><div class="desc">若閘道自行終止 TLS 則需要的 PEM 路徑</div></div>
+      <div class="field"><div class="name">trusted_proxies</div><div class="desc">前方負載平衡器的 CIDR, 用於信任 X-Forwarded-For 並記錄真實客戶端 IP</div></div>
+    </div>
+  </div>
+  <div class="cf-panel demo-panel" data-i="1">
+    <div class="api-fields">
+      <div class="field"><div class="name">issuer</div><div class="desc">OIDC discovery 基底, 必須提供 /.well-known/openid-configuration</div></div>
+      <div class="field"><div class="name">client_id / client_secret</div><div class="desc">來自 OAuth 用戶端註冊</div></div>
+      <div class="field"><div class="name">allowed_email_domains</div><div class="desc">拒絕 email 網域不符的 id_token</div></div>
+      <div class="field"><div class="name">allowed_groups</div><div class="desc">限制只有特定 IdP 群組成員可登入</div></div>
+      <div class="field"><div class="name">userinfo_fallback</div><div class="desc">id_token 缺少 email 或 groups 時改用 /userinfo 補齊</div></div>
+      <div class="field"><div class="name">use_pkce</div><div class="desc">預設 true, 傳送 PKCE 挑戰</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="session-store">
+  <h2>session 與 store</h2>
+  <pre class="code-block">session:
+  jwt_secret: ${GATEWAY_JWT_SECRET}   <span class="cmt"># openssl rand -base64 32</span>
+  ttl_hours: 1                        <span class="cmt"># 也界定撤銷延遲</span>
+
+store:
+  postgres_url: ${GATEWAY_POSTGRES_URL}
+  max_connections: 5</pre>
+  <div class="info-box"><div class="tag">輪替 JWT 密鑰</div><p><code>jwt_secret</code> 接受單一字串或陣列, 索引 0 用來簽章, 全部項目都能驗證。要輪替時先加入新密鑰, 等 ttl_hours 之後再移除舊密鑰。</p></div>
+</section>
+
+<section id="upstreams">
+  <h2>upstreams 上游</h2>
+  <p>upstreams 是有序清單, 閘道轉發推論給第一個能解析所需模型的上游。5xx, 429 或逾時會容錯移轉到下一個。</p>
+  <div class="chip-row">
+    <span class="chip-label">選擇上游:</span>
+    <span class="up-chip chip active" data-i="0" onclick="upShow(0)">Anthropic API</span>
+    <span class="up-chip chip" data-i="1" onclick="upShow(1)">Amazon Bedrock</span>
+    <span class="up-chip chip" data-i="2" onclick="upShow(2)">Google Agent Platform</span>
+    <span class="up-chip chip" data-i="3" onclick="upShow(3)">Microsoft Foundry</span>
+  </div>
+  <div class="up-panel demo-panel visible" data-i="0">
+    <pre class="code-block">upstreams:
+  - provider: anthropic
+    auth:
+      api_key: ${ANTHROPIC_API_KEY}</pre>
+  </div>
+  <div class="up-panel demo-panel" data-i="1">
+    <pre class="code-block">upstreams:
+  - provider: bedrock
+    region: us-east-1
+    auth: {}  <span class="cmt"># AWS 預設憑證鏈</span></pre>
+  </div>
+  <div class="up-panel demo-panel" data-i="2">
+    <pre class="code-block">upstreams:
+  - provider: vertex
+    region: us-east5
+    project_id: example-prod
+    auth: {}  <span class="cmt"># Application Default Credentials</span></pre>
+  </div>
+  <div class="up-panel demo-panel" data-i="3">
+    <pre class="code-block">upstreams:
+  - provider: foundry
+    resource: example-foundry
+    auth: { use_azure_ad: true }</pre>
+  </div>
+  <div class="takeaway"><p>同一 provider 可搭配不同 <code>name:</code> 出現多次, 用於不同區域, 帳號, provisioned throughput 與跨 provider 容錯移轉。</p></div>
+</section>
+
+<section id="admin-enforcement">
+  <h2>admin 與 enforcement</h2>
+  <p>啟用 <code>admin:</code> 區塊後, 閘道會提供 <code>/v1/organizations/spend_limits</code> 與每位開發者的即時花費強制執行。</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">write_keys / read_keys</div><div class="desc">具名的靜態 API 金鑰, 分別對應寫入與唯讀權限</div></div>
+    <div class="field"><div class="name">admin_groups</div><div class="desc">IdP 群組中屬於此列表者透過一般閘道 JWT 取得完整管理權限</div></div>
+    <div class="field"><div class="name">fail_closed_on_error</div><div class="desc">Postgres 無法連線時, 預設 fail-open, 設 true 改為 fail-closed</div></div>
+  </div>
+</section>
+
+<section id="managed">
+  <h2>managed 政策</h2>
+  <p>managed 區塊依 IdP 群組或 email 網域定義以角色為基礎的存取政策, 依序評估, 第一個相符者套用, 再與 <code>match: {}</code> 兜底層合併。</p>
+  <pre class="code-block">managed:
+  policies:
+    - match: { groups: [eng-contractors] }
+      cli:
+        availableModels: [claude-sonnet-4-6]
+        permissions: { deny: [<span class="str">"WebFetch"</span>, <span class="str">"WebSearch"</span>] }
+    - match: {}
+      cli:
+        availableModels: [claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5]</pre>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">Allow-lists</span><span class="event-desc">availableModels 與 permissions.allow, 特定政策的清單會完全取代基底</span></div>
+    <div class="event-item"><span class="event-name">Deny-lists / hooks</span><span class="event-desc">取基底與政策的聯集, 避免組織層級規則被意外移除</span></div>
+    <div class="event-item"><span class="event-name">Record 型別</span><span class="event-desc">env, modelOverrides, skillOverrides 採淺層合併</span></div>
+  </div>
+</section>
+
+<section id="telemetry">
+  <h2>telemetry 遙測</h2>
+  <pre class="code-block">telemetry:
+  forward_to:
+    - url: https://otel-collector.internal.example.com
+      headers:
+        Authorization: ${OTLP_TOKEN}
+      metrics: true
+      logs: false
+      traces: false</pre>
+  <div class="info-box"><div class="tag">敏感度</div><p>Metrics 是彙總計數, Logs 與 Traces 可能包含完整的 bash 指令與檔案路徑, 只在具備存取控制與保留政策的目的地開啟後兩者。</p></div>
+</section>
+
+<section id="example">
+  <h2>完整範例與用戶端設定</h2>
+  <p>把以下兩個鍵設在每台裝置的 managed-settings.json 中, 讓 <code>/login</code> 直接開啟 Cloud gateway 畫面:</p>
+  <pre class="code-block">{
+  <span class="str">"forceLoginMethod"</span>: <span class="str">"gateway"</span>,
+  <span class="str">"forceLoginGatewayUrl"</span>: <span class="str">"https://claude-gateway.internal.example.com"</span>
+}</pre>
+  <div class="response-box">
+    <div class="response-field"><span class="rf-key">macOS</span><span class="rf-val">/Library/Application Support/ClaudeCode/managed-settings.json</span></div>
+    <div class="response-field"><span class="rf-key">Linux / WSL</span><span class="rf-val">/etc/claude-code/managed-settings.json</span></div>
+    <div class="response-field"><span class="rf-key">Windows</span><span class="rf-val">C:\Program Files\ClaudeCode\managed-settings.json 或 HKLM 登錄</span></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+function cfShow(i) {
+  document.querySelectorAll('.cf-chip').forEach(c => c.classList.toggle('active', c.dataset.i == i));
+  document.querySelectorAll('.cf-panel').forEach(p => p.classList.toggle('visible', p.dataset.i == i));
+}
+function upShow(i) {
+  document.querySelectorAll('.up-chip').forEach(c => c.classList.toggle('active', c.dataset.i == i));
+  document.querySelectorAll('.up-panel').forEach(p => p.classList.toggle('visible', p.dataset.i == i));
+}
+</script>
+</body>
+</html>

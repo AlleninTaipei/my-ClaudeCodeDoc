@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>擴充 Claude Code</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 200px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 190px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; }
+body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>擴充 Claude Code</h1>
+  <p>了解何時該用 CLAUDE.md, Skills, 子代理, hooks, MCP 與 plugins, 打造分層擴充架構.</p>
+</header>
+
+<main>
+
+<section>
+  <h2>總覽</h2>
+  <p>Claude Code 結合了能理解程式碼的模型, 以及檔案操作, 搜尋, 執行, 網頁存取等內建工具. 內建工具涵蓋大多數程式撰寫任務. 擴充層則是你用來自訂 Claude 所知內容, 連接外部服務, 並自動化工作流程的部分.</p>
+  <div class="info-box">
+    <span class="tag">TIP</span>
+    <p>剛接觸 Claude Code, 先從 CLAUDE.md 建立專案慣例開始, 再依實際觸發情境逐步加入其他擴充功能.</p>
+  </div>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">CLAUDE.md</span><span class="event-desc">加入 Claude 每個 session 都會看到的持久性內容</span></div>
+    <div class="event-item"><span class="event-name">Skills</span><span class="event-desc">加入可重複使用的知識與可呼叫的工作流程</span></div>
+    <div class="event-item"><span class="event-name">Code intelligence</span><span class="event-desc">連接語言伺服器, 進行符號層級導覽與即時型別錯誤檢查</span></div>
+    <div class="event-item"><span class="event-name">MCP</span><span class="event-desc">連接 Claude 到外部服務與工具</span></div>
+    <div class="event-item"><span class="event-name">Subagents</span><span class="event-desc">在獨立情境中執行自己的迴圈, 只回傳摘要</span></div>
+    <div class="event-item"><span class="event-name">Agent teams</span><span class="event-desc">協調多個獨立 session, 共享任務清單並互相傳訊</span></div>
+    <div class="event-item"><span class="event-name">Hooks</span><span class="event-desc">在生命週期事件觸發, 可執行腳本, HTTP 請求, prompt 或子代理</span></div>
+    <div class="event-item"><span class="event-name">Plugins / Marketplaces</span><span class="event-desc">打包並散布上述功能</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>依目標挑選對應功能</h2>
+  <p>功能範圍從每個 session 都會看到的常駐情境, 到你或 Claude 可隨需呼叫的能力, 再到針對特定事件執行的背景自動化.</p>
+  <div class="api-fields">
+    <div class="field"><span class="name">CLAUDE.md</span><div class="desc">每次對話都載入的持久性情境. 適合專案慣例, "永遠做 X" 的規則.</div></div>
+    <div class="field"><span class="name">Skill</span><div class="desc">Claude 可用的指令, 知識與工作流程. 適合可重複使用的內容與參考文件.</div></div>
+    <div class="field"><span class="name">Subagent</span><div class="desc">獨立執行情境, 只回傳摘要結果. 適合情境隔離, 平行任務.</div></div>
+    <div class="field"><span class="name">Agent teams</span><div class="desc">協調多個獨立 Claude Code session. 適合平行研究, 新功能開發.</div></div>
+    <div class="field"><span class="name">Code intelligence</span><div class="desc">語言伺服器導覽與診斷. 適合型別語言, grep 效率不佳的大型程式庫.</div></div>
+    <div class="field"><span class="name">MCP</span><div class="desc">連接外部服務. 適合需要外部資料或動作的情境.</div></div>
+    <div class="field"><span class="name">Hook</span><div class="desc">由事件觸發的腳本, HTTP 請求, prompt 或子代理. 適合必須每次都執行的自動化.</div></div>
+    <div class="field"><span class="name">Artifact</span><div class="desc">將 session 輸出發布為私人互動網頁. 適合想以視覺化而非終端機文字檢視的輸出.</div></div>
+  </div>
+
+  <h3>隨時間逐步建立你的設定</h3>
+  <p>不需要一開始就設定好所有東西. 每個功能都有可辨識的觸發時機, 大多數團隊依序加入:</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">慣例或指令連續說錯兩次</span><span class="event-desc">加入 CLAUDE.md</span></div>
+    <div class="event-item"><span class="event-name">重複打相同的起始 prompt</span><span class="event-desc">存成使用者可呼叫的 skill</span></div>
+    <div class="event-item"><span class="event-name">第三次貼上相同的多步驟流程</span><span class="event-desc">捕捉為 skill</span></div>
+    <div class="event-item"><span class="event-name">重複從瀏覽器分頁複製資料</span><span class="event-desc">以 MCP server 連接該系統</span></div>
+    <div class="event-item"><span class="event-name">Claude 讀很多檔案才找到符號定義</span><span class="event-desc">安裝該語言的 code intelligence plugin</span></div>
+    <div class="event-item"><span class="event-name">附帶任務灌爆對話, 之後不再參考</span><span class="event-desc">透過 subagent 處理</span></div>
+    <div class="event-item"><span class="event-name">希望每次都自動發生, 不必詢問</span><span class="event-desc">撰寫 hook</span></div>
+    <div class="event-item"><span class="event-name">第二個儲存庫需要相同設定</span><span class="event-desc">打包為 plugin</span></div>
+  </div>
+
+  <h3>比較相近的功能</h3>
+  <div class="chip-row">
+    <span class="chip-label">選擇比較對象:</span>
+    <span class="chip ft-chip active" data-i="0" onclick="ftShow(0)">Skill vs Subagent</span>
+    <span class="chip ft-chip" data-i="1" onclick="ftShow(1)">CLAUDE.md vs Skill</span>
+    <span class="chip ft-chip" data-i="2" onclick="ftShow(2)">Subagent vs Agent team</span>
+    <span class="chip ft-chip" data-i="3" onclick="ftShow(3)">MCP vs Skill</span>
+    <span class="chip ft-chip" data-i="4" onclick="ftShow(4)">Hook vs Skill</span>
+  </div>
+  <div class="ft-panel demo-panel visible" data-i="0">
+    <div class="two-col">
+      <div class="col-card"><div class="col-card-title">Skill</div><p>可重複使用的內容, 可載入任何情境</p><p>分享內容跨情境</p><p>加到你的主要對話視窗</p></div>
+      <div class="col-card"><div class="col-card-title">Subagent</div><p>擁有自己情境的獨立工作者</p><p>情境隔離, 只回傳摘要</p><p>使用獨立的情境視窗</p></div>
+    </div>
+    <p style="margin-top:12px">Skill 可以是參考資料型 (如 API 風格指南) 或動作型 (如執行部署流程的 /deploy). 使用 subagent 的時機是需要情境隔離, 或情境視窗快滿了. 兩者可以組合: subagent 可預先載入特定 skill, skill 也可用 <code>context: fork</code> 在隔離情境執行.</p>
+  </div>
+  <div class="ft-panel demo-panel" data-i="1">
+    <div class="two-col">
+      <div class="col-card"><div class="col-card-title">CLAUDE.md</div><p>每個 session 自動載入</p><p>適合 "永遠做 X" 的規則</p></div>
+      <div class="col-card"><div class="col-card-title">Skill</div><p>依需求載入</p><p>適合參考資料或可用 /name 觸發的工作流程</p></div>
+    </div>
+    <p style="margin-top:12px">經驗法則: CLAUDE.md 保持在 200 行以內, 若持續增長就把參考內容搬到 skills 或拆成 .claude/rules/ 檔案.</p>
+  </div>
+  <div class="ft-panel demo-panel" data-i="2">
+    <div class="two-col">
+      <div class="col-card"><div class="col-card-title">Subagent</div><p>在你的 session 內執行, 結果回傳主要情境</p><p>主代理管理所有工作</p><p>Token 成本較低</p></div>
+      <div class="col-card"><div class="col-card-title">Agent team</div><p>互相溝通的獨立 Claude Code session</p><p>共享任務清單, 自行協調</p><p>Token 成本較高</p></div>
+    </div>
+    <p style="margin-top:12px">轉換時機: 若你在跑平行 subagent 卻遇到情境上限, 或 subagent 之間需要互相溝通, agent team 就是下一步. Agent team 目前為實驗性功能, 預設關閉.</p>
+  </div>
+  <div class="ft-panel demo-panel" data-i="3">
+    <div class="two-col">
+      <div class="col-card"><div class="col-card-title">MCP</div><p>連接外部服務的協定</p><p>提供工具與資料存取</p><p>例如 Slack 整合, 資料庫查詢, 瀏覽器控制</p></div>
+      <div class="col-card"><div class="col-card-title">Skill</div><p>知識, 工作流程與參考資料</p><p>例如程式碼審查清單, 部署流程, API 風格指南</p></div>
+    </div>
+    <p style="margin-top:12px">範例: MCP server 連接 Claude 到你的資料庫, 而 skill 教 Claude 你的資料模型, 常見查詢模式與該用哪些資料表.</p>
+  </div>
+  <div class="ft-panel demo-panel" data-i="4">
+    <div class="two-col">
+      <div class="col-card"><div class="col-card-title">Hook</div><p>由生命週期事件觸發, 執行 shell 指令, HTTP 請求, LLM prompt 或 subagent</p><p>觸發保證發生</p></div>
+      <div class="col-card"><div class="col-card-title">Skill</div><p>Claude 讀取並遵循的指示</p><p>由 Claude 判斷是否套用, 結果可能不同</p></div>
+    </div>
+    <p style="margin-top:12px">把護欄放進 hooks. 像 "永遠不要編輯 .env" 這種指示放在 CLAUDE.md 或 skill 只是請求, 不是保證. PreToolUse hook 阻擋該編輯才是強制執行.</p>
+  </div>
+
+  <h3>理解功能如何分層</h3>
+  <div class="info-box">
+    <span class="tag">RULE</span>
+    <p>CLAUDE.md 檔案是疊加的: 所有層級同時貢獻內容. Skills 與 subagents 依名稱覆蓋: managed > user > project (skills); managed > CLI flag > project > user > plugin (subagents). MCP servers 依名稱覆蓋: local > project > user. Hooks 則是合併: 所有已註冊的 hook 都會針對其符合的事件觸發.</p>
+  </div>
+
+  <h3>組合使用功能</h3>
+  <div class="api-fields">
+    <div class="field"><span class="name">Skill + MCP</span><div class="desc">MCP 提供連接, skill 教 Claude 如何善用它</div></div>
+    <div class="field"><span class="name">Skill + Subagent</span><div class="desc">skill 觸發 subagent 進行平行工作</div></div>
+    <div class="field"><span class="name">CLAUDE.md + Skills</span><div class="desc">CLAUDE.md 放常駐規則, skills 放依需求載入的參考資料</div></div>
+    <div class="field"><span class="name">Hook + MCP</span><div class="desc">hook 透過 MCP 觸發外部動作</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>理解情境成本</h2>
+  <p>你加入的每個功能都會消耗 Claude 的情境. 過多的功能可能塞滿情境視窗, 也可能加入噪音讓 Claude 表現變差.</p>
+  <div class="response-box">
+    <div class="response-field"><span class="rf-key">CLAUDE.md</span><span class="rf-val">Session 開始時載入完整內容, 每次請求都算成本</span></div>
+    <div class="response-field"><span class="rf-key">Skills</span><span class="rf-val">開始時載入描述, 使用時載入完整內容, 成本低</span></div>
+    <div class="response-field"><span class="rf-key">MCP servers</span><span class="rf-val">開始時載入工具名稱, 完整 schema 依需求載入, 未使用前成本低</span></div>
+    <div class="response-field"><span class="rf-key">Code intelligence</span><span class="rf-val">編輯後與查詢時載入, 成本低且能減少其他地方的檔案讀取</span></div>
+    <div class="response-field"><span class="rf-key">Subagents</span><span class="rf-val">產生時載入新情境, 與主 session 隔離</span></div>
+    <div class="response-field"><span class="rf-key">Hooks</span><span class="rf-val">觸發時執行, 若無回傳額外情境則成本為零</span></div>
+  </div>
+  <div class="info-box">
+    <span class="tag">NOTE</span>
+    <p>Skill 描述預設在 session 開始時載入, 讓 Claude 判斷何時使用. 在 skill frontmatter 設定 <code>disable-model-invocation: true</code> 可讓它對 Claude 完全隱形, 直到你手動呼叫, 將情境成本降到零.</p>
+  </div>
+
+  <h3>理解功能如何載入</h3>
+  <div class="stage-tabs">
+    <div class="fl-tab stage-tab active" onclick="flGoTo(0)">1 · CLAUDE.md</div>
+    <div class="fl-tab stage-tab" onclick="flGoTo(1)">2 · Skills</div>
+    <div class="fl-tab stage-tab" onclick="flGoTo(2)">3 · MCP servers</div>
+    <div class="fl-tab stage-tab" onclick="flGoTo(3)">4 · Code intelligence</div>
+    <div class="fl-tab stage-tab" onclick="flGoTo(4)">5 · Subagents</div>
+    <div class="fl-tab stage-tab" onclick="flGoTo(5)">6 · Hooks</div>
+  </div>
+  <div class="fl-panel demo-panel visible" id="fl-p0">
+    <p><strong>時機:</strong> Session 開始時.</p>
+    <p><strong>載入內容:</strong> managed, user, project 三個層級所有 CLAUDE.md 檔案的完整內容.</p>
+    <div class="info-box"><span class="tag">TIP</span><p>保持 CLAUDE.md 在 200 行以內, 把參考資料移到依需求載入的 skills.</p></div>
+  </div>
+  <div class="fl-panel demo-panel" id="fl-p1">
+    <p><strong>時機:</strong> 依 skill 設定而異. 預設情況下描述在 session 開始時載入, 使用時載入完整內容.</p>
+    <p><strong>載入內容:</strong> 對可由模型呼叫的 skill, Claude 每次請求都看得到名稱與描述; 呼叫 /name 或 Claude 自動載入時, 完整內容才進入對話.</p>
+    <p><strong>在 subagent 中:</strong> subagent 的 <code>skills</code> 欄位所列的 skill, 會在啟動時完整預先載入.</p>
+  </div>
+  <div class="fl-panel demo-panel" id="fl-p2">
+    <p><strong>時機:</strong> Session 開始時.</p>
+    <p><strong>載入內容:</strong> 已連接伺服器的工具名稱. 完整 JSON schema 延後到 Claude 需要特定工具時才載入.</p>
+    <p><strong>成本:</strong> Tool search 預設開啟, 閒置的 MCP 工具消耗的情境很少.</p>
+  </div>
+  <div class="fl-panel demo-panel" id="fl-p3">
+    <p><strong>時機:</strong> 檔案編輯後, 以及 Claude 導覽程式碼時依需求觸發.</p>
+    <p><strong>載入內容:</strong> 每次編輯後的型別錯誤與警告; 查詢符號時的定義, 參照與型別資訊.</p>
+    <p><strong>成本:</strong> 低. 符號查詢常取代大範圍檔案讀取, 淨情境用量可能反而下降.</p>
+  </div>
+  <div class="fl-panel demo-panel" id="fl-p4">
+    <p><strong>時機:</strong> 依需求, 由你或 Claude 產生任務時觸發.</p>
+    <p><strong>載入內容:</strong> 全新且隔離的情境, 包含代理自己的系統 prompt, 其 <code>skills:</code> 欄位所列 skill 的完整內容, CLAUDE.md 與 git 狀態 (內建的 Explore 與 Plan 代理兩者都略過), 以及主代理傳入 prompt 中的任何情境.</p>
+  </div>
+  <div class="fl-panel demo-panel" id="fl-p5">
+    <p><strong>時機:</strong> 觸發時. Hooks 在特定生命週期事件觸發, 如工具執行, session 邊界, prompt 送出, 權限請求與壓縮.</p>
+    <p><strong>載入內容:</strong> 預設不載入任何內容. Hooks 在主要對話之外執行.</p>
+    <p><strong>成本:</strong> 零, 除非 hook 回傳的輸出被加為對話中的訊息.</p>
+  </div>
+  <div>
+    <button class="btn btn-ghost" id="flPrev" disabled onclick="flGoTo(flStep-1)">← 上一步</button>
+    <button class="btn btn-primary" id="flNext" onclick="flGoTo(flStep+1)">下一步 →</button>
+    <span class="step-indicator" id="flIndicator">Step 1 of 6</span>
+  </div>
+</section>
+
+<section>
+  <h2>延伸閱讀</h2>
+  <div class="api-fields">
+    <div class="field"><span class="name">CLAUDE.md</span><div class="desc">儲存專案情境, 慣例與指示</div></div>
+    <div class="field"><span class="name">Skills</span><div class="desc">賦予 Claude 領域知識與可重複使用的工作流程</div></div>
+    <div class="field"><span class="name">Subagents</span><div class="desc">把工作卸載到隔離情境</div></div>
+    <div class="field"><span class="name">Agent teams</span><div class="desc">協調多個平行工作的 session</div></div>
+    <div class="field"><span class="name">MCP</span><div class="desc">連接 Claude 到外部服務</div></div>
+    <div class="field"><span class="name">Hooks</span><div class="desc">用 hooks 自動化動作</div></div>
+    <div class="field"><span class="name">Plugins</span><div class="desc">打包並分享功能組合</div></div>
+    <div class="field"><span class="name">Marketplaces</span><div class="desc">託管並散布 plugin 集合</div></div>
+  </div>
+  <div class="takeaway">
+    <p>擴充功能各有專長: CLAUDE.md 負責常駐情境, skills 負責依需求的知識與工作流程, MCP 負責外部連接, subagents 負責隔離, hooks 負責自動化. 依實際工作流程混合使用, 才是最有效的設定方式.</p>
+  </div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+function ftShow(i) {
+  document.querySelectorAll('.ft-chip').forEach((el, idx) => el.classList.toggle('active', idx == i));
+  document.querySelectorAll('.ft-panel').forEach((el) => el.classList.toggle('visible', el.dataset.i == i));
+}
+
+let flStep = 0;
+const FL_MAX = 5;
+function flGoTo(n) {
+  flStep = Math.max(0, Math.min(FL_MAX, n));
+  document.querySelectorAll('.fl-panel').forEach((el, i) => el.classList.toggle('visible', i === flStep));
+  document.querySelectorAll('.fl-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === flStep) t.classList.add('active');
+    else if (i < flStep) t.classList.add('done');
+  });
+  document.getElementById('flPrev').disabled = flStep === 0;
+  const next = document.getElementById('flNext');
+  next.disabled = flStep === FL_MAX;
+  next.textContent = flStep === FL_MAX ? '完成 ✓' : '下一步 →';
+  document.getElementById('flIndicator').textContent = `Step ${flStep + 1} of ${FL_MAX + 1}`;
+}
+flGoTo(0);
+</script>
+</body>
+</html>

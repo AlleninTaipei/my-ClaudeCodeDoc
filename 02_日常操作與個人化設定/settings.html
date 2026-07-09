@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Claude Code 設定 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 220px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 220px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.scope-badge { display: inline-block; font-size: 0.58rem; font-weight: 700;
+  letter-spacing: 0.07em; text-transform: uppercase; padding: 2px 8px;
+  border-radius: 4px; vertical-align: middle; margin-left: 10px;
+  position: relative; top: -2px; }
+.scope-universal { background: #dcfce7; color: #166534; border: 1px solid #4ade80; }
+.scope-api       { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.scope-specific  { background: #ede9fe; color: #6d28d9; border: 1px solid #a78bfa; }
+.scope-legend { display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  background: #e2e8f0; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 10px 18px; margin-bottom: 36px; }
+.scope-legend-label { font-size: 0.72rem; color: #4a5568; font-weight: 700; }
+.scope-legend-item  { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .scope-universal { background: #1a3a28; color: #68d391; border-color: #276749; }
+body.dark .scope-api       { background: #3a2a10; color: #f6ad55; border-color: #7a5a20; }
+body.dark .scope-specific  { background: #2d1f4a; color: #b794f4; border-color: #553c8b; }
+body.dark .scope-legend { background: #1a202c; border-color: #2d3748; }
+body.dark .scope-legend-label { color: #4a5568; } body.dark .scope-legend-item  { color: #718096; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Claude Code 設定</h1>
+  <p>用全域與專案層級的設定, 以及環境變數配置 Claude Code 的行為</p>
+</header>
+
+<main>
+
+<div class="scope-legend">
+  <span class="scope-legend-label">適用範圍:</span>
+  <span class="scope-legend-item"><span class="scope-badge scope-universal">通用</span> 所有安裝方式皆適用</span>
+  <span class="scope-legend-item"><span class="scope-badge scope-specific">Managed 專屬</span> 僅限管理員部署的 managed settings</span>
+</div>
+
+<section>
+  <h2>設定範圍 (Configuration Scopes)</h2>
+  <p>Claude Code 用範圍系統決定設定套用在哪裡, 與誰共享。點選下方範圍查看位置與影響對象。</p>
+  <div class="chip-row" id="scopeChips"></div>
+  <div class="response-box" id="scopeDisplay"></div>
+  <h3>範圍如何互動</h3>
+  <p>同一個設定出現在多個範圍時, Claude Code 依優先順序套用:</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">1. Managed (最高)</span><span class="event-desc">無法被任何其他層級覆寫</span></div>
+    <div class="event-item"><span class="event-name">2. 命令列參數</span><span class="event-desc">臨時性的 session 覆寫</span></div>
+    <div class="event-item"><span class="event-name">3. Local</span><span class="event-desc">覆寫 project 與 user 設定</span></div>
+    <div class="event-item"><span class="event-name">4. Project</span><span class="event-desc">覆寫 user 設定</span></div>
+    <div class="event-item"><span class="event-name">5. User (最低)</span><span class="event-desc">當其他層級都沒有指定時套用</span></div>
+  </div>
+  <div class="info-box"><span class="tag">例外</span><p>權限規則的行為不同, 它們是跨範圍合併而非互相覆寫, 詳見下方「設定優先順序」章節。</p></div>
+</section>
+
+<section>
+  <h2>設定檔案 (Settings Files)</h2>
+  <p><code>settings.json</code> 是設定 Claude Code 的官方機制, 採階層式設定。點選下方分頁瀏覽各主題。</p>
+  <div class="stage-tabs">
+    <div class="sf-tab stage-tab active" onclick="sfGoTo(0)">1 · 檔案位置</div>
+    <div class="sf-tab stage-tab" onclick="sfGoTo(1)">2 · 可用設定</div>
+    <div class="sf-tab stage-tab" onclick="sfGoTo(2)">3 · 沙盒設定</div>
+    <div class="sf-tab stage-tab" onclick="sfGoTo(3)">4 · 歸屬與檔案建議</div>
+    <div class="sf-tab stage-tab" onclick="sfGoTo(4)">5 · Hooks 與 Footer 徽章</div>
+    <div class="sf-tab stage-tab" onclick="sfGoTo(5)">6 · 優先順序與驗證</div>
+  </div>
+
+  <div class="sf-panel demo-panel visible" id="sf-p0">
+    <div class="api-fields">
+      <div class="field"><div class="name">User settings</div><div class="desc">~/.claude/settings.json, 適用所有專案</div></div>
+      <div class="field"><div class="name">Project settings</div><div class="desc">.claude/settings.json, 納入版控與團隊共享</div></div>
+      <div class="field"><div class="name">Local settings</div><div class="desc">.claude/settings.local.json, 不納入版控, 個人偏好用</div></div>
+      <div class="field"><div class="name">Managed settings</div><div class="desc">server-managed, MDM/OS 政策, 或 managed-settings.json 檔案</div></div>
+    </div>
+    <p>另一個檔案 <code>~/.claude.json</code> 儲存 OAuth session, 使用者與本機範圍的 MCP 伺服器設定, 每個專案的狀態與各種快取。專案範圍的 MCP 伺服器則獨立存放於 <code>.mcp.json</code>。</p>
+    <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"$schema"</span>: <span class="str">"https://json.schemastore.org/claude-code-settings.json"</span>,
+  <span class="str">"permissions"</span>: <span class="kw">{</span>
+    <span class="str">"allow"</span>: [<span class="str">"Bash(npm run lint)"</span>, <span class="str">"Bash(npm run test *)"</span>],
+    <span class="str">"deny"</span>: [<span class="str">"Bash(curl *)"</span>, <span class="str">"Read(./.env)"</span>]
+  <span class="kw">}</span>,
+  <span class="str">"env"</span>: <span class="kw">{</span> <span class="str">"CLAUDE_CODE_ENABLE_TELEMETRY"</span>: <span class="str">"1"</span> <span class="kw">}</span>
+<span class="kw">}</span></pre>
+    <div class="info-box"><span class="tag">何時生效</span><p>Claude Code 會監看設定檔並在變更時重新載入, permissions, hooks, apiKeyHelper 等大多數鍵值都能在執行中的 session 立即套用。model 與 outputStyle 則只在下次重啟或 /clear 時套用。</p></div>
+  </div>
+
+  <div class="sf-panel demo-panel" id="sf-p1">
+    <p>settings.json 支援上百個設定鍵, 依主題分類瀏覽以下代表性設定 (完整清單請見原始文件的 Available settings 表格)。</p>
+    <div class="chip-row" id="settingsChips"></div>
+    <div class="api-fields" id="settingsFields"></div>
+  </div>
+
+  <div class="sf-panel demo-panel" id="sf-p2">
+    <p>進階沙盒行為設定, 隔離 Bash 指令的檔案系統與網路存取。</p>
+    <div class="api-fields">
+      <div class="field"><div class="name">sandbox.enabled</div><div class="desc">啟用 bash 沙盒 (macOS, Linux, WSL2), 預設 false</div></div>
+      <div class="field"><div class="name">sandbox.autoAllowBashIfSandboxed</div><div class="desc">沙盒化時自動核准 bash 指令, 預設 true</div></div>
+      <div class="field"><div class="name">sandbox.filesystem.allowWrite / denyWrite</div><div class="desc">額外允許或禁止寫入的路徑, 跨範圍合併</div></div>
+      <div class="field"><div class="name">sandbox.network.allowedDomains / deniedDomains</div><div class="desc">允許或封鎖出站網路流量的網域, 支援萬用字元</div></div>
+      <div class="field"><div class="name">credentials.files / envVars</div><div class="desc">禁止沙盒讀取的憑證檔案或環境變數</div></div>
+      <div class="field"><div class="name">network.httpProxyPort / socksProxyPort</div><div class="desc">自備代理伺服器的埠號</div></div>
+    </div>
+    <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"sandbox"</span>: <span class="kw">{</span>
+    <span class="str">"enabled"</span>: true,
+    <span class="str">"filesystem"</span>: <span class="kw">{</span> <span class="str">"allowWrite"</span>: [<span class="str">"/tmp/build"</span>, <span class="str">"~/.kube"</span>] <span class="kw">}</span>,
+    <span class="str">"network"</span>: <span class="kw">{</span> <span class="str">"allowedDomains"</span>: [<span class="str">"github.com"</span>, <span class="str">"*.npmjs.org"</span>] <span class="kw">}</span>
+  <span class="kw">}</span>
+<span class="kw">}</span></pre>
+    <div class="info-box"><span class="tag">重要</span><p>filesystem 與 network 限制可透過 sandbox 設定 (OS 層級沙盒邊界) 或權限規則 (Edit/Read/WebFetch allow deny) 兩種方式設定, 兩者會合併生效。</p></div>
+  </div>
+
+  <div class="sf-panel demo-panel" id="sf-p3">
+    <h3>歸屬設定 (Attribution)</h3>
+    <p>Git commit 與 PR 說明的歸屬文字可分別設定, commit 預設使用 git trailer。</p>
+    <pre class="code-block"><span class="cmt"># 預設 commit 歸屬</span>
+Co-Authored-By: Claude Sonnet 5 &lt;noreply@anthropic.com&gt;</pre>
+    <div class="api-fields">
+      <div class="field"><div class="name">attribution.commit</div><div class="desc">commit 的歸屬文字, 空字串隱藏</div></div>
+      <div class="field"><div class="name">attribution.pr</div><div class="desc">PR 說明的歸屬文字, 空字串隱藏</div></div>
+      <div class="field"><div class="name">attribution.sessionUrl</div><div class="desc">是否附加 claude.ai session 連結, 預設 true</div></div>
+    </div>
+    <h3>檔案建議設定</h3>
+    <p>為 <code>@</code> 檔案路徑自動完成設定自訂指令, 大型 monorepo 適合用專案專屬索引取代預設的檔案系統遍歷。</p>
+    <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"fileSuggestion"</span>: <span class="kw">{</span> <span class="str">"type"</span>: <span class="str">"command"</span>, <span class="str">"command"</span>: <span class="str">"~/.claude/file-suggestion.sh"</span> <span class="kw">}</span>
+<span class="kw">}</span></pre>
+    <p>指令透過 stdin 收到 <code>{"query": "..."}</code>, 輸出換行分隔的檔案路徑 (最多 15 筆) 到 stdout。</p>
+  </div>
+
+  <div class="sf-panel demo-panel" id="sf-p4">
+    <h3>Footer link badges</h3>
+    <p><code>footerLinksRegexes</code> 設定會在輸入框下方頁尾渲染可點擊的徽章, 把專案 CLI 印出的 ID (例如審查工具或問題追蹤器) 轉成 session 連結。</p>
+    <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"footerLinksRegexes"</span>: [<span class="kw">{</span>
+    <span class="str">"type"</span>: <span class="str">"regex"</span>,
+    <span class="str">"pattern"</span>: <span class="str">"\\b(?&lt;key&gt;PROJ-\\d+)\\b"</span>,
+    <span class="str">"url"</span>: <span class="str">"https://issues.example.com/browse/{key}"</span>,
+    <span class="str">"label"</span>: <span class="str">"{key}"</span>
+  <span class="kw">}</span>]
+<span class="kw">}</span></pre>
+    <div class="api-fields">
+      <div class="field"><div class="name">URL 長度上限</div><div class="desc">超過 2048 字元的組成網址會被捨棄</div></div>
+      <div class="field"><div class="name">徽章數量上限</div><div class="desc">最多顯示 5 個, 最舊的會被新符合項目取代</div></div>
+      <div class="field"><div class="name">設定範圍</div><div class="desc">僅讀取自 user settings, --settings 旗標, managed settings</div></div>
+    </div>
+    <h3>Hook 設定</h3>
+    <div class="api-fields">
+      <div class="field"><div class="name">allowManagedHooksOnly</div><div class="desc">為 true 時只載入 managed/SDK hooks 與強制啟用外掛的 hooks</div></div>
+      <div class="field"><div class="name">allowedHttpHookUrls</div><div class="desc">HTTP hook 可鎖定的網址白名單, 支援萬用字元</div></div>
+      <div class="field"><div class="name">httpHookAllowedEnvVars</div><div class="desc">HTTP hook 可內插進標頭的環境變數名稱白名單</div></div>
+    </div>
+  </div>
+
+  <div class="sf-panel demo-panel" id="sf-p5">
+    <h3>設定優先順序細節</h3>
+    <p>Managed 層內部還有子順序: policyHelper 輸出 (若設定, 為唯一來源) > remote > MDM/OS 政策 > 檔案式 > HKCU 登錄檔 (僅 Windows)。</p>
+    <div class="info-box"><span class="tag">陣列合併</span><p>相同的陣列型設定 (如 permissions.allow) 出現在多個範圍時, 會被串接並去除重複, 而非互相取代, 讓較低優先層級可以新增項目而不覆寫較高層級。fallbackModel 與部分情境下的 availableModels 是例外, 採用最高優先層級的完整值。</p></div>
+    <h3>驗證目前生效的設定</h3>
+    <p>在 Claude Code 中執行 <code>/status</code> 查看目前生效的設定來源, Status 分頁的 Setting sources 會列出每個已載入的層級, managed settings 會額外標示傳遞管道, 例如 (remote), (plist), (HKLM), (HKCU), (file)。設定檔若有錯誤, /status 會列出受影響的檔案, 執行 <code>/doctor</code> 查看細節。</p>
+    <h3>系統提示詞與敏感檔案</h3>
+    <p>Claude Code 的內部系統提示詞未公開, 若要加入自訂指示, 使用 CLAUDE.md 檔案或 <code>--append-system-prompt</code> 旗標。要排除敏感檔案 (API 金鑰, 密鑰, 環境檔), 在 <code>permissions.deny</code> 中設定:</p>
+    <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"permissions"</span>: <span class="kw">{</span>
+    <span class="str">"deny"</span>: [<span class="str">"Read(./.env)"</span>, <span class="str">"Read(./secrets/**)"</span>, <span class="str">"Read(./config/credentials.json)"</span>]
+  <span class="kw">}</span>
+<span class="kw">}</span></pre>
+  </div>
+
+  <div>
+    <button class="btn btn-ghost" id="sfPrev" disabled onclick="sfGoTo(SFStep-1)">← Back</button>
+    <button class="btn btn-primary" id="sfNext" onclick="sfGoTo(SFStep+1)">Next →</button>
+    <span class="step-indicator" id="sfIndicator">Step 1 of 6</span>
+  </div>
+</section>
+
+<section>
+  <h2>子代理設定 (Subagent Configuration)</h2>
+  <p>Claude Code 支援可在使用者與專案層級設定的自訂 AI 子代理, 這些子代理以帶有 YAML frontmatter 的 Markdown 檔案儲存。</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">User subagents</div><div class="desc">~/.claude/agents/, 適用於你所有的專案</div></div>
+    <div class="field"><div class="name">Project subagents</div><div class="desc">.claude/agents/, 特定於此專案並可與團隊共享</div></div>
+  </div>
+  <p>子代理檔案定義具備自訂提示詞與工具權限的專門化 AI 助理。</p>
+</section>
+
+<section>
+  <h2>外掛設定 (Plugin Configuration)</h2>
+  <p>Claude Code 支援外掛系統, 讓你用 skills, agents, hooks, MCP 伺服器擴充功能, 外掛透過 marketplace 發佈, 可在使用者與儲存庫層級設定。</p>
+  <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"enabledPlugins"</span>: <span class="kw">{</span>
+    <span class="str">"formatter@acme-tools"</span>: true,
+    <span class="str">"deployer@acme-tools"</span>: true,
+    <span class="str">"analyzer@security-plugins"</span>: false
+  <span class="kw">}</span>,
+  <span class="str">"extraKnownMarketplaces"</span>: <span class="kw">{</span>
+    <span class="str">"acme-tools"</span>: <span class="kw">{</span> <span class="str">"source"</span>: <span class="kw">{</span> <span class="str">"source"</span>: <span class="str">"github"</span>, <span class="str">"repo"</span>: <span class="str">"acme-corp/claude-plugins"</span> <span class="kw">}</span> <span class="kw">}</span>
+  <span class="kw">}</span>
+<span class="kw">}</span></pre>
+  <h3>管理外掛</h3>
+  <p>使用 <code>/plugin</code> 指令互動管理外掛:</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">瀏覽</span><span class="event-desc">從 marketplace 瀏覽可用外掛</span></div>
+    <div class="event-item"><span class="event-name">安裝/移除</span><span class="event-desc">安裝或解除安裝外掛</span></div>
+    <div class="event-item"><span class="event-name">啟用/停用</span><span class="event-desc">切換外掛的啟用狀態</span></div>
+    <div class="event-item"><span class="event-name">檢視細節</span><span class="event-desc">檢視外掛提供的 skills, agents, hooks</span></div>
+    <div class="event-item"><span class="event-name">Marketplace 管理</span><span class="event-desc">新增或移除 marketplace 來源</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>環境變數</h2>
+  <p>環境變數讓你不需編輯設定檔就能控制 Claude Code 的行為, 任何變數也能在 <code>settings.json</code> 的 <code>env</code> 鍵下設定, 套用到每個 session 或推行給整個團隊。</p>
+  <div class="takeaway"><p>完整清單請見環境變數參考文件。</p></div>
+</section>
+
+<section>
+  <h2>Claude 可用的工具</h2>
+  <p>Claude Code 提供一組工具供讀取, 編輯, 搜尋, 執行指令, 與協調子代理。工具名稱就是你在權限規則與 hook matcher 中使用的確切字串。</p>
+  <div class="info-box"><span class="tag">參考</span><p>完整清單與 Bash 工具行為細節請見工具參考文件。</p></div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+const SCOPES = [
+  {k:'Managed', loc:'Server-managed settings, plist/registry, 或系統層級 managed-settings.json', who:'伺服器交付時為全組織成員; 檔案交付時為機器上所有使用者', shared:'是 (由 IT 部署)'},
+  {k:'User', loc:'~/.claude/ 目錄', who:'你, 適用所有專案', shared:'否'},
+  {k:'Project', loc:'.claude/ 於儲存庫中', who:'此儲存庫的所有協作者', shared:'是 (提交至 git)'},
+  {k:'Local', loc:'.claude/settings.local.json', who:'僅你, 只在此儲存庫', shared:'否 (Claude Code 建立時自動加入 gitignore)'},
+];
+const scopeChipsEl = document.getElementById('scopeChips');
+const scopeDisplayEl = document.getElementById('scopeDisplay');
+function renderScope(s) {
+  scopeDisplayEl.innerHTML = `
+    <div class="response-field"><div class="rf-key">位置</div><div class="rf-val">${s.loc}</div></div>
+    <div class="response-field"><div class="rf-key">影響對象</div><div class="rf-val">${s.who}</div></div>
+    <div class="response-field"><div class="rf-key">與團隊共享</div><div class="rf-val">${s.shared}</div></div>`;
+}
+SCOPES.forEach((s, i) => {
+  const chip = document.createElement('div');
+  chip.className = 'chip' + (i === 0 ? ' active' : '');
+  chip.textContent = s.k;
+  chip.onclick = () => {
+    document.querySelectorAll('#scopeChips .chip').forEach(el => el.classList.remove('active'));
+    chip.classList.add('active');
+    renderScope(s);
+  };
+  scopeChipsEl.appendChild(chip);
+});
+renderScope(SCOPES[0]);
+
+let SFStep = 0;
+const SF_MAX = 5;
+function sfGoTo(n) {
+  SFStep = Math.max(0, Math.min(SF_MAX, n));
+  document.querySelectorAll('.sf-panel').forEach((el, i) => el.classList.toggle('visible', i === SFStep));
+  document.querySelectorAll('.sf-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === SFStep) t.classList.add('active');
+    else if (i < SFStep) t.classList.add('done');
+  });
+  document.getElementById('sfPrev').disabled = SFStep === 0;
+  const next = document.getElementById('sfNext');
+  next.disabled = SFStep === SF_MAX;
+  next.textContent = SFStep === SF_MAX ? 'Done ✓' : 'Next →';
+  document.getElementById('sfIndicator').textContent = `Step ${SFStep + 1} of ${SF_MAX + 1}`;
+}
+sfGoTo(0);
+
+const SETTINGS_CATS = {
+  '一般行為與模型': [
+    ['model','覆寫預設使用的模型'],
+    ['fallbackModel','主要模型過載時依序嘗試的備援模型鏈, 最多 3 個'],
+    ['effortLevel','跨 session 保留努力等級 (low/medium/high/xhigh)'],
+    ['alwaysThinkingEnabled','預設為所有 session 啟用延伸思考'],
+    ['autoCompactEnabled','上下文接近上限時自動壓縮對話, 預設 true'],
+    ['theme','介面色彩主題, 預設 dark'],
+    ['editorMode','輸入提示的按鍵綁定模式: normal 或 vim'],
+    ['language','設定 Claude 回應的預設語言'],
+    ['outputStyle','設定 output style 以調整系統提示'],
+  ],
+  '介面與通知': [
+    ['preferredNotifChannel','任務完成與權限提示的通知方式, 預設 auto'],
+    ['spinnerTipsEnabled','工作中顯示提示訊息, 預設 true'],
+    ['showTurnDuration','回應後顯示回合耗時訊息, 預設 true'],
+    ['terminalProgressBarEnabled','在支援的終端機顯示進度條, 預設 true'],
+    ['awaySummaryEnabled','離開一段時間後返回時顯示簡短摘要'],
+    ['agentPushNotifEnabled','Remote Control 連線時允許主動推播通知, 預設 false'],
+    ['verbose','顯示完整工具輸出而非截斷摘要, 預設 false'],
+  ],
+  '權限與安全': [
+    ['disableBypassPermissionsMode','設為 disable 阻止啟用 bypassPermissions 模式'],
+    ['disableAutoMode','設為 disable 阻止啟用 auto 模式'],
+    ['autoMode','自訂 auto 模式分類器的封鎖與允許規則'],
+    ['skipDangerousModePermissionPrompt','跳過進入 bypass permissions 前的確認提示'],
+    ['sandbox.enabled','啟用 bash 沙盒隔離'],
+  ],
+  'Managed 專屬': [
+    ['allowedMcpServers / deniedMcpServers','MCP 伺服器的允許/拒絕清單'],
+    ['strictKnownMarketplaces','外掛 marketplace 來源允許清單'],
+    ['allowManagedPermissionRulesOnly','僅套用 managed settings 中定義的權限規則'],
+    ['requiredMinimumVersion / requiredMaximumVersion','啟動所需的最低/最高 Claude Code 版本'],
+    ['forceLoginMethod / forceLoginOrgUUID','限制登入方式或所屬組織'],
+    ['claudeMd','以組織管理的記憶體形式注入的 CLAUDE.md 風格指示'],
+  ],
+  'Hooks 與 MCP': [
+    ['hooks','設定生命週期事件觸發的自訂指令'],
+    ['allowManagedHooksOnly','僅載入 managed/SDK hooks 與強制啟用外掛的 hooks'],
+    ['enabledMcpjsonServers / disabledMcpjsonServers','核准或拒絕 .mcp.json 中特定伺服器'],
+    ['enableAllProjectMcpServers','自動核准專案 .mcp.json 中定義的所有 MCP 伺服器'],
+  ],
+  'Session 與記憶體': [
+    ['cleanupPeriodDays','超過此天數的 session 檔案在啟動時刪除, 預設 30'],
+    ['autoMemoryEnabled','啟用/停用 auto memory, 預設 true'],
+    ['autoMemoryDirectory','自訂 auto memory 儲存目錄'],
+    ['plansDirectory','自訂計畫檔案儲存位置, 預設 ~/.claude/plans'],
+    ['fileCheckpointingEnabled','編輯前快照檔案以支援 /rewind, 預設 true'],
+  ],
+};
+const settingsChipsEl = document.getElementById('settingsChips');
+const settingsFieldsEl = document.getElementById('settingsFields');
+function renderSettings(key) {
+  settingsFieldsEl.innerHTML = SETTINGS_CATS[key].map(([n,d]) =>
+    `<div class="field"><div class="name">${n}</div><div class="desc">${d}</div></div>`).join('');
+}
+Object.keys(SETTINGS_CATS).forEach((key, i) => {
+  const chip = document.createElement('div');
+  chip.className = 'chip' + (i === 0 ? ' active' : '');
+  chip.textContent = key;
+  chip.onclick = () => {
+    document.querySelectorAll('#settingsChips .chip').forEach(el => el.classList.remove('active'));
+    chip.classList.add('active');
+    renderSettings(key);
+  };
+  settingsChipsEl.appendChild(chip);
+});
+renderSettings(Object.keys(SETTINGS_CATS)[0]);
+</script>
+</body>
+</html>

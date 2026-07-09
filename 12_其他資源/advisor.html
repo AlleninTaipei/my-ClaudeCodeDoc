@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Advisor 顧問工具互動課程</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+
+  header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+           border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+  header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+  header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+              max-width: 600px; margin-inline: auto; }
+
+  main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+  section { margin-bottom: 52px; }
+  h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+       border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+  h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+  p  { color: #4a5568; margin-bottom: 12px; }
+
+  .code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+    padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+    overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+  .kw  { color: #7c3aed; }
+  .fn  { color: #16a34a; }
+  .str { color: #d97706; }
+  .cmt { color: #94a3b8; font-style: italic; }
+  .key { color: #2563eb; }
+
+  .info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+    padding: 16px 20px; margin-top: 14px; }
+  .info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+    font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+    margin-bottom: 10px; letter-spacing: 0.05em; }
+  .info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+
+  .takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+    border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+  .takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+
+  .api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+  .field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+  .field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+  .field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+
+  .event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+  .event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+    padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+  .event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+    min-width: 160px; flex-shrink: 0; }
+  .event-desc { font-size: 0.82rem; color: #4a5568; }
+
+  .response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+    padding: 20px; margin-top: 16px; }
+  .response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+  .response-field:last-child { border-bottom: none; }
+  .rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 150px; flex-shrink: 0; }
+  .rf-val { font-size: 0.85rem; color: #374151; }
+
+  .btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+    cursor: pointer; border: none; transition: all 0.2s; }
+  .btn-primary { background: #2563eb; color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+  .btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+  .btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+  .btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+  .btn-ghost:disabled { opacity: 0.4; cursor: default; }
+  .step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+
+  .stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+  .stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+    cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+  .stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+  .stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+
+  .demo-panel { display: none; }
+  .demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+  .col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+  .col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+    text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+  .col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+  .col-card p:last-child { margin-bottom: 0; }
+
+  .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+  .chip-label { font-size: 0.75rem; color: #6b7280; }
+  .chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+    cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+  .chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+
+  @media (max-width: 640px) {
+    .api-fields, .two-col { grid-template-columns: 1fr; }
+  }
+
+  #themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+    padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+    cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+    transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+  #themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+
+  body.dark { background: #0f1117; color: #e2e8f0; }
+  body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+  body.dark header h1 { color: #f7fafc; }
+  body.dark header p  { color: #a0aec0; }
+  body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+  body.dark h3 { color: #e2e8f0; }
+  body.dark p  { color: #a0aec0; }
+  body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+  body.dark .kw  { color: #9f7aea; }
+  body.dark .fn  { color: #68d391; }
+  body.dark .str { color: #f6ad55; }
+  body.dark .cmt { color: #4a5568; }
+  body.dark .key { color: #63b3ed; }
+  body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+  body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+  body.dark .info-box p { color: #a0aec0; }
+  body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+  body.dark .takeaway p { color: #c6f6d5; }
+  body.dark .field { background: #1a202c; border-color: #2d3748; }
+  body.dark .field .name { color: #68d391; }
+  body.dark .field .desc { color: #718096; }
+  body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+  body.dark .event-name { color: #68d391; }
+  body.dark .event-desc { color: #718096; }
+  body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+  body.dark .response-field { border-bottom-color: #2d3748; }
+  body.dark .rf-key { color: #f6ad55; }
+  body.dark .rf-val { color: #a0aec0; }
+  body.dark .btn-primary { background: #2b6cb0; }
+  body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+  body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+  body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+  body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+  body.dark .step-indicator { color: #718096; }
+  body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+  body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+  body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+  body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+  body.dark .col-card-title { color: #4a5568; }
+  body.dark .col-card p { color: #a0aec0; }
+  body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+  body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+  body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+  body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Advisor 顧問工具互動課程</h1>
+  <p>讓主要模型在關鍵時刻諮詢一個更強的顧問模型, 學習何時啟用, 如何配對模型, 以及費用與快取的影響。</p>
+</header>
+
+<main>
+  <section>
+    <h2>什麼是 Advisor</h2>
+    <div class="info-box">
+      <span class="tag">實驗性功能</span>
+      <p>Advisor 工具為實驗性功能, 需要 Claude Code v2.1.98 以上版本並搭配 Anthropic API, 不支援 Amazon Bedrock, Google Vertex AI 或 Microsoft Foundry。行為, 定價與可用性未來可能變動。</p>
+    </div>
+    <p>Advisor 工具讓 Claude 在任務的關鍵時刻諮詢第二個, 通常更強大的模型, 例如即將決定採用某個做法之前, 卡在反覆出現的錯誤時, 或宣告任務完成之前。顧問會收到完整的對話紀錄, 包含每一次工具呼叫與結果, 並回傳建議供 Claude 在繼續之前採用。</p>
+    <p>Advisor 是以 <span class="key">server tool</span> 的形式在 Anthropic 的伺服器端執行, 訂閱制與 API 計費帳號皆可使用。你選擇由哪個模型擔任顧問, 而何時呼叫顧問則由 Claude 自行判斷。</p>
+  </section>
+
+  <section>
+    <h2>什麼時候該用 Advisor</h2>
+    <div class="two-col">
+      <div class="col-card">
+        <div class="col-card-title">適合使用</div>
+        <p>長時間, 多步驟的任務, 大部分回合都很例行, 但計畫品質決定成敗。例如大型重構, 反覆出現同一個錯誤的除錯過程, 或希望在 Claude 宣告完成前獨立檢查一次的任務。</p>
+      </div>
+      <div class="col-card">
+        <div class="col-card-title">不適合使用</div>
+        <p>短任務, 幾乎不需要規劃, 或每一回合都需要最強模型的工作。這些情境應直接切換主要模型, 或考慮 opusplan 與子代理等其他取得第二意見的方式。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>啟用 Advisor 的三種方式</h2>
+    <div class="stage-tabs">
+      <div class="av-tab stage-tab active" onclick="avGoTo(0)">1 · /advisor 指令</div>
+      <div class="av-tab stage-tab" onclick="avGoTo(1)">2 · advisorModel 設定</div>
+      <div class="av-tab stage-tab" onclick="avGoTo(2)">3 · --advisor 旗標</div>
+    </div>
+
+    <div class="av-panel demo-panel visible" id="av-p0">
+      <p>在 session 中即時設定或更換顧問, 並存成預設值。不帶參數執行會開啟選擇器列出可用的顧問模型, 也可以直接指定模型。</p>
+      <pre class="code-block">/advisor opus</pre>
+      <p>選擇結果會存成使用者設定裡的 <span class="key">advisorModel</span>, 並跨 session 保留。若組織的 <span class="key">availableModels</span> 允許清單排除了已儲存的顧問模型, 則要等你用 /advisor 選一個允許的模型後才會啟用。</p>
+    </div>
+    <div class="av-panel demo-panel" id="av-p1">
+      <p>不開啟 session 也能設定預設顧問, 寫入設定檔即可。</p>
+      <pre class="code-block">{
+  <span class="str">"advisorModel"</span>: <span class="str">"opus"</span>
+}</pre>
+    </div>
+    <div class="av-panel demo-panel" id="av-p2">
+      <p>只在單一 session 設定顧問, 不影響已儲存的設定。</p>
+      <pre class="code-block">claude --advisor opus</pre>
+      <p>此旗標的優先順序高於 advisorModel 設定。若 session 的主要模型不支援 advisor, 或請求的顧問模型被組織的允許清單排除, 指令會以錯誤結束。</p>
+    </div>
+
+    <div>
+      <button class="btn btn-ghost" id="avPrev" disabled onclick="avGoTo(avStep-1)">← 上一步</button>
+      <button class="btn btn-primary" id="avNext" onclick="avGoTo(avStep+1)">下一步 →</button>
+      <span class="step-indicator" id="avIndicator">Step 1 of 3</span>
+    </div>
+
+    <div class="info-box" style="margin-top:20px;">
+      <span class="tag">版本需求</span>
+      <p>要使用 Fable 5 作為顧問, 需要 Claude Code v2.1.170 以上版本, 並取得組織的 Fable 5 使用權限。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>選擇顧問模型</h2>
+    <p>顧問模型的能力必須至少與主要模型相當。每個主要模型可接受的顧問如下:</p>
+    <div class="response-box">
+      <div class="response-field"><div class="rf-key">Haiku 4.5</div><div class="rf-val">Fable, Opus, Sonnet — Haiku 可以呼叫顧問, 但不能擔任顧問</div></div>
+      <div class="response-field"><div class="rf-key">Sonnet 4.6</div><div class="rf-val">Fable, Opus, Sonnet</div></div>
+      <div class="response-field"><div class="rf-key">Sonnet 5</div><div class="rf-val">Fable, Opus, Sonnet 5 — Sonnet 4.6 顧問會被拒絕</div></div>
+      <div class="response-field"><div class="rf-key">Opus 4.6 以上</div><div class="rf-val">Fable, 版本等於或高於主要模型的 Opus — Opus 4.7 主模型配 Opus 4.6 顧問會被拒絕, Opus 4.6 主模型也接受 Sonnet 5 顧問</div></div>
+      <div class="response-field"><div class="rf-key">Fable 5 (v2.1.170+)</div><div class="rf-val">僅接受 Fable — Opus 或 Sonnet 顧問都會被拒絕</div></div>
+    </div>
+    <p>顧問可設定為 <span class="key">opus</span>, <span class="key">sonnet</span> 或 <span class="key">fable</span>, 這些別名會解析為各模型的最新版本, 也可以直接傳入完整的模型 ID, 例如 <span class="key">claude-opus-4-8</span>。子代理會繼承所設定的顧問, 並依自身模型套用相同的配對檢查。</p>
+
+    <h3>常見的模型配對</h3>
+    <div class="chip-row" id="avPairChips">
+      <span class="chip-label">選擇配對:</span>
+    </div>
+    <div class="response-box" id="avPairDetail"></div>
+  </section>
+
+  <section>
+    <h2>Claude 何時會諮詢顧問</h2>
+    <p>是否呼叫顧問由 Claude 自行決定。它傾向在即將決定採用某個做法之前, 錯誤反覆出現時, 以及宣告任務完成之前諮詢顧問, 但實際時機是由模型判斷, 而非固定規則。</p>
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">committing to approach</span><span class="event-desc">即將決定採用某個實作方向之前</span></div>
+      <div class="event-item"><span class="event-name">recurring error</span><span class="event-desc">同一個錯誤反覆出現, 卡住時</span></div>
+      <div class="event-item"><span class="event-name">task completion</span><span class="event-desc">宣告任務完成之前</span></div>
+    </div>
+    <div class="info-box">
+      <span class="tag">提示</span>
+      <p>你也可以在提示詞中直接要求諮詢顧問, 例如 <span class="key">consult the advisor before you continue</span>。目前沒有設定可以限制或強制顧問呼叫次數, 若想調整頻率, 直接在指示中說明即可。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Session 中會看到什麼</h2>
+    <p>當 Claude 呼叫顧問時, 逐字稿會顯示一行 <span class="key">Advising</span> 並附上顧問模型名稱, 呼叫進行中會持續顯示。結果回傳後, 該行會確認顧問已完成檢視。按下 <span class="key">Ctrl+O</span> 可展開閱讀顧問完整的建議內容。</p>
+    <p>Claude 通常會依循顧問的建議, 但當自身證據與某個具體主張矛盾時會調整做法: 如果建議的步驟實際嘗試後失敗, 或檔案內容與建議矛盾, Claude 會呈現這個衝突, 而不是無條件遵循建議。</p>
+  </section>
+
+  <section>
+    <h2>費用</h2>
+    <div class="response-box">
+      <div class="response-field"><div class="rf-key">計費方式</div><div class="rf-val">每次顧問呼叫都會把對話傳送給顧問模型, 因此除了主要模型的用量外, 還會依顧問模型的費率額外計費</div></div>
+      <div class="response-field"><div class="rf-key">API 計費</div><div class="rf-val">顧問的 token 依顧問模型的輸入輸出費率計算</div></div>
+      <div class="response-field"><div class="rf-key">訂閱方案</div><div class="rf-val">顧問用量計入方案的使用限額</div></div>
+      <div class="response-field"><div class="rf-key">整體成本</div><div class="rf-val">顧問只在決策點被呼叫, 而非每一回合, 因此搭配較快的主要模型與較強的顧問, 通常比全程使用強模型更省錢</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>對 Prompt Caching 的影響</h2>
+    <div class="info-box">
+      <span class="tag">快取行為</span>
+      <p>在 session 中途啟用或停用 advisor, 不會讓主要模型的 prompt cache 失效。與切換模型或調整 effort level 不同, 切換 /advisor 會保留已快取的前綴, 顧問回傳的建議也會在後續回合中作為逐字稿的一部分被快取。</p>
+    </div>
+    <p>顧問模型自己讀取對話的過程不會被快取, 每一次顧問呼叫都會重新處理完整的逐字稿, 呼叫之間沒有重複使用的部分。</p>
+  </section>
+
+  <section>
+    <h2>使用需求</h2>
+    <div class="api-fields">
+      <div class="field"><div class="name">Claude Code 版本</div><div class="desc">v2.1.98 以上, 執行 claude update 升級</div></div>
+      <div class="field"><div class="name">僅限 Anthropic API</div><div class="desc">Advisor 是伺服器端執行的工具, 不支援 Bedrock, Vertex AI 或 Foundry; 透過 LLM gateway 時, 是否可用取決於 gateway 是否原封不動轉發請求給 Anthropic API</div></div>
+      <div class="field"><div class="name">支援的主要模型</div><div class="desc">Opus 4.6 以上, Sonnet 4.6 以上, 或 Haiku 4.5; Fable 5 在 v2.1.170 以上也符合資格</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>關閉 Advisor</h2>
+    <p>要停止使用 advisor 並清除已儲存的 advisorModel, 執行 <span class="key">/advisor off</span>, 或在 /advisor 選擇器中選擇 No advisor。</p>
+    <pre class="code-block">/advisor off</pre>
+    <p>若要完全停用 advisor 工具, 包含 /advisor 指令與 --advisor 旗標, 設定環境變數:</p>
+    <pre class="code-block"><span class="key">CLAUDE_CODE_DISABLE_ADVISOR_TOOL</span>=1</pre>
+  </section>
+
+  <section>
+    <h2>與相關功能的比較</h2>
+    <p>Advisor 是結合不同模型能力的其中一種方式, 依你希望更強的模型何時介入來選擇。</p>
+    <div class="response-box">
+      <div class="response-field"><div class="rf-key">Advisor 工具</div><div class="rf-val">任務中途的決策點, 由 Claude 判斷何時需要建議而主動呼叫</div></div>
+      <div class="response-field"><div class="rf-key">opusplan</div><div class="rf-val">在 plan mode 期間執行 (若組織的 availableModels 允許), 之後切回 Sonnet 執行; 由使用者進入 plan mode 觸發</div></div>
+      <div class="response-field"><div class="rf-key">Subagents (設定 model)</div><div class="rf-val">整個委派的子任務都由該模型執行; 由 Claude 委派或使用者呼叫子代理觸發</div></div>
+      <div class="response-field"><div class="rf-key">/model</div><div class="rf-val">套用到之後所有回合; 由使用者切換模型觸發</div></div>
+    </div>
+    <div class="takeaway">
+      <p>重點回顧: Advisor 適合用在長任務裡少數真正需要更強判斷力的節點, 讓便宜的主要模型處理例行工作, 只在關鍵決策時付出顧問模型的額外成本, 而不必整個 session 都跑最強的模型。</p>
+    </div>
+  </section>
+</main>
+
+<script>
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+  }
+
+  let avStep = 0;
+  const AV_MAX = 2;
+
+  function avGoTo(n) {
+    avStep = Math.max(0, Math.min(AV_MAX, n));
+    document.querySelectorAll('.av-panel').forEach((el, i) => el.classList.toggle('visible', i === avStep));
+    document.querySelectorAll('.av-tab').forEach((t, i) => {
+      t.classList.remove('active', 'done');
+      if (i === avStep) t.classList.add('active');
+      else if (i < avStep) t.classList.add('done');
+    });
+    document.getElementById('avPrev').disabled = avStep === 0;
+    const next = document.getElementById('avNext');
+    next.disabled = avStep === AV_MAX;
+    next.textContent = avStep === AV_MAX ? '完成 ✓' : '下一步 →';
+    document.getElementById('avIndicator').textContent = `Step ${avStep + 1} of ${AV_MAX + 1}`;
+  }
+  avGoTo(0);
+
+  const AV_PAIRS = [
+    { key: 'sonnet-opus', label: 'Sonnet 主 + Opus 顧問', desc: 'Sonnet 處理例行工作, 遇到規劃, 模稜兩可的失敗與完成檢查時升級給 Opus。' },
+    { key: 'sonnet-fable', label: 'Sonnet 主 + Fable 顧問', desc: '在決策點取得 Fable 5 等級的建議, 而不必全程執行 Fable 5。需要 v2.1.170 以上並取得 Fable 5 使用權限。' },
+    { key: 'haiku-opus', label: 'Haiku 主 + Opus 顧問', desc: '成本最低的主要模型搭配強大的規劃能力, 費用預期高於單獨使用 Haiku, 但低於把主要模型換成 Sonnet 或 Opus。' },
+    { key: 'opus-opus', label: 'Opus 主 + Opus 顧問', desc: '由第二個 Opus 檢視第一個 Opus 的結果, 適合高風險任務, 獨立檢查比成本更重要。' },
+    { key: 'fable-fable', label: 'Fable 主 + Fable 顧問', desc: 'Fable 5 可用時能力最高的配對。Fable 的等級高於 Opus 與 Sonnet, 因此是 Fable 主模型唯一可接受的顧問。' },
+    { key: 'sonnet-sonnet', label: 'Sonnet 主 + Sonnet 顧問', desc: '成本較低的第二意見, 用來抓例行的疏漏。' }
+  ];
+
+  function avRenderPairs() {
+    const chipRow = document.getElementById('avPairChips');
+    AV_PAIRS.forEach((p, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'chip' + (i === 0 ? ' active' : '');
+      btn.textContent = p.label;
+      btn.onclick = () => avSelectPair(p.key);
+      chipRow.appendChild(btn);
+    });
+    avSelectPair(AV_PAIRS[0].key);
+  }
+
+  function avSelectPair(key) {
+    const pair = AV_PAIRS.find(p => p.key === key);
+    document.querySelectorAll('#avPairChips .chip').forEach((c, i) => c.classList.toggle('active', AV_PAIRS[i].key === key));
+    document.getElementById('avPairDetail').innerHTML =
+      `<div class="response-field"><div class="rf-key">${pair.label}</div><div class="rf-val">${pair.desc}</div></div>`;
+  }
+
+  avRenderPairs();
+</script>
+</body>
+</html>

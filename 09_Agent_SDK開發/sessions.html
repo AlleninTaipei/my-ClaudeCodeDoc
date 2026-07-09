@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Agent SDK Sessions 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; }
+.fn  { color: #16a34a; }
+.str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; }
+.key { color: #2563eb; }
+
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 130px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+
+.scope-badge { display: inline-block; font-size: 0.58rem; font-weight: 700;
+  letter-spacing: 0.07em; text-transform: uppercase; padding: 2px 8px;
+  border-radius: 4px; vertical-align: middle; margin-left: 10px;
+  position: relative; top: -2px; }
+.scope-universal { background: #dcfce7; color: #166534; border: 1px solid #4ade80; }
+.scope-api       { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.scope-specific  { background: #ede9fe; color: #6d28d9; border: 1px solid #a78bfa; }
+.scope-legend { display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  background: #e2e8f0; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 10px 18px; margin-bottom: 36px; }
+.scope-legend-label { font-size: 0.72rem; color: #4a5568; font-weight: 700; }
+.scope-legend-item  { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: #374151; }
+
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+
+@media (max-width: 640px) {
+  .api-fields, .two-col { grid-template-columns: 1fr; }
+}
+
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; }
+body.dark .fn  { color: #68d391; }
+body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; }
+body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; }
+body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; }
+body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; }
+body.dark .rf-val { color: #a0aec0; }
+body.dark .scope-universal { background: #1a3a28; color: #68d391; border-color: #276749; }
+body.dark .scope-api       { background: #3a2a10; color: #f6ad55; border-color: #7a5a20; }
+body.dark .scope-specific  { background: #2d1f4a; color: #b794f4; border-color: #553c8b; }
+body.dark .scope-legend { background: #1a202c; border-color: #2d3748; }
+body.dark .scope-legend-label { color: #4a5568; }
+body.dark .scope-legend-item  { color: #718096; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; }
+body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Agent SDK Sessions</h1>
+  <p>了解 session 如何保存 agent 對話歷史, 以及何時該用 continue, resume 或 fork 回到先前的執行紀錄。</p>
+</header>
+
+<main>
+
+<section>
+  <h2>選擇合適的做法</h2>
+  <p>需要多少 session 管理, 取決於應用程式的形狀。單一 query() 呼叫內, agent 本來就會自行完成所需的多輪對話, 只有當你要發送多個彼此需共享上下文的 prompt 時, session 管理才會派上用場。</p>
+
+  <div class="api-fields">
+    <div class="field"><div class="name">單次任務</div><div class="desc">單一 prompt, 無需後續追問, 一次 query() 呼叫即可處理。</div></div>
+    <div class="field"><div class="name">單一行程內多輪對話</div><div class="desc">Python 用 ClaudeSDKClient, TypeScript 用 continue: true, SDK 自動追蹤 session, 不需處理 ID。</div></div>
+    <div class="field"><div class="name">行程重啟後接續</div><div class="desc">continue_conversation=True / continue: true, 自動接續目錄中最近一次 session, 不需 ID。</div></div>
+    <div class="field"><div class="name">回到特定過去 session</div><div class="desc">擷取 session ID 並傳入 resume。</div></div>
+    <div class="field"><div class="name">嘗試替代方案但保留原始紀錄</div><div class="desc">使用 fork 分岔 session。</div></div>
+    <div class="field"><div class="name">無狀態任務 (僅 TypeScript)</div><div class="desc">設定 persistSession: false, session 只存在記憶體中, Python 則一律會寫入磁碟。</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Continue, Resume 與 Fork</h2>
+  <p>三者都是設定在 query() 上的選項欄位, 差別在於如何找到與處理既有的 session。</p>
+
+  <div class="chip-row">
+    <span class="chip-label">選擇概念:</span>
+    <div class="chip active" onclick="crfShow(0,this)">Continue</div>
+    <div class="chip" onclick="crfShow(1,this)">Resume</div>
+    <div class="chip" onclick="crfShow(2,this)">Fork</div>
+  </div>
+  <div class="response-box crf-panel" id="crf-0">
+    <p class="rf-val">尋找目前目錄中最近一次的 session 並接續下去, 不需要自行追蹤任何 ID, 適合一次只跑一組對話的應用程式。</p>
+  </div>
+  <div class="response-box crf-panel" id="crf-1" style="display:none">
+    <p class="rf-val">傳入特定的 session ID 來接續, 你需要自行追蹤這個 ID。當有多組 session 並存 (例如多使用者各自一組), 或想回到非最近一次的 session 時使用。</p>
+  </div>
+  <div class="response-box crf-panel" id="crf-2" style="display:none">
+    <p class="rf-val">建立一份全新的 session, 內容是原始歷史的副本, 原始 session 完全不受影響。適合想嘗試不同方向, 同時保留退回原路的選項。</p>
+  </div>
+</section>
+
+<section>
+  <h2>自動 Session 管理</h2>
+  <p>兩個 SDK 都提供跨呼叫自動追蹤 session 狀態的介面, 不需要手動傳遞 ID, 適合單一行程內的多輪對話。</p>
+
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">Python: ClaudeSDKClient</div>
+      <p>內部自動處理 session ID, 每次呼叫 client.query() 都會自動接續同一個 session。</p>
+      <pre class="code-block"><span class="kw">async with</span> ClaudeSDKClient(options=options) <span class="kw">as</span> client:
+    <span class="kw">await</span> client.<span class="fn">query</span>(<span class="str">"Analyze the auth module"</span>)
+    <span class="kw">async for</span> message <span class="kw">in</span> client.<span class="fn">receive_response</span>():
+        <span class="fn">print_response</span>(message)
+    <span class="kw">await</span> client.<span class="fn">query</span>(<span class="str">"Now refactor it to use JWT"</span>)</pre>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">TypeScript: continue: true</div>
+      <p>沒有像 ClaudeSDKClient 那樣的物件, 改為在每次後續呼叫傳入 continue: true, SDK 會找到目前目錄中最近一次的 session。</p>
+      <pre class="code-block"><span class="kw">for await</span> (<span class="kw">const</span> message <span class="kw">of</span> <span class="fn">query</span>({
+  prompt: <span class="str">"Now refactor it to use JWT"</span>,
+  options: { continue: <span class="kw">true</span> }
+})) { <span class="cmt">/* ... */</span> }</pre>
+    </div>
+  </div>
+
+  <div class="info-box"><span class="tag">注意</span>
+  <p>實驗性的 V2 session API (createSession 搭配 send / stream) 已在 TypeScript Agent SDK 0.3.142 中移除, 請改用 query() 函式與本頁介紹的 session 選項。</p></div>
+</section>
+
+<section>
+  <h2>用 query() 操作 Session 選項</h2>
+
+  <div class="stage-tabs">
+    <div class="sess-tab stage-tab active" onclick="sessGoTo(0)">1 · 擷取 Session ID</div>
+    <div class="sess-tab stage-tab" onclick="sessGoTo(1)">2 · 依 ID Resume</div>
+    <div class="sess-tab stage-tab" onclick="sessGoTo(2)">3 · Fork 探索替代方案</div>
+  </div>
+
+  <div class="sess-panel demo-panel visible" id="sess-p0">
+    <p>resume 與 fork 都需要 session ID。從結果訊息的 session_id 欄位讀取即可, 每一則結果訊息都會帶有這個欄位, 無論成功或錯誤。TypeScript 在 init 的 SystemMessage 上也能更早取得; Python 則巢狀在 SystemMessage.data 內。</p>
+    <pre class="code-block"><span class="kw">let</span> sessionId;
+<span class="kw">for await</span> (<span class="kw">const</span> message <span class="kw">of</span> <span class="fn">query</span>({ prompt: <span class="str">"Analyze the auth module"</span> })) {
+  <span class="kw">if</span> (message.type === <span class="str">"result"</span>) sessionId = message.session_id;
+}</pre>
+  </div>
+  <div class="sess-panel demo-panel" id="sess-p1">
+    <p>把 session ID 傳給 resume 即可回到該 session, agent 會帶著完整先前上下文接續下去。常見情境: 針對已完成的分析追加後續動作, 從 error_max_turns 之類的上限中恢復, 或是行程重啟後還原對話。</p>
+    <pre class="code-block"><span class="fn">query</span>({
+  prompt: <span class="str">"Now implement the refactoring you suggested"</span>,
+  options: { resume: sessionId }
+});</pre>
+    <div class="info-box"><span class="tag">常見錯誤</span>
+    <p>若 resume 回傳的是全新 session 而非預期歷史, 最常見原因是 cwd 不一致。session 儲存在 ~/.claude/projects/&lt;encoded-cwd&gt;/*.jsonl, 若從不同目錄呼叫 resume, SDK 會找錯位置。</p></div>
+  </div>
+  <div class="sess-panel demo-panel" id="sess-p2">
+    <p>fork 會建立一份帶有原始歷史副本的新 session, 但從那個時間點開始分岔發展。fork 會取得自己的 session ID, 原始 session 的 ID 與歷史則完全不變, 你會得到兩個可各自獨立 resume 的 session。</p>
+    <pre class="code-block"><span class="fn">query</span>({
+  prompt: <span class="str">"Instead of JWT, outline how OAuth2 would work"</span>,
+  options: { resume: sessionId, forkSession: <span class="kw">true</span> }
+});</pre>
+    <div class="info-box"><span class="tag">注意</span>
+    <p>fork 只分岔對話歷史, 不分岔檔案系統。若 forked agent 編輯了檔案, 那些變更是真實且對同目錄下其他 session 可見的, 要分岔並還原檔案變更請用 file checkpointing。</p></div>
+  </div>
+
+  <div>
+    <button class="btn btn-ghost" id="sessPrev" disabled onclick="sessGoTo(sessStep-1)">← 上一步</button>
+    <button class="btn btn-primary" id="sessNext" onclick="sessGoTo(sessStep+1)">下一步 →</button>
+    <span class="step-indicator" id="sessIndicator">Step 1 of 3</span>
+  </div>
+</section>
+
+<section>
+  <h2>跨主機 Resume</h2>
+  <p>session 檔案只存在於建立它的機器上。要在不同主機 (CI worker, 短暫容器, serverless) resume, 有兩種做法。</p>
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">搬移 session 檔案</div>
+      <p>把 ~/.claude/projects/&lt;encoded-cwd&gt;/&lt;session-id&gt;.jsonl 從第一台機器複製到新主機的相同路徑, cwd 必須一致。</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">不依賴 session resume</div>
+      <p>把需要的結果 (分析輸出, 決策, 檔案差異) 存成應用程式狀態, 再傳入新 session 的 prompt, 通常比搬運 transcript 檔案更穩健。</p>
+    </div>
+  </div>
+  <p>兩個 SDK 都提供 listSessions() / getSessionMessages() 等函式可列舉與讀取磁碟上的 session, 也提供 getSessionInfo(), renameSession(), tagSession() 等函式用來管理個別 session。</p>
+</section>
+
+<section>
+  <h2>相關資源</h2>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">agent-loop</span><span class="event-desc">了解 session 內的輪次, 訊息與 context 累積方式</span></div>
+    <div class="event-item"><span class="event-name">file-checkpointing</span><span class="event-desc">為 session 內的檔案變更做快照與還原</span></div>
+    <div class="event-item"><span class="event-name">Python ClaudeAgentOptions</span><span class="event-desc">Python 完整 session 選項參考</span></div>
+    <div class="event-item"><span class="event-name">TypeScript Options</span><span class="event-desc">TypeScript 完整 session 選項參考</span></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+function crfShow(n, el) {
+  document.querySelectorAll('.crf-panel').forEach((p, i) => p.style.display = i === n ? 'block' : 'none');
+  el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+let sessStep = 0;
+const SESS_MAX = 2;
+function sessGoTo(n) {
+  sessStep = Math.max(0, Math.min(SESS_MAX, n));
+  document.querySelectorAll('.sess-panel').forEach((el, i) => el.classList.toggle('visible', i === sessStep));
+  document.querySelectorAll('.sess-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === sessStep) t.classList.add('active');
+    else if (i < sessStep) t.classList.add('done');
+  });
+  document.getElementById('sessPrev').disabled = sessStep === 0;
+  const next = document.getElementById('sessNext');
+  next.disabled = sessStep === SESS_MAX;
+  next.textContent = sessStep === SESS_MAX ? 'Done ✓' : '下一步 →';
+  document.getElementById('sessIndicator').textContent = `Step ${sessStep + 1} of ${SESS_MAX + 1}`;
+}
+sessGoTo(0);
+</script>
+</body>
+</html>

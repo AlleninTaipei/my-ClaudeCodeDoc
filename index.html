@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLAUDE CODE 操作手冊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Serif+4:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEFEA;
+    --paper-2:#E3E6DE;
+    --paper-3:#D9DDD3;
+    --ink:#1B2320;
+    --ink-soft:#4C5750;
+    --blueprint:#2C4A6E;
+    --blueprint-soft:#6C88A6;
+    --signal:#D98E33;
+    --signal-soft:#F0D2A6;
+    --sage:#8E9C90;
+    --line:rgba(27,35,32,0.16);
+    --line-strong:rgba(27,35,32,0.32);
+    --radius:2px;
+    --maxw:1120px;
+  }
+
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#14181A;
+      --paper-2:#1C2123;
+      --paper-3:#262C2E;
+      --ink:#EDEFEA;
+      --ink-soft:#AEB7B0;
+      --blueprint:#7FA3C7;
+      --blueprint-soft:#4E6C8C;
+      --signal:#E8A857;
+      --signal-soft:#5A4526;
+      --sage:#7C8A7E;
+      --line:rgba(237,239,234,0.16);
+      --line-strong:rgba(237,239,234,0.32);
+    }
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *,*::before,*::after{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; }
+  }
+
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Source Serif 4', Georgia, serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  code, .mono{
+    font-family:'IBM Plex Mono', ui-monospace, Consolas, monospace;
+  }
+
+  h1,h2,h3{
+    font-family:'Space Grotesk', 'Noto Sans TC', sans-serif;
+    font-weight:600;
+    margin:0;
+    color:var(--ink);
+  }
+
+  a{ color:var(--blueprint); }
+
+  ::selection{ background:var(--signal-soft); color:var(--ink); }
+
+  :focus-visible{
+    outline:2px solid var(--signal);
+    outline-offset:3px;
+  }
+
+  .wrap{
+    max-width:var(--maxw);
+    margin:0 auto;
+    padding:0 28px;
+  }
+
+  /* ---------- registration mark ---------- */
+  .reg{
+    position:relative;
+  }
+  .reg::before, .reg::after{
+    content:"";
+    position:absolute;
+    width:14px;
+    height:14px;
+    border:1.4px solid var(--blueprint);
+    opacity:0.55;
+    pointer-events:none;
+  }
+  .reg::before{
+    top:-1px; left:-1px;
+    border-right:none;
+    border-bottom:none;
+  }
+  .reg::after{
+    bottom:-1px; right:-1px;
+    border-left:none;
+    border-top:none;
+  }
+
+  /* ---------- header / title block ---------- */
+  .hero{
+    padding:56px 0 0;
+    border-bottom:1px solid var(--line-strong);
+  }
+  .hero__top{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--blueprint);
+    padding-bottom:18px;
+    border-bottom:1px solid var(--line);
+    opacity:0;
+    animation:fade-up 0.7s ease forwards;
+  }
+  .hero__title{
+    padding:34px 0 26px;
+    opacity:0;
+    animation:fade-up 0.7s ease 0.12s forwards;
+  }
+  .hero__eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--blueprint);
+    display:block;
+    margin-bottom:14px;
+  }
+  .hero__title h1{
+    font-size:clamp(40px, 7vw, 76px);
+    line-height:0.98;
+    letter-spacing:-0.01em;
+  }
+  .hero__title h1 span{
+    display:block;
+    font-size:0.42em;
+    font-weight:500;
+    color:var(--ink-soft);
+    margin-top:10px;
+    letter-spacing:0.01em;
+  }
+  .hero__sub{
+    max-width:46ch;
+    margin-top:22px;
+    font-size:17px;
+    color:var(--ink-soft);
+  }
+
+  @keyframes fade-up{
+    from{ opacity:0; transform:translateY(10px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  .titleblock{
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    margin-top:36px;
+    border-top:1px solid var(--line-strong);
+    opacity:0;
+    animation:fade-up 0.7s ease 0.24s forwards;
+  }
+  .titleblock__cell{
+    padding:14px 18px;
+    border-right:1px solid var(--line);
+    border-bottom:1px solid var(--line-strong);
+  }
+  .titleblock__cell:last-child{ border-right:none; }
+  .titleblock__label{
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--sage);
+    margin-bottom:6px;
+  }
+  .titleblock__value{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:18px;
+    font-weight:600;
+  }
+
+  @media (max-width:760px){
+    .titleblock{ grid-template-columns:repeat(2, 1fr); }
+    .titleblock__cell:nth-child(2n){ border-right:none; }
+  }
+
+  /* ---------- intro ---------- */
+  .intro{
+    padding:44px 0 8px;
+  }
+  .intro p{
+    max-width:64ch;
+    font-size:18px;
+    color:var(--ink-soft);
+  }
+  .intro p strong{
+    color:var(--ink);
+    font-weight:600;
+  }
+
+  /* ---------- path section ---------- */
+  .path{ padding:56px 0 40px; }
+  .path__head{
+    margin-bottom:40px;
+  }
+  .path__head .hero__eyebrow{ margin-bottom:10px; }
+  .path__head h2{ font-size:clamp(26px,3.4vw,34px); }
+  .path__head p{
+    margin-top:10px;
+    color:var(--ink-soft);
+    max-width:60ch;
+  }
+
+  .spine{
+    position:relative;
+  }
+  .spine::before{
+    content:"";
+    position:absolute;
+    left:29px;
+    top:8px;
+    bottom:8px;
+    width:1px;
+    background:var(--line-strong);
+  }
+  .spine__fill{
+    position:absolute;
+    left:29px;
+    top:8px;
+    width:1px;
+    height:0%;
+    background:var(--blueprint);
+    transition:height 0.25s linear;
+  }
+
+  .chapter{
+    position:relative;
+    display:grid;
+    grid-template-columns:60px 1fr;
+    column-gap:22px;
+    padding:26px 0;
+  }
+  .chapter + .chapter{ border-top:1px dashed var(--line); }
+
+  .chapter__node{
+    position:relative;
+    display:flex;
+    justify-content:center;
+    padding-top:4px;
+  }
+  .chapter__num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    font-weight:500;
+    color:var(--sage);
+    background:var(--paper);
+    border:1px solid var(--line-strong);
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    z-index:2;
+    transition:color 0.3s, border-color 0.3s, background 0.3s;
+  }
+  .chapter.is-passed .chapter__num{
+    color:var(--paper);
+    background:var(--blueprint);
+    border-color:var(--blueprint);
+  }
+  .chapter.is-current .chapter__num{
+    color:var(--ink);
+    background:var(--signal-soft);
+    border-color:var(--signal);
+  }
+
+  .chapter__tick{
+    position:absolute;
+    top:23px;
+    left:48px;
+    width:20px;
+    height:1px;
+    background:var(--line-strong);
+  }
+  .chapter__tick::before, .chapter__tick::after{
+    content:"";
+    position:absolute;
+    top:-4px;
+    width:1px;
+    height:9px;
+    background:var(--line-strong);
+  }
+  .chapter__tick::before{ left:0; }
+  .chapter__tick::after{ right:0; }
+
+  .chapter__body{
+    padding-top:2px;
+  }
+  .chapter__row{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .chapter__title{
+    font-size:clamp(19px,2.4vw,23px);
+  }
+  .chapter__count{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.06em;
+    color:var(--blueprint);
+    border:1px solid var(--blueprint-soft);
+    padding:4px 9px;
+    border-radius:20px;
+    white-space:nowrap;
+  }
+  .chapter__desc{
+    margin-top:8px;
+    color:var(--ink-soft);
+    font-size:15.5px;
+    max-width:62ch;
+  }
+
+  .chapter__toggle{
+    margin-top:14px;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:none;
+    border:none;
+    padding:6px 0;
+    cursor:pointer;
+    color:var(--blueprint);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+  }
+  .chapter__toggle-icon{
+    display:inline-block;
+    width:9px;
+    height:9px;
+    border-right:1.4px solid var(--blueprint);
+    border-bottom:1.4px solid var(--blueprint);
+    transform:rotate(-45deg);
+    transition:transform 0.25s ease;
+  }
+  .chapter__toggle[aria-expanded="true"] .chapter__toggle-icon{
+    transform:rotate(45deg);
+  }
+
+  .chapter__drawer{
+    display:grid;
+    grid-template-rows:0fr;
+    transition:grid-template-rows 0.35s ease;
+  }
+  .chapter__drawer.is-open{
+    grid-template-rows:1fr;
+  }
+  .chapter__drawer-inner{
+    overflow:hidden;
+  }
+  .filelist{
+    list-style:none;
+    margin:14px 0 4px;
+    padding:16px 18px;
+    background:var(--paper-2);
+    border:1px solid var(--line);
+    border-left:2px solid var(--blueprint-soft);
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(190px, 1fr));
+    gap:6px 18px;
+  }
+  .filelist li{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .filelist li::before{
+    content:"·/ ";
+    color:var(--sage);
+  }
+  .filelist li a{
+    color:inherit;
+    text-decoration:none;
+    border-bottom:1px solid transparent;
+    transition:color 0.2s, border-color 0.2s;
+  }
+  .filelist li a:hover,
+  .filelist li a:focus-visible{
+    color:var(--blueprint);
+    border-bottom-color:var(--blueprint-soft);
+  }
+
+  @media (max-width:640px){
+    .chapter{ grid-template-columns:40px 1fr; column-gap:14px; }
+    .chapter__num{ width:32px; height:32px; font-size:11px; }
+    .spine::before, .spine__fill{ left:25px; }
+    .chapter__tick{ left:38px; width:10px; }
+  }
+
+  /* ---------- legend / footer ---------- */
+  .legend{
+    border-top:1px solid var(--line-strong);
+    padding:36px 0;
+    display:flex;
+    flex-wrap:wrap;
+    gap:28px;
+  }
+  .legend__item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+  .legend__mark{
+    width:16px;
+    height:16px;
+    flex:none;
+  }
+
+  footer{
+    padding:28px 0 60px;
+    color:var(--sage);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    letter-spacing:0.02em;
+  }
+  footer p{ margin:4px 0; }
+</style>
+</head>
+<body>
+
+<header class="hero reg">
+  <div class="wrap">
+    <div class="hero__top">
+      <span>CC / MANUAL</span>
+      <span>正體中文整理版</span>
+    </div>
+
+    <div class="hero__title">
+      <span class="hero__eyebrow">Claude Code 官方文件整理</span>
+      <h1>操作手冊<span>CLAUDE CODE OPERATIONS MANUAL</span></h1>
+      <p class="hero__sub">從安裝設定到企業級部署與治理, 依難易度重新編排的十二個階段, 收錄一百二十六篇官方文件, 每篇均已轉換為互動式學習頁面.</p>
+    </div>
+
+    <div class="titleblock">
+      <div class="titleblock__cell">
+        <span class="titleblock__label">章節 / Chapters</span>
+        <span class="titleblock__value">12</span>
+      </div>
+      <div class="titleblock__cell">
+        <span class="titleblock__label">文件 / Docs</span>
+        <span class="titleblock__value">126</span>
+      </div>
+      <div class="titleblock__cell">
+        <span class="titleblock__label">範圍 / Scope</span>
+        <span class="titleblock__value">入門 → 企業部署</span>
+      </div>
+      <div class="titleblock__cell">
+        <span class="titleblock__label">語言 / Lang</span>
+        <span class="titleblock__value">正體中文</span>
+      </div>
+      <div class="titleblock__cell">
+        <span class="titleblock__label">版次 / Rev</span>
+        <span class="titleblock__value">2026.07.08</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="intro">
+    <div class="wrap">
+      <p>這份手冊把 Claude Code 的官方文件, 依<strong>建議的學習路徑</strong>重新編排成十二個階段, 從第一次安裝啟動, 到日常操作, 平台整合, 擴充能力, 自動化, 品質安全, 成本觀測, CI/CD, Agent SDK 開發, 最後到企業級部署與治理.每個階段底下列出實際的文件檔名, 對應本機資料夾裡真實存在的檔案.</p>
+    </div>
+  </section>
+
+  <section class="path">
+    <div class="wrap">
+      <div class="path__head">
+        <span class="hero__eyebrow">Learning Path</span>
+        <h2>學習路徑, 十二個階段</h2>
+        <p>編號代表建議的先後順序, 從入門開始, 沿著這條線往下, 就是導入 Claude Code 的完整路徑.</p>
+      </div>
+
+      <div class="spine" id="spine">
+        <div class="spine__fill" id="spineFill"></div>
+
+        <!-- 01 -->
+        <article class="chapter" data-index="0">
+          <div class="chapter__node"><span class="chapter__num">01</span><span class="chapter__tick"></span></div>
+          <div class="chapter__body">
+            <div class="chapter__row">
+              <h3 class="chapter__title">入門與基本認識</h3>
+              <span class="chapter__count">9 篇文件</span>
+            </div>
+            <p class="chapter__desc">先了解 Claude Code 是什麼, 如何安裝與啟動.</p>
+            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__drawer"><div class="chapter__drawer-inner">
+              <ul class="filelist">
+                <li><a href="01_入門與基本認識/overview.html"><code>overview.html</code></a></li>
+                <li><a href="01_入門與基本認識/quickstart.html"><code>quickstart.html</code></a></li>
+                <li><a href="01_入門與基本認識/how-claude-code-works.html"><code>how-claude-code-works.html</code></a></li>
+                <li><a href="01_入門與基本認識/glossary.html"><code>glossary.html</code></a></li>
+                <li><a href="01_入門與基本認識/authentication.html"><code>authentication.html</code></a></li>
+                <li><a href="01_入門與基本認識/setup.html"><code>setup.html</code></a></li>
+                <li><a href="01_入門與基本認識/desktop-quickstart.html"><code>desktop-quickstart.html</code></a></li>
+                <li><a href="01_入門與基本認識/web-quickstart.html"><code>web-quickstart.html</code></a></li>
+                <li><a href="01_入門與基本認識/best-practices.html"><code>best-practices.html</code></a></li>
+              </ul>
+            </div></div>
+          </div>
+        </article>
+
+        <!-- 02 -->
+        <article class="chapter" data-index="1">
+          <div class="chapter__node"><span class="chapter__num">02</span><span class="chapter__tick"></span></div>
+          <div class="chapter__body">
+            <div class="chapter__row">
+              <h3 class="chapter__title">日常操作與個人化設定</h3>
+              <span class="chapter__count">13 篇文件</span>
+            </div>
+            <p class="chapter__desc">熟悉互動模式, 常用指令與個人偏好設定.</p>
+            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__drawer"><div class="chapter__drawer-inner">
+              <ul class="filelist">
+                <li><a href="02_日常操作與個人化設定/interactive-mode.html"><code>interactive-mode.html</code></a></li>
+                <li><a href="02_日常操作與個人化設定/common-workflows.html"><code>common-workflows.html</code></a></li>
+                <li><a href="02_日常操作與個人化設定/commands.html"><code>commands.html</code></a></li>
+                <li><a href="02_日常操作與個人化設定/cli-reference.html"><code>cli-reference.html</code></a></li>
+                <li><a href="02_日常操作與個人化設定/permission-modes.html"><code>permission-modes.html</code></a></li>
+                <li><a href="02_日常操作與個人化設定/permissions.html"><code>permissions.html</code></a></li>
+                <li><a href="02_日常操作與個人化設定/settings.html"><code>settings.html</code></a></li>
+                <li><a href="02_日常操作與個人化設定/claude-directory.html"><code>claude-directory.html</code></a></li>
+                <li><a href="02_日常操作與個人化設定/sessions.html"><code>sessions.html</code></a></li>
+                <li><a href="02_日常操作與個人化設定/keybindings.html"><code>keybindings.html</code></a></li>
+                <li><a href="02_日常操作與個人化設定/terminal-config.html"><code>terminal-config.html</code></a></li>
+                <li><a href="02_日常操作與個人化設定/fullscreen.html"><code>fullscreen.html</code></a></li>
+                <li><a href="02_日常操作與個人化設定/fast-mode.html"><code>fast-mode.html</code></a></li>
+              </ul>
+            </div></div>
+          </div>
+        </article>
+
+        <!-- 03 -->
+        <article class="chapter" data-index="2">
+          <div class="chapter__node"><span class="chapter__num">03</span><span class="chapter__tick"></span></div>
+          <div class="chapter__body">
+            <div class="chapter__row">
+              <h3 class="chapter__title">使用介面與平台整合</h3>
+              <span class="chapter__count">12 篇文件</span>
+            </div>
+            <p class="chapter__desc">在編輯器, 桌面, 瀏覽器與行動裝置等不同環境中使用 Claude Code.</p>
+            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__drawer"><div class="chapter__drawer-inner">
+              <ul class="filelist">
+                <li><a href="03_使用介面與平台整合/platforms.html"><code>platforms.html</code></a></li>
+                <li><a href="03_使用介面與平台整合/vs-code.html"><code>vs-code.html</code></a></li>
+                <li><a href="03_使用介面與平台整合/jetbrains.html"><code>jetbrains.html</code></a></li>
+                <li><a href="03_使用介面與平台整合/desktop.html"><code>desktop.html</code></a></li>
+                <li><a href="03_使用介面與平台整合/desktop-linux.html"><code>desktop-linux.html</code></a></li>
+                <li><a href="03_使用介面與平台整合/chrome.html"><code>chrome.html</code></a></li>
+                <li><a href="03_使用介面與平台整合/computer-use.html"><code>computer-use.html</code></a></li>
+                <li><a href="03_使用介面與平台整合/remote-control.html"><code>remote-control.html</code></a></li>
+                <li><a href="03_使用介面與平台整合/slack.html"><code>slack.html</code></a></li>
+                <li><a href="03_使用介面與平台整合/voice-dictation.html"><code>voice-dictation.html</code></a></li>
+                <li><a href="03_使用介面與平台整合/deep-links.html"><code>deep-links.html</code></a></li>
+                <li><a href="03_使用介面與平台整合/artifacts.html"><code>artifacts.html</code></a></li>
+              </ul>
+            </div></div>
+          </div>
+        </article>
+
+        <!-- 04 -->
+        <article class="chapter" data-index="3">
+          <div class="chapter__node"><span class="chapter__num">04</span><span class="chapter__tick"></span></div>
+          <div class="chapter__body">
+            <div class="chapter__row">
+              <h3 class="chapter__title">擴充能力</h3>
+              <span class="chapter__count">5 篇文件</span>
+            </div>
+            <p class="chapter__desc">學習如何以 skills, hooks 與子代理客製化 Claude 的能力.</p>
+            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__drawer"><div class="chapter__drawer-inner">
+              <ul class="filelist">
+                <li><a href="04_擴充能力/features-overview.html"><code>features-overview.html</code></a></li>
+                <li><a href="04_擴充能力/skills.html"><code>skills.html</code></a></li>
+                <li><a href="04_擴充能力/sub-agents.html"><code>sub-agents.html</code></a></li>
+                <li><a href="04_擴充能力/hooks-guide.html"><code>hooks-guide.html</code></a></li>
+                <li><a href="04_擴充能力/hooks.html"><code>hooks.html</code></a></li>
+              </ul>
+            </div></div>
+          </div>
+        </article>
+
+        <!-- 05 -->
+        <article class="chapter" data-index="4">
+          <div class="chapter__node"><span class="chapter__num">05</span><span class="chapter__tick"></span></div>
+          <div class="chapter__body">
+            <div class="chapter__row">
+              <h3 class="chapter__title">自動化與多代理協作</h3>
+              <span class="chapter__count">11 篇文件</span>
+            </div>
+            <p class="chapter__desc">讓 Claude 自主執行任務, 排程, 或多個代理協同工作.</p>
+            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__drawer"><div class="chapter__drawer-inner">
+              <ul class="filelist">
+                <li><a href="05_自動化與多代理協作/goal.html"><code>goal.html</code></a></li>
+                <li><a href="05_自動化與多代理協作/scheduled-tasks.html"><code>scheduled-tasks.html</code></a></li>
+                <li><a href="05_自動化與多代理協作/desktop-scheduled-tasks.html"><code>desktop-scheduled-tasks.html</code></a></li>
+                <li><a href="05_自動化與多代理協作/routines.html"><code>routines.html</code></a></li>
+                <li><a href="05_自動化與多代理協作/channels.html"><code>channels.html</code></a></li>
+                <li><a href="05_自動化與多代理協作/channels-reference.html"><code>channels-reference.html</code></a></li>
+                <li><a href="05_自動化與多代理協作/agents.html"><code>agents.html</code></a></li>
+                <li><a href="05_自動化與多代理協作/agent-view.html"><code>agent-view.html</code></a></li>
+                <li><a href="05_自動化與多代理協作/agent-teams.html"><code>agent-teams.html</code></a></li>
+                <li><a href="05_自動化與多代理協作/headless.html"><code>headless.html</code></a></li>
+                <li><a href="05_自動化與多代理協作/ultraplan.html"><code>ultraplan.html</code></a></li>
+              </ul>
+            </div></div>
+          </div>
+        </article>
+
+        <!-- 06 -->
+        <article class="chapter" data-index="5">
+          <div class="chapter__node"><span class="chapter__num">06</span><span class="chapter__tick"></span></div>
+          <div class="chapter__body">
+            <div class="chapter__row">
+              <h3 class="chapter__title">品質安全與合規</h3>
+              <span class="chapter__count">7 篇文件</span>
+            </div>
+            <p class="chapter__desc">確保程式碼品質與安全性的工具.</p>
+            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__drawer"><div class="chapter__drawer-inner">
+              <ul class="filelist">
+                <li><a href="06_品質安全與合規/checkpointing.html"><code>checkpointing.html</code></a></li>
+                <li><a href="06_品質安全與合規/code-review.html"><code>code-review.html</code></a></li>
+                <li><a href="06_品質安全與合規/ultrareview.html"><code>ultrareview.html</code></a></li>
+                <li><a href="06_品質安全與合規/security.html"><code>security.html</code></a></li>
+                <li><a href="06_品質安全與合規/security-guidance.html"><code>security-guidance.html</code></a></li>
+                <li><a href="06_品質安全與合規/data-usage.html"><code>data-usage.html</code></a></li>
+                <li><a href="06_品質安全與合規/legal-and-compliance.html"><code>legal-and-compliance.html</code></a></li>
+              </ul>
+            </div></div>
+          </div>
+        </article>
+
+        <!-- 07 -->
+        <article class="chapter" data-index="6">
+          <div class="chapter__node"><span class="chapter__num">07</span><span class="chapter__tick"></span></div>
+          <div class="chapter__body">
+            <div class="chapter__row">
+              <h3 class="chapter__title">成本效能與可觀測性</h3>
+              <span class="chapter__count">3 篇文件</span>
+            </div>
+            <p class="chapter__desc">理解並管理 token 用量, 快取與成本.</p>
+            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__drawer"><div class="chapter__drawer-inner">
+              <ul class="filelist">
+                <li><a href="07_成本效能與可觀測性/costs.html"><code>costs.html</code></a></li>
+                <li><a href="07_成本效能與可觀測性/prompt-caching.html"><code>prompt-caching.html</code></a></li>
+                <li><a href="07_成本效能與可觀測性/context-window.html"><code>context-window.html</code></a></li>
+              </ul>
+            </div></div>
+          </div>
+        </article>
+
+        <!-- 08 -->
+        <article class="chapter" data-index="7">
+          <div class="chapter__node"><span class="chapter__num">08</span><span class="chapter__tick"></span></div>
+          <div class="chapter__body">
+            <div class="chapter__row">
+              <h3 class="chapter__title">CI/CD 與大型專案整合</h3>
+              <span class="chapter__count">5 篇文件</span>
+            </div>
+            <p class="chapter__desc">將 Claude Code 導入既有開發流程與大型程式庫.</p>
+            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__drawer"><div class="chapter__drawer-inner">
+              <ul class="filelist">
+                <li><a href="08_CICD與大型專案整合/github-actions.html"><code>github-actions.html</code></a></li>
+                <li><a href="08_CICD與大型專案整合/github-enterprise-server.html"><code>github-enterprise-server.html</code></a></li>
+                <li><a href="08_CICD與大型專案整合/gitlab-ci-cd.html"><code>gitlab-ci-cd.html</code></a></li>
+                <li><a href="08_CICD與大型專案整合/large-codebases.html"><code>large-codebases.html</code></a></li>
+                <li><a href="08_CICD與大型專案整合/devcontainer.html"><code>devcontainer.html</code></a></li>
+              </ul>
+            </div></div>
+          </div>
+        </article>
+
+        <!-- 09 -->
+        <article class="chapter" data-index="8">
+          <div class="chapter__node"><span class="chapter__num">09</span><span class="chapter__tick"></span></div>
+          <div class="chapter__body">
+            <div class="chapter__row">
+              <h3 class="chapter__title">Agent SDK 開發</h3>
+              <span class="chapter__count">27 篇文件</span>
+            </div>
+            <p class="chapter__desc">給想以程式方式建置自訂代理應用的開發者.</p>
+            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__drawer"><div class="chapter__drawer-inner">
+              <ul class="filelist">
+                <li><a href="09_Agent_SDK開發/overview.html"><code>overview.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/quickstart.html"><code>quickstart.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/agent-loop.html"><code>agent-loop.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/claude-code-features.html"><code>claude-code-features.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/streaming-vs-single-mode.html"><code>streaming-vs-single-mode.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/streaming-output.html"><code>streaming-output.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/sessions.html"><code>sessions.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/session-storage.html"><code>session-storage.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/custom-tools.html"><code>custom-tools.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/mcp.html"><code>mcp.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/tool-search.html"><code>tool-search.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/skills.html"><code>skills.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/subagents.html"><code>subagents.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/slash-commands.html"><code>slash-commands.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/plugins.html"><code>plugins.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/modifying-system-prompts.html"><code>modifying-system-prompts.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/permissions.html"><code>permissions.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/hooks.html"><code>hooks.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/file-checkpointing.html"><code>file-checkpointing.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/structured-outputs.html"><code>structured-outputs.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/todo-tracking.html"><code>todo-tracking.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/user-input.html"><code>user-input.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/cost-tracking.html"><code>cost-tracking.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/observability.html"><code>observability.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/secure-deployment.html"><code>secure-deployment.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/migration-guide.html"><code>migration-guide.html</code></a></li>
+                <li><a href="09_Agent_SDK開發/hosting.html"><code>hosting.html</code></a></li>
+              </ul>
+            </div></div>
+          </div>
+        </article>
+
+        <!-- 10 -->
+        <article class="chapter" data-index="9">
+          <div class="chapter__node"><span class="chapter__num">10</span><span class="chapter__tick"></span></div>
+          <div class="chapter__body">
+            <div class="chapter__row">
+              <h3 class="chapter__title">企業級部署與治理</h3>
+              <span class="chapter__count">22 篇文件</span>
+            </div>
+            <p class="chapter__desc">給需要在組織內大規模部署與治理 Claude Code 的管理者.</p>
+            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__drawer"><div class="chapter__drawer-inner">
+              <ul class="filelist">
+                <li><a href="10_企業級部署與治理/admin-setup.html"><code>admin-setup.html</code></a></li>
+                <li><a href="10_企業級部署與治理/feature-availability.html"><code>feature-availability.html</code></a></li>
+                <li><a href="10_企業級部署與治理/auto-mode-config.html"><code>auto-mode-config.html</code></a></li>
+                <li><a href="10_企業級部署與治理/managed-mcp.html"><code>managed-mcp.html</code></a></li>
+                <li><a href="10_企業級部署與治理/server-managed-settings.html"><code>server-managed-settings.html</code></a></li>
+                <li><a href="10_企業級部署與治理/network-config.html"><code>network-config.html</code></a></li>
+                <li><a href="10_企業級部署與治理/sandbox-environments.html"><code>sandbox-environments.html</code></a></li>
+                <li><a href="10_企業級部署與治理/sandboxing.html"><code>sandboxing.html</code></a></li>
+                <li><a href="10_企業級部署與治理/gateways.html"><code>gateways.html</code></a></li>
+                <li><a href="10_企業級部署與治理/llm-gateway.html"><code>llm-gateway.html</code></a></li>
+                <li><a href="10_企業級部署與治理/llm-gateway-connect.html"><code>llm-gateway-connect.html</code></a></li>
+                <li><a href="10_企業級部署與治理/llm-gateway-protocol.html"><code>llm-gateway-protocol.html</code></a></li>
+                <li><a href="10_企業級部署與治理/llm-gateway-rollout.html"><code>llm-gateway-rollout.html</code></a></li>
+                <li><a href="10_企業級部署與治理/claude-apps-gateway.html"><code>claude-apps-gateway.html</code></a></li>
+                <li><a href="10_企業級部署與治理/claude-apps-gateway-config.html"><code>claude-apps-gateway-config.html</code></a></li>
+                <li><a href="10_企業級部署與治理/claude-apps-gateway-deploy.html"><code>claude-apps-gateway-deploy.html</code></a></li>
+                <li><a href="10_企業級部署與治理/claude-apps-gateway-on-gcp.html"><code>claude-apps-gateway-on-gcp.html</code></a></li>
+                <li><a href="10_企業級部署與治理/claude-apps-gateway-spend-limits.html"><code>claude-apps-gateway-spend-limits.html</code></a></li>
+                <li><a href="10_企業級部署與治理/amazon-bedrock.html"><code>amazon-bedrock.html</code></a></li>
+                <li><a href="10_企業級部署與治理/google-vertex-ai.html"><code>google-vertex-ai.html</code></a></li>
+                <li><a href="10_企業級部署與治理/microsoft-foundry.html"><code>microsoft-foundry.html</code></a></li>
+                <li><a href="10_企業級部署與治理/claude-platform-on-aws.html"><code>claude-platform-on-aws.html</code></a></li>
+              </ul>
+            </div></div>
+          </div>
+        </article>
+
+        <!-- 11 -->
+        <article class="chapter" data-index="10">
+          <div class="chapter__node"><span class="chapter__num">11</span><span class="chapter__tick"></span></div>
+          <div class="chapter__body">
+            <div class="chapter__row">
+              <h3 class="chapter__title">疑難排解與參考資料</h3>
+              <span class="chapter__count">6 篇文件</span>
+            </div>
+            <p class="chapter__desc">遇到問題時查閱的除錯與參考資料.</p>
+            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__drawer"><div class="chapter__drawer-inner">
+              <ul class="filelist">
+                <li><a href="11_疑難排解與參考資料/debug-your-config.html"><code>debug-your-config.html</code></a></li>
+                <li><a href="11_疑難排解與參考資料/troubleshooting.html"><code>troubleshooting.html</code></a></li>
+                <li><a href="11_疑難排解與參考資料/troubleshoot-install.html"><code>troubleshoot-install.html</code></a></li>
+                <li><a href="11_疑難排解與參考資料/errors.html"><code>errors.html</code></a></li>
+                <li><a href="11_疑難排解與參考資料/env-vars.html"><code>env-vars.html</code></a></li>
+                <li><a href="11_疑難排解與參考資料/tools-reference.html"><code>tools-reference.html</code></a></li>
+              </ul>
+            </div></div>
+          </div>
+        </article>
+
+        <!-- 12 -->
+        <article class="chapter" data-index="11">
+          <div class="chapter__node"><span class="chapter__num">12</span><span class="chapter__tick"></span></div>
+          <div class="chapter__body">
+            <div class="chapter__row">
+              <h3 class="chapter__title">其他資源</h3>
+              <span class="chapter__count">5 篇文件</span>
+            </div>
+            <p class="chapter__desc">推廣, 溝通與延伸閱讀素材.</p>
+            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__drawer"><div class="chapter__drawer-inner">
+              <ul class="filelist">
+                <li><a href="12_其他資源/advisor.html"><code>advisor.html</code></a></li>
+                <li><a href="12_其他資源/champion-kit.html"><code>champion-kit.html</code></a></li>
+                <li><a href="12_其他資源/communications-kit.html"><code>communications-kit.html</code></a></li>
+                <li><a href="12_其他資源/prompt-library.html"><code>prompt-library.html</code></a></li>
+                <li><a href="12_其他資源/changelog.html"><code>changelog.html</code></a></li>
+              </ul>
+            </div></div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <div class="legend">
+      <div class="legend__item">
+        <svg class="legend__mark" viewBox="0 0 16 16"><path d="M1 6V1H6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M15 10V15H10" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+        本頁範圍標記
+      </div>
+      <div class="legend__item">
+        <svg class="legend__mark" viewBox="0 0 16 16"><line x1="0" y1="8" x2="16" y2="8" stroke="currentColor" stroke-width="1.2"/><line x1="0" y1="4" x2="0" y2="12" stroke="currentColor" stroke-width="1.2"/><line x1="16" y1="4" x2="16" y2="12" stroke="currentColor" stroke-width="1.2"/></svg>
+        階段順序尺寸線
+      </div>
+      <div class="legend__item">
+        <span class="chapter__num" style="width:16px;height:16px;font-size:9px;">01</span>
+        建議先後順序
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>資料來源: 本機資料夾內十二個章節, 共一百二十六篇 Claude Code 官方文件, 依 llms.txt 建議學習路徑整理.</p>
+    <p>CC-MANUAL / REV 2026.07.08 / 正體中文整理版</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var chapters = Array.prototype.slice.call(document.querySelectorAll('.chapter'));
+  var spineFill = document.getElementById('spineFill');
+  var spine = document.getElementById('spine');
+
+  chapters.forEach(function(ch){
+    var btn = ch.querySelector('.chapter__toggle');
+    var drawer = ch.querySelector('.chapter__drawer');
+    btn.addEventListener('click', function(){
+      var open = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!open));
+      drawer.classList.toggle('is-open', !open);
+      btn.firstChild.textContent = !open ? '收合檔案清單' : '展開檔案清單';
+    });
+  });
+
+  if('IntersectionObserver' in window){
+    var observer = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        var idx = Number(entry.target.getAttribute('data-index'));
+        if(entry.isIntersecting){
+          chapters.forEach(function(ch, i){
+            ch.classList.toggle('is-passed', i < idx);
+            ch.classList.toggle('is-current', i === idx);
+          });
+          var total = chapters.length - 1;
+          var pct = total > 0 ? (idx / total) * 100 : 0;
+          spineFill.style.height = pct + '%';
+        }
+      });
+    }, { rootMargin: '-40% 0px -50% 0px', threshold: 0 });
+
+    chapters.forEach(function(ch){ observer.observe(ch); });
+  }
+})();
+</script>
+
+</body>
+</html>

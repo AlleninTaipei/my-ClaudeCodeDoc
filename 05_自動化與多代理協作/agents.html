@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>並行執行代理</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 130px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; }
+body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; }
+body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; }
+body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; }
+body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>並行執行代理</h1>
+  <p>比較 Claude Code 同時處理多項任務的四種方式: subagents, agent view, agent teams, 與 dynamic workflows.</p>
+</header>
+
+<main>
+
+  <section>
+    <h2>四種並行方式總覽</h2>
+    <p>Subagents, agent view, agent teams, 與 dynamic workflows 各自以不同方式平行處理工作. 選擇哪一種取決於你是否想親自留在每個對話中, 交辦任務後再回來查看, 或是讓 Claude 協調一整組工作者.</p>
+
+    <div class="chip-row">
+      <span class="chip-label">選擇方式查看說明:</span>
+      <div class="chip active" onclick="agSelect(0,this)">Subagents</div>
+      <div class="chip" onclick="agSelect(1,this)">Agent view</div>
+      <div class="chip" onclick="agSelect(2,this)">Agent teams</div>
+      <div class="chip" onclick="agSelect(3,this)">Dynamic workflows</div>
+    </div>
+
+    <div class="response-box">
+      <div class="response-field"><div class="rf-key">提供什麼</div><div class="rf-val" id="agGive">在單一 session 內委派的工作者, 於自己的 context 中完成側邊任務並回傳摘要.</div></div>
+      <div class="response-field"><div class="rf-key">適用時機</div><div class="rf-val" id="agWhen">側邊任務會用大量搜尋結果, 記錄或檔案內容淹沒你的主對話, 而這些內容你之後不會再用到.</div></div>
+    </div>
+
+    <div class="info-box">
+      <div class="tag">NOTE</div>
+      <p>在每一種做法中, 工作者都是 Claude session. 若要使用不同的工具, 需將該工具以 MCP server 的形式提供給 Claude.</p>
+    </div>
+
+    <h3>另外兩個輔助工具</h3>
+    <div class="event-list">
+      <div class="event-item"><div class="event-name">Worktrees</div><div class="event-desc">讓每個 session 擁有獨立的 git checkout, 使平行 session 不會編輯同一份檔案.</div></div>
+      <div class="event-item"><div class="event-name">/batch</div><div class="event-desc">一個 skill, 讓 Claude 把一項大型變更拆成 5 到 30 個以 worktree 隔離的 subagent, 各自開一個 pull request.</div></div>
+    </div>
+
+    <h3>其他容易混淆的功能</h3>
+    <div class="event-list">
+      <div class="event-item"><div class="event-name">background bash</div><div class="event-desc">在不阻塞對話的情況下執行一個 shell 指令, 不會產生代理.</div></div>
+      <div class="event-item"><div class="event-name">forked subagent</div><div class="event-desc">繼承你完整對話內容的 subagent, 屬於產生 subagent 的一種方式.</div></div>
+      <div class="event-item"><div class="event-name">routine</div><div class="event-desc">在 Anthropic 雲端依排程執行的 session, 而非在你的機器上平行執行.</div></div>
+    </div>
+
+    <div class="takeaway">
+      <p>同時執行多個 session 或 subagent 會使 token 用量倍增, 詳見 Costs 文件中的用量與速率限制說明.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>選擇合適的做法</h2>
+    <p>合適的做法取決於誰在協調工作, 工作者之間是否需要溝通, 以及是否會編輯同一份檔案.</p>
+    <div class="api-fields">
+      <div class="field"><div class="name">誰協調工作?</div><div class="desc">Claude 在同一對話中委派並收集結果: subagents. 你交辦獨立任務並之後回來查看: agent view. Claude 規劃, 指派並監督一組工作者: agent teams (實驗性, 預設關閉). 由腳本持有計畫而非 Claude 逐輪判斷: dynamic workflows.</div></div>
+      <div class="field"><div class="name">工作者需要互相溝通嗎?</div><div class="desc">Subagent 只會把結果回報給產生它的對話, agent view 的 session 只回報給你. Agent team 的隊員共用任務清單並直接互相傳訊.</div></div>
+      <div class="field"><div class="name">任務是否會碰到相同檔案?</div><div class="desc">用 worktrees 隔離工作. Subagent 與你自己執行的 session 都可各自使用獨立 worktree. Agent team 不會自動隔離隊員, 需自行拆分工作範圍.</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>查看執行中的工作</h2>
+    <p>檢查執行中工作所用的指令, 依你所採用的做法而不同.</p>
+    <div class="event-list">
+      <div class="event-item"><div class="event-name">claude agents</div><div class="event-desc">開啟 agent view, 顯示每個背景 session, 其狀態, 以及哪些需要你輸入.</div></div>
+      <div class="event-item"><div class="event-name">/agents</div><div class="event-desc">開啟面板, 內含列出執行中 subagent 的 Running 分頁, 以及建立與編輯自訂 subagent 的 Library 分頁.</div></div>
+      <div class="event-item"><div class="event-name">/tasks</div><div class="event-desc">列出目前 session 中背景執行的每個項目, 可查看, 附加或停止它們.</div></div>
+      <div class="event-item"><div class="event-name">/workflows</div><div class="event-desc">列出執行中與已完成的 dynamic workflow, 各自所在階段, 以及已完成的代理數量.</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>進一步了解</h2>
+    <p>以下每份指南涵蓋一種做法的設定與配置.</p>
+    <div class="event-list">
+      <div class="event-item"><div class="event-name">Create custom subagents</div><div class="event-desc">定義可重複使用的專家角色, 並控制它們能使用哪些工具.</div></div>
+      <div class="event-item"><div class="event-name">Manage agents with agent view</div><div class="event-desc">派送 session, 觀察其狀態, 並在需要時附加進去.</div></div>
+      <div class="event-item"><div class="event-name">Orchestrate agent teams</div><div class="event-desc">設置團隊領導與隊員, 指派任務並審查其成果.</div></div>
+      <div class="event-item"><div class="event-name">Orchestrate dynamic workflows</div><div class="event-desc">執行預先包裝好的 workflow, 或讓 Claude 撰寫一個能執行多個 subagent 並互相驗證結果的 workflow.</div></div>
+      <div class="event-item"><div class="event-name">Run parallel sessions with worktrees</div><div class="event-desc">在隔離的 checkout 中啟動 Claude, 控制要複製進去的內容, 並在事後清理.</div></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+const AG_DATA = [
+  { give: '在單一 session 內委派的工作者, 於自己的 context 中完成側邊任務並回傳摘要.', when: '側邊任務會用大量搜尋結果, 記錄或檔案內容淹沒你的主對話, 而這些內容你之後不會再用到.' },
+  { give: '一個畫面用來派送並監看在背景執行的 session, 以 claude agents 開啟, 研究預覽階段.', when: '你有多個獨立任務想交辦出去, 一眼查看狀態, 只在需要時介入.' },
+  { give: '多個協調中的 session, 共用任務清單並由隊員之間互相傳訊, 由團隊領導管理, 實驗性且預設關閉.', when: '你想讓 Claude 把一項專案拆成多塊, 分派下去, 並讓工作者彼此保持同步.' },
+  { give: '一個腳本, 執行多個 subagent 並互相交叉檢查結果, 適合一次無法在單一輪完成的大型工作.', when: '工作規模超出少數幾個 subagent 能負荷, 或你想讓多個發現互相驗證: 全庫層級稽核, 500 個檔案的搬遷, 交叉驗證的研究, 或從多個角度草擬的計畫.' },
+];
+function agSelect(i, el) {
+  document.querySelectorAll('.chip-row .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('agGive').textContent = AG_DATA[i].give;
+  document.getElementById('agWhen').textContent = AG_DATA[i].when;
+}
+</script>
+</body>
+</html>

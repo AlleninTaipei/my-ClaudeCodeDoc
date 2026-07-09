@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Roll Out an LLM Gateway 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%); border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c; overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; } .cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a; min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.8rem; color: #d97706; width: 170px; flex-shrink: 0; }
+.rf-val { font-size: 0.83rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; } .btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; } .btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; } .demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; } .col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; } body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; } body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; } body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; } body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; } body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; } body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; } body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; } body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; } body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; } body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Roll Out an LLM Gateway for Your Organization</h1>
+  <p>部署 gateway 產品: 設定轉發, 核發開發者憑證, 透過 managed settings 分發, 並驗證導入結果</p>
+</header>
+
+<main>
+
+  <section>
+    <h2>Gateway 需求</h2>
+    <p>不論選擇哪一款產品, gateway 都必須符合以下要求.</p>
+    <div class="api-fields">
+      <div class="field"><div class="name">接受支援的 API 格式</div><div class="desc">預設走 Anthropic Messages API 的 POST /v1/messages</div></div>
+      <div class="field"><div class="name">串流回應</div><div class="desc">即時轉發 server-sent events, 不緩衝整個回應</div></div>
+      <div class="field"><div class="name">路由模型名稱</div><div class="desc">把每個開發者使用的名稱對應到上游模型</div></div>
+      <div class="field"><div class="name">原樣轉發表頭與主體</div><div class="desc">anthropic-beta, anthropic-version 與請求主體雙向轉發</div></div>
+      <div class="field"><div class="name">不修改上游錯誤</div><div class="desc">自動復原機制依錯誤字句比對, 包裝錯誤會破壞復原路徑</div></div>
+      <div class="field"><div class="name">豁免 WAF 主體檢查</div><div class="desc">Claude Code 提示含原始碼與 XML 標籤, 易誤觸 XSS 規則</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>導入五步驟</h2>
+    <div class="stage-tabs">
+      <div name="ro" class="ro-tab stage-tab active" onclick="roGoTo(0)">1 · 確認路由</div>
+      <div class="ro-tab stage-tab" onclick="roGoTo(1)">2 · 核發憑證</div>
+      <div class="ro-tab stage-tab" onclick="roGoTo(2)">3 · 測試 Claude Code</div>
+      <div class="ro-tab stage-tab" onclick="roGoTo(3)">4 · 分發設定</div>
+      <div class="ro-tab stage-tab" onclick="roGoTo(4)">5 · 驗證導入</div>
+    </div>
+    <div class="ro-panel demo-panel visible" id="ro-p0">
+      <pre class="code-block"><span class="fn">curl</span> -X POST <span class="str">"https://llm-gateway.example.com/v1/messages"</span> \
+  -H <span class="str">"Authorization: Bearer &lt;gateway-key&gt;"</span> \
+  -d <span class="str">'{"model": "claude-sonnet-4-6", "max_tokens": 1, "messages": [...]}'</span></pre>
+      <p>檢查點: 200 且有 content 欄位代表 gateway 能連到 provider, 404 代表該名稱未路由, 401 代表 provider 憑證錯誤. 對每個模型名稱重複測試.</p>
+    </div>
+    <div class="ro-panel demo-panel" id="ro-p1">
+      <p>每位開發者需要自己的 gateway 金鑰. 用同樣的請求測試新核發的金鑰, 確保能通過驗證.</p>
+      <p>檢查點: 200 代表開發者金鑰生效; 401 代表金鑰錯誤或尚未在 gateway 生效.</p>
+    </div>
+    <div class="ro-panel demo-panel" id="ro-p2">
+      <pre class="code-block"><span class="kw">export</span> ANTHROPIC_BASE_URL=<span class="str">https://llm-gateway.example.com</span>
+<span class="kw">export</span> ANTHROPIC_AUTH_TOKEN=<span class="str">"&lt;developer-key&gt;"</span>
+claude -p <span class="str">"Reply with one word: connected"</span></pre>
+      <p>檢查點: 提示回傳結果, 且 gateway 日誌出現對 /v1/messages 的 POST 且狀態 200.</p>
+    </div>
+    <div class="ro-panel demo-panel" id="ro-p3">
+      <pre class="code-block">{
+  <span class="str">"env"</span>: { <span class="str">"ANTHROPIC_BASE_URL"</span>: <span class="str">"https://llm-gateway.example.com"</span> },
+  <span class="str">"apiKeyHelper"</span>: <span class="str">"/usr/local/bin/get-gateway-key"</span>
+}</pre>
+      <p>透過 managed settings 的 env 區塊分發, 讓 managed ANTHROPIC_BASE_URL 無法被開發者的 shell export 覆蓋.</p>
+    </div>
+    <div class="ro-panel demo-panel" id="ro-p4">
+      <p>在開發者機器而非 gateway 主機上測試, 涵蓋開發者實際使用的網路路徑. 送出串流請求, 一次確認端點, 串流轉發與模型路由.</p>
+      <p>檢查點: claude 啟動不顯示登入畫面, /status 顯示 gateway 位址且 Setting sources 包含 managed settings.</p>
+    </div>
+    <div>
+      <button class="btn btn-ghost" id="roPrev" disabled onclick="roGoTo(roStep-1)">← 上一步</button>
+      <button class="btn btn-primary" id="roNext" onclick="roGoTo(roStep+1)">下一步 →</button>
+      <span class="step-indicator" id="roIndicator">Step 1 of 5</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>要分發的設定項目</h2>
+    <div class="response-box">
+      <div class="response-field"><span class="rf-key">ANTHROPIC_BASE_URL</span><span class="rf-val">一定要有, 把請求送到 gateway 而非 api.anthropic.com</span></div>
+      <div class="response-field"><span class="rf-key">憑證變數或 apiKeyHelper</span><span class="rf-val">一定要有其中一種, 用來驗證每個請求</span></div>
+      <div class="response-field"><span class="rf-key">ANTHROPIC_CUSTOM_HEADERS</span><span class="rf-val">gateway 要求每個請求都帶租戶或路由表頭時加入</span></div>
+      <div class="response-field"><span class="rf-key">CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY</span><span class="rf-val">gateway 提供 /v1/models 且想讓選單自動填入時加入</span></div>
+      <div class="response-field"><span class="rf-key">CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS</span><span class="rf-val">gateway 轉發到不接受 beta 欄位的上游時加入</span></div>
+    </div>
+    <div class="info-box"><span class="tag">WARNING</span><p>不要在 managed settings 中加入 forceLoginMethod 或 forceLoginOrgUUID 與 gateway 憑證並存, 這會讓開發者卡在需要第一方登入的錯誤訊息.</p></div>
+  </section>
+
+  <section>
+    <h2>維護 Gateway</h2>
+    <p>導入後有三種變化會持續影響 gateway, 各自有對應的觀察指標與行動.</p>
+    <div class="two-col">
+      <div class="col-card">
+        <div class="col-card-title">新版 Claude Code 發布</div>
+        <p>症狀: 開發者更新後回報命名新欄位的 400</p>
+        <p>行動: 原樣轉發 anthropic-* 表頭與主體, 而非用白名單</p>
+      </div>
+      <div class="col-card">
+        <div class="col-card-title">新模型上線</div>
+        <p>症狀: 選擇新模型名稱得到 404, /model 選單未列出</p>
+        <p>行動: 在 gateway 路由設定加入模型名稱, 重新執行路由檢查</p>
+      </div>
+    </div>
+    <div class="takeaway"><p>設定每組金鑰的速率限制時, 記得客戶端會對暫時性失敗與 429 重試最多 10 次, 並遵守 Retry-After.</p></div>
+  </section>
+
+  <section>
+    <h2>相關資源</h2>
+    <div class="api-fields">
+      <div class="field"><div class="name">Connect Claude Code to an LLM gateway</div><div class="desc">開發者端設定步驟與疑難排解表</div></div>
+      <div class="field"><div class="name">Gateway protocol reference</div><div class="desc">operator 的線路契約, 含端點與轉發表頭</div></div>
+      <div class="field"><div class="name">Settings files and precedence</div><div class="desc">managed, project, user settings 如何合併與優先順序</div></div>
+      <div class="field"><div class="name">Set up Claude Code for your organization</div><div class="desc">gateway 是其中一部分的更廣泛導入流程</div></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+  }
+  let roStep = 0; const RO_MAX = 4;
+  function roGoTo(n) {
+    roStep = Math.max(0, Math.min(RO_MAX, n));
+    document.querySelectorAll('.ro-panel').forEach((el, i) => el.classList.toggle('visible', i === roStep));
+    document.querySelectorAll('.ro-tab').forEach((t, i) => {
+      t.classList.remove('active', 'done');
+      if (i === roStep) t.classList.add('active'); else if (i < roStep) t.classList.add('done');
+    });
+    document.getElementById('roPrev').disabled = roStep === 0;
+    const next = document.getElementById('roNext');
+    next.disabled = roStep === RO_MAX;
+    next.textContent = roStep === RO_MAX ? '完成 ✓' : '下一步 →';
+    document.getElementById('roIndicator').textContent = `Step ${roStep + 1} of ${RO_MAX + 1}`;
+  }
+  roGoTo(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Claude Apps Gateway 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%); border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
+main { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c; overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw{color:#7c3aed;} .fn{color:#16a34a;} .str{color:#d97706;} .cmt{color:#94a3b8;font-style:italic;} .key{color:#2563eb;}
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a; min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 170px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.scope-badge { display: inline-block; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; vertical-align: middle; margin-left: 10px; position: relative; top: -2px; }
+.scope-universal { background: #dcfce7; color: #166534; border: 1px solid #4ade80; }
+.scope-api { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.scope-specific { background: #ede9fe; color: #6d28d9; border: 1px solid #a78bfa; }
+.scope-legend { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; background: #e2e8f0; border: 1px solid #cbd5e0; border-radius: 8px; padding: 10px 18px; margin-bottom: 36px; }
+.scope-legend-label { font-size: 0.72rem; color: #4a5568; font-weight: 700; }
+.scope-legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; } body.dark p { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw{color:#9f7aea;} body.dark .fn{color:#68d391;} body.dark .str{color:#f6ad55;} body.dark .cmt{color:#4a5568;} body.dark .key{color:#63b3ed;}
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .scope-universal { background: #1a3a28; color: #68d391; border-color: #276749; }
+body.dark .scope-api { background: #3a2a10; color: #f6ad55; border-color: #7a5a20; }
+body.dark .scope-specific { background: #2d1f4a; color: #b794f4; border-color: #553c8b; }
+body.dark .scope-legend { background: #1a202c; border-color: #2d3748; }
+body.dark .scope-legend-label { color: #4a5568; } body.dark .scope-legend-item { color: #718096; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Claude Apps Gateway</h1>
+  <p>透過自架閘道在 Amazon Bedrock, Google Cloud 或 Microsoft Foundry 上執行 Claude Code, 具備 SSO 登入, 依群組控管模型存取與 OTLP 遙測</p>
+</header>
+
+<main>
+
+<section id="why">
+  <h2>為何選擇 Claude Apps Gateway</h2>
+  <p>Claude apps gateway 是內建在 <code>claude</code> 執行檔中的 Anthropic 自架閘道, 隨每次 Claude Code 發布一起測試, 因此能正確轉發 CLI 傳送的標頭與請求欄位。</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">憑證</div><div class="desc">上游 API 金鑰或雲端憑證只存在你的基礎設施, 開發者以企業 SSO 驗證並取得短期權杖</div></div>
+    <div class="field"><div class="name">存取控制</div><div class="desc">IdP 群組對應模型允許清單與 managed settings 政策, 由伺服器端強制執行</div></div>
+    <div class="field"><div class="name">設定分發</div><div class="desc">閘道直接將 managed settings 送達已登入的用戶端</div></div>
+    <div class="field"><div class="name">遙測</div><div class="desc">每個設定的目的地都會收到含 token 數, 模型, 使用者身分與延遲的 OTLP 指標</div></div>
+    <div class="field"><div class="name">上游路由</div><div class="desc">用戶端說 Anthropic Messages API, 閘道轉譯給 Bedrock, Agent Platform, Foundry 或 Anthropic API, 並支援容錯移轉</div></div>
+  </div>
+</section>
+
+<section id="quickstart">
+  <h2>快速入門</h2>
+  <p>最小路徑: 在 IdP 註冊 OAuth 用戶端, 撰寫 gateway.yaml, 用 Docker Compose 執行閘道與 Postgres, 再驗證登入全流程。</p>
+  <div class="stage-tabs">
+    <div class="gw-tab stage-tab active" onclick="gwGoTo(0)">1 · 註冊 OAuth</div>
+    <div class="gw-tab stage-tab" onclick="gwGoTo(1)">2 · 建立 Postgres</div>
+    <div class="gw-tab stage-tab" onclick="gwGoTo(2)">3 · 撰寫 gateway.yaml</div>
+    <div class="gw-tab stage-tab" onclick="gwGoTo(3)">4 · 執行</div>
+    <div class="gw-tab stage-tab" onclick="gwGoTo(4)">5 · 驗證登入</div>
+  </div>
+  <div class="gw-panel demo-panel visible" id="gw-p0"><p>決定閘道主機名稱, 建立 OIDC web 應用程式, 將 redirect URI 設為 <code>https://claude-gateway.&lt;domain&gt;/oauth/callback</code>, 記下 client_id 與 client_secret。</p></div>
+  <div class="gw-panel demo-panel" id="gw-p1"><p>任何 Postgres 14 以上均可, 包含最小的受管方案。閘道在啟動時會自行執行結構遷移, 所以資料庫使用者需要 CREATE TABLE 權限。</p></div>
+  <div class="gw-panel demo-panel" id="gw-p2">
+    <pre class="code-block">listen:
+  host: 0.0.0.0
+  port: 8080
+  public_url: https://claude-gateway.internal.example.com
+
+oidc:
+  issuer: https://login.example.com
+  client_id: 0oa1example2
+  client_secret: ${OIDC_CLIENT_SECRET}
+  allowed_email_domains: [example.com]
+
+session:
+  jwt_secret: ${GATEWAY_JWT_SECRET}
+  ttl_hours: 1
+
+store:
+  postgres_url: ${GATEWAY_POSTGRES_URL}
+
+upstreams:
+  - provider: bedrock
+    region: us-east-1
+    auth: {}
+
+auto_include_builtin_models: true</pre>
+  </div>
+  <div class="gw-panel demo-panel" id="gw-p3"><p>用符合映像檔需求的容器包裝 <code>claude</code> 執行檔, 搭配 Postgres 一起執行。開機是 fail-closed 的: 設定檔, 5 秒逾時的 Postgres 連線, OIDC discovery 與上游用戶端建構都必須成功。</p></div>
+  <div class="gw-panel demo-panel" id="gw-p4"><p>三項檢查確認閘道能驗證真實使用者: discovery 文件, 裝置授權請求, 以及在瀏覽器開啟驗證連結完成登入。</p></div>
+  <div>
+    <button class="btn btn-ghost" id="gwPrev" disabled onclick="gwGoTo(gwStep-1)">← Back</button>
+    <button class="btn btn-primary" id="gwNext" onclick="gwGoTo(gwStep+1)">Next →</button>
+    <span class="step-indicator" id="gwIndicator">Step 1 of 5</span>
+  </div>
+  <div class="info-box"><div class="tag">私有網路</div><p>Claude Code 只會連接位址為私有的閘道, 這是安全防護, 因為受信任的閘道可以推送在開發者機器上執行指令的設定。把閘道放在內部負載平衡器或 VPN 後面。</p></div>
+</section>
+
+<section id="connect">
+  <h2>連接開發者</h2>
+  <p>開發者用自己的公司帳號完成一次瀏覽器登入, 不需要 claude.ai 帳號, API 金鑰或訂閱, 因為模型請求透過閘道用組織的上游憑證進行。</p>
+  <pre class="code-block">{
+  <span class="str">"forceLoginMethod"</span>: <span class="str">"gateway"</span>,
+  <span class="str">"forceLoginGatewayUrl"</span>: <span class="str">"https://claude-gateway.internal.example.com"</span>
+}</pre>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">模型存取</span><span class="event-desc">未授權的模型請求回傳 400, /model 選單過濾為政策允許清單</span></div>
+    <div class="event-item"><span class="event-name">遙測目的地</span><span class="event-desc">OTLP 匯出端點固定為閘道, 覆寫本機設定的 OTEL_* 變數</span></div>
+    <div class="event-item"><span class="event-name">憑證</span><span class="event-desc">閘道權杖是唯一憑證, 登入期間忽略 ANTHROPIC_API_KEY 等既有設定</span></div>
+    <div class="event-item"><span class="event-name">解除授權</span><span class="event-desc">IdP 中停用的使用者, 其 session 會在下次刷新失敗時於 ttl_hours 內過期</span></div>
+  </div>
+</section>
+
+<section id="availability">
+  <h2>可用性與限制</h2>
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">可用</div>
+      <p>推論轉發, 依 IdP 群組的模型存取與 managed settings, OTLP 遙測扇出, 任何 OIDC 相容 IdP, 每使用者與每群組的花費上限, 標準 prompt caching</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">不可用</div>
+      <p>伺服器端 web search, 1 小時快取 TTL, 首方限定優化, OTLP/gRPC, SAML/LDAP, 多租戶 (多 OIDC issuer), Windows 伺服器, Helm chart, Admin UI</p>
+    </div>
+  </div>
+</section>
+
+<section id="next">
+  <h2>後續步驟</h2>
+  <p>快速入門只留下最小設定, 接下來可以擴充 gateway.yaml 加入依群組 RBAC, 多上游容錯移轉或遙測目的地。</p>
+  <div class="takeaway"><p>配置參考涵蓋 gateway.yaml 每個選項; 部署指南涵蓋依 IdP 設定, Kubernetes 與 Cloud Run 部署, 以及維運; 花費上限文件涵蓋 Admin API 與強制執行方式。</p></div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+let gwStep = 0;
+const GW_MAX = 4;
+function gwGoTo(n) {
+  gwStep = Math.max(0, Math.min(GW_MAX, n));
+  document.querySelectorAll('.gw-panel').forEach((el, i) => el.classList.toggle('visible', i === gwStep));
+  document.querySelectorAll('.gw-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === gwStep) t.classList.add('active');
+    else if (i < gwStep) t.classList.add('done');
+  });
+  document.getElementById('gwPrev').disabled = gwStep === 0;
+  const next = document.getElementById('gwNext');
+  next.disabled = gwStep === GW_MAX;
+  next.textContent = gwStep === GW_MAX ? 'Done ✓' : 'Next →';
+  document.getElementById('gwIndicator').textContent = `Step ${gwStep + 1} of ${GW_MAX + 1}`;
+}
+gwGoTo(0);
+</script>
+</body>
+</html>

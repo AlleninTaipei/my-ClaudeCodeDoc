@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Communications Kit 溝通推廣素材包互動課程</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+
+  header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+           border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+  header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+  header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+              max-width: 600px; margin-inline: auto; }
+
+  main    { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+  section { margin-bottom: 52px; }
+  h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+       border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+  h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+  p  { color: #4a5568; margin-bottom: 12px; }
+
+  .code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+    padding: 16px 18px; font-family: monospace; font-size: 0.8rem; color: #1a202c;
+    overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre-wrap; }
+  .key { color: #2563eb; }
+
+  .info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+    padding: 16px 20px; margin-top: 14px; }
+  .info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+    font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+    margin-bottom: 10px; letter-spacing: 0.05em; }
+  .info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+
+  .takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+    border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+  .takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+
+  .event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+  .event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+    padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+  .event-name { font-size: 0.82rem; color: #16a34a; min-width: 200px; flex-shrink: 0; }
+  .event-desc { font-size: 0.82rem; color: #4a5568; }
+
+  .response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+    padding: 20px; margin-top: 16px; }
+  .response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+  .response-field:last-child { border-bottom: none; }
+  .rf-key { font-size: 0.8rem; color: #d97706; width: 170px; flex-shrink: 0; }
+  .rf-val { font-size: 0.85rem; color: #374151; }
+
+  .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+  .chip-label { font-size: 0.75rem; color: #6b7280; }
+  .chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+    cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+  .chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+
+  .stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+  .stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+    cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+  .stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+
+  .demo-panel { display: none; }
+  .demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+
+  #themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+    padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+    cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+    transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+  #themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+
+  body.dark { background: #0f1117; color: #e2e8f0; }
+  body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+  body.dark header h1 { color: #f7fafc; }
+  body.dark header p  { color: #a0aec0; }
+  body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+  body.dark h3 { color: #e2e8f0; }
+  body.dark p  { color: #a0aec0; }
+  body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+  body.dark .key { color: #63b3ed; }
+  body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+  body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+  body.dark .info-box p { color: #a0aec0; }
+  body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+  body.dark .takeaway p { color: #c6f6d5; }
+  body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+  body.dark .event-name { color: #68d391; }
+  body.dark .event-desc { color: #718096; }
+  body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+  body.dark .response-field { border-bottom-color: #2d3748; }
+  body.dark .rf-key { color: #f6ad55; }
+  body.dark .rf-val { color: #a0aec0; }
+  body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+  body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+  body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+  body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+  body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+  body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Communications Kit 溝通推廣素材包</h1>
+  <p>給正在為工程組織推廣 Claude Code 的管理員與工程主管: 上線公告, 分階段小技巧文宣, 以及常見問題的一句話回覆。</p>
+</header>
+
+<main>
+  <section>
+    <h2>如何使用這份素材</h2>
+    <div class="info-box">
+      <span class="tag">草稿, 非成稿</span>
+      <p>把這裡的一切都當成草稿而非成稿。用你組織的語氣重寫每一則訊息, 把範例任務換成你程式碼庫裡真實的 bug 與模組, 並在發送前替換所有 [方括號佔位符]。真正帶動採用的公告, 讀起來會像是公司裡的人自己寫的。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>發送前檢查清單</h2>
+    <p>公告發出前先走過這份清單, 每一項都能補上一個原本會變成上線當天支援串的缺口。</p>
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">建立並連結 #claude-code 頻道</span><span class="event-desc">讓問題有一個固定去處</span></div>
+      <div class="event-item"><span class="event-name">在環境中至少一台機器測過安裝指令</span><span class="event-desc">在所有人同時遇到之前先抓出 proxy 或防火牆問題</span></div>
+      <div class="event-item"><span class="event-name">準備好安全與資料處理連結</span><span class="event-desc">「我的程式碼會流向哪裡」會是第一個回覆</span></div>
+      <div class="event-item"><span class="event-name">選定一個具體的第一個任務</span><span class="event-desc">通用範例不會促成轉換, 「修好 auth_test.go 裡不穩定的測試」才會</span></div>
+      <div class="event-item"><span class="event-name">指定前 48 小時的頻道負責人</span><span class="event-desc">上線當天沒人回答的問題會扼殺動能</span></div>
+      <div class="event-item"><span class="event-name">找到高層贊助人共同具名發送</span><span class="event-desc">高層具名發出的公告, 第一週採用率一致高於管理員發出的版本</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>上線公告</h2>
+    <p>作為全組織上線訊息的標準版本, 涵蓋 Claude Code 是什麼, 兩分鐘安裝路徑, 一個具體任務, 並在被問之前先回答「我的程式碼會去哪裡」。</p>
+    <div class="stage-tabs">
+      <div class="cm-tab stage-tab active" data-panel="cm-email" onclick="cmSelect('cm-email')">Email 版本</div>
+      <div class="cm-tab stage-tab" data-panel="cm-slack" onclick="cmSelect('cm-slack')">Slack / Teams 版本</div>
+    </div>
+    <div class="cm-panel demo-panel visible" id="cm-email">
+      <pre class="code-block">Subject: Claude Code is live for [Engineering / your team]
+
+各位,
+
+從今天起你已經可以使用 Claude Code, 一個在你的終端機裡執行的 AI
+程式代理, 它會讀取你實際的程式碼庫, 從頭到尾處理真實任務: 除錯,
+重構, 測試, PR. 它不是自動完成, 也不是聊天視窗. 它會編輯檔案,
+執行你的指令, 並在任何有風險的動作前先徵求同意.
+
+兩分鐘內開始使用:
+
+    curl -fsSL https://claude.ai/install.sh | bash
+    cd &lt;your-repo&gt;
+    claude
+
+接著執行一次 /init. Claude 會讀取你的專案並寫出 CLAUDE.md,
+包含你的建置指令與慣例, 你就不必再重新解釋基本狀況.
+
+然後在你正在用的這個 repo 上試試以下其中一個:
+
+  - "[某檔案] 裡的測試不穩定. 查出原因並修好它"
+  - "帶我看看 [某模組] 如何處理 [X]"
+  - "看看我還沒 commit 的變更, 在我推送前告訴我哪裡有風險"
+
+我的程式碼會去哪裡: Claude Code 在你的終端機執行, 直接與 Anthropic
+的 API 溝通, 過程中沒有第三方伺服器. 它會在編輯檔案或執行指令前
+先詢問. 在我們的 Enterprise 合約下, Anthropic 不會用你的程式碼或
+提示詞來訓練模型.
+詳情: https://code.claude.com/docs/en/data-usage
+      https://code.claude.com/docs/en/security
+
+有問題請到 #claude-code. [負責人姓名] 這週會盯著這裡.
+
+- [姓名]
+
+附註: 偏好用編輯器? 有 VS Code 擴充套件與 JetBrains 外掛, 同一個
+代理, 不需要終端機.</pre>
+    </div>
+    <div class="cm-panel demo-panel" id="cm-slack">
+      <pre class="code-block">📢 *Claude Code is live for [team]*
+
+AI 程式代理, 在你的終端機執行, 讀取你的 repo, 做真實的工作:
+bug, 重構, 測試, PR. 碰任何東西前都會先問.
+
+`curl -fsSL https://claude.ai/install.sh | bash` → `cd your-repo` → `claude`
+
+*第一件事* → 先跑 `/init`, 然後問: "[某檔案] 裡的測試不穩定,
+查出原因並修好."
+
+🔒 只在終端機執行, 只與 Anthropic 的 API 溝通. 在我們的 Enterprise
+方案下, 你的程式碼與提示詞不會被用來訓練模型.
+資料使用政策 → https://code.claude.com/docs/en/data-usage
+
+📚 Quickstart · VS Code · 免費一小時課程
+   https://code.claude.com/docs/en/quickstart
+   https://code.claude.com/docs/en/vs-code
+   https://anthropic.skilljar.com/claude-code-in-action
+
+有問題 → 這個討論串. [負責人] 在這裡待命.</pre>
+    </div>
+  </section>
+
+  <section>
+    <h2>其他公告變體</h2>
+    <div class="chip-row" id="cmVariantChips"><span class="chip-label">選擇變體:</span></div>
+    <div id="cmVariantBody"></div>
+  </section>
+
+  <section>
+    <h2>小技巧推廣活動</h2>
+    <p>上線後用來推動功能採用的即貼即用訊息, 每則都遵循同一個模式: 一個鉤子, 一個回報, 一句「現在就試試」, 再加一個文件連結。每週投放一到兩則到 #claude-code, 或挑選符合團隊落差的幾則, 順序不拘。</p>
+    <div class="chip-row" id="cmTipChips"><span class="chip-label">選擇分類:</span></div>
+    <div id="cmTipList"></div>
+  </section>
+
+  <section>
+    <h2>快速參考</h2>
+    <h3>常見問題一句話回覆</h3>
+    <div class="response-box">
+      <div class="response-field"><div class="rf-key">支援 VS Code 嗎?</div><div class="rf-val">支援. 有 VS Code 擴充套件與 JetBrains 外掛, 功能相同, 內嵌在編輯器裡</div></div>
+      <div class="response-field"><div class="rf-key">要先設定什麼嗎?</div><div class="rf-val">不用. 安裝後在任何 repo 執行 claude, 跑一次 /init 就完成設定</div></div>
+      <div class="response-field"><div class="rf-key">我的程式碼會去哪?</div><div class="rf-val">CLI 在終端機執行, 把脈絡送到 Anthropic API 做推論, 沒有第三方伺服器. 在 Enterprise 方案下不會被用來訓練模型</div></div>
+      <div class="response-field"><div class="rf-key">它能看到整個 repo 嗎?</div><div class="rf-val">它讀取你授權的範圍. 工作目錄內的檔案讀取不會跳出提示, 但編輯, 執行指令與目錄外的存取都會被權限機制擋下確認</div></div>
+      <div class="response-field"><div class="rf-key">跟 Copilot 有什麼不同?</div><div class="rf-val">Copilot 自動完成單行. Claude Code 是會讀檔案, 執行指令並做多檔案編輯的代理</div></div>
+      <div class="response-field"><div class="rf-key">該先試什麼?</div><div class="rf-val">一個你一直拖延的 bug, 因為它很瑣碎. "[某檔案] 裡的測試不穩定, 查出原因"</div></div>
+    </div>
+    <h3>提示詞範本</h3>
+    <div class="response-box">
+      <div class="response-field"><div class="rf-key">修 bug</div><div class="rf-val">"[某檔案] 裡的測試失敗了, 查出原因並修好"</div></div>
+      <div class="response-field"><div class="rf-key">理解程式碼</div><div class="rf-val">"帶我看看 [某模組] 如何運作, 然後告訴我進入點在哪"</div></div>
+      <div class="response-field"><div class="rf-key">安全重構</div><div class="rf-val">"把 [某模組] 重構成 [目標], 用 plan mode 讓我先審查"</div></div>
+      <div class="response-field"><div class="rf-key">寫測試</div><div class="rf-val">"為 [某檔案] 寫測試, 涵蓋 [某情境] 周邊的邊界情況"</div></div>
+      <div class="response-field"><div class="rf-key">commit 前審查</div><div class="rf-val">"看看我還沒 commit 的變更, 告訴我哪裡看起來有風險"</div></div>
+      <div class="response-field"><div class="rf-key">開 PR</div><div class="rf-val">"修好 [某 issue], 寫一個 conventional commit, 開一個附摘要的 PR"</div></div>
+      <div class="response-field"><div class="rf-key">建立 skill</div><div class="rf-val">"幫我做一個 /ship skill, 在 commit 前執行測試與 lint"</div></div>
+      <div class="response-field"><div class="rf-key">除錯堆疊追蹤</div><div class="rf-val">"這是堆疊追蹤, 找出根本原因, 不要只是掩蓋它"</div></div>
+    </div>
+    <div class="takeaway">
+      <p>重點回顧: 高層具名, 具體的第一個任務, 以及發送前先回答資料流向問題, 是決定上線公告成敗的三個關鍵。上線後用分類清楚的小技巧文宣持續投放, 比一次性的大公告更能帶動長期採用。</p>
+    </div>
+  </section>
+</main>
+
+<script>
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+  }
+
+  function cmSelect(id) {
+    document.querySelectorAll('.cm-panel').forEach(p => p.classList.toggle('visible', p.id === id));
+    document.querySelectorAll('.cm-tab').forEach(t => t.classList.toggle('active', t.dataset.panel === id));
+  }
+
+  const CM_VARIANTS = [
+    { key: 'exec', label: '高層贊助人版本', body: `Subject: One thing I'd like every engineer to try this week
+
+各位,
+
+我們已經為整個工程團隊開通 Claude Code. 這是一個直接在你的終端機
+上, 針對你實際程式碼庫運作的 AI 代理, 已經在使用的團隊回報的初期
+成果, 強到讓我希望這週每個人都用上它.
+
+我只要求十分鐘:
+
+    curl -fsSL https://claude.ai/install.sh | bash
+    cd &lt;your-repo&gt;
+    claude
+
+然後給它一個真實任務: 你一直拖著的 bug, 或是 "帶我看看 [某模組]
+如何運作."
+
+就這樣. [負責人姓名] 與團隊在 #claude-code 待命, 處理你遇到的任何問題.
+
+- [高層姓名]
+  [職稱]` },
+    { key: 'pilot', label: '試辦小組版本', body: `Subject: You're in the Claude Code pilot
+
+[姓名 / 團隊],
+
+你是 [公司] 第一波使用 Claude Code 的人. 我們選中這個小組, 因為
+你們會把它用在真實問題上, 並誠實回報使用心得.
+
+要求: 這週在至少一個真實任務上使用它, 然後在 #claude-code-pilot
+留言說明什麼有效, 什麼很煩, 什麼讓你意外. 這些回饋會決定之後如何
+推廣給所有人.
+
+[接續標準公告中「兩分鐘內開始使用」的部分]
+
+給試辦小組的額外提醒: 第一次做多檔案變更時, 按 Shift+Tab 直到看見
+"plan". Claude 會先列出打算做的事再碰任何檔案. 這是校準信任程度
+最快的方法.` },
+    { key: 'dm', label: '推廣者邀請私訊', body: `嘿 [姓名], 你在 #claude-code 的貼文對採用率的貢獻比我的公告還大.
+有幾個人告訴我, 你的 [討論串 / 截圖] 是他們真正動手嘗試的原因.
+
+想讓這件事半正式化嗎? 負擔很輕: 大致上繼續做你正在做的事, 加上新
+功能優先體驗, 以及與 Anthropic 團隊的直接聯繫窗口. 如果你有興趣,
+我可以分享一份簡短的操作手冊.` }
+  ];
+
+  function cmRenderVariants() {
+    const row = document.getElementById('cmVariantChips');
+    CM_VARIANTS.forEach((v, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'chip' + (i === 0 ? ' active' : '');
+      btn.textContent = v.label;
+      btn.onclick = () => cmSelectVariant(v.key);
+      row.appendChild(btn);
+    });
+    cmSelectVariant(CM_VARIANTS[0].key);
+  }
+  function cmSelectVariant(key) {
+    const v = CM_VARIANTS.find(x => x.key === key);
+    document.querySelectorAll('#cmVariantChips .chip').forEach((c, i) => c.classList.toggle('active', CM_VARIANTS[i].key === key));
+    document.getElementById('cmVariantBody').innerHTML = `<pre class="code-block">${v.body}</pre>`;
+  }
+  cmRenderVariants();
+
+  const CM_TIP_CATS = [
+    { key: 'start', label: '入門起步', tips: [
+      { title: '搭配任務挑選模型', body: 'Sonnet 是日常功能開發, bug 與審查的預設主力. 大型重構或高風險任務用 Opus. 快速問答與機械式編輯用 Haiku. 最困難的長任務可用 /model fable 選用 Fable 5.' },
+      { title: '前 10 分鐘就能試的三件事', body: '修一個煩人的東西, 理解你沒寫過的程式碼, 或在推送前做風險檢查, 都不需要事前設定, cd 進 repo 執行 claude 即可.' }
+    ]},
+    { key: 'memory', label: '專案記憶', tips: [
+      { title: '/init 與 CLAUDE.md', body: '每個 repo 執行一次 /init, Claude 會讀取專案結構寫出包含建置指令, 架構與慣例的 CLAUDE.md, 之後每個 session 都會自動套用.' },
+      { title: '@ 引用', body: '打 @ 加檔案路徑, Claude 會直接把檔案拉進脈絡, 整個目錄也適用, 不必再把整段程式碼貼進對話.' }
+    ]},
+    { key: 'control', label: '控制與安全', tips: [
+      { title: '權限模式', body: 'Shift+Tab 循環切換信任程度: default 在風險動作前詢問, acceptEdits 讓檔案編輯與常見指令直接通過, plan 會先提出完整提案再碰任何檔案.' },
+      { title: 'Checkpointing 與 /rewind', body: '/rewind 可以回到對話中較早的時間點, 包含 Claude 沿途做的檔案變更. Checkpointing 是自動的, 不需要額外設定.' }
+    ]},
+    { key: 'connect', label: '連接工具', tips: [
+      { title: 'MCP 連接器', body: '一個設定檔 (.mcp.json) 就能把 Claude 接上 GitHub, Jira, Linear 或任何你用的追蹤工具, 之後可以直接在對話中查詢並處理.' }
+    ]},
+    { key: 'automate', label: '自動化工作流程', tips: [
+      { title: 'Skills', body: '.claude/skills/<name>/ 底下的 SKILL.md 檔案會變成可重複使用的提示詞, 打 /name 即可執行.' },
+      { title: 'Hooks', body: 'Hooks 是在 Claude Code 事件上觸發的 shell 指令, 設定 Stop hook 送出桌面通知, 就能離開座位等長任務完成.' }
+    ]},
+    { key: 'daily', label: '日常開發', tips: [
+      { title: '截圖與圖片', body: '直接把截圖拖進終端機, Claude 就能看到錯誤對話框, UI 草稿, 白板照片或 Figma 匯出.' },
+      { title: 'Git 工作流程', body: 'Claude 能處理完整的 git 流程: 附慣例訊息的 commit, 分支, 附完整摘要的 PR.' }
+    ]},
+    { key: 'scale', label: '分享與擴散', tips: [
+      { title: 'Plugins', body: 'Skill 可以打包分享成 plugin, /plugin 瀏覽可用項目, 一步安裝.' }
+    ]},
+    { key: 'security', label: '安全與管理', tips: [
+      { title: '安全架構', body: '權限優先設計, 每個檔案編輯, shell 指令與外部呼叫都經過你的核准. CLI 在終端機執行, 直接連 Anthropic API, 沒有第三方伺服器, 並支援選擇性的作業系統層級沙盒.' },
+      { title: '最佳實踐', body: '多檔案變更先用 plan mode, 及早執行 /init, commit 前審查 diff, 對關鍵路徑的變更務必驗證, 把它當成敏銳的資淺工程師而非萬能神諭.' }
+    ]}
+  ];
+
+  function cmRenderTips() {
+    const row = document.getElementById('cmTipChips');
+    CM_TIP_CATS.forEach((c, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'chip' + (i === 0 ? ' active' : '');
+      btn.textContent = c.label;
+      btn.onclick = () => cmSelectTipCat(c.key);
+      row.appendChild(btn);
+    });
+    cmSelectTipCat(CM_TIP_CATS[0].key);
+  }
+  function cmSelectTipCat(key) {
+    const cat = CM_TIP_CATS.find(c => c.key === key);
+    document.querySelectorAll('#cmTipChips .chip').forEach((c, i) => c.classList.toggle('active', CM_TIP_CATS[i].key === key));
+    document.getElementById('cmTipList').innerHTML = cat.tips.map(t =>
+      `<div class="event-item" style="align-items:flex-start;"><span class="event-name">${t.title}</span><span class="event-desc">${t.body}</span></div>`
+    ).join('');
+  }
+  cmRenderTips();
+</script>
+</body>
+</html>

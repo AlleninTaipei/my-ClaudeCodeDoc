@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>有效管理成本 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%); border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px;
+  font-family: monospace; font-size: 0.82rem; color: #1a202c; overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; } .cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a; min-width: 190px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 150px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; } .col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+input[type=range] { width: 100%; margin-top: 10px; }
+.slider-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: #6b7280; margin-top: 4px; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; } body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; } body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; } body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; } body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; } body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; } body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; } body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; } body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; } body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark .slider-labels { color: #718096; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>有效管理成本</h1>
+  <p>追蹤 token 用量, 設定團隊支出上限, 並透過 context 管理, 模型選擇, extended thinking 設定與前處理 hook 降低 Claude Code 成本.</p>
+</header>
+
+<main>
+  <section>
+    <h2>追蹤你的成本</h2>
+    <p>Claude Code 依 API token 消耗計費. 企業部署的平均成本約為每位開發者每個活躍日 13 美元, 每月 150 到 250 美元, 90% 的使用者每個活躍日低於 30 美元.</p>
+    <pre class="code-block"><span class="cmt">Total cost:            $0.55</span>
+<span class="cmt">Total duration (API):  6m 19.7s</span>
+<span class="cmt">Total duration (wall): 6h 33m 10.2s</span>
+<span class="cmt">Total code changes:    0 lines added, 0 lines removed</span></pre>
+    <div class="info-box">
+      <span class="tag">/usage</span>
+      <p>在 Pro, Max, Team, Enterprise 方案中, /usage 也會顯示依 skills, subagents, plugins, MCP 伺服器分類的用量占比, 按 d 或 w 切換 24 小時或 7 天檢視.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>管理團隊成本</h2>
+    <p>使用 Claude API 時可設定工作區支出上限. Pro/Max 方案可用 /usage-credits 設定每月使用額度上限.</p>
+    <h3>速率限制建議 (依團隊規模)</h3>
+    <div class="chip-row" id="teamChips"></div>
+    <div class="response-box" id="teamBox"></div>
+    <div class="two-col">
+      <div class="col-card">
+        <div class="col-card-title">Agent Team Token 成本</div>
+        <p>每個 teammate 都有自己的 context window, 用量大致與團隊規模成正比. 建議使用 Sonnet, 保持小團隊, spawn prompt 精簡, 並在完成後關閉 teammate.</p>
+      </div>
+      <div class="col-card">
+        <div class="col-card-title">Bedrock / Vertex / Foundry</div>
+        <p>Claude Code 不會從雲端傳送指標. 自架 Claude apps gateway 可提供逐使用者的用量歸屬與支出上限.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>降低 Token 用量</h2>
+    <p>Token 成本隨 context 大小增加. Claude Code 會透過 prompt caching 與 auto-compaction 自動最佳化成本, 以下策略能進一步縮小 context.</p>
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">主動管理 context</span><span class="event-desc">切換任務時用 /clear, 用 /compact 加上自訂保留重點的指示</span></div>
+      <div class="event-item"><span class="event-name">選擇合適的模型</span><span class="event-desc">Sonnet 處理大多數任務, Opus 保留給複雜架構決策</span></div>
+      <div class="event-item"><span class="event-name">降低 MCP 額外負擔</span><span class="event-desc">工具定義預設延遲載入, 優先使用 CLI 工具如 gh, aws, gcloud</span></div>
+      <div class="event-item"><span class="event-name">安裝程式碼智慧外掛</span><span class="event-desc">提供精確符號導覽, 減少不必要的檔案讀取</span></div>
+      <div class="event-item"><span class="event-name">交給 hooks 與 skills 前處理</span><span class="event-desc">用 hook 過濾大型 log 檔案, 用 skill 提供領域知識減少探索</span></div>
+      <div class="event-item"><span class="event-name">CLAUDE.md 精簡</span><span class="event-desc">將特定工作流程指示移至 skills, 讓 CLAUDE.md 維持在 200 行以內</span></div>
+      <div class="event-item"><span class="event-name">調整 extended thinking</span><span class="event-desc">簡單任務可用 /effort 降低推理深度或關閉 thinking</span></div>
+      <div class="event-item"><span class="event-name">委派給 subagent</span><span class="event-desc">執行測試, 抓取文件或處理 log 時把冗長輸出留在 subagent</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>寫出具體的提示詞</h2>
+    <p>模糊的請求如「改善這個程式碼庫」會觸發大範圍掃描. 具體的請求如「在 auth.ts 的登入函式加入輸入驗證」讓 Claude 更有效率地工作.</p>
+    <input type="range" min="0" max="100" value="30" id="promptSlider" oninput="updatePromptSlider(this.value)">
+    <div class="slider-labels"><span>模糊: 大範圍掃描</span><span>具體: 精準最小讀取</span></div>
+    <div class="response-box" id="promptSliderBox"></div>
+  </section>
+
+  <section>
+    <h2>背景 Token 用量</h2>
+    <p>即使閒置, Claude Code 仍會為部分背景功能使用 token, 例如對話摘要與部分指令的狀態檢查, 通常每個 session 低於 0.04 美元.</p>
+    <div class="takeaway">
+      <p>從小型試點團隊開始, 用追蹤工具建立基準線, 再評估更大規模的推行成本.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+const TEAMS = [
+  { size: '1-5 使用者', tpm: '200k-300k', rpm: '5-7' },
+  { size: '5-20 使用者', tpm: '100k-150k', rpm: '2.5-3.5' },
+  { size: '20-50 使用者', tpm: '50k-75k', rpm: '1.25-1.75' },
+  { size: '50-100 使用者', tpm: '25k-35k', rpm: '0.62-0.87' },
+  { size: '100-500 使用者', tpm: '15k-20k', rpm: '0.37-0.47' },
+  { size: '500+ 使用者', tpm: '10k-15k', rpm: '0.25-0.35' },
+];
+let teamIdx = 0;
+function renderTeam() {
+  document.getElementById('teamChips').innerHTML = TEAMS.map((t,i) =>
+    `<span class="chip ${i===teamIdx?'active':''}" onclick="teamIdx=${i};renderTeam()">${t.size}</span>`).join('');
+  const t = TEAMS[teamIdx];
+  document.getElementById('teamBox').innerHTML = `
+    <div class="response-field"><div class="rf-key">TPM per user</div><div class="rf-val">${t.tpm}</div></div>
+    <div class="response-field"><div class="rf-key">RPM per user</div><div class="rf-val">${t.rpm}</div></div>`;
+}
+renderTeam();
+
+function updatePromptSlider(v) {
+  const box = document.getElementById('promptSliderBox');
+  if (v < 40) box.innerHTML = `<div class="response-field"><div class="rf-key">結果</div><div class="rf-val">「改善這個程式碼庫」觸發大範圍掃描, token 成本高</div></div>`;
+  else if (v < 70) box.innerHTML = `<div class="response-field"><div class="rf-key">結果</div><div class="rf-val">中等具體度, 部分探索仍然需要</div></div>`;
+  else box.innerHTML = `<div class="response-field"><div class="rf-key">結果</div><div class="rf-val">「在 auth.ts 的登入函式加入輸入驗證」讓 Claude 用最少檔案讀取完成工作</div></div>`;
+}
+updatePromptSlider(30);
+</script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Overview 總覽互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%); border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c; overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw { color: #7c3aed; } .fn { color: #16a34a; } .str { color: #d97706; } .cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 12px 16px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.8rem; color: #d97706; width: 260px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields { grid-template-columns: 1fr; } .rf-key { width: 140px; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark p { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw { color: #9f7aea; } body.dark .fn { color: #68d391; } body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; } body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; } body.dark .info-box p { color: #a0aec0; }
+body.dark .field { background: #1a202c; border-color: #2d3748; } body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; } body.dark .response-field { border-bottom-color: #2d3748; } body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; } body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); } body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+<header>
+  <h1>Claude Code 總覽</h1>
+  <p>能讀取程式庫, 編輯檔案, 執行指令並整合開發工具的代理式編碼工具, 在終端機, IDE, 桌面版與瀏覽器中都能使用。</p>
+</header>
+<main>
+
+<section>
+  <h2>選擇你的環境開始使用</h2>
+  <div class="chip-row">
+    <span class="chip-label">選擇平台:</span>
+    <div class="chip active" onclick="ovChip(this,0)">Terminal</div>
+    <div class="chip" onclick="ovChip(this,1)">VS Code</div>
+    <div class="chip" onclick="ovChip(this,2)">Desktop app</div>
+    <div class="chip" onclick="ovChip(this,3)">Web</div>
+    <div class="chip" onclick="ovChip(this,4)">JetBrains</div>
+  </div>
+  <div id="ovPanel0"><p>在終端機直接使用的全功能 CLI, 編輯檔案, 執行指令並管理整個專案。</p><pre class="code-block"><span class="fn">curl</span> -fsSL https://claude.ai/install.sh | bash
+
+<span class="kw">cd</span> your-project
+<span class="fn">claude</span></pre></div>
+  <div id="ovPanel1" style="display:none"><p>VS Code 擴充套件提供行內差異比對, @-提及, 計畫審查以及編輯器內的對話紀錄。</p></div>
+  <div id="ovPanel2" style="display:none"><p>獨立應用程式, 可在 IDE 或終端機之外使用。視覺化審查差異, 並排執行多個 session, 排定週期性任務, 啟動雲端 session。</p></div>
+  <div id="ovPanel3" style="display:none"><p>在瀏覽器中執行, 免本機設定。啟動長時間任務並在完成後查看, 處理本機沒有的儲存庫, 或平行執行多項任務。</p></div>
+  <div id="ovPanel4" style="display:none"><p>適用於 IntelliJ IDEA, PyCharm, WebStorm 等 JetBrains IDE 的外掛, 具互動式差異檢視與選取內容分享。</p></div>
+</section>
+
+<section>
+  <h2>你能用它做什麼</h2>
+  <div class="chip-row">
+    <span class="chip-label">選擇情境:</span>
+    <div class="chip active" onclick="wdChip(this,0)">自動化瑣事</div>
+    <div class="chip" onclick="wdChip(this,1)">建構功能與修錯</div>
+    <div class="chip" onclick="wdChip(this,2)">建立 Commit 與 PR</div>
+    <div class="chip" onclick="wdChip(this,3)">用 MCP 連接工具</div>
+    <div class="chip" onclick="wdChip(this,4)">自訂指示與 Hooks</div>
+    <div class="chip" onclick="wdChip(this,5)">執行 Agent teams</div>
+    <div class="chip" onclick="wdChip(this,6)">管線與腳本自動化</div>
+    <div class="chip" onclick="wdChip(this,7)">排程週期性任務</div>
+    <div class="chip" onclick="wdChip(this,8)">隨處工作</div>
+  </div>
+  <div id="wdPanel0"><p>Claude Code 處理耗時的瑣碎任務: 為未測試程式碼寫測試, 修正整個專案的 lint 錯誤, 解決合併衝突, 更新依賴套件, 撰寫發行說明。</p><pre class="code-block"><span class="fn">claude</span> <span class="str">"write tests for the auth module, run them, and fix any failures"</span></pre></div>
+  <div id="wdPanel1" style="display:none"><p>用白話描述你想要的東西, Claude Code 會規劃方法, 跨多個檔案撰寫程式碼, 並驗證是否可行。針對錯誤, 貼上錯誤訊息或描述症狀, Claude 會沿著程式庫追蹤問題, 找出根本原因並實作修正。</p></div>
+  <div id="wdPanel2" style="display:none"><p>Claude Code 直接與 git 互動, 暫存變更, 撰寫提交訊息, 建立分支, 開啟 pull request。</p><pre class="code-block"><span class="fn">claude</span> <span class="str">"commit my changes with a descriptive message"</span></pre></div>
+  <div id="wdPanel3" style="display:none"><p>Model Context Protocol 是連接 AI 工具與外部資料來源的開放標準。透過 MCP, Claude Code 能讀取 Google Drive 中的設計文件, 更新 Jira 工單, 從 Slack 拉資料, 或使用你自己的自訂工具。</p></div>
+  <div id="wdPanel4" style="display:none"><p>CLAUDE.md 是加到專案根目錄的 markdown 檔, 用來設定程式碼標準, 架構決策與偏好的函式庫。Skills 打包可重複使用的工作流程, Hooks 讓你在動作前後執行 shell 指令。</p></div>
+  <div id="wdPanel5" style="display:none"><p>生成多個同時處理任務不同部分的 Claude Code 代理, 由 lead agent 協調工作, 指派子任務並整合結果。Agent SDK 讓你建立完全自訂的工作流程。</p></div>
+  <div id="wdPanel6" style="display:none"><p>Claude Code 遵循 Unix 哲學, 可組合使用。將日誌管進去, 在 CI 中執行, 或與其他工具串接。</p><pre class="code-block"><span class="fn">tail</span> -200 app.log | claude -p <span class="str">"Slack me if you see any anomalies"</span></pre></div>
+  <div id="wdPanel7" style="display:none"><p>依排程執行 Claude 來自動化重複性的工作: 每天早上審查 PR, 隔夜分析 CI 失敗, 每週依賴套件稽核, 或 PR 合併後同步文件。</p></div>
+  <div id="wdPanel8" style="display:none"><p>Session 不綁定單一介面。用 Remote Control 從手機或瀏覽器繼續工作, 用 --teleport 把雲端或行動裝置上的任務拉進終端機, 或在 Slack 中提及 @Claude 取得 pull request。</p></div>
+</section>
+
+<section>
+  <h2>在任何地方使用 Claude Code</h2>
+  <div class="response-box">
+    <div class="response-field"><span class="rf-key">從手機或其他裝置繼續本機 session</span><span class="rf-val">Remote Control</span></div>
+    <div class="response-field"><span class="rf-key">把 Telegram, Discord, iMessage 事件推入 session</span><span class="rf-val">Channels</span></div>
+    <div class="response-field"><span class="rf-key">本機開始, 行動裝置繼續</span><span class="rf-val">Web 或 Claude iOS App</span></div>
+    <div class="response-field"><span class="rf-key">週期性排程執行</span><span class="rf-val">Routines 或 Desktop scheduled tasks</span></div>
+    <div class="response-field"><span class="rf-key">自動化 PR 審查與 issue 分類</span><span class="rf-val">GitHub Actions 或 GitLab CI/CD</span></div>
+    <div class="response-field"><span class="rf-key">每個 PR 自動取得程式碼審查</span><span class="rf-val">GitHub Code Review</span></div>
+    <div class="response-field"><span class="rf-key">把 Slack 中的錯誤回報導向 PR</span><span class="rf-val">Slack</span></div>
+    <div class="response-field"><span class="rf-key">除錯正在執行的網頁應用程式</span><span class="rf-val">Chrome</span></div>
+    <div class="response-field"><span class="rf-key">為自己的工作流程建立自訂代理</span><span class="rf-val">Agent SDK</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>下一步</h2>
+  <div class="api-fields">
+    <div class="field"><div class="name">Quickstart</div><div class="desc">從探索程式庫到提交修正, 走過你的第一個真實任務</div></div>
+    <div class="field"><div class="name">Store instructions and memories</div><div class="desc">用 CLAUDE.md 與 auto memory 給 Claude 持久指示</div></div>
+    <div class="field"><div class="name">Common workflows / best practices</div><div class="desc">充分運用 Claude Code 的模式</div></div>
+    <div class="field"><div class="name">Settings</div><div class="desc">依你的工作流程自訂 Claude Code</div></div>
+  </div>
+</section>
+
+</main>
+<script>
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+  }
+  function ovChip(el, i) {
+    el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    for (let n = 0; n < 5; n++) document.getElementById('ovPanel'+n).style.display = (n === i ? 'block' : 'none');
+  }
+  function wdChip(el, i) {
+    el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    for (let n = 0; n < 9; n++) document.getElementById('wdPanel'+n).style.display = (n === i ? 'block' : 'none');
+  }
+</script>
+</body>
+</html>

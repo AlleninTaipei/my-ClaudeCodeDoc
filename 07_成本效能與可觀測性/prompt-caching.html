@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Prompt Caching 運作方式 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%); border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px;
+  font-family: monospace; font-size: 0.82rem; color: #1a202c; overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; } .cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a; min-width: 220px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 150px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; } .btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; } .btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; } .demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; } .col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; } body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; } body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; } body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; } body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; } body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; } body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; } body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; } body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; } body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; } body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; } body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Claude Code 如何使用 Prompt Caching</h1>
+  <p>了解為何切換模型會觸發較慢的未快取回合, /compact 要付出什麼代價, 為何 CLAUDE.md 編輯不會即時套用, 以及如何檢查快取命中率.</p>
+</header>
+
+<main>
+  <section>
+    <h2>快取如何組織</h2>
+    <p>每次送出訊息都會產生新的 API 請求, 模型不會記得請求之間的內容, 因此 Claude Code 會重送完整上下文. API 依請求開頭 (稱為 prefix) 比對最近處理過的內容, 比對是精確的, prefix 中任何位置的變動都會導致之後的內容全部重新計算.</p>
+    <div class="api-fields">
+      <div class="field"><div class="name">System prompt</div><div class="desc">核心指令, 工具定義, 輸出風格; 工具定義集合改變或 Claude Code 升級時變動</div></div>
+      <div class="field"><div class="name">Project context</div><div class="desc">CLAUDE.md, auto memory, 未限定範圍的規則; session 開始或 /clear /compact 後變動</div></div>
+      <div class="field"><div class="name">Conversation</div><div class="desc">你的訊息, Claude 的回應, 工具結果; 每個回合都會變動</div></div>
+    </div>
+    <div class="info-box">
+      <span class="tag">額外的快取鍵</span>
+      <p>模型與 effort level 也是快取鍵的一部分但不屬於 prompt 文字本身, 切換模型或 effort level 都會導致整個請求重新計算.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>會讓快取失效的動作</h2>
+    <div class="chip-row" id="invChips"></div>
+    <div class="response-box" id="invBox"></div>
+  </section>
+
+  <section>
+    <h2>會保留快取的動作</h2>
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">編輯儲存庫中的檔案</span><span class="event-desc">檔案內容只在 Claude 讀取時進入 context, 屬於附加內容</span></div>
+      <div class="event-item"><span class="event-name">Mid-session 編輯 CLAUDE.md</span><span class="event-desc">不會讓快取失效, 但編輯也不會立即套用, 需等到下次 /clear 或 /compact</span></div>
+      <div class="event-item"><span class="event-name">變更輸出風格</span><span class="event-desc">同樣要等到重啟或 /clear 才會套用新風格</span></div>
+      <div class="event-item"><span class="event-name">切換權限模式</span><span class="event-desc">不會改變 system prompt 或工具定義, 屬於快取安全的操作</span></div>
+      <div class="event-item"><span class="event-name">呼叫 skills 與 commands</span><span class="event-desc">指令會以使用者訊息的形式附加在對話之後</span></div>
+      <div class="event-item"><span class="event-name">執行 /recap</span><span class="event-desc">摘要以指令輸出附加, 不取代訊息歷史</span></div>
+      <div class="event-item"><span class="event-name">倒回對話 /rewind</span><span class="event-desc">截斷回較早的回合, 該處的快取項目仍然有效</span></div>
+      <div class="event-item"><span class="event-name">產生 subagent</span><span class="event-desc">呼叫與結果附加在對話之後, 不影響父層的 prefix</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>快取存續時間 (TTL)</h2>
+    <p>快取過的 prefix 會在閒置一段時間後過期, 每次命中快取都會重設計時器.</p>
+    <div class="stage-tabs">
+      <div class="ttl-tab stage-tab active" onclick="ttlGoTo(0)">1 · Claude 訂閱</div>
+      <div class="ttl-tab stage-tab" onclick="ttlGoTo(1)">2 · API key / 第三方</div>
+      <div class="ttl-tab stage-tab" onclick="ttlGoTo(2)">3 · 覆寫 TTL</div>
+    </div>
+    <div class="ttl-panel demo-panel visible" id="ttl-p0"><p>Claude Code 自動要求一小時 TTL, 用量計入方案而非按 token 計費, 較長的 TTL 不會產生額外費用. 若已超過方案限制並開始使用 usage credits, 則自動降回五分鐘.</p></div>
+    <div class="ttl-panel demo-panel" id="ttl-p1"><p>使用 API key, Bedrock, Vertex, Foundry 或 Claude Platform on AWS 時預設維持五分鐘 TTL, 設定 ENABLE_PROMPT_CACHING_1H=1 可選用一小時 TTL.</p></div>
+    <div class="ttl-panel demo-panel" id="ttl-p2"><p>設定 FORCE_PROMPT_CACHING_5M=1 可強制使用五分鐘 TTL, 常用於除錯快取行為或比較兩種 TTL.</p></div>
+    <div>
+      <button class="btn btn-ghost" id="ttlPrev" disabled onclick="ttlGoTo(ttlStep-1)">← 上一步</button>
+      <button class="btn btn-primary" id="ttlNext" onclick="ttlGoTo(ttlStep+1)">下一步 →</button>
+      <span class="step-indicator" id="ttlIndicator">Step 1 of 3</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>檢查快取表現</h2>
+    <div class="api-fields">
+      <div class="field"><div class="name">cache_creation_input_tokens</div><div class="desc">本回合寫入快取的 token 數, 以快取寫入費率計費</div></div>
+      <div class="field"><div class="name">cache_read_input_tokens</div><div class="desc">本回合從快取讀取的 token 數, 費率約為標準輸入的 10%</div></div>
+    </div>
+    <div class="takeaway">
+      <p>高讀取對建立比表示快取運作良好. 若建立數持續偏高, 表示 prefix 中有內容持續變動, 對照上方會讓快取失效的動作清單找出原因.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Subagent 與快取</h2>
+    <p>Subagent 會啟動自己的對話, 有自己的 system prompt 與工具集, 建立自己的快取, 對父層的快取沒有影響. Fork 則不同, 它會完整繼承父層的 system prompt, 工具與對話歷史, 因此第一個請求就能讀取父層的快取.</p>
+  </section>
+
+  <section>
+    <h2>停用 Prompt Caching</h2>
+    <div class="api-fields">
+      <div class="field"><div class="name">DISABLE_PROMPT_CACHING</div><div class="desc">停用所有模型的快取</div></div>
+      <div class="field"><div class="name">DISABLE_PROMPT_CACHING_HAIKU</div><div class="desc">只停用 Haiku 的快取</div></div>
+      <div class="field"><div class="name">DISABLE_PROMPT_CACHING_SONNET</div><div class="desc">只停用 Sonnet 的快取</div></div>
+      <div class="field"><div class="name">DISABLE_PROMPT_CACHING_OPUS</div><div class="desc">只停用 Opus 的快取</div></div>
+    </div>
+  </section>
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+const INVALIDATORS = [
+  { name: '切換模型', desc: '每個模型都有自己的快取, /model 切換後下一個請求會完全沒有快取命中' },
+  { name: '變更 effort level', desc: '快取依 effort level 分別建立, 切換會導致重新計算整個請求' },
+  { name: '開啟 fast mode', desc: '會加入請求標頭, 屬於快取鍵的一部分, 首次開啟時觸發一次性重算' },
+  { name: '連接或中斷 MCP 伺服器', desc: '若工具定義載入 prefix 中, 變動會使快取失效; 延遲載入的工具則不受影響' },
+  { name: '啟用或停用外掛', desc: '提供 MCP 伺服器的外掛比照 MCP 規則, 其餘元件只會附加不影響快取' },
+  { name: '拒絕整個工具', desc: '加入 Bash 或 WebFetch 這類裸工具名稱的拒絕規則會讓快取失效' },
+  { name: '壓縮對話 /compact', desc: '對話層的歷史被摘要取代, 與舊的 prefix 不再共用' },
+  { name: '升級 Claude Code', desc: '新版本通常更新 system prompt 或工具定義, 升級後第一個請求會重建快取' },
+];
+let invIdx = 0;
+function renderInv() {
+  document.getElementById('invChips').innerHTML = INVALIDATORS.map((c,i) =>
+    `<span class="chip ${i===invIdx?'active':''}" onclick="invIdx=${i};renderInv()">${c.name}</span>`).join('');
+  document.getElementById('invBox').innerHTML =
+    `<div class="response-field"><div class="rf-key">影響</div><div class="rf-val">${INVALIDATORS[invIdx].desc}</div></div>`;
+}
+renderInv();
+
+let ttlStep = 0;
+const TTL_MAX = 2;
+function ttlGoTo(n) {
+  ttlStep = Math.max(0, Math.min(TTL_MAX, n));
+  document.querySelectorAll('.ttl-panel').forEach((el, i) => el.classList.toggle('visible', i === ttlStep));
+  document.querySelectorAll('.ttl-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === ttlStep) t.classList.add('active'); else if (i < ttlStep) t.classList.add('done');
+  });
+  document.getElementById('ttlPrev').disabled = ttlStep === 0;
+  const next = document.getElementById('ttlNext');
+  next.disabled = ttlStep === TTL_MAX;
+  next.textContent = ttlStep === TTL_MAX ? '完成 ✓' : '下一步 →';
+  document.getElementById('ttlIndicator').textContent = `Step ${ttlStep + 1} of ${TTL_MAX + 1}`;
+}
+ttlGoTo(0);
+</script>
+</body>
+</html>

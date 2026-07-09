@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>即時串流回應互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 190px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; }
+body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>即時串流回應</h1>
+  <p>了解如何從 Agent SDK 即時接收文字與工具呼叫的串流更新, 而不是等待完整回應.</p>
+</header>
+
+<main>
+
+  <section>
+    <h2>啟用串流輸出</h2>
+    <p>預設情況下, Agent SDK 會在 Claude 產生完每則回應後才回傳完整的 AssistantMessage. 將 include_partial_messages (Python) 或 includePartialMessages (TypeScript) 設為 true, 即可接收增量更新的文字與工具呼叫.</p>
+    <div class="info-box">
+      <span class="tag">處理步驟</span>
+      <p>1. 判斷訊息類型是否為 StreamEvent<br>2. 取出 StreamEvent 的 event 欄位並檢查其 type<br>3. 尋找 delta.type 為 text_delta 的 content_block_delta 事件, 其中含有實際文字片段</p>
+    </div>
+    <div class="chip-row">
+      <span class="chip-label">選擇語言:</span>
+      <div class="chip active" onclick="soSwitch(this,'py','en')">Python</div>
+      <div class="chip" onclick="soSwitch(this,'ts','en')">TypeScript</div>
+    </div>
+    <div id="en-py" class="code-block">
+<span class="kw">from</span> claude_agent_sdk <span class="kw">import</span> query, ClaudeAgentOptions
+<span class="kw">from</span> claude_agent_sdk.types <span class="kw">import</span> StreamEvent
+<span class="kw">import</span> asyncio
+
+<span class="kw">async def</span> <span class="fn">stream_response</span>():
+    options = <span class="fn">ClaudeAgentOptions</span>(
+        include_partial_messages=<span class="key">True</span>,
+        allowed_tools=[<span class="str">"Bash"</span>, <span class="str">"Read"</span>],
+    )
+    <span class="kw">async for</span> message <span class="kw">in</span> <span class="fn">query</span>(prompt=<span class="str">"List the files in my project"</span>, options=options):
+        <span class="kw">if</span> <span class="fn">isinstance</span>(message, StreamEvent):
+            event = message.event
+            <span class="kw">if</span> event.get(<span class="str">"type"</span>) == <span class="str">"content_block_delta"</span>:
+                delta = event.get(<span class="str">"delta"</span>, {})
+                <span class="kw">if</span> delta.get(<span class="str">"type"</span>) == <span class="str">"text_delta"</span>:
+                    <span class="fn">print</span>(delta.get(<span class="str">"text"</span>, <span class="str">""</span>), end=<span class="str">""</span>, flush=<span class="key">True</span>)
+
+asyncio.<span class="fn">run</span>(stream_response())</div>
+    <div id="en-ts" class="code-block" style="display:none">
+<span class="kw">import</span> { query } <span class="kw">from</span> <span class="str">"@anthropic-ai/claude-agent-sdk"</span>;
+
+<span class="kw">for await</span> (<span class="kw">const</span> <span class="key">message</span> <span class="kw">of</span> <span class="fn">query</span>({
+  prompt: <span class="str">"List the files in my project"</span>,
+  options: { includePartialMessages: <span class="key">true</span>, allowedTools: [<span class="str">"Bash"</span>, <span class="str">"Read"</span>] }
+})) {
+  <span class="kw">if</span> (<span class="key">message</span>.type === <span class="str">"stream_event"</span>) {
+    <span class="kw">const</span> <span class="key">event</span> = <span class="key">message</span>.event;
+    <span class="kw">if</span> (<span class="key">event</span>.type === <span class="str">"content_block_delta"</span>) {
+      <span class="kw">if</span> (<span class="key">event</span>.delta.type === <span class="str">"text_delta"</span>) {
+        <span class="key">process</span>.stdout.<span class="fn">write</span>(<span class="key">event</span>.delta.text);
+      }
+    }
+  }
+}</div>
+  </section>
+
+  <section>
+    <h2>StreamEvent 參考</h2>
+    <p>啟用 partial messages 後, 你會收到包裝在物件中的原始 Claude API 串流事件. 此類型在兩個 SDK 中名稱不同.</p>
+    <div class="two-col">
+      <div class="col-card">
+        <div class="col-card-title">Python: StreamEvent</div>
+        <p>uuid: 此事件的唯一識別碼</p>
+        <p>session_id: session 識別碼</p>
+        <p>event: 原始 Claude API 串流事件 (dict)</p>
+        <p>parent_tool_use_id: 若來自 subagent 則為其父工具 ID</p>
+      </div>
+      <div class="col-card">
+        <div class="col-card-title">TypeScript: SDKPartialAssistantMessage</div>
+        <p>type: "stream_event"</p>
+        <p>event: BetaRawMessageStreamEvent (來自 Anthropic SDK)</p>
+        <p>parent_tool_use_id, uuid, session_id</p>
+        <p>ttft_ms: 首個 token 花費時間 (僅 message_start 事件才有)</p>
+      </div>
+    </div>
+    <h3>常見事件類型</h3>
+    <div class="api-fields">
+      <div class="field"><div class="name">message_start</div><div class="desc">新訊息開始</div></div>
+      <div class="field"><div class="name">content_block_start</div><div class="desc">新內容區塊開始 (文字或工具使用)</div></div>
+      <div class="field"><div class="name">content_block_delta</div><div class="desc">內容的增量更新</div></div>
+      <div class="field"><div class="name">content_block_stop</div><div class="desc">內容區塊結束</div></div>
+      <div class="field"><div class="name">message_delta</div><div class="desc">訊息層級更新 (停止原因, 使用量)</div></div>
+      <div class="field"><div class="name">message_stop</div><div class="desc">訊息結束</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>訊息流程順序</h2>
+    <p>啟用 partial messages 後, 你會依照以下順序收到訊息:</p>
+    <div class="event-list">
+      <div class="event-item"><div class="event-name">message_start</div><div class="event-desc">StreamEvent</div></div>
+      <div class="event-item"><div class="event-name">content_block_start</div><div class="event-desc">StreamEvent, 文字區塊開始</div></div>
+      <div class="event-item"><div class="event-name">content_block_delta ×N</div><div class="event-desc">StreamEvent, 文字片段陸續抵達</div></div>
+      <div class="event-item"><div class="event-name">content_block_stop</div><div class="event-desc">StreamEvent</div></div>
+      <div class="event-item"><div class="event-name">content_block_start</div><div class="event-desc">StreamEvent, tool_use 區塊開始</div></div>
+      <div class="event-item"><div class="event-name">content_block_delta ×N</div><div class="event-desc">StreamEvent, 工具輸入片段陸續抵達</div></div>
+      <div class="event-item"><div class="event-name">content_block_stop</div><div class="event-desc">StreamEvent</div></div>
+      <div class="event-item"><div class="event-name">message_delta / message_stop</div><div class="event-desc">StreamEvent</div></div>
+      <div class="event-item"><div class="event-name">AssistantMessage</div><div class="event-desc">包含所有內容的完整訊息</div></div>
+      <div class="event-item"><div class="event-name">ResultMessage</div><div class="event-desc">最終結果 (工具執行, 下一輪串流事件之後)</div></div>
+    </div>
+    <div class="info-box">
+      <span class="tag">未啟用時</span>
+      <p>若未啟用 partial messages, 你只會收到除了 StreamEvent 以外的所有訊息類型, 包含 SystemMessage, AssistantMessage, ResultMessage, 以及壓縮邊界訊息.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>串流工具呼叫</h2>
+    <p>工具呼叫也會以增量方式串流. 你可以追蹤工具何時開始, 接收其輸入被逐步產生, 並看到它何時完成. 使用以下三種事件類型:</p>
+    <div class="event-list">
+      <div class="event-item"><div class="event-name">content_block_start</div><div class="event-desc">工具開始</div></div>
+      <div class="event-item"><div class="event-name">content_block_delta (input_json_delta)</div><div class="event-desc">輸入片段陸續抵達</div></div>
+      <div class="event-item"><div class="event-name">content_block_stop</div><div class="event-desc">工具呼叫完成</div></div>
+    </div>
+    <div class="chip-row">
+      <span class="chip-label">選擇語言:</span>
+      <div class="chip active" onclick="soSwitch(this,'py','tool')">Python</div>
+      <div class="chip" onclick="soSwitch(this,'ts','tool')">TypeScript</div>
+    </div>
+    <div id="tool-py" class="code-block">
+current_tool = <span class="key">None</span>
+tool_input = <span class="str">""</span>
+
+<span class="kw">async for</span> message <span class="kw">in</span> <span class="fn">query</span>(prompt=<span class="str">"Read the README.md file"</span>, options=options):
+    <span class="kw">if</span> <span class="fn">isinstance</span>(message, StreamEvent):
+        event_type = message.event.get(<span class="str">"type"</span>)
+        <span class="kw">if</span> event_type == <span class="str">"content_block_start"</span>:
+            block = message.event.get(<span class="str">"content_block"</span>, {})
+            <span class="kw">if</span> block.get(<span class="str">"type"</span>) == <span class="str">"tool_use"</span>:
+                current_tool = block.get(<span class="str">"name"</span>)
+                <span class="fn">print</span>(<span class="str">f"Starting tool: {current_tool}"</span>)
+        <span class="kw">elif</span> event_type == <span class="str">"content_block_delta"</span>:
+            delta = message.event.get(<span class="str">"delta"</span>, {})
+            <span class="kw">if</span> delta.get(<span class="str">"type"</span>) == <span class="str">"input_json_delta"</span>:
+                tool_input += delta.get(<span class="str">"partial_json"</span>, <span class="str">""</span>)
+        <span class="kw">elif</span> event_type == <span class="str">"content_block_stop"</span>:
+            <span class="kw">if</span> current_tool:
+                <span class="fn">print</span>(<span class="str">f"Tool {current_tool} called with: {tool_input}"</span>)</div>
+    <div id="tool-ts" class="code-block" style="display:none">
+<span class="kw">let</span> <span class="key">currentTool</span>: <span class="key">string</span> | <span class="key">null</span> = <span class="key">null</span>;
+<span class="kw">let</span> <span class="key">toolInput</span> = <span class="str">""</span>;
+
+<span class="kw">for await</span> (<span class="kw">const</span> <span class="key">message</span> <span class="kw">of</span> <span class="fn">query</span>({ prompt: <span class="str">"Read the README.md file"</span>, options })) {
+  <span class="kw">if</span> (<span class="key">message</span>.type === <span class="str">"stream_event"</span>) {
+    <span class="kw">const</span> <span class="key">event</span> = <span class="key">message</span>.event;
+    <span class="kw">if</span> (<span class="key">event</span>.type === <span class="str">"content_block_start"</span> && <span class="key">event</span>.content_block.type === <span class="str">"tool_use"</span>) {
+      <span class="key">currentTool</span> = <span class="key">event</span>.content_block.name;
+      <span class="key">console</span>.<span class="fn">log</span>(<span class="str">`Starting tool: ${currentTool}`</span>);
+    } <span class="kw">else if</span> (<span class="key">event</span>.type === <span class="str">"content_block_delta"</span> && <span class="key">event</span>.delta.type === <span class="str">"input_json_delta"</span>) {
+      <span class="key">toolInput</span> += <span class="key">event</span>.delta.partial_json;
+    } <span class="kw">else if</span> (<span class="key">event</span>.type === <span class="str">"content_block_stop"</span> && <span class="key">currentTool</span>) {
+      <span class="key">console</span>.<span class="fn">log</span>(<span class="str">`Tool ${currentTool} called with: ${toolInput}`</span>);
+    }
+  }
+}</div>
+  </section>
+
+  <section>
+    <h2>打造串流 UI</h2>
+    <p>結合文字與工具串流成一個完整的 UI. 用 in_tool 旗標追蹤是否正在執行工具, 在工具執行時顯示狀態指示 (例如 [Using Read...]), 未執行工具時正常串流文字, 工具完成時顯示 done 訊息. 適合需要顯示多步驟 agent 任務進度的聊天介面.</p>
+    <div class="info-box">
+      <span class="tag">已知限制</span>
+      <p>結構化輸出 (structured output) 的 JSON 結果只會出現在最終 ResultMessage.structured_output 中, 不會以串流增量的形式出現.</p>
+    </div>
+    <div class="takeaway">
+      <p>串流輸出讓使用者在等待期間就能看到進度, 是打造即時聊天介面與多步驟 agent 任務可視化的關鍵能力. 搭配 [串流輸入模式] 使用效果最佳.</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+function soSwitch(el, lang, group) {
+  el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(group + '-py').style.display = lang === 'py' ? 'block' : 'none';
+  document.getElementById(group + '-ts').style.display = lang === 'ts' ? 'block' : 'none';
+}
+</script>
+</body>
+</html>

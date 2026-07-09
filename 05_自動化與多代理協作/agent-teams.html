@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Orchestrate teams of Claude Code sessions</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.info-box.warn { background: #fef3c7; border-color: #fcd34d; }
+.info-box.warn .tag { background: #d97706; }
+.info-box.warn p { color: #78350f; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 140px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .info-box.warn { background: #3a2a10; border-color: #7a5a20; }
+body.dark .info-box.warn .tag { background: #7a5a20; color: #f6ad55; }
+body.dark .info-box.warn p { color: #f6ad55; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; }
+body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; }
+body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; }
+body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; }
+body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Orchestrate teams of Claude Code sessions</h1>
+  <p>協調多個 Claude Code 實例一起工作: 共用任務清單, 代理間傳訊, 以及集中管理.</p>
+</header>
+
+<main>
+
+  <section>
+    <h2>什麼時候該用 Agent teams</h2>
+    <div class="info-box warn">
+      <div class="tag">WARNING</div>
+      <p>Agent teams 是實驗性功能, 預設關閉. 需在 settings.json 或環境變數中加入 CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS 才會啟用.</p>
+    </div>
+    <p>Agent teams 讓你協調多個 Claude Code 實例一起工作. 其中一個 session 擔任團隊領導, 負責協調工作, 指派任務, 並整合結果. 隊員各自獨立工作, 擁有自己的 context window, 並能直接互相溝通.</p>
+    <p>與 subagents 不同, subagents 只能在單一 session 內運作, 只能回報給主代理; agent teams 中你可以直接與個別隊員互動, 不必透過領導者.</p>
+
+    <h3>最適合的情境</h3>
+    <div class="api-fields">
+      <div class="field"><div class="name">研究與審查</div><div class="desc">多名隊員可同時調查問題的不同面向, 再互相分享並挑戰彼此的發現.</div></div>
+      <div class="field"><div class="name">新模組或功能</div><div class="desc">隊員各自負責獨立的一塊, 不會互相干擾.</div></div>
+      <div class="field"><div class="name">以競爭假設除錯</div><div class="desc">隊員平行測試不同理論, 更快收斂到答案.</div></div>
+      <div class="field"><div class="name">跨層協調</div><div class="desc">橫跨前端, 後端與測試的變更, 各自由不同隊員負責.</div></div>
+    </div>
+
+    <h3>與 Subagents 比較</h3>
+    <div class="two-col">
+      <div class="col-card">
+        <div class="col-card-title">Subagents</div>
+        <p>Context: 擁有自己的 context window, 結果回傳給呼叫者</p>
+        <p>溝通: 只回報給主代理</p>
+        <p>協調: 由主代理管理所有工作</p>
+        <p>最適合: 只在意結果的專注型任務</p>
+        <p>Token 成本: 較低, 結果會摘要回主 context</p>
+      </div>
+      <div class="col-card">
+        <div class="col-card-title">Agent teams</div>
+        <p>Context: 擁有自己的 context window, 完全獨立</p>
+        <p>溝通: 隊員之間直接傳訊</p>
+        <p>協調: 共用任務清單, 自我協調</p>
+        <p>最適合: 需要討論與協作的複雜工作</p>
+        <p>Token 成本: 較高, 每個隊員都是獨立的 Claude 實例</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>啟用 Agent teams</h2>
+    <p>在 settings.json 或 shell 環境中將 CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS 設為 1.</p>
+    <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"env"</span>: <span class="kw">{</span>
+    <span class="str">"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS"</span>: <span class="str">"1"</span>
+  <span class="kw">}</span>
+<span class="kw">}</span></pre>
+  </section>
+
+  <section>
+    <h2>啟動你的第一個 Agent team</h2>
+    <p>啟用後, 以自然語言描述任務與想要的隊員, Claude 會依你的提示產生隊員並協調工作.</p>
+    <pre class="code-block"><span class="cmt">// 這個範例效果好, 因為三個角色互相獨立, 不需等待彼此</span>
+I'm designing a CLI tool that helps developers track TODO comments across
+their codebase. Spawn three teammates to explore this from different angles:
+one on UX, one on technical architecture, one playing devil's advocate.</pre>
+    <p>之後 Claude 會建立共用任務清單, 為每個角度產生隊員, 讓他們探索問題, 並在完成後整合發現.</p>
+
+    <h3>領導者面板操作</h3>
+    <div class="event-list">
+      <div class="event-item"><div class="event-name">↑ / ↓</div><div class="event-desc">選擇隊員</div></div>
+      <div class="event-item"><div class="event-name">Enter</div><div class="event-desc">開啟所選隊員的對話紀錄並直接傳訊</div></div>
+      <div class="event-item"><div class="event-name">Escape</div><div class="event-desc">中斷所選隊員目前的回合</div></div>
+    </div>
+    <div class="info-box">
+      <div class="tag">NOTE</div>
+      <p>v2.1.181 起, 閒置隊員的列會在 30 秒後隱藏, 並在其下一回合重新出現; 隱藏期間該隊員仍在執行且可被傳訊.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>控制你的 Agent team</h2>
+
+    <h3>選擇顯示模式</h3>
+    <div class="chip-row">
+      <span class="chip-label">切換模式:</span>
+      <div class="chip active" onclick="atSelect(0,this)">In-process</div>
+      <div class="chip" onclick="atSelect(1,this)">Split panes</div>
+    </div>
+    <div class="response-box">
+      <div class="response-field"><div class="rf-key">說明</div><div class="rf-val" id="atDesc">所有隊員都在你的主終端機內執行, 用上下鍵在面板中選取隊員, 按 Enter 檢視並輸入訊息傳給它. 任何終端機都可用, 不需額外設定.</div></div>
+      <div class="response-field"><div class="rf-key">需求</div><div class="rf-val" id="atReq">無, 這是預設模式.</div></div>
+    </div>
+
+    <h3>指定隊員與模型</h3>
+    <pre class="code-block"><span class="cmt">// Claude 會依任務決定隊員數量, 也可以明確指定</span>
+Spawn 4 teammates to refactor these modules in parallel. Use Sonnet for
+each teammate.</pre>
+    <p>隊員預設不會繼承領導者的 /model 選擇, 需在 /config 中設定 Default teammate model 才能改變預設行為.</p>
+
+    <h3>要求隊員先規劃再執行</h3>
+    <pre class="code-block"><span class="cmt">// 對於複雜或高風險任務, 可要求隊員先規劃</span>
+Spawn an architect teammate to refactor the authentication module.
+Require plan approval before they make any changes.</pre>
+    <p>隊員在唯讀的規劃模式中工作, 直到領導者核准其做法為止. 若被拒絕, 隊員會停留在規劃模式, 依回饋修訂後重新提交.</p>
+
+    <h3>任務指派與領取</h3>
+    <div class="api-fields">
+      <div class="field"><div class="name">領導者指派</div><div class="desc">告訴領導者要把哪個任務交給哪位隊員.</div></div>
+      <div class="field"><div class="name">自我領取</div><div class="desc">隊員完成一項任務後, 自行領取下一個未指派且未被阻擋的任務.</div></div>
+    </div>
+
+    <h3>結束隊員與品質關卡</h3>
+    <div class="event-list">
+      <div class="event-item"><div class="event-name">TeammateIdle</div><div class="event-desc">隊員即將閒置前執行, 以結束碼 2 傳送回饋讓隊員繼續工作.</div></div>
+      <div class="event-item"><div class="event-name">TaskCreated</div><div class="event-desc">任務建立時執行, 以結束碼 2 阻止建立並傳送回饋.</div></div>
+      <div class="event-item"><div class="event-name">TaskCompleted</div><div class="event-desc">任務標記完成時執行, 以結束碼 2 阻止完成並傳送回饋.</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Agent teams 如何運作</h2>
+
+    <h3>架構</h3>
+    <div class="api-fields">
+      <div class="field"><div class="name">Team lead</div><div class="desc">產生隊員並協調工作的主要 Claude Code session.</div></div>
+      <div class="field"><div class="name">Teammates</div><div class="desc">各自負責被指派任務的獨立 Claude Code 實例.</div></div>
+      <div class="field"><div class="name">Task list</div><div class="desc">隊員領取與完成的共用工作項目清單.</div></div>
+      <div class="field"><div class="name">Mailbox</div><div class="desc">代理之間互相溝通的訊息系統.</div></div>
+    </div>
+    <p>團隊與任務以來自 session 的名稱儲存在本機: 團隊設定在 ~/.claude/teams/{team-name}/config.json, 任務清單在 ~/.claude/tasks/{team-name}/.</p>
+
+    <h3>使用 Subagent 定義作為隊員</h3>
+    <pre class="code-block">Spawn a teammate using the security-reviewer agent type to audit the auth module.</pre>
+    <p>隊員會遵循該定義的 tools 允許清單與 model, 定義內文會附加到隊員的系統提示中作為額外指示.</p>
+
+    <h3>權限與情境溝通</h3>
+    <p>隊員以領導者的權限設定啟動. 每個隊員擁有自己的 context window, 產生時會載入與一般 session 相同的專案情境: CLAUDE.md, MCP servers 與 skills, 但不會繼承領導者的對話歷史.</p>
+    <div class="event-list">
+      <div class="event-item"><div class="event-name">自動訊息投遞</div><div class="event-desc">隊員傳訊時會自動送達收件者, 領導者不需輪詢更新.</div></div>
+      <div class="event-item"><div class="event-name">閒置通知</div><div class="event-desc">隊員完成並停止時會自動通知領導者.</div></div>
+      <div class="event-item"><div class="event-name">共用任務清單</div><div class="event-desc">所有代理都能看到任務狀態並領取可用工作.</div></div>
+    </div>
+
+    <div class="takeaway">
+      <p>Agent teams 使用的 token 遠多於單一 session, 每位隊員都有自己的 context window, 用量會隨隊員數量增加. 對研究, 審查與新功能開發而言通常值得, 但例行工作用單一 session 更划算.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>使用情境範例</h2>
+
+    <h3>平行程式碼審查</h3>
+    <pre class="code-block">Spawn three teammates to review PR #142:
+- One focused on security implications
+- One checking performance impact
+- One validating test coverage
+Have them each review and report findings.</pre>
+    <p>每位審查者以同一份 PR 為基礎, 但套用不同的過濾角度; 三者完成後由領導者整合發現.</p>
+
+    <h3>以競爭假設調查問題</h3>
+    <pre class="code-block">Users report the app exits after one message instead of staying connected.
+Spawn 5 agent teammates to investigate different hypotheses. Have them talk to
+each other to try to disprove each other's theories, like a scientific
+debate. Update the findings doc with whatever consensus emerges.</pre>
+    <p>辯論結構是這裡的關鍵機制: 多個獨立調查者互相嘗試推翻彼此理論時, 存活下來的理論更可能就是真正的根因.</p>
+  </section>
+
+  <section>
+    <h2>最佳實務</h2>
+    <div class="api-fields">
+      <div class="field"><div class="name">給予足夠情境</div><div class="desc">隊員不會繼承領導者的對話歷史, 在產生提示中納入任務相關細節.</div></div>
+      <div class="field"><div class="name">選擇適當團隊規模</div><div class="desc">大多數工作流從 3 到 5 位隊員開始, 每位隊員 5 到 6 個任務可維持生產力.</div></div>
+      <div class="field"><div class="name">合理拆分任務大小</div><div class="desc">太小會讓協調成本超過效益, 太大會讓隊員長時間無回報, 增加浪費風險.</div></div>
+      <div class="field"><div class="name">等待隊員完成</div><div class="desc">若領導者自行動手而非等待隊員, 明確告訴它等隊員完成任務再繼續.</div></div>
+      <div class="field"><div class="name">從研究與審查開始</div><div class="desc">初次使用時, 從邊界清楚且不需寫程式的任務開始, 例如審查 PR 或調查錯誤.</div></div>
+      <div class="field"><div class="name">避免檔案衝突</div><div class="desc">兩位隊員編輯同一檔案會導致覆寫, 需拆分工作讓每位隊員負責不同檔案集合.</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>疑難排解</h2>
+    <div class="event-list">
+      <div class="event-item"><div class="event-name">隊員沒有出現</div><div class="event-desc">確認任務是否足夠複雜以值得組建團隊, 並檢查 in-process 面板或 tmux/iTerm2 設定.</div></div>
+      <div class="event-item"><div class="event-name">權限提示過多</div><div class="event-desc">隊員的權限請求會上呈給領導者, 事先在權限設定中核准常見操作可減少中斷.</div></div>
+      <div class="event-item"><div class="event-name">隊員因錯誤而停止</div><div class="event-desc">在面板中選取隊員並檢視輸出, 給予額外指示或產生替代隊員接手.</div></div>
+      <div class="event-item"><div class="event-name">領導者過早結束</div><div class="event-desc">告訴它任務尚未完成, 請繼續進行.</div></div>
+      <div class="event-item"><div class="event-name">遺留的 tmux session</div><div class="event-desc">用 tmux ls 列出並以 tmux kill-session 結束團隊建立的 session.</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>限制</h2>
+    <div class="event-list">
+      <div class="event-item"><div class="event-name">無法還原 session</div><div class="event-desc">/resume 與 /rewind 不會還原 in-process 隊員.</div></div>
+      <div class="event-item"><div class="event-name">任務狀態可能延遲</div><div class="event-desc">隊員有時未能標記任務完成, 導致依賴任務被阻擋.</div></div>
+      <div class="event-item"><div class="event-name">關閉可能較慢</div><div class="event-desc">隊員會先完成目前請求或工具呼叫才關閉.</div></div>
+      <div class="event-item"><div class="event-name">每個 session 僅一個團隊</div><div class="event-desc">無法建立額外的命名團隊或跨 session 共用團隊.</div></div>
+      <div class="event-item"><div class="event-name">不支援巢狀團隊</div><div class="event-desc">隊員不能產生自己的隊員, 只有領導者能管理團隊.</div></div>
+      <div class="event-item"><div class="event-name">領導者固定</div><div class="event-desc">主 session 在整個生命週期中都是領導者, 無法轉移領導權.</div></div>
+    </div>
+    <div class="takeaway">
+      <p>CLAUDE.md 仍正常運作: 隊員會從其工作目錄讀取 CLAUDE.md 檔案, 可用來對所有隊員提供專案層級的指引.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>下一步</h2>
+    <div class="event-list">
+      <div class="event-item"><div class="event-name">Subagents</div><div class="event-desc">為研究或驗證產生輔助代理, 適合不需要代理間協調的任務.</div></div>
+      <div class="event-item"><div class="event-name">Worktrees</div><div class="event-desc">自行執行多個 Claude Code session, 不需自動化團隊協調.</div></div>
+      <div class="event-item"><div class="event-name">Compare approaches</div><div class="event-desc">查看 subagent 與 agent team 的並列比較.</div></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+const AT_DATA = [
+  { desc: '所有隊員都在你的主終端機內執行, 用上下鍵在面板中選取隊員, 按 Enter 檢視並輸入訊息傳給它. 任何終端機都可用, 不需額外設定.', req: '無, 這是預設模式.' },
+  { desc: '每位隊員擁有自己的窗格, 可同時看到所有人的輸出, 點入窗格即可直接互動.', req: '需要 tmux, 或 iTerm2 搭配 it2 CLI.' },
+];
+function atSelect(i, el) {
+  document.querySelectorAll('.chip-row .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('atDesc').textContent = AT_DATA[i].desc;
+  document.getElementById('atReq').textContent = AT_DATA[i].req;
+}
+</script>
+</body>
+</html>

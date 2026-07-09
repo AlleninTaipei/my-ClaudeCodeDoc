@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>選擇權限模式 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.info-box.warn { background: #fef3c7; border-color: #fcd34d; }
+.info-box.warn .tag { background: #d97706; }
+.info-box.warn p { color: #92400e; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 170px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 150px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.scope-badge { display: inline-block; font-size: 0.58rem; font-weight: 700;
+  letter-spacing: 0.07em; text-transform: uppercase; padding: 2px 8px;
+  border-radius: 4px; vertical-align: middle; margin-left: 10px;
+  position: relative; top: -2px; }
+.scope-universal { background: #dcfce7; color: #166534; border: 1px solid #4ade80; }
+.scope-api       { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.scope-specific  { background: #ede9fe; color: #6d28d9; border: 1px solid #a78bfa; }
+.scope-legend { display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  background: #e2e8f0; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 10px 18px; margin-bottom: 36px; }
+.scope-legend-label { font-size: 0.72rem; color: #4a5568; font-weight: 700; }
+.scope-legend-item  { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+.accordion { border: 1px solid #cbd5e0; border-radius: 8px; margin-top: 10px; overflow: hidden; }
+.accordion-head { padding: 12px 16px; background: #fff; cursor: pointer; font-size: 0.85rem;
+  font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+.accordion-body { padding: 0 16px; max-height: 0; overflow: hidden; transition: all 0.25s ease; background: #f8fafc; }
+.accordion-body p { font-size: 0.82rem; padding: 12px 0; margin: 0; }
+.accordion.open .accordion-body { max-height: 800px; padding-bottom: 12px; }
+.accordion-arrow { transition: transform 0.2s; }
+.accordion.open .accordion-arrow { transform: rotate(90deg); }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .info-box.warn { background: #3a2a10; border-color: #7a5a20; }
+body.dark .info-box.warn .tag { background: #7a5a20; color: #f6ad55; }
+body.dark .info-box.warn p { color: #f6ad55; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .scope-universal { background: #1a3a28; color: #68d391; border-color: #276749; }
+body.dark .scope-api       { background: #3a2a10; color: #f6ad55; border-color: #7a5a20; }
+body.dark .scope-specific  { background: #2d1f4a; color: #b794f4; border-color: #553c8b; }
+body.dark .scope-legend { background: #1a202c; border-color: #2d3748; }
+body.dark .scope-legend-label { color: #4a5568; } body.dark .scope-legend-item  { color: #718096; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark .accordion { border-color: #2d3748; }
+body.dark .accordion-head { background: #1a202c; color: #e2e8f0; }
+body.dark .accordion-body { background: #0f1117; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>選擇權限模式</h1>
+  <p>控制 Claude 在編輯檔案, 執行指令前是否需要詢問你, 用 Shift+Tab 在 CLI 中循環切換</p>
+</header>
+
+<main>
+
+<section>
+  <h2>可用模式</h2>
+  <p>每種模式在便利性與監督程度之間做出不同取捨。下方顯示每種模式在不需詢問的情況下, Claude 可以做什麼。</p>
+  <div class="chip-row" id="modeChips"></div>
+  <div class="response-box" id="modeDisplay"></div>
+  <div class="info-box"><span class="tag">重要</span><p>除了 bypassPermissions 模式以外, 所有模式對受保護路徑 (protected paths) 的寫入永遠不會自動核准, 藉此保護儲存庫狀態與 Claude 自身的設定不受意外破壞。權限規則 (permission rules) 可疊加在模式之上, 用來預先核准或封鎖特定工具; deny 規則與明確的 ask 規則在所有模式下都會生效, 包含 bypassPermissions。</p></div>
+</section>
+
+<section>
+  <h2>切換權限模式</h2>
+  <p>可以在 session 中途, 啟動時, 或作為持久預設值來切換模式。模式是透過下方控制方式設定, 而非在對話中要求 Claude 切換。選擇你的介面查看切換方式。</p>
+  <div class="stage-tabs">
+    <div class="if-tab stage-tab active" onclick="ifGoTo(0)">CLI</div>
+    <div class="if-tab stage-tab" onclick="ifGoTo(1)">VS Code</div>
+    <div class="if-tab stage-tab" onclick="ifGoTo(2)">JetBrains</div>
+    <div class="if-tab stage-tab" onclick="ifGoTo(3)">Desktop</div>
+    <div class="if-tab stage-tab" onclick="ifGoTo(4)">Web 與行動裝置</div>
+  </div>
+  <div class="if-panel demo-panel visible" id="if-p0">
+    <p><b>Session 中</b>: 按 <code>Shift+Tab</code> 循環切換 default → acceptEdits → plan。目前模式顯示在狀態列。並非每個模式都在預設循環中: auto 只在帳號符合 auto 模式需求時出現; bypassPermissions 只在以啟用旗標啟動後才出現; dontAsk 永遠不會出現在循環中, 需以 <code>--permission-mode dontAsk</code> 設定。</p>
+    <pre class="code-block"><span class="fn">claude</span> --permission-mode plan</pre>
+    <p><b>作為預設值</b>: 在 settings 的 <code>defaultMode</code> 設定。</p>
+    <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"permissions"</span>: <span class="kw">{</span>
+    <span class="str">"defaultMode"</span>: <span class="str">"acceptEdits"</span>
+  <span class="kw">}</span>
+<span class="kw">}</span></pre>
+    <p>相同的 <code>--permission-mode</code> 旗標也適用於搭配 <code>-p</code> 的非互動執行。</p>
+  </div>
+  <div class="if-panel demo-panel" id="if-p1">
+    <p><b>Session 中</b>: 點擊提示框底部的模式指示器。</p>
+    <p><b>作為預設值</b>: 在 VS Code 設定中設 <code>claudeCode.initialPermissionMode</code>, 或使用 Claude Code 擴充功能的設定面板。此設定不接受 auto, 若要預設啟用 auto 模式, 需改在使用者設定中設定 defaultMode。專案與本機設定中的 defaultMode: "auto" 會被忽略。</p>
+    <div class="api-fields">
+      <div class="field"><div class="name">Ask before edits</div><div class="desc">default</div></div>
+      <div class="field"><div class="name">Edit automatically</div><div class="desc">acceptEdits</div></div>
+      <div class="field"><div class="name">Plan mode</div><div class="desc">plan</div></div>
+      <div class="field"><div class="name">Auto mode</div><div class="desc">auto</div></div>
+      <div class="field"><div class="name">Bypass permissions</div><div class="desc">bypassPermissions (需先在擴充功能設定啟用)</div></div>
+    </div>
+  </div>
+  <div class="if-panel demo-panel" id="if-p2">
+    <p>JetBrains 外掛在 IDE 終端機中執行 Claude Code, 切換方式與 CLI 相同: 按 <code>Shift+Tab</code> 循環切換, 或在啟動時傳入 <code>--permission-mode</code>。</p>
+  </div>
+  <div class="if-panel demo-panel" id="if-p3">
+    <p>使用送出按鈕旁的模式選擇器。Auto 與 Bypass permissions 只在 Desktop 設定中啟用後才會出現。</p>
+  </div>
+  <div class="if-panel demo-panel" id="if-p4">
+    <p>使用 claude.ai/code 或行動應用中提示框旁的模式下拉選單。權限提示會在 claude.ai 中顯示供核准。可用模式依 session 執行位置而不同:</p>
+    <div class="two-col">
+      <div class="col-card"><div class="col-card-title">Cloud sessions</div><p>Accept edits, Plan mode, Auto mode。Accept edits 對應 default 模式, 雲端環境無論模式為何都會預先核准檔案編輯。Auto mode 只在組織允許且所選模型支援時出現。不提供 Bypass permissions。</p></div>
+      <div class="col-card"><div class="col-card-title">Remote Control sessions</div><p>Ask permissions, Auto accept edits, Plan mode。不提供 Auto 與 Bypass permissions。可用 <code>claude remote-control --permission-mode acceptEdits</code> 設定啟動模式。</p></div>
+    </div>
+  </div>
+  <div>
+    <button class="btn btn-ghost" id="ifPrev" disabled onclick="ifGoTo(IFStep-1)">← Back</button>
+    <button class="btn btn-primary" id="ifNext" onclick="ifGoTo(IFStep+1)">Next →</button>
+    <span class="step-indicator" id="ifIndicator">Step 1 of 5</span>
+  </div>
+</section>
+
+<section>
+  <h2>用 acceptEdits 模式自動核准檔案編輯</h2>
+  <p><code>acceptEdits</code> 模式讓 Claude 建立與編輯工作目錄中的檔案, 不需詢問。啟用時狀態列顯示 accept edits on。除了檔案編輯外, 也會自動核准常見的檔案系統 Bash 指令: <code>mkdir</code>, <code>touch</code>, <code>rm</code>, <code>rmdir</code>, <code>mv</code>, <code>cp</code>, <code>sed</code>, 以及搭配安全環境變數 (如 LANG=C) 或行程包裝工具 (timeout, nice, nohup) 的前綴形式。自動核准僅適用於工作目錄或 additionalDirectories 內的路徑, 範圍外路徑與受保護路徑的寫入仍會詢問。</p>
+  <p>啟用 PowerShell 工具時, acceptEdits 模式也會自動核准範圍內路徑的 <code>Set-Content</code>, <code>Add-Content</code>, <code>Clear-Content</code>, <code>Remove-Item</code> 及其常見別名。</p>
+  <pre class="code-block"><span class="fn">claude</span> --permission-mode acceptEdits</pre>
+  <div class="takeaway"><p>想在事後用編輯器或 git diff 檢視變更, 而非逐一核准編輯時使用此模式。從 default 模式按一次 Shift+Tab 即可進入。</p></div>
+</section>
+
+<section>
+  <h2>用 plan 模式先分析再編輯</h2>
+  <p>Plan 模式讓 Claude 研究並提出變更建議, 但不實際修改。Claude 會讀取檔案, 執行 shell 指令來探索, 並撰寫計畫, 但不編輯原始碼。權限提示規則與 default 模式相同。</p>
+  <pre class="code-block"><span class="fn">claude</span> --permission-mode plan</pre>
+  <p>按 <code>Shift+Tab</code> 或在單一提示前加上 <code>/plan</code> 進入計畫模式, 再按一次 Shift+Tab 可離開而不核准計畫。</p>
+  <h3>審閱並核准計畫</h3>
+  <p>計畫準備好時, Claude 會提出計畫並詢問下一步, 你可以:</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">核准並以 auto 模式開始</span><span class="event-desc">切換為 auto 模式並開始編輯</span></div>
+    <div class="event-item"><span class="event-name">核准並自動接受編輯</span><span class="event-desc">切換為 acceptEdits 模式</span></div>
+    <div class="event-item"><span class="event-name">核准並逐一手動審閱編輯</span><span class="event-desc">切換為 default 模式</span></div>
+    <div class="event-item"><span class="event-name">繼續規劃並提供回饋</span><span class="event-desc">留在 plan 模式中修改計畫</span></div>
+    <div class="event-item"><span class="event-name">用 Ultraplan 精煉</span><span class="event-desc">在瀏覽器中進行以 Claude Code on the web 為基礎的審閱</span></div>
+  </div>
+  <p>按 <code>Ctrl+G</code> 可在預設文字編輯器中開啟並直接編輯提出的計畫。核准計畫也會依計畫內容自動命名 session, 除非你已用 <code>--name</code> 或 <code>/rename</code> 設定過名稱。</p>
+  <h3>將 plan 模式設為預設值</h3>
+  <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"permissions"</span>: <span class="kw">{</span>
+    <span class="str">"defaultMode"</span>: <span class="str">"plan"</span>
+  <span class="kw">}</span>
+<span class="kw">}</span></pre>
+</section>
+
+<section>
+  <h2>用 auto 模式消除權限提示<span class="scope-badge scope-specific">研究預覽</span></h2>
+  <p>Auto 模式讓 Claude 執行時不會出現例行的權限提示。獨立的分類模型會在動作執行前審查, 封鎖任何超出你要求範圍, 針對未知基礎設施, 或看似受 Claude 讀取的惡意內容驅動的動作。明確的 ask 規則仍會強制觸發提示。</p>
+  <div class="info-box warn"><span class="tag">警告</span><p>Auto 模式是研究預覽版本, 能減少權限提示但不保證安全, 請用於信任大方向的任務, 而非取代對敏感操作的審查。</p></div>
+  <h3>啟用條件</h3>
+  <div class="api-fields">
+    <div class="field"><div class="name">方案</div><div class="desc">所有方案皆可</div></div>
+    <div class="field"><div class="name">擁有者</div><div class="desc">Team/Enterprise 需由 Owner 在管理設定中啟用, 也可用 managed settings 鎖定關閉</div></div>
+    <div class="field"><div class="name">模型</div><div class="desc">Anthropic API 為 Opus 4.6+ 或 Sonnet 4.6+; Bedrock/Vertex/Foundry/Claude apps gateway 僅支援 Sonnet 5, Opus 4.7, Opus 4.8</div></div>
+    <div class="field"><div class="name">供應商</div><div class="desc">Anthropic API 預設可用; 其餘供應商需設定 CLAUDE_CODE_ENABLE_AUTO_MODE</div></div>
+  </div>
+  <h3>分類器預設封鎖與允許的項目</h3>
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">預設封鎖</div>
+      <p>下載並執行程式碼 (如 curl | bash)</p>
+      <p>將敏感資料送往外部端點</p>
+      <p>正式環境部署與資料庫遷移</p>
+      <p>雲端儲存空間的大量刪除</p>
+      <p>授予 IAM 或儲存庫權限</p>
+      <p>強制推送, 或直接推送到 main</p>
+      <p>git reset --hard, git clean -fd 等會捨棄未提交變更的指令</p>
+      <p>terraform destroy 等基礎設施銷毀指令</p>
+      <p>寫入密鑰管理服務, 變更 DNS/TLS 憑證</p>
+      <p>合併未經人工核准的 PR, 核准自己的 PR</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">預設允許</div>
+      <p>工作目錄內的本機檔案操作</p>
+      <p>安裝鎖定檔或清單中宣告的相依套件</p>
+      <p>讀取 .env 並將憑證送至對應的 API</p>
+      <p>唯讀的 HTTP 請求</p>
+      <p>推送到你啟動的分支或 Claude 建立的分支</p>
+      <p>刪除 Claude 在同一 session 中先前建立的任務</p>
+      <p>讀取, 審閱, 撰寫與安全相關的程式碼與威脅模型</p>
+      <p>多代理 session 中代理之間的訊息</p>
+    </div>
+  </div>
+  <h3>你在對話中陳述的界線</h3>
+  <p>分類器會將你在對話中陳述的界線視為封鎖訊號。例如告訴 Claude 「先不要推送」或「等我審閱後再部署」, 即使預設規則允許, 分類器仍會封鎖對應動作。界線會持續生效直到你在之後的訊息中解除, Claude 自行判斷條件已滿足並不會解除界線。</p>
+  <div class="info-box"><span class="tag">注意</span><p>界線不是以規則形式儲存, 分類器每次檢查時會重新從逐字稿讀取, 若上下文壓縮移除了陳述界線的訊息, 界線可能因此遺失。若需要硬性保證, 改用 deny 規則。</p></div>
+  <h3>Auto 模式回退機制</h3>
+  <p>每個被拒絕的動作會顯示通知, 並出現在 <code>/permissions</code> 的 Recently denied 分頁, 可按 r 以手動核准重試。若分類器連續 3 次或總計 20 次封鎖動作, auto 模式會暫停並恢復詢問, 核准被提示的動作後恢復 auto 模式。這些門檻無法調整。</p>
+  <div class="accordion" id="acc0">
+    <div class="accordion-head" onclick="toggleAcc('acc0')"><span>分類器如何評估動作</span><span class="accordion-arrow">›</span></div>
+    <div class="accordion-body"><p>每個動作依固定順序決策, 第一個符合的步驟勝出: 1) 符合 allow/deny 規則的動作立即解析 (受保護路徑寫入除外); 2) 工作目錄內的唯讀動作與檔案編輯自動核准 (受保護路徑除外); 3) 其餘動作交給分類器; 4) 若分類器封鎖, Claude 會收到原因並嘗試替代方案。進入 auto 模式時, 授予任意程式碼執行權限的寬鬆 allow 規則 (如 Bash(*)) 會被移除, 離開 auto 模式後會恢復。</p></div>
+  </div>
+  <div class="accordion" id="acc1">
+    <div class="accordion-head" onclick="toggleAcc('acc1')"><span>Auto 模式如何處理子代理</span><span class="accordion-arrow">›</span></div>
+    <div class="accordion-body"><p>分類器在三個時間點檢查子代理工作: 1) 子代理啟動前評估委派的任務描述, 危險的任務會在產生時就被封鎖; 2) 子代理執行期間, 每個動作都以與父 session 相同規則通過分類器, 子代理 frontmatter 中的 permissionMode 會被忽略; 3) 子代理結束時, 分類器審查其完整動作歷史, 若發現疑慮會在結果前附加安全警告。</p></div>
+  </div>
+  <div class="accordion" id="acc2">
+    <div class="accordion-head" onclick="toggleAcc('acc2')"><span>成本與延遲</span><span class="accordion-arrow">›</span></div>
+    <div class="accordion-body"><p>分類器在伺服器設定的模型上執行, 與 /model 選擇無關, 因此切換模型不影響分類器可用性。分類器呼叫會計入 token 用量, 每次檢查都會傳送部分逐字稿與待執行動作, 在執行前增加一次往返。工作目錄內受保護路徑之外的讀取與編輯會跳過分類器, 因此額外開銷主要來自 shell 指令與網路操作。</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>用 dontAsk 模式只允許預先核准的工具</h2>
+  <p><code>dontAsk</code> 模式會自動拒絕任何原本會觸發提示的工具呼叫, 只有符合 <code>permissions.allow</code> 規則與唯讀 Bash 指令的動作可以執行, 明確的 ask 規則會被拒絕而非提示。這使得此模式完全非互動, 適合 CI 流水線或需要預先定義 Claude 可做之事的受限環境。</p>
+  <pre class="code-block"><span class="fn">claude</span> --permission-mode dontAsk</pre>
+</section>
+
+<section>
+  <h2>用 bypassPermissions 模式跳過所有檢查</h2>
+  <p><code>bypassPermissions</code> 模式停用權限提示與安全檢查, 工具呼叫會立即執行 (v2.1.126 起也包含受保護路徑寫入)。明確的 ask 規則仍會強制提示, 針對檔案系統根目錄或家目錄的刪除 (如 rm -rf / 或 rm -rf ~) 仍會提示作為斷路保護。只應在容器, VM 等隔離環境, 且無網際網路存取的環境中使用此模式。</p>
+  <pre class="code-block"><span class="fn">claude</span> --permission-mode bypassPermissions</pre>
+  <p><code>--dangerously-skip-permissions</code> 旗標效果相同。在 Linux 與 macOS 上, 以 root 或 sudo 執行時 Claude Code 會拒絕以此模式啟動 (在已知的沙盒環境中此檢查會自動跳過)。</p>
+  <div class="info-box warn"><span class="tag">警告</span><p>bypassPermissions 對提示注入或非預期動作沒有任何防護。若要在保留較少權限提示的同時做背景安全檢查, 請改用 auto 模式。管理員可透過 managed settings 的 permissions.disableBypassPermissionsMode 封鎖此模式。</p></div>
+</section>
+
+<section>
+  <h2>受保護路徑</h2>
+  <p>在 bypassPermissions 以外的每個模式中, 對一小組路徑的寫入永遠不會自動核准, 以防止意外破壞儲存庫狀態與 Claude 自身的設定。</p>
+  <div class="response-box">
+    <div class="response-field"><div class="rf-key">default / acceptEdits / plan</div><div class="rf-val">提示</div></div>
+    <div class="response-field"><div class="rf-key">auto</div><div class="rf-val">交由分類器處理</div></div>
+    <div class="response-field"><div class="rf-key">dontAsk</div><div class="rf-val">拒絕</div></div>
+    <div class="response-field"><div class="rf-key">bypassPermissions</div><div class="rf-val">允許</div></div>
+  </div>
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">受保護目錄</div>
+      <p>.git, .config/git, .vscode, .idea, .husky, .cargo, .devcontainer, .yarn, .mvn, .claude (.claude/worktrees 除外)</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">受保護檔案</div>
+      <p>.gitconfig, .gitmodules, .bashrc/.zshrc 系列, .npmrc/.yarnrc 系列, .bazelrc, .pre-commit-config.yaml, gradle/maven wrapper 屬性檔, .mcp.json, .claude.json 等</p>
+    </div>
+  </div>
+  <div class="info-box"><span class="tag">提示</span><p>settings 檔中的 permissions.allow 規則不會預先核准受保護路徑寫入, 安全檢查會在評估 allow 規則之前執行。在會提示的模式中, .claude/ 寫入的提示會提供「本 session 允許 Claude 編輯自身設定」選項, 核准後該 session 後續的 .claude/ 寫入不再提示。</p></div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+function toggleAcc(id) { document.getElementById(id).classList.toggle('open'); }
+
+const MODES = [
+  {k:'default', run:'僅唯讀', best:'剛開始使用, 敏感工作'},
+  {k:'acceptEdits', run:'讀取, 檔案編輯, 常見檔案系統指令 (mkdir, touch, mv, cp 等)', best:'迭代審閱中的程式碼'},
+  {k:'plan', run:'僅唯讀', best:'變更前先探索程式碼庫'},
+  {k:'auto', run:'所有動作, 搭配背景安全檢查', best:'長任務, 減少提示疲勞'},
+  {k:'dontAsk', run:'僅預先核准的工具', best:'鎖定的 CI 與腳本'},
+  {k:'bypassPermissions', run:'所有動作', best:'僅限隔離的容器與 VM'},
+];
+const modeChipsEl = document.getElementById('modeChips');
+const modeDisplayEl = document.getElementById('modeDisplay');
+function renderMode(m) {
+  modeDisplayEl.innerHTML = `
+    <div class="response-field"><div class="rf-key">不需詢問即可執行</div><div class="rf-val">${m.run}</div></div>
+    <div class="response-field"><div class="rf-key">最適合</div><div class="rf-val">${m.best}</div></div>`;
+}
+MODES.forEach((m, i) => {
+  const chip = document.createElement('div');
+  chip.className = 'chip' + (i === 0 ? ' active' : '');
+  chip.textContent = m.k;
+  chip.onclick = () => {
+    document.querySelectorAll('#modeChips .chip').forEach(el => el.classList.remove('active'));
+    chip.classList.add('active');
+    renderMode(m);
+  };
+  modeChipsEl.appendChild(chip);
+});
+renderMode(MODES[0]);
+
+let IFStep = 0;
+const IF_MAX = 4;
+function ifGoTo(n) {
+  IFStep = Math.max(0, Math.min(IF_MAX, n));
+  document.querySelectorAll('.if-panel').forEach((el, i) => el.classList.toggle('visible', i === IFStep));
+  document.querySelectorAll('.if-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === IFStep) t.classList.add('active');
+    else if (i < IFStep) t.classList.add('done');
+  });
+  document.getElementById('ifPrev').disabled = IFStep === 0;
+  const next = document.getElementById('ifNext');
+  next.disabled = IFStep === IF_MAX;
+  next.textContent = IFStep === IF_MAX ? 'Done ✓' : 'Next →';
+  document.getElementById('ifIndicator').textContent = `Step ${IFStep + 1} of ${IF_MAX + 1}`;
+}
+ifGoTo(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Agent Loop 運作原理</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 190px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.scope-badge { display: inline-block; font-size: 0.58rem; font-weight: 700;
+  letter-spacing: 0.07em; text-transform: uppercase; padding: 2px 8px;
+  border-radius: 4px; vertical-align: middle; margin-left: 10px;
+  position: relative; top: -2px; }
+.scope-universal { background: #dcfce7; color: #166534; border: 1px solid #4ade80; }
+.scope-api       { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; }
+body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .scope-universal { background: #1a3a28; color: #68d391; border-color: #276749; }
+body.dark .scope-api       { background: #3a2a10; color: #f6ad55; border-color: #7a5a20; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Agent Loop 運作原理</h1>
+  <p>了解訊息生命週期, 工具執行, 情境視窗, 以及支撐 SDK agent 運作的架構</p>
+</header>
+
+<main>
+
+<section>
+<h2>迴圈總覽</h2>
+<p>每個 agent session 都遵循相同的循環: 接收提示, 評估並回應, 執行工具, 重複, 回傳結果。使用下方的步驟導覽逐一了解每個階段。</p>
+<div class="stage-tabs">
+  <div class="lp-tab stage-tab active" onclick="lpGoTo(0)">1 · 接收提示</div>
+  <div class="lp-tab stage-tab" onclick="lpGoTo(1)">2 · 評估並回應</div>
+  <div class="lp-tab stage-tab" onclick="lpGoTo(2)">3 · 執行工具</div>
+  <div class="lp-tab stage-tab" onclick="lpGoTo(3)">4 · 重複</div>
+  <div class="lp-tab stage-tab" onclick="lpGoTo(4)">5 · 回傳結果</div>
+</div>
+<div class="lp-panel demo-panel visible" id="lp-p0">
+  <div class="info-box"><span class="tag">STEP 1</span>
+  <p>Claude 接收你的提示, 連同系統提示, 工具定義, 以及對話歷史。SDK 會產生一個 subtype 為 "init" 的 SystemMessage, 內含 session 中繼資料。</p></div>
+</div>
+<div class="lp-panel demo-panel" id="lp-p1">
+  <div class="info-box"><span class="tag">STEP 2</span>
+  <p>Claude 評估目前狀態並決定如何進行, 可能回覆文字, 請求一個或多個工具呼叫, 或兩者皆有。SDK 會產生包含文字與工具呼叫請求的 AssistantMessage。</p></div>
+</div>
+<div class="lp-panel demo-panel" id="lp-p2">
+  <div class="info-box"><span class="tag">STEP 3</span>
+  <p>SDK 執行每個被請求的工具並收集結果, 每組工具結果會回饋給 Claude 做下一步決策, 你可以用 hooks 來攔截, 修改或封鎖工具呼叫。</p></div>
+</div>
+<div class="lp-panel demo-panel" id="lp-p3">
+  <div class="info-box"><span class="tag">STEP 4</span>
+  <p>步驟 2 和 3 會重複循環, 每個完整循環稱為一個 turn, Claude 會持續呼叫工具與處理結果, 直到產出不含工具呼叫的回應為止。</p></div>
+</div>
+<div class="lp-panel demo-panel" id="lp-p4">
+  <div class="info-box"><span class="tag">STEP 5</span>
+  <p>SDK 產生最後一則不含工具呼叫的 AssistantMessage, 接著是包含最終文字, token 使用量, 成本, 與 session ID 的 ResultMessage。</p></div>
+</div>
+<div>
+  <button class="btn btn-ghost" id="lpPrev" disabled onclick="lpGoTo(lpStep-1)">← 上一步</button>
+  <button class="btn btn-primary" id="lpNext" onclick="lpGoTo(lpStep+1)">下一步 →</button>
+  <span class="step-indicator" id="lpIndicator">Step 1 of 5</span>
+</div>
+</section>
+
+<section>
+<h2>輪次與訊息 (Turns and Messages)</h2>
+<p>一個 turn 是迴圈中一次完整的往返: Claude 產出包含工具呼叫的輸出, SDK 執行工具, 結果自動回饋給 Claude。以「修正 auth.ts 中失敗的測試」為例, 完整流程如下:</p>
+<div class="event-list">
+  <div class="event-item"><span class="event-name">Turn 1</span><span class="event-desc">呼叫 Bash 執行 npm test, 收到三個失敗結果</span></div>
+  <div class="event-item"><span class="event-name">Turn 2</span><span class="event-desc">呼叫 Read 讀取 auth.ts 與 auth.test.ts</span></div>
+  <div class="event-item"><span class="event-name">Turn 3</span><span class="event-desc">呼叫 Edit 修正 auth.ts, 再次執行 npm test, 全數通過</span></div>
+  <div class="event-item"><span class="event-name">Final Turn</span><span class="event-desc">產出純文字回應, 無工具呼叫: 修好了, 三個測試都通過了</span></div>
+</div>
+<div class="info-box"><span class="tag">限制迴圈</span>
+<p>可用 max_turns / maxTurns 限制工具使用回合數, 或用 max_budget_usd / maxBudgetUsd 依花費上限停止, 未設限時迴圈會執行到 Claude 自行完成為止。</p></div>
+</section>
+
+<section>
+<h2>訊息類型 (Message Types)<span class="scope-badge scope-universal">UNIVERSAL</span></h2>
+<p>迴圈執行過程中, SDK 會產生一連串訊息, 每則訊息都帶有類型欄位, 標示它來自迴圈的哪個階段。</p>
+<div class="api-fields">
+  <div class="field"><div class="name">SystemMessage</div><div class="desc">session 生命週期事件, 例如 init, compact_boundary</div></div>
+  <div class="field"><div class="name">AssistantMessage</div><div class="desc">每次 Claude 回應後產生, 包含文字與工具呼叫區塊</div></div>
+  <div class="field"><div class="name">UserMessage</div><div class="desc">每次工具執行後產生, 內含回傳給 Claude 的結果</div></div>
+  <div class="field"><div class="name">StreamEvent</div><div class="desc">僅在啟用 partial messages 時產生, 包含原始串流事件</div></div>
+  <div class="field"><div class="name">ResultMessage</div><div class="desc">標示迴圈結束, 包含最終文字, token 用量, 成本與 session ID</div></div>
+</div>
+<h3>範例: 檢查訊息類型並處理結果</h3>
+<pre class="code-block"><span class="kw">from</span> claude_agent_sdk <span class="kw">import</span> query, AssistantMessage, ResultMessage
+
+<span class="kw">async for</span> message <span class="kw">in</span> <span class="fn">query</span>(prompt=<span class="str">"Summarize this project"</span>):
+    <span class="kw">if</span> <span class="fn">isinstance</span>(message, AssistantMessage):
+        <span class="fn">print</span>(<span class="str">f"Turn completed: {len(message.content)} content blocks"</span>)
+    <span class="kw">if</span> <span class="fn">isinstance</span>(message, ResultMessage):
+        <span class="kw">if</span> message.subtype == <span class="str">"success"</span>:
+            <span class="fn">print</span>(message.result)
+        <span class="kw">else</span>:
+            <span class="fn">print</span>(<span class="str">f"Stopped: {message.subtype}"</span>)</pre>
+</section>
+
+<section>
+<h2>工具執行 (Tool Execution)</h2>
+<p>沒有工具時, Claude 只能以文字回應, 有了工具, Claude 就能讀取檔案, 執行指令, 搜尋程式碼, 與外部服務互動。</p>
+<div class="api-fields">
+  <div class="field"><div class="name">Read / Edit / Write</div><div class="desc">讀取, 修改, 建立檔案</div></div>
+  <div class="field"><div class="name">Glob / Grep</div><div class="desc">依模式尋找檔案, 用正規表示式搜尋內容</div></div>
+  <div class="field"><div class="name">Bash</div><div class="desc">執行 shell 指令, 腳本, git 操作</div></div>
+  <div class="field"><div class="name">WebSearch / WebFetch</div><div class="desc">搜尋網路, 擷取並解析網頁</div></div>
+  <div class="field"><div class="name">ToolSearch</div><div class="desc">依需動態尋找並載入工具, 而非預先全部載入</div></div>
+  <div class="field"><div class="name">Agent / Skill / AskUserQuestion</div><div class="desc">產生子代理, 呼叫技能, 詢問使用者, 追蹤任務</div></div>
+</div>
+<div class="info-box"><span class="tag">平行執行</span>
+<p>唯讀工具 (Read, Glob, Grep, 標記為 read-only 的 MCP 工具) 可平行執行, 會修改狀態的工具 (Edit, Write, Bash) 則依序執行以避免衝突。</p></div>
+</section>
+
+<section>
+<h2>控制迴圈運作方式</h2>
+<p>可限制迴圈的輪次數量, 花費上限, 推理深度, 以及工具是否需要核准。</p>
+<div class="chip-row">
+  <span class="chip-label">選擇 effort 等級查看說明:</span>
+  <span class="chip al-chip active" data-i="0" onclick="alSelect(0)">low</span>
+  <span class="chip al-chip" data-i="1" onclick="alSelect(1)">medium</span>
+  <span class="chip al-chip" data-i="2" onclick="alSelect(2)">high</span>
+  <span class="chip al-chip" data-i="3" onclick="alSelect(3)">xhigh</span>
+  <span class="chip al-chip" data-i="4" onclick="alSelect(4)">max</span>
+</div>
+<div class="response-box" id="alDetail">
+  <div class="response-field"><div class="rf-key">行為</div><div class="rf-val" id="alBehavior">最少推理, 回應快速</div></div>
+  <div class="response-field"><div class="rf-key">適合場景</div><div class="rf-val" id="alGood">尋找檔案, 列出目錄</div></div>
+</div>
+<h3>權限模式</h3>
+<div class="two-col">
+  <div class="col-card"><div class="col-card-title">acceptEdits</div><p>自動核准檔案編輯與常見檔案系統指令 (mkdir, touch, mv, cp), 其他 Bash 指令仍走預設規則。</p></div>
+  <div class="col-card"><div class="col-card-title">bypassPermissions</div><p>所有允許的工具都不經詢問直接執行, 僅限隔離環境使用, 不可在 Unix 以 root 執行。</p></div>
+</div>
+</section>
+
+<section>
+<h2>情境視窗 (The Context Window)</h2>
+<p>情境視窗是 Claude 在一個 session 期間可用的資訊總量, 不會在各輪次之間重置, 所有內容都會累積。</p>
+<div class="two-col">
+  <div class="col-card"><div class="col-card-title">系統提示與 CLAUDE.md</div><p>每次請求都會載入, 屬固定成本, 且會被 prompt cache 快取以降低成本。</p></div>
+  <div class="col-card"><div class="col-card-title">工具定義</div><p>內建工具每次請求都會載入, MCP 工具 schema 預設延後載入。</p></div>
+  <div class="col-card"><div class="col-card-title">對話歷史</div><p>隨每個 turn 累積, 包含提示, 回應, 工具輸入與輸出。</p></div>
+  <div class="col-card"><div class="col-card-title">技能描述</div><p>啟動時載入簡短摘要, 完整內容僅在被呼叫時才載入。</p></div>
+</div>
+<h3>自動壓縮 (Automatic Compaction)</h3>
+<div class="info-box"><span class="tag">重要</span>
+<p>當情境視窗接近上限時, SDK 會自動壓縮對話: 摘要較舊的歷史以釋放空間, 同時保留最近的交流與關鍵決策。持久性規則應寫在 CLAUDE.md, 而非放在初始提示中。</p></div>
+</section>
+
+<section>
+<h2>處理結果 (Handle the Result)</h2>
+<p>迴圈結束時, ResultMessage 會告訴你發生了什麼並提供輸出, subtype 欄位是判斷終止狀態的主要依據。</p>
+<div class="response-box">
+  <div class="response-field"><div class="rf-key">success</div><div class="rf-val">任務正常完成, result 欄位可用</div></div>
+  <div class="response-field"><div class="rf-key">error_max_turns</div><div class="rf-val">完成前已達 maxTurns 上限</div></div>
+  <div class="response-field"><div class="rf-key">error_max_budget_usd</div><div class="rf-val">完成前已達 maxBudgetUsd 上限</div></div>
+  <div class="response-field"><div class="rf-key">error_during_execution</div><div class="rf-val">迴圈執行過程中發生錯誤中斷</div></div>
+  <div class="response-field"><div class="rf-key">error_max_structured_output_retries</div><div class="rf-val">重試上限內未產生有效的結構化輸出</div></div>
+</div>
+</section>
+
+<section>
+<h2>綜合運用</h2>
+<p>下例結合本頁重點概念, 建立一個修復失敗測試的完整 agent: 設定允許工具, 專案設定, 以及輪次與推理深度的安全上限。</p>
+<pre class="code-block"><span class="kw">async def</span> <span class="fn">run_agent</span>():
+    <span class="kw">async for</span> message <span class="kw">in</span> <span class="fn">query</span>(
+        prompt=<span class="str">"Find and fix the bug causing test failures"</span>,
+        options=ClaudeAgentOptions(
+            allowed_tools=[<span class="str">"Read"</span>, <span class="str">"Edit"</span>, <span class="str">"Bash"</span>, <span class="str">"Glob"</span>, <span class="str">"Grep"</span>],
+            setting_sources=[<span class="str">"project"</span>],
+            max_turns=<span class="str">30</span>,  <span class="cmt"># 避免失控的 session</span>
+            effort=<span class="str">"high"</span>,
+        ),
+    ):
+        <span class="kw">if</span> <span class="fn">isinstance</span>(message, ResultMessage):
+            <span class="kw">if</span> message.subtype == <span class="str">"success"</span>:
+                <span class="fn">print</span>(<span class="str">f"Done: {message.result}"</span>)</pre>
+<div class="takeaway"><p>掌握這個迴圈後, 就能決定何時該用 hooks 稽核工具呼叫, 何時該用 subagents 把工作卸載到獨立情境, 以及如何用串流即時呈現進度。</p></div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+let lpStep = 0;
+const LP_MAX = 4;
+function lpGoTo(n) {
+  lpStep = Math.max(0, Math.min(LP_MAX, n));
+  document.querySelectorAll('.lp-panel').forEach((el, i) => el.classList.toggle('visible', i === lpStep));
+  document.querySelectorAll('.lp-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === lpStep) t.classList.add('active');
+    else if (i < lpStep) t.classList.add('done');
+  });
+  document.getElementById('lpPrev').disabled = lpStep === 0;
+  const next = document.getElementById('lpNext');
+  next.disabled = lpStep === LP_MAX;
+  next.textContent = lpStep === LP_MAX ? '完成 ✓' : '下一步 →';
+  document.getElementById('lpIndicator').textContent = `Step ${lpStep + 1} of ${LP_MAX + 1}`;
+}
+lpGoTo(0);
+
+const AL_DATA = [
+  { behavior: '最少推理, 回應快速', good: '尋找檔案, 列出目錄' },
+  { behavior: '平衡的推理深度', good: '例行編輯, 標準任務' },
+  { behavior: '深入分析', good: '重構, 除錯' },
+  { behavior: '延伸推理深度', good: '編碼與代理任務, 建議用於 Fable 5, Opus 4.7+, Sonnet 5' },
+  { behavior: '最大推理深度', good: '需要深入分析的多步驟問題' }
+];
+function alSelect(i) {
+  document.querySelectorAll('.al-chip').forEach((c, idx) => c.classList.toggle('active', idx === i));
+  document.getElementById('alBehavior').textContent = AL_DATA[i].behavior;
+  document.getElementById('alGood').textContent = AL_DATA[i].good;
+}
+</script>
+</body>
+</html>

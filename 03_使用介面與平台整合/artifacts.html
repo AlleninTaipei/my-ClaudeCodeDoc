@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Artifacts:將工作階段輸出分享為互動頁面</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; }
+.fn  { color: #16a34a; }
+.str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; }
+.key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 200px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.scope-badge { display: inline-block; font-size: 0.58rem; font-weight: 700;
+  letter-spacing: 0.07em; text-transform: uppercase; padding: 2px 8px;
+  border-radius: 4px; vertical-align: middle; margin-left: 10px;
+  position: relative; top: -2px; }
+.scope-universal { background: #dcfce7; color: #166534; border: 1px solid #4ade80; }
+.scope-api       { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.scope-specific  { background: #ede9fe; color: #6d28d9; border: 1px solid #a78bfa; }
+.scope-legend { display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  background: #e2e8f0; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 10px 18px; margin-bottom: 36px; }
+.scope-legend-label { font-size: 0.72rem; color: #4a5568; font-weight: 700; }
+.scope-legend-item  { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; }
+body.dark .fn  { color: #68d391; }
+body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; }
+body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; }
+body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; }
+body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; }
+body.dark .rf-val { color: #a0aec0; }
+body.dark .scope-universal { background: #1a3a28; color: #68d391; border-color: #276749; }
+body.dark .scope-api       { background: #3a2a10; color: #f6ad55; border-color: #7a5a20; }
+body.dark .scope-specific  { background: #2d1f4a; color: #b794f4; border-color: #553c8b; }
+body.dark .scope-legend { background: #1a202c; border-color: #2d3748; }
+body.dark .scope-legend-label { color: #4a5568; }
+body.dark .scope-legend-item  { color: #718096; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; }
+body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Artifacts</h1>
+  <p>將 Claude Code 工作階段的輸出, 發布成一個私有連結上的即時互動頁面, 方便在組織內分享。</p>
+</header>
+
+<main>
+
+<div class="scope-legend">
+  <span class="scope-legend-label">範圍標示</span>
+  <span class="scope-legend-item"><span class="scope-badge scope-universal">UNIVERSAL</span> 通用概念</span>
+  <span class="scope-legend-item"><span class="scope-badge scope-specific">TOOL-SPECIFIC</span> Artifacts 專屬</span>
+</div>
+
+<section>
+  <h2>何時該使用 Artifact <span class="scope-badge scope-specific">TOOL-SPECIFIC</span></h2>
+  <p>當終端機文字不是適合呈現輸出的媒介時, 就該使用 artifact, 也就是那些看一眼比逐行閱讀更容易理解的內容。</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">帶註解的 PR 走查</span><span class="event-desc">用有註解的 diff 帶審查者看過整個變更</span></div>
+    <div class="event-item"><span class="event-name">資料儀表板</span><span class="event-desc">用工作階段已抓取的資料呈現視覺化儀表板</span></div>
+    <div class="event-item"><span class="event-name">方案並列比較</span><span class="event-desc">把數個設計或實作選項並排呈現</span></div>
+    <div class="event-item"><span class="event-name">調查時間軸</span><span class="event-desc">在長任務執行期間持續補上內容的調查記錄</span></div>
+    <div class="event-item"><span class="event-name">分享連結取代貼文字</span><span class="event-desc">傳一個連結給同事, 而不是把輸出貼進 Slack</span></div>
+  </div>
+  <div class="info-box">
+    <span class="tag">Artifact 不是什麼</span>
+    <p>Artifact 是工作成果的擷取, 不是一個應用程式。它是沒有後端的單一自包含頁面, 因此無法儲存表單輸入, 也無法在檢視當下呼叫 API。若需要有後端的內部工具, 請部署在自己的基礎設施上。</p>
+  </div>
+</section>
+
+<section>
+  <h2>建立 Artifact</h2>
+  <p>Claude 可能會在輸出適合做成頁面時自動發布, 你也可以直接要求。用一般語言描述你想要的視覺輸出即可。</p>
+  <pre class="code-block"><span class="cmt"># 範例提示 1</span>
+<span class="str">"Make an artifact that walks through this PR with the diff annotated inline."</span>
+
+<span class="cmt"># 範例提示 2</span>
+<span class="str">"Build a dashboard artifact of last week's deploy failures by service and keep it updated as you investigate."</span></pre>
+  <div class="info-box">
+    <span class="tag">流程</span>
+    <p>Claude 會把頁面寫成專案中的 HTML 或 Markdown 檔案, 然後發布。發布新 artifact 前, Claude Code 會先請求許可。選擇 Yes 後, Claude 印出網址並自動開啟瀏覽器; 之後可隨時按 Ctrl+] 重新開啟最近的 artifact。設定環境變數 CLAUDE_CODE_ARTIFACT_AUTO_OPEN=0 可停止自動開啟瀏覽器。</p>
+  </div>
+</section>
+
+<section>
+  <h2>更新 Artifact</h2>
+  <p>請 Claude 修改頁面, 或讓長時間執行的任務在有進度時自動重新發布。Claude 會編輯底層檔案, 並發布到同一個網址。</p>
+  <pre class="code-block"><span class="str">"Add a per-region breakdown below the summary chart and republish."</span>
+
+<span class="cmt"># 從不同工作階段更新, 需附上 artifact 網址</span>
+<span class="str">"Update https://claude.ai/code/artifact/5fbea6f3-... with today's numbers."</span></pre>
+  <div class="takeaway">
+    <p>每次發布都會成為一個新版本, 你可以在頁面標頭的 Share 控制項中選擇讓檢視者看到哪個版本。沒有附上網址時, 新的工作階段一律會建立新的 artifact, 而不是更新既有的。</p>
+  </div>
+</section>
+
+<section>
+  <h2>分享 Artifact</h2>
+  <p>新的 artifact 預設只有你能看到。用瀏覽器打開它, 並使用頁面標頭的 Share 控制項, 授權給組織內特定成員或所有人。</p>
+  <div class="api-fields">
+    <div class="field"><span class="name">分享範圍</span><div class="desc">僅止於你的組織, 沒有對外公開的選項</div></div>
+    <div class="field"><span class="name">檢視者要求</span><div class="desc">必須以同組織成員身分登入 claude.ai</div></div>
+    <div class="field"><span class="name">共編權限</span><div class="desc">僅可檢視, 不可共同編輯, 你是唯一的寫入者</div></div>
+    <div class="field"><span class="name">組織外分享</span><div class="desc">需向 Claude 索取 HTML 檔案並直接分享該檔案</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>可以建立什麼</h2>
+  <p>Artifact 是單一 HTML 頁面, 只要能用 HTML, CSS 與內嵌 JavaScript 表達的內容都在範圍內。點選下方標籤查看常見用法與範例提示。</p>
+  <div class="chip-row">
+    <span class="chip-label">用途</span>
+    <div class="chip active" data-idx="0" onclick="artSelect(0)">走查變更</div>
+    <div class="chip" data-idx="1" onclick="artSelect(1)">比較方案</div>
+    <div class="chip" data-idx="2" onclick="artSelect(2)">互動調整</div>
+    <div class="chip" data-idx="3" onclick="artSelect(3)">帶回工作階段</div>
+    <div class="chip" data-idx="4" onclick="artSelect(4)">追蹤進度</div>
+  </div>
+  <div id="artPanels">
+    <div class="art-panel col-card" data-idx="0">
+      <div class="col-card-title">走查一項變更</div>
+      <p>請求一個頁面, 在相關程式碼旁渲染 diff 或設計變更並附上註解, 讓審查者可以直接在程式碼旁閱讀你的推理過程。</p>
+      <pre class="code-block"><span class="str">"Make an artifact that walks through this PR. Render the diff with margin annotations and color-code findings by severity."</span></pre>
+    </div>
+    <div class="art-panel col-card" data-idx="1" style="display:none">
+      <div class="col-card-title">比較方案</div>
+      <p>把數個變體放在同一頁面上以便互相評估, 適用於版面配置, 文案, API 形狀或實作計畫。</p>
+      <pre class="code-block"><span class="str">"Make an artifact with four distinctly different layouts for the settings panel. Vary density and grouping, and lay them out as a grid with a one-line tradeoff under each."</span></pre>
+    </div>
+    <div class="art-panel col-card" data-idx="2" style="display:none">
+      <div class="col-card-title">用互動控制項微調</div>
+      <p>請求滑桿, 開關或輸入欄位綁定你想調整的值, 讓你直接嘗試數值而不是用文字描述。</p>
+      <pre class="code-block"><span class="str">"Build an artifact with sliders for the easing curve, duration, and delay so I can try values on this transition. Show the animation live as I move them."</span></pre>
+    </div>
+    <div class="art-panel col-card" data-idx="3" style="display:none">
+      <div class="col-card-title">把結果帶回工作階段</div>
+      <p>Artifact 可以作為決策的輕量編輯器, 之後再交還給 Claude。請求一個匯出控制項, 產生可貼回終端機的文字。</p>
+      <pre class="code-block"><span class="str">"Make a triage board artifact with each open issue as a draggable card across Now, Next, Later, and Cut columns. Add a 'Copy as prompt' button that gives me the final ordering to paste back here."</span></pre>
+    </div>
+    <div class="art-panel col-card" data-idx="4" style="display:none">
+      <div class="col-card-title">追蹤進行中的工作</div>
+      <p>請 Claude 在長任務執行期間持續更新 artifact, 讓任何有連結的人不必閱讀終端機也能追蹤進度。</p>
+      <pre class="code-block"><span class="str">"Turn this migration plan into a checklist artifact. Check items off as you complete them and add a note for anything you skip."</span></pre>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>改善視覺設計</h2>
+  <p>Claude 建立 artifact 時會套用內建的設計技能, 讓頁面在沒有額外提示的情況下也具備明確的配色, 字型與版面。它也會優先尋找專案內既有的設計系統。</p>
+  <pre class="code-block"><span class="cmt"># CLAUDE.md 中的設計系統範例</span>
+<span class="kw">## Design system</span>
+
+<span class="key">- Colors:</span> <span class="str">primary #1a4d8f, accent #f59e0b, surface #f8fafc</span>
+<span class="key">- Typography:</span> <span class="str">Inter for body, JetBrains Mono for code</span>
+<span class="key">- Spacing:</span> <span class="str">8px scale, 6px border radius</span></pre>
+  <div class="info-box">
+    <span class="tag">優先順序</span>
+    <p>Claude 會把你的設計系統看得比它自己的選擇更重要, 而你的提示又比兩者都優先。</p>
+  </div>
+</section>
+
+<section>
+  <h2>頁面限制</h2>
+  <p>每個 artifact 都是一個自包含頁面。Claude Code 會把你發布的檔案包進 HTML 文件外殼, 並以嚴格的內容安全政策 (CSP) 提供服務, 這決定了頁面能做什麼。</p>
+  <div class="response-box">
+    <div class="response-field"><span class="rf-key">無外部請求</span><span class="rf-val">CSP 封鎖來自其他主機的 script, stylesheet, font, image, 以及 fetch, XHR, WebSocket。CSS 與 JS 需全部內嵌, 圖片以 data URI 嵌入</span></div>
+    <div class="response-field"><span class="rf-key">無後端</span><span class="rf-val">Artifact 是靜態頁面, 無法儲存表單提交的資料, 也無法在檢視當下驗證身分或呼叫 API</span></div>
+    <div class="response-field"><span class="rf-key">單一頁面</span><span class="rf-val">相對連結無法解析, 因為沒有其他頁面與它一起部署, 多段落內容需用頁內錨點</span></div>
+    <div class="response-field"><span class="rf-key">來源檔案類型</span><span class="rf-val">發布的檔案必須是 .html, .htm 或 .md, Markdown 檔會渲染成有樣式的 HTML</span></div>
+    <div class="response-field"><span class="rf-key">渲染後大小</span><span class="rf-val">渲染後的頁面必須小於等於 16 MiB, 內嵌的大型圖片是發布失敗最常見的原因</span></div>
+  </div>
+  <div class="info-box">
+    <span class="tag">降低 Token 成本</span>
+    <p>圖表優先使用 SVG 或 HTML/CSS 而非嵌入的點陣圖, 省略不需要的互動性, 並讓頁面摘要大型資料集而非完整內嵌。</p>
+  </div>
+</section>
+
+<section>
+  <h2>可用性</h2>
+  <p>Artifacts 需要以下每一項條件都成立, 其中任一項未滿足時, Claude 會改寫一份本機 HTML 檔案, 或直接說明無法發布。</p>
+  <div class="api-fields">
+    <div class="field"><span class="name">方案</span><div class="desc">Team 或 Enterprise。Team 預設開啟, Enterprise 需 Owner 在後台啟用</div></div>
+    <div class="field"><span class="name">身分驗證</span><div class="desc">以 /login 登入 claude.ai, API key 或閘道權杖無法發布</div></div>
+    <div class="field"><span class="name">模型供應商</span><div class="desc">僅限 Anthropic API, 不支援 Bedrock, Vertex AI 或 Microsoft Foundry</div></div>
+    <div class="field"><span class="name">組織政策</span><div class="desc">組織未啟用 CMEK, HIPAA 或 Zero Data Retention</div></div>
+    <div class="field"><span class="name">使用介面</span><div class="desc">Claude Code CLI 或 Desktop 1.13576.0 以上, Agent SDK 等情境預設關閉</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>停用 Artifacts</h2>
+  <p>不論組織設定為何, 都可以用以下任一方式停用自己工作階段中的 artifacts。</p>
+  <div class="api-fields">
+    <div class="field"><span class="name">設定檔</span><div class="desc">"disableArtifact": true</div></div>
+    <div class="field"><span class="name">環境變數</span><div class="desc">CLAUDE_CODE_DISABLE_ARTIFACT=1</div></div>
+    <div class="field"><span class="name">權限規則</span><div class="desc">在 permissions.deny 中加入 Artifact</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>為組織管理 Artifacts</h2>
+  <p>Team 與 Enterprise 方案的 Owner 可以透過 claude.ai 後台管理設定來控制 artifacts。內容儲存在 Anthropic 維運的基礎設施上, 僅發布組織的成員可見。</p>
+  <div class="stage-tabs">
+    <div class="mg-tab stage-tab active" onclick="mgGoTo(0)">1 · 啟用停用</div>
+    <div class="mg-tab stage-tab" onclick="mgGoTo(1)">2 · 保留政策</div>
+    <div class="mg-tab stage-tab" onclick="mgGoTo(2)">3 · 稽核紀錄</div>
+    <div class="mg-tab stage-tab" onclick="mgGoTo(3)">4 · 網域允許清單</div>
+    <div class="mg-tab stage-tab" onclick="mgGoTo(4)">5 · Compliance API</div>
+  </div>
+  <div class="mg-panel demo-panel visible" id="mg-p0">
+    <p>前往 Settings &gt; Claude Code &gt; Capabilities, 使用 Artifacts 開關。Enterprise 方案若啟用角色權限控制, 還能到 Settings &gt; Roles 針對特定角色設定 Artifacts 權限。</p>
+  </div>
+  <div class="mg-panel demo-panel" id="mg-p1">
+    <p>前往 Settings &gt; Data &amp; privacy controls, 可分別設定尚未分享的私有 artifact 與已分享的 artifact 的保留期限。</p>
+  </div>
+  <div class="mg-panel demo-panel" id="mg-p2">
+    <p>發布, 分享與刪除 artifact 的動作都會出現在組織的稽核紀錄中, 事件類型為 claude_artifact_*, 與 claude.ai 對話中建立的 artifact 共用同一系列。</p>
+  </div>
+  <div class="mg-panel demo-panel" id="mg-p3">
+    <p>claude.ai 上的檢視器會從沙盒化的 *.claudeusercontent.com 來源載入每個 artifact。若組織限制對外網路存取, 需把此網域與 claude.ai 一併加入允許清單。</p>
+  </div>
+  <div class="mg-panel demo-panel" id="mg-p4">
+    <div class="response-box">
+      <div class="response-field"><span class="rf-key">GET</span><span class="rf-val">/v1/compliance/code/artifacts</span></div>
+      <div class="response-field"><span class="rf-key">GET</span><span class="rf-val">/v1/compliance/code/artifacts/{artifact_id}/versions/{version_id}</span></div>
+      <div class="response-field"><span class="rf-key">DELETE</span><span class="rf-val">/v1/compliance/code/artifacts/{artifact_id}</span></div>
+    </div>
+  </div>
+  <div>
+    <button class="btn btn-ghost" id="mgPrev" disabled onclick="mgGoTo(mgStep-1)">← 上一步</button>
+    <button class="btn btn-primary" id="mgNext" onclick="mgGoTo(mgStep+1)">下一步 →</button>
+    <span class="step-indicator" id="mgIndicator">Step 1 of 5</span>
+  </div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+function artSelect(idx) {
+  document.querySelectorAll('.chip').forEach((c,i) => c.classList.toggle('active', i === idx));
+  document.querySelectorAll('.art-panel').forEach(p => {
+    p.style.display = (parseInt(p.dataset.idx) === idx) ? 'block' : 'none';
+  });
+}
+
+let mgStep = 0;
+const MG_MAX = 4;
+function mgGoTo(n) {
+  mgStep = Math.max(0, Math.min(MG_MAX, n));
+  document.querySelectorAll('.mg-panel').forEach((el, i) =>
+    el.classList.toggle('visible', i === mgStep));
+  document.querySelectorAll('.mg-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === mgStep)     t.classList.add('active');
+    else if (i < mgStep)  t.classList.add('done');
+  });
+  document.getElementById('mgPrev').disabled = mgStep === 0;
+  const next = document.getElementById('mgNext');
+  next.disabled    = mgStep === MG_MAX;
+  next.textContent = mgStep === MG_MAX ? '完成 ✓' : '下一步 →';
+  document.getElementById('mgIndicator').textContent =
+    `Step ${mgStep + 1} of ${MG_MAX + 1}`;
+}
+mgGoTo(0);
+</script>
+</body>
+</html>

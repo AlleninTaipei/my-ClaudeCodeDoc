@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>安裝與登入疑難排解 互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%); border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; } header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; } section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; } p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c; overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; } .cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; } .takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; } .field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.8rem; color: #16a34a; min-width: 220px; flex-shrink: 0; } .event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; } .response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.8rem; color: #d97706; width: 220px; flex-shrink: 0; } .rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; } .btn-primary:hover:not(:disabled) { background: #1d4ed8; } .btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; } .btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; } .btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; } .stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; } .demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; } .col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; } .chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; } body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; } body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; } body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; } body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; } body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; } body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; } body.dark .response-field { border-bottom-color: #2d3748; } body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; } body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; } body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; } body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; } body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; } body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; } body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; } body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); } body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+<header>
+  <h1>安裝與登入疑難排解</h1>
+  <p>修正安裝或登入 Claude Code 時的 command not found, PATH, 權限, 網路與驗證錯誤</p>
+</header>
+<main>
+
+<section>
+  <h2>快速找到你的錯誤</h2>
+  <p>用篩選晶片快速找到症狀對應的解法分類。</p>
+  <div class="chip-row">
+    <span class="chip-label">依症狀分類:</span>
+    <span class="chip er-chip active" onclick="erShow(0)">PATH / 找不到指令</span>
+    <span class="chip er-chip" onclick="erShow(1)">下載 / 網路</span>
+    <span class="chip er-chip" onclick="erShow(2)">Windows 專屬</span>
+    <span class="chip er-chip" onclick="erShow(3)">二進位檔不相容</span>
+  </div>
+  <div class="er-panel" id="er-0">
+    <div class="response-box">
+      <div class="response-field"><span class="rf-key">command not found: claude</span><span class="rf-val">安裝目錄不在 PATH 中, 需加入 ~/.local/bin</span></div>
+      <div class="response-field"><span class="rf-key">PowerShell 找不到 claude</span><span class="rf-val">加入 %USERPROFILE%\.local\bin 到 User PATH 後重開終端機</span></div>
+    </div>
+  </div>
+  <div class="er-panel" id="er-1" style="display:none">
+    <div class="response-box">
+      <div class="response-field"><span class="rf-key">syntax error near '&lt;'</span><span class="rf-val">安裝腳本回傳 HTML, 可能是地區限制或暫時性服務中斷</span></div>
+      <div class="response-field"><span class="rf-key">curl: (56) Failure writing output</span><span class="rf-val">下載中斷, 檢查連線穩定性或改用替代安裝方式</span></div>
+      <div class="response-field"><span class="rf-key">TLS connect error</span><span class="rf-val">更新系統 CA 憑證, 或設定 --cacert 指向公司憑證</span></div>
+    </div>
+  </div>
+  <div class="er-panel" id="er-2" style="display:none">
+    <div class="response-box">
+      <div class="response-field"><span class="rf-key">irm is not recognized</span><span class="rf-val">你在 CMD 而非 PowerShell, 開啟 PowerShell 執行原指令</span></div>
+      <div class="response-field"><span class="rf-key">The process cannot access the file</span><span class="rf-val">刪除 %USERPROFILE%\.claude\downloads 後重新安裝</span></div>
+      <div class="response-field"><span class="rf-key">不支援 32-bit Windows</span><span class="rf-val">確認開啟的是 Windows PowerShell 而非 x86 版本</span></div>
+    </div>
+  </div>
+  <div class="er-panel" id="er-3" style="display:none">
+    <div class="response-box">
+      <div class="response-field"><span class="rf-key">Illegal instruction</span><span class="rf-val">CPU 缺少 AVX 指令集支援, 常見於 2013 年前的處理器或未透傳 AVX 的虛擬機</span></div>
+      <div class="response-field"><span class="rf-key">dyld: cannot load (macOS)</span><span class="rf-val">macOS 版本過舊, 需要 13.0 以上</span></div>
+      <div class="response-field"><span class="rf-key">Exec format error (WSL1)</span><span class="rf-val">已知 WSL1 迴歸問題, 轉換到 WSL2 或透過動態連結器呼叫</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>診斷檢查流程</h2>
+  <div class="stage-tabs">
+    <div name="dg" class="dg-tab stage-tab active" onclick="dgGoTo(0)">1 · 網路連線</div>
+    <div class="dg-tab stage-tab" onclick="dgGoTo(1)">2 · PATH</div>
+    <div class="dg-tab stage-tab" onclick="dgGoTo(2)">3 · 衝突安裝</div>
+    <div class="dg-tab stage-tab" onclick="dgGoTo(3)">4 · 目錄權限</div>
+    <div class="dg-tab stage-tab" onclick="dgGoTo(4)">5 · 執行檔驗證</div>
+  </div>
+  <div class="dg-panel demo-panel visible" id="dg-p0"><pre class="code-block">curl -sI https://downloads.claude.ai/claude-code-releases/latest</pre><p>看到 HTTP/2 200 代表已連上伺服器; 若逾時或無回應, 網路正在阻擋連線, 檢查防火牆或代理設定。</p></div>
+  <div class="dg-panel demo-panel" id="dg-p1"><pre class="code-block">echo $PATH | tr ':' '\n' | grep -Fx "$HOME/.local/bin"</pre><p>沒有輸出代表安裝目錄不在 PATH, 需加入 shell 設定檔並重新載入。</p></div>
+  <div class="dg-panel demo-panel" id="dg-p2"><pre class="code-block">which -a claude</pre><p>檢查是否有多個安裝來源: 原生安裝, 舊版 npm local install, 或 npm 全域安裝, 只保留原生安裝。</p></div>
+  <div class="dg-panel demo-panel" id="dg-p3"><pre class="code-block">test -w ~/.local/bin && echo "writable" || echo "not writable"</pre><p>若目錄不可寫入, 建立目錄並設定使用者為擁有者。</p></div>
+  <div class="dg-panel demo-panel" id="dg-p4"><pre class="code-block">ldd "$(command -v claude)" | grep "not found"</pre><p>Linux 上檢查是否缺少共享函式庫, Alpine 等 musl 系統需要另外安裝套件。</p></div>
+  <div>
+    <button class="btn btn-ghost" id="dgPrev" disabled onclick="dgGoTo(dgStep-1)">← 上一步</button>
+    <button class="btn btn-primary" id="dgNext" onclick="dgGoTo(dgStep+1)">下一步 →</button>
+    <span class="step-indicator" id="dgIndicator">步驟 1 / 5</span>
+  </div>
+</section>
+
+<section>
+  <h2>常見安裝問題</h2>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">Homebrew cask 找不到</span><span class="event-desc">執行 brew update 刷新索引後重新安裝</span></div>
+    <div class="event-item"><span class="event-name">低記憶體 Linux 伺服器 Killed</span><span class="event-desc">OOM killer 終止程序, 需增加 2GB swap 空間再重試</span></div>
+    <div class="event-item"><span class="event-name">Docker 中安裝掛起</span><span class="event-desc">以 root 從 / 執行安裝會掃描整個檔案系統, 設定 WORKDIR 限制範圍</span></div>
+    <div class="event-item"><span class="event-name">Claude Desktop 覆蓋 claude 指令</span><span class="event-desc">舊版 Desktop 註冊的 Claude.exe 佔用 PATH 優先權, 更新 Desktop 即可</span></div>
+    <div class="event-item"><span class="event-name">Linux musl/glibc 二進位不符</span><span class="event-desc">安裝器誤判系統類型, 檢查 ldd --version 後手動下載對應版本</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>登入與驗證問題</h2>
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">重設登入</div>
+      <p>執行 /logout 完全登出</p>
+      <p>關閉 Claude Code</p>
+      <p>重新啟動 claude 並完成驗證流程</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">403 Forbidden</div>
+      <p>Pro/Max 使用者確認訂閱有效</p>
+      <p>Console 使用者確認帳號有 Claude Code 角色</p>
+      <p>企業代理環境檢查網路設定</p>
+    </div>
+  </div>
+  <div class="info-box"><span class="tag">常見陷阱</span><p>看到 "This organization has been disabled" 時, 通常是舊的 ANTHROPIC_API_KEY 環境變數蓋過了訂閱憑證, unset 該變數即可改用訂閱登入。</p></div>
+  <div class="takeaway"><p>WSL2, SSH, 容器中登入時瀏覽器可能開在錯誤主機上, 這時直接把顯示的登入碼貼進終端機提示即可完成驗證。</p></div>
+</section>
+
+<section>
+  <h2>仍然卡關怎麼辦</h2>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">1. 查 GitHub Issues</span><span class="event-desc">或附上作業系統, 安裝指令與完整錯誤輸出開新 issue</span></div>
+    <div class="event-item"><span class="event-name">2. claude doctor</span><span class="event-desc">若 claude --version 正常但其他功能異常, 執行自動診斷報告</span></div>
+    <div class="event-item"><span class="event-name">3. /feedback</span><span class="event-desc">若能啟動 session, 在 Claude Code 內回報問題</span></div>
+  </div>
+</section>
+
+</main>
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+function erShow(n) {
+  document.querySelectorAll('.er-chip').forEach((c,i)=>c.classList.toggle('active', i===n));
+  document.querySelectorAll('.er-panel').forEach((p,i)=>p.style.display = i===n ? 'block' : 'none');
+}
+let dgStep = 0; const DG_MAX = 4;
+function dgGoTo(n) {
+  dgStep = Math.max(0, Math.min(DG_MAX, n));
+  document.querySelectorAll('.dg-panel').forEach((el,i)=>el.classList.toggle('visible', i===dgStep));
+  document.querySelectorAll('.dg-tab').forEach((t,i)=>{ t.classList.remove('active','done'); if (i===dgStep) t.classList.add('active'); else if (i<dgStep) t.classList.add('done'); });
+  document.getElementById('dgPrev').disabled = dgStep===0;
+  const next = document.getElementById('dgNext'); next.disabled = dgStep===DG_MAX; next.textContent = dgStep===DG_MAX ? '完成 ✓' : '下一步 →';
+  document.getElementById('dgIndicator').textContent = `步驟 ${dgStep+1} / ${DG_MAX+1}`;
+}
+dgGoTo(0);
+</script>
+</body>
+</html>

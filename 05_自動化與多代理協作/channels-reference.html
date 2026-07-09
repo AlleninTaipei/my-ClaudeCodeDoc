@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Channels Reference 建置自訂頻道互動課程</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700;
+  padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80;
+  border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px;
+  display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a; min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 150px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+  border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+  color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+  border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px;
+  font-size: 0.78rem; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; }
+body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Channels Reference</h1>
+  <p>建置一個能把 webhook, 警報, 聊天訊息推入 Claude Code session 的 MCP server, 這是頻道協定的完整參考。</p>
+</header>
+
+<main>
+
+<section id="overview">
+  <h2>概觀</h2>
+  <p>頻道是一個和 Claude Code 在同一台機器上執行的 MCP server, 以子行程方式透過 stdio 溝通。聊天平台輪詢 API 取得新訊息, webhook 則在本機開一個 HTTP port 供外部系統 POST。</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">Chat platforms</div><div class="desc">外掛在本機執行, 輪詢平台 API, 收到訊息後轉發給 Claude</div></div>
+    <div class="field"><div class="name">Webhooks</div><div class="desc">server 監聽本機 HTTP port, 外部系統 POST 後推送給 Claude</div></div>
+  </div>
+</section>
+
+<section id="what-you-need">
+  <h2>需要準備什麼</h2>
+  <p>唯一硬性需求是 @modelcontextprotocol/sdk 套件與相容 Node.js 的執行環境, Bun, Node, Deno 皆可。</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">1</span><span class="event-desc">宣告 claude/channel 能力, 讓 Claude Code 註冊通知監聽器</span></div>
+    <div class="event-item"><span class="event-name">2</span><span class="event-desc">發出 notifications/claude/channel 事件</span></div>
+    <div class="event-item"><span class="event-name">3</span><span class="event-desc">透過 stdio transport 連線, Claude Code 會以子行程方式啟動你的 server</span></div>
+  </div>
+</section>
+
+<section id="build-webhook">
+  <h2>範例: 建置 Webhook 接收器</h2>
+  <p>這個範例用 Bun 建立一個單檔 server, 監聽 HTTP 請求並轉發進 Claude Code session。</p>
+
+  <div class="stage-tabs">
+    <div class="wh-tab stage-tab active" onclick="whGoTo(0)">1 · 建立專案</div>
+    <div class="wh-tab stage-tab" onclick="whGoTo(1)">2 · 撰寫 Server</div>
+    <div class="wh-tab stage-tab" onclick="whGoTo(2)">3 · 註冊到 MCP 設定</div>
+    <div class="wh-tab stage-tab" onclick="whGoTo(3)">4 · 測試</div>
+  </div>
+
+  <div class="wh-panel demo-panel visible" id="wh-p0">
+    <pre class="code-block"><span class="fn">mkdir</span> webhook-channel <span class="kw">&&</span> <span class="fn">cd</span> webhook-channel
+bun add @modelcontextprotocol/sdk</pre>
+  </div>
+  <div class="wh-panel demo-panel" id="wh-p1">
+    <pre class="code-block"><span class="kw">import</span> { Server } <span class="kw">from</span> <span class="str">'@modelcontextprotocol/sdk/server/index.js'</span>
+<span class="kw">import</span> { StdioServerTransport } <span class="kw">from</span> <span class="str">'@modelcontextprotocol/sdk/server/stdio.js'</span>
+
+<span class="cmt">// 建立 MCP server 並宣告為頻道</span>
+<span class="kw">const</span> <span class="key">mcp</span> = <span class="kw">new</span> <span class="fn">Server</span>(
+  { name: <span class="str">'webhook'</span>, version: <span class="str">'0.0.1'</span> },
+  {
+    capabilities: { experimental: { <span class="str">'claude/channel'</span>: {} } },
+    instructions: <span class="str">'Events arrive as &lt;channel source="webhook" ...&gt;'</span>,
+  },
+)
+
+<span class="kw">await</span> mcp.<span class="fn">connect</span>(<span class="kw">new</span> <span class="fn">StdioServerTransport</span>())
+
+Bun.<span class="fn">serve</span>({
+  port: <span class="str">8788</span>,
+  hostname: <span class="str">'127.0.0.1'</span>,
+  <span class="kw">async</span> <span class="fn">fetch</span>(req) {
+    <span class="kw">const</span> <span class="key">body</span> = <span class="kw">await</span> req.<span class="fn">text</span>()
+    <span class="kw">await</span> mcp.<span class="fn">notification</span>({
+      method: <span class="str">'notifications/claude/channel'</span>,
+      params: { content: body, meta: { path: <span class="kw">new</span> <span class="fn">URL</span>(req.url).pathname } },
+    })
+    <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'ok'</span>)
+  },
+})</pre>
+  </div>
+  <div class="wh-panel demo-panel" id="wh-p2">
+    <pre class="code-block"><span class="cmt">// .mcp.json</span>
+{
+  <span class="str">"mcpServers"</span>: {
+    <span class="str">"webhook"</span>: { <span class="str">"command"</span>: <span class="str">"bun"</span>, <span class="str">"args"</span>: [<span class="str">"./webhook.ts"</span>] }
+  }
+}</pre>
+  </div>
+  <div class="wh-panel demo-panel" id="wh-p3">
+    <pre class="code-block"><span class="fn">claude</span> --dangerously-load-development-channels server:webhook
+
+<span class="cmt"># 另一個終端機模擬 webhook</span>
+curl -X POST localhost:8788 -d <span class="str">"build failed on main"</span></pre>
+    <p>負載會以 <code>&lt;channel source="webhook" path="/" method="POST"&gt;</code> 標籤抵達 session。</p>
+  </div>
+
+  <div>
+    <button class="btn btn-ghost" id="whPrev" disabled onclick="whGoTo(whStep-1)">← 上一步</button>
+    <button class="btn btn-primary" id="whNext" onclick="whGoTo(whStep+1)">下一步 →</button>
+    <span class="step-indicator" id="whIndicator">Step 1 of 4</span>
+  </div>
+</section>
+
+<section id="server-options">
+  <h2>Server 選項</h2>
+  <div class="api-fields">
+    <div class="field"><div class="name">experimental['claude/channel']</div><div class="desc">必填, 永遠是 {}, 存在即註冊通知監聽器</div></div>
+    <div class="field"><div class="name">experimental['claude/channel/permission']</div><div class="desc">選填, 宣告此頻道可接收權限轉發請求</div></div>
+    <div class="field"><div class="name">capabilities.tools</div><div class="desc">僅雙向頻道需要, 標準 MCP 工具能力</div></div>
+    <div class="field"><div class="name">instructions</div><div class="desc">加入 Claude 系統提示, 告訴它如何處理事件與回覆</div></div>
+  </div>
+</section>
+
+<section id="notification-format">
+  <h2>通知格式</h2>
+  <p>server 呼叫 mcp.notification() 送出 notifications/claude/channel, 帶兩個參數:</p>
+  <div class="response-box">
+    <div class="response-field"><div class="rf-key">content</div><div class="rf-val">string, 事件本文, 會成為 &lt;channel&gt; 標籤的內容</div></div>
+    <div class="response-field"><div class="rf-key">meta</div><div class="rf-val">Record&lt;string,string&gt;, 每一項成為標籤屬性, 鍵只能是字母數字底線</div></div>
+  </div>
+  <div class="info-box"><span class="tag">注意</span><p>通知不會被確認, await 只代表寫入 transport, 不代表 Claude 已處理完畢。</p></div>
+</section>
+
+<section id="reply-tool">
+  <h2>公開回覆工具</h2>
+  <p>雙向頻道需要公開一個標準 MCP 工具讓 Claude 回訊息, 三個組成部分: capabilities 加入 tools: {}, 註冊工具處理器, 在 instructions 說明何時呼叫。</p>
+  <pre class="code-block"><span class="key">mcp</span>.<span class="fn">setRequestHandler</span>(ListToolsRequestSchema, <span class="kw">async</span> () => ({
+  tools: [{
+    name: <span class="str">'reply'</span>,
+    inputSchema: { type: <span class="str">'object'</span>, properties: {
+      chat_id: { type: <span class="str">'string'</span> }, text: { type: <span class="str">'string'</span> } },
+      required: [<span class="str">'chat_id'</span>, <span class="str">'text'</span>] },
+  }],
+}))</pre>
+</section>
+
+<section id="gate-inbound">
+  <h2>過濾接收訊息</h2>
+  <p>未經過濾的頻道就是提示注入的攻擊面, 任何能觸及你 endpoint 的人都能把文字塞進 Claude 面前。</p>
+  <div class="info-box"><span class="tag">安全規則</span><p>要用寄件人身分 (message.from.id) 過濾, 不是聊天室身分 (message.chat.id), 否則群組中任何人都能注入訊息。</p></div>
+  <div class="takeaway"><p>Telegram 與 Discord 用配對流程建立白名單, iMessage 則自動放行自己的位址, 其他聯絡人以 handle 加入。</p></div>
+</section>
+
+<section id="relay-permission">
+  <h2>轉發權限提示</h2>
+  <p>雙向頻道可選擇同時接收權限提示並轉發到另一台裝置, 本機與遠端都保持有效, 先回應的一方生效。</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">1</span><span class="event-desc">Claude Code 產生五字元請求 ID 並通知 server</span></div>
+    <div class="event-item"><span class="event-name">2</span><span class="event-desc">server 把提示與 ID 轉發到聊天 App</span></div>
+    <div class="event-item"><span class="event-name">3</span><span class="event-desc">遠端使用者以 yes/no 加 ID 回覆</span></div>
+    <div class="event-item"><span class="event-name">4</span><span class="event-desc">inbound handler 解析回覆為裁決, ID 相符才會套用</span></div>
+  </div>
+  <div class="response-box">
+    <div class="response-field"><div class="rf-key">request_id</div><div class="rf-val">五個小寫字母, 不含 l, 避免在手機上誤讀為 1 或 I</div></div>
+    <div class="response-field"><div class="rf-key">tool_name</div><div class="rf-val">Claude 想使用的工具名稱, 例如 Bash 或 Write</div></div>
+    <div class="response-field"><div class="rf-key">description</div><div class="rf-val">這次呼叫的人類可讀摘要</div></div>
+    <div class="response-field"><div class="rf-key">input_preview</div><div class="rf-val">工具參數的 JSON 字串, 截斷至 200 字元</div></div>
+  </div>
+</section>
+
+<section id="package-plugin">
+  <h2>打包成外掛</h2>
+  <p>要讓頻道可安裝且可分享, 把它包成外掛並發布到市集, 使用者用 /plugin install 安裝, 再以 --channels plugin:&lt;name&gt;@&lt;marketplace&gt; 啟用。</p>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+let whStep = 0;
+const WH_MAX = 3;
+function whGoTo(n) {
+  whStep = Math.max(0, Math.min(WH_MAX, n));
+  document.querySelectorAll('.wh-panel').forEach((el, i) => el.classList.toggle('visible', i === whStep));
+  document.querySelectorAll('.wh-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === whStep) t.classList.add('active');
+    else if (i < whStep) t.classList.add('done');
+  });
+  document.getElementById('whPrev').disabled = whStep === 0;
+  const next = document.getElementById('whNext');
+  next.disabled = whStep === WH_MAX;
+  next.textContent = whStep === WH_MAX ? 'Done ✓' : '下一步 →';
+  document.getElementById('whIndicator').textContent = `Step ${whStep + 1} of ${WH_MAX + 1}`;
+}
+whGoTo(0);
+</script>
+</body>
+</html>

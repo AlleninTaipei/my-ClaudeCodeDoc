@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>探索 .claude 目錄</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 640px; margin-inline: auto; }
+main    { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+code { font-family: monospace; font-size: 0.9em; background: #e2e8f0; padding: 1px 5px; border-radius: 4px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px;
+  font-family: monospace; font-size: 0.82rem; color: #1a202c; overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw { color: #7c3aed; } .fn { color: #16a34a; } .str { color: #d97706; } .cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700;
+  padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0 0 8px; }
+.info-box ul { margin: 0 0 8px 18px; color: #1e3a5f; font-size: 0.88rem; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .scope { display: inline-block; font-size: 0.62rem; color: #92400e; background: #fef3c7; border: 1px solid #fcd34d; border-radius: 4px; padding: 1px 6px; margin-left: 6px; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a; min-width: 190px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 190px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #cbd5e0; color: #9ca3af; cursor: default; }
+.btn-ghost { background: #fff; color: #4a5568; border: 1px solid #cbd5e0; }
+.btn-ghost:hover:not(:disabled) { color: #1a202c; border-color: #6b7280; }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-left: auto; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+  border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+  border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } .event-name { min-width: 130px; } .rf-key { width: 130px; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px;
+  font-size: 0.78rem; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; }
+body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark code { background: #1a202c; color: #e2e8f0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw { color: #9f7aea; } body.dark .fn { color: #68d391; } body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p, body.dark .info-box ul { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; }
+body.dark .field .scope { background: #3a2a10; color: #f6ad55; border-color: #7a5a20; }
+body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; }
+body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; }
+body.dark .rf-val { color: #a0aec0; }
+body.dark .btn-primary { background: #2b6cb0; }
+body.dark .btn-primary:hover:not(:disabled) { background: #3182ce; }
+body.dark .btn-primary:disabled { background: #2d3748; color: #4a5568; }
+body.dark .btn-ghost { background: transparent; color: #718096; border-color: #2d3748; }
+body.dark .btn-ghost:hover:not(:disabled) { color: #e2e8f0; border-color: #4a5568; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; }
+body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>探索 .claude 目錄</h1>
+  <p>Claude Code 從專案目錄與家目錄下的 .claude 讀取指令, 設定, hooks, skills, commands, subagents, workflows, rules 以及自動記憶。這份課程帶你逐一認識這些檔案的用途, 何時載入, 以及範例寫法。</p>
+</header>
+
+<main>
+
+<section>
+<h2>基本觀念</h2>
+<p>Claude Code 會從兩個位置讀取設定: 專案目錄 (通常是 repo 根目錄或 <code>.claude/</code>) 以及家目錄的 <code>~/.claude</code>。把專案檔案 commit 進 git 可以與團隊共享, 而 <code>~/.claude</code> 內的檔案屬於你個人, 會套用到所有專案。</p>
+<div class="info-box">
+<span class="tag">平台差異</span>
+<p>在 Windows 上, <code>~/.claude</code> 會對應到 <code>%USERPROFILE%\.claude</code>。若你設定了 <code>CLAUDE_CONFIG_DIR</code> 環境變數, 本頁提到的所有 <code>~/.claude</code> 路徑都會改到該目錄之下。</p>
+</div>
+<div class="takeaway">
+<p>多數使用者只需要編輯 <code>CLAUDE.md</code> 與 <code>settings.json</code>。目錄裡其餘的檔案都是選用的, 需要時再加入 skills, rules 或 subagents 即可。</p>
+</div>
+</section>
+
+<section>
+<h2>探索目錄結構</h2>
+<p>點選下方的分類, 再挑選檔案, 就能看到每個檔案的用途, 何時載入, 以及範例內容。</p>
+
+<div class="chip-row">
+  <span class="chip-label">選擇範圍:</span>
+  <button class="chip active" id="chip-project" onclick="cdSwitchRoot('project')">Project (專案)</button>
+  <button class="chip" id="chip-global" onclick="cdSwitchRoot('global')">Global (~/)</button>
+</div>
+
+<div class="event-list" id="cdFileList"></div>
+
+<div class="response-box" id="cdDetail" style="margin-top:20px;"></div>
+</section>
+
+<section>
+<h2>目錄之外還有哪些檔案</h2>
+<p>上面的探索器只涵蓋你會自己撰寫與編輯的檔案。還有幾個相關檔案位於別處:</p>
+<div class="api-fields">
+<div class="field"><div class="name">managed-settings.json<span class="scope">系統層級</span></div><div class="desc">位置依作業系統而異。企業強制套用的設定, 使用者無法覆寫, 詳見 server-managed settings。</div></div>
+<div class="field"><div class="name">CLAUDE.local.md<span class="scope">專案根目錄</span></div><div class="desc">你個人在此專案的私人偏好設定, 與 CLAUDE.md 一起載入。需要自行建立並加入 .gitignore。</div></div>
+<div class="field"><div class="name">已安裝的 plugins<span class="scope">~/.claude/plugins</span></div><div class="desc">已 clone 的 marketplace, 已安裝的 plugin 版本與各 plugin 的資料, 由 claude plugin 指令管理。孤兒版本會在更新或移除後 7 天被刪除。</div></div>
+</div>
+<p style="margin-top:12px;"><code>~/.claude</code> 同時也存放 Claude Code 在工作過程中寫入的資料: 逐字稿, 提示歷史, 檔案快照, 快取與紀錄檔, 詳見下方的「應用程式資料」章節。</p>
+</section>
+
+<section>
+<h2>該編輯哪個檔案</h2>
+<p>不同類型的自訂內容會放在不同的檔案裡。用下表找到你要修改的位置。</p>
+<div class="event-list">
+<div class="event-item"><span class="event-name">給 Claude 專案脈絡與慣例</span><span class="event-desc">編輯 <code>CLAUDE.md</code> (project 或 global)</span></div>
+<div class="event-item"><span class="event-name">允許或封鎖特定工具呼叫</span><span class="event-desc">編輯 <code>settings.json</code> 的 permissions 或 hooks</span></div>
+<div class="event-item"><span class="event-name">在工具呼叫前後執行腳本</span><span class="event-desc">編輯 <code>settings.json</code> 的 hooks</span></div>
+<div class="event-item"><span class="event-name">設定 session 的環境變數</span><span class="event-desc">編輯 <code>settings.json</code> 的 env</span></div>
+<div class="event-item"><span class="event-name">讓個人覆寫設定不進 git</span><span class="event-desc">編輯 <code>settings.local.json</code> (僅限 project)</span></div>
+<div class="event-item"><span class="event-name">新增以 /name 呼叫的提示或能力</span><span class="event-desc">建立 <code>skills/&lt;name&gt;/SKILL.md</code></span></div>
+<div class="event-item"><span class="event-name">定義擁有自己工具的專屬 subagent</span><span class="event-desc">建立 <code>agents/*.md</code></span></div>
+<div class="event-item"><span class="event-name">用腳本協調多個 subagent</span><span class="event-desc">建立 <code>workflows/*.js</code></span></div>
+<div class="event-item"><span class="event-name">透過 MCP 連接外部工具</span><span class="event-desc">編輯 <code>.mcp.json</code> (僅限 project)</span></div>
+<div class="event-item"><span class="event-name">改變 Claude 的回覆格式</span><span class="event-desc">建立 <code>output-styles/*.md</code></span></div>
+</div>
+</section>
+
+<section>
+<h2>疑難排解設定</h2>
+<div class="info-box">
+<span class="tag">提醒</span>
+<p>如果某個設定, hook 或檔案沒有生效, 請參考「Debug your configuration」文件, 裡面有檢查指令與依症狀查找的對照表。</p>
+</div>
+</section>
+
+<section>
+<h2>應用程式資料</h2>
+<p>除了你自己撰寫的設定之外, <code>~/.claude</code> 還存放 Claude Code 在工作過程中寫入的資料。這些檔案都是純文字, 任何經過工具的內容 (檔案內容, 指令輸出, 貼上的文字) 都會被寫進逐字稿。</p>
+
+<div class="stage-tabs">
+  <div class="ad-tab stage-tab active" onclick="adGoTo(0)">1 · 自動清除</div>
+  <div class="ad-tab stage-tab" onclick="adGoTo(1)">2 · 永久保留</div>
+  <div class="ad-tab stage-tab" onclick="adGoTo(2)">3 · 明文儲存</div>
+  <div class="ad-tab stage-tab" onclick="adGoTo(3)">4 · 清除本機資料</div>
+</div>
+
+<div class="ad-panel demo-panel visible" id="ad-p0">
+<p>以下路徑中的檔案, 只要超過 <code>cleanupPeriodDays</code> 設定的天數 (預設 30 天), 會在啟動時自動刪除。</p>
+<div class="response-box">
+<div class="response-field"><div class="rf-key">projects/&lt;project&gt;/&lt;session&gt;.jsonl</div><div class="rf-val">完整對話逐字稿: 每則訊息, 工具呼叫與結果</div></div>
+<div class="response-field"><div class="rf-key">.../subagents/</div><div class="rf-val">Subagent 對話逐字稿, 隨父 session 逐字稿一起過期刪除</div></div>
+<div class="response-field"><div class="rf-key">.../tool-results/</div><div class="rf-val">過大的工具輸出會被獨立存成檔案</div></div>
+<div class="response-field"><div class="rf-key">file-history/&lt;session&gt;/</div><div class="rf-val">Claude 修改檔案前的快照, 用於 checkpoint 還原</div></div>
+<div class="response-field"><div class="rf-key">plans/</div><div class="rf-val">Plan mode 期間寫入的規劃檔案</div></div>
+<div class="response-field"><div class="rf-key">debug/</div><div class="rf-val">每個 session 的除錯紀錄, 只在 --debug 或 /debug 時才寫入</div></div>
+<div class="response-field"><div class="rf-key">paste-cache/, image-cache/</div><div class="rf-val">大型貼上內容與附加圖片的快取</div></div>
+<div class="response-field"><div class="rf-key">shell-snapshots/</div><div class="rf-val">Bash 工具使用的 shell 環境快照, 正常結束時會移除</div></div>
+<div class="response-field"><div class="rf-key">feedback-bundles/</div><div class="rf-val">/feedback 在第三方 provider 上寫入的去識別化逐字稿封包</div></div>
+</div>
+</div>
+
+<div class="ad-panel demo-panel" id="ad-p1">
+<p>下列路徑不受自動清除機制影響, 會一直保留到你自行刪除。</p>
+<div class="response-box">
+<div class="response-field"><div class="rf-key">history.jsonl</div><div class="rf-val">你輸入過的每個提示, 含時間戳與專案路徑, 供上下鍵回顧使用</div></div>
+<div class="response-field"><div class="rf-key">stats-cache.json</div><div class="rf-val">/usage 顯示的累計 token 與費用統計</div></div>
+<div class="response-field"><div class="rf-key">remote-settings.json</div><div class="rf-val">組織的 server-managed settings 快取副本, 每次啟動時刷新</div></div>
+</div>
+</div>
+
+<div class="ad-panel demo-panel" id="ad-p2">
+<div class="info-box">
+<span class="tag">安全提醒</span>
+<p>逐字稿與歷史紀錄並未加密儲存, 只靠作業系統的檔案權限保護。若工具讀取了 .env 檔案或指令印出了憑證, 該值就會被寫入 <code>projects/&lt;project&gt;/&lt;session&gt;.jsonl</code>。</p>
+<ul>
+<li>調低 <code>cleanupPeriodDays</code> 縮短逐字稿保留時間</li>
+<li>設定 <code>CLAUDE_CODE_SKIP_PROMPT_HISTORY</code> 環境變數, 在任何模式下都不寫入逐字稿與提示歷史; 非互動模式下也可搭配 <code>-p</code> 使用 <code>--no-session-persistence</code>, 或在 Agent SDK 中設定 <code>persistSession: false</code></li>
+<li>使用 permission 規則封鎖讀取憑證檔案</li>
+</ul>
+</div>
+</div>
+
+<div class="ad-panel demo-panel" id="ad-p3">
+<p>執行 <code>claude project purge</code> 可以刪除 Claude Code 為某個專案保留的狀態 (需要 v2.1.124 以上), 會刪除: projects/ 下的逐字稿與自動記憶, 每個 session 的 tasks/, debug/, file-history/ 項目, history.jsonl 中相符的紀錄, 以及 ~/.claude.json 中該專案的項目。</p>
+<pre class="code-block"><span class="cmt"># 預覽刪除計畫, 不實際刪除</span>
+<span class="fn">claude</span> project purge ~/work/my-repo <span class="key">--dry-run</span>
+
+<span class="cmt"># 單次確認後刪除</span>
+<span class="fn">claude</span> project purge ~/work/my-repo
+
+<span class="cmt"># 略過確認, 適合腳本使用</span>
+<span class="fn">claude</span> project purge ~/work/my-repo <span class="key">--yes</span></pre>
+<p style="margin-top:10px;">省略路徑會跳出互動式清單讓你挑選專案; 用 <code>--all</code> 取代路徑可一次清除所有專案 (此時會直接刪除整份 history.jsonl 而非過濾); 加上 <code>-i</code> 可以逐項確認刪除計畫。此指令不會動到 <code>shell-snapshots/</code> 與 <code>backups/</code>, 因為它們不屬於特定專案。</p>
+</div>
+
+<div>
+  <button class="btn btn-ghost" id="adPrev" disabled onclick="adGoTo(adStep-1)">← 上一步</button>
+  <button class="btn btn-primary" id="adNext" onclick="adGoTo(adStep+1)">下一步 →</button>
+  <span class="step-indicator" id="adIndicator">Step 1 of 4</span>
+</div>
+
+<p style="margin-top:16px;">不要刪除 <code>~/.claude.json</code>, <code>~/.claude/settings.json</code>, 或 <code>~/.claude/plugins/</code>, 這些檔案保存了你的登入狀態, 偏好設定與已安裝的 plugins。</p>
+</section>
+
+<section>
+<h2>相關資源</h2>
+<div class="event-list">
+<div class="event-item"><span class="event-name">Manage Claude's memory</span><span class="event-desc">撰寫與組織 CLAUDE.md, rules 與自動記憶</span></div>
+<div class="event-item"><span class="event-name">Configure settings</span><span class="event-desc">設定 permissions, hooks, 環境變數與預設模型</span></div>
+<div class="event-item"><span class="event-name">Create skills</span><span class="event-desc">建立可重複使用的提示與工作流程</span></div>
+<div class="event-item"><span class="event-name">Configure subagents</span><span class="event-desc">定義擁有獨立情境的專屬 agent</span></div>
+</div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+const CD_DATA = {
+  project: [
+    {name: 'CLAUDE.md', badge: 'committed', when: '每個 session 開始時載入到情境中', desc: '專案專屬指令, 決定 Claude 在這個 repo 裡如何運作。把你們的慣例, 常用指令與架構脈絡放在這裡。', tips: '建議控制在 200 行以內; 只在特定任務才需要的內容, 移到 skill 或路徑限定的 rule。'},
+    {name: '.mcp.json', badge: 'committed', when: 'Session 開始時連線', desc: '設定專案共用的 MCP servers, 讓 Claude 存取資料庫, API, 瀏覽器等外部工具。個人專用的 server 請改用 ~/.claude.json。', tips: '密鑰請用環境變數參照, 例如 ${GITHUB_TOKEN}, 不要寫死在檔案裡。'},
+    {name: '.worktreeinclude', badge: 'committed', when: '建立 git worktree 時讀取', desc: '列出要從主要 repo 複製到新 worktree 的 gitignore 檔案, 例如 .env。語法與 .gitignore 相同。', tips: '只有 git 適用; 其他版本控制系統要在 WorktreeCreate hook 中自行複製檔案。'},
+    {name: '.claude/settings.json', badge: 'committed', when: '啟動時載入, 會覆蓋 ~/.claude/settings.json', desc: '直接由 Claude Code 強制套用的設定: permissions, hooks, statusLine, model, env, outputStyle。與 CLAUDE.md 不同, 這些是強制生效的規則。', tips: 'Bash permission 支援萬用字元, 例如 Bash(npm test *)。'},
+    {name: '.claude/settings.local.json', badge: 'gitignored', when: '優先權高於 settings.json, 但仍低於 CLI 參數與 managed settings', desc: '個人的專案設定覆寫, 不會進版控。適合用在你需要跟團隊不同的權限或預設值時。', tips: '首次寫入時會自動加入 ~/.config/git/ignore。'},
+    {name: '.claude/rules/*.md', badge: 'committed', when: '無 paths 的規則在 session 開始時載入; 有 paths 的規則在符合的檔案進入情境時載入', desc: '把專案指令拆成依主題分類的檔案, 可依檔案路徑條件式載入。', tips: '用 paths: 搭配 glob 限定規則只在特定目錄或檔案類型生效; 支援子目錄。'},
+    {name: '.claude/skills/<name>/SKILL.md', badge: 'committed', when: '輸入 /skill-name, 或 Claude 依任務自動比對', desc: '每個 skill 是一個資料夾, 內含 SKILL.md 與所需的支援檔案, 預設你與 Claude 都能呼叫。', tips: '用 $ARGUMENTS 接收參數; description frontmatter 決定 Claude 何時會自動呼叫。'},
+    {name: '.claude/commands/*.md', badge: 'committed', when: '輸入 /command-name', desc: '單一檔案就能建立 /command, 與 skill 是相同機制, 但不能像 skill 一樣打包附加檔案。', tips: '新的工作流程建議改用 skills; commands 仍受支援但屬舊機制。'},
+    {name: '.claude/agents/*.md', badge: 'committed', when: 'Claude 委派任務時啟動, 或你用 @ 提及', desc: '每個 markdown 檔案定義一個擁有獨立系統提示, 工具權限, 甚至獨立模型的 subagent, 在全新的情境視窗中執行。', tips: '用 tools: frontmatter 限制每個 agent 能使用的工具。'},
+    {name: '.claude/workflows/*.js', badge: 'committed', when: '啟動時載入, 每個檔案成為一個 /<name> 指令', desc: '每個 .js 檔案是一個動態 workflow 腳本, 用來協調多個 subagent, 通常由 Claude 從 /workflows 儲存產生。', tips: '專案層級的 workflow 會優先於同名的個人 workflow。'},
+    {name: '.claude/output-styles/*.md', badge: '(較少見)', when: '透過 outputStyle 設定選用時套用', desc: '大多數 output style 屬於個人偏好, 通常放在 ~/.claude/output-styles/; 只有團隊共用的樣式才放這裡。'},
+    {name: '.claude/agent-memory/<agent>/MEMORY.md', badge: 'committed / autogen', when: 'Subagent 啟動時, 前 200 行 (上限 25KB) 會載入到系統提示', desc: '設定了 memory: project 的 subagent 專屬記憶, 與主要 session 的自動記憶是分開的機制。'}
+  ],
+  global: [
+    {name: '~/.claude.json', badge: 'local', when: 'Session 開始時讀取, /config 或信任提示核准時會寫回', desc: '保存不屬於 settings.json 的狀態: 主題, OAuth session, 各專案的信任決定, 個人 MCP servers, UI 開關。', tips: 'IDE 開關如 autoConnectIde 放在這裡, 不是 settings.json。'},
+    {name: '~/.claude/CLAUDE.md', badge: 'local', when: '每個專案, 每個 session 開始時載入', desc: '你的全域指令檔, 與專案 CLAUDE.md 一起載入到情境中; 指令衝突時以專案層級為準。', tips: '保持精簡, 適合放回覆風格, commit 格式, 個人慣例。'},
+    {name: '~/.claude/settings.json', badge: 'local', when: '作為預設值; 專案與 local settings.json 中相同的 key 會覆蓋它', desc: '與專案 settings.json 相同的欄位, 放你想在所有專案套用的設定, 例如一律允許的權限或偏好模型。'},
+    {name: '~/.claude/keybindings.json', badge: 'local', when: 'Session 開始時讀取, 編輯時熱重載', desc: '重新綁定互動式 CLI 的鍵盤快速鍵, 用 /keybindings 建立或開啟。Ctrl+C, Ctrl+D, Ctrl+M 與 Caps Lock 為保留鍵無法重新綁定。'},
+    {name: '~/.claude/themes/*.json', badge: '(較少見)', when: 'Session 開始時讀取, 熱重載, 於 /theme 中列出', desc: '每個 .json 定義一個內建 base 加上 overrides 色彩對照表的主題, 可用 /theme 互動建立或手動撰寫。'},
+    {name: '~/.claude/projects/<project>/memory/', badge: 'autogen', when: 'MEMORY.md 於 session 開始時載入, 主題檔案依需要讀取', desc: '自動記憶功能, 讓 Claude 在不需你動手的情況下累積跨 session 的知識, 每個專案有各自的記憶目錄。', tips: '預設開啟, 可用 /memory 或 autoMemoryEnabled 關閉; 純文字檔, 可隨時編輯或刪除。'},
+    {name: '~/.claude/rules/', badge: '(較少見)', when: '同專案 rules, 但套用到所有專案', desc: '適合放跨專案共用的慣例, 例如個人程式風格或 commit 訊息格式。'},
+    {name: '~/.claude/skills/, commands/, agents/, workflows/', badge: '(較少見)', when: '在任何專案中皆可呼叫', desc: '個人版本的 skills, commands, subagents 與 workflows, 結構與專案版本相同, 差別只在適用範圍是你的帳號而非單一專案。'},
+    {name: '~/.claude/output-styles/*.md', badge: 'local', when: '透過 outputStyle 設定選用時套用', desc: '定義附加到系統提示的區塊, 用來讓 Claude 適應程式開發以外的用途, 或加入教學, 審查等模式。', tips: '變更需在下次 session 才會生效, 因為系統提示在啟動時就已固定以支援快取。'},
+    {name: '~/.claude/agent-memory/', badge: '(較少見)', when: 'Subagent 啟動時載入', desc: '設定 memory: user 的 subagent 會把知識儲存在這裡, 跨所有專案持續存在。'}
+  ]
+};
+
+let cdRoot = 'project';
+let cdSelected = 0;
+
+function cdRenderList() {
+  const list = document.getElementById('cdFileList');
+  list.innerHTML = '';
+  CD_DATA[cdRoot].forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'event-item';
+    div.style.cursor = 'pointer';
+    div.style.borderColor = i === cdSelected ? '#3b82f6' : '';
+    div.innerHTML = `<span class="event-name">${item.name}</span><span class="event-desc">${item.desc.length > 40 ? item.desc.slice(0,40)+'…' : item.desc}</span>`;
+    div.onclick = () => { cdSelected = i; cdRenderList(); cdRenderDetail(); };
+    list.appendChild(div);
+  });
+}
+
+function cdRenderDetail() {
+  const item = CD_DATA[cdRoot][cdSelected];
+  const box = document.getElementById('cdDetail');
+  box.innerHTML = `
+    <div class="response-field"><div class="rf-key">檔案</div><div class="rf-val"><code>${item.name}</code> <span style="color:#92400e;font-size:0.75rem;">(${item.badge})</span></div></div>
+    <div class="response-field"><div class="rf-key">何時載入</div><div class="rf-val">${item.when}</div></div>
+    <div class="response-field"><div class="rf-key">說明</div><div class="rf-val">${item.desc}</div></div>
+    ${item.tips ? `<div class="response-field"><div class="rf-key">小提示</div><div class="rf-val">${item.tips}</div></div>` : ''}
+  `;
+}
+
+function cdSwitchRoot(root) {
+  cdRoot = root;
+  cdSelected = 0;
+  document.getElementById('chip-project').classList.toggle('active', root === 'project');
+  document.getElementById('chip-global').classList.toggle('active', root === 'global');
+  cdRenderList();
+  cdRenderDetail();
+}
+
+cdRenderList();
+cdRenderDetail();
+
+let adStep = 0;
+const AD_MAX = 3;
+function adGoTo(n) {
+  adStep = Math.max(0, Math.min(AD_MAX, n));
+  document.querySelectorAll('.ad-panel').forEach((el, i) => el.classList.toggle('visible', i === adStep));
+  document.querySelectorAll('.ad-tab').forEach((t, i) => t.classList.toggle('active', i === adStep));
+  document.getElementById('adPrev').disabled = adStep === 0;
+  const next = document.getElementById('adNext');
+  next.disabled = adStep === AD_MAX;
+  next.textContent = adStep === AD_MAX ? '完成 ✓' : '下一步 →';
+  document.getElementById('adIndicator').textContent = `Step ${adStep + 1} of ${AD_MAX + 1}`;
+}
+adGoTo(0);
+</script>
+</body>
+</html>
