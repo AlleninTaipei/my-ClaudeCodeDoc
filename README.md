@@ -1,5 +1,20 @@
 # Claude Code 中文學習手冊
 
+[![claude-code](https://img.shields.io/badge/-claude--code-2C4A6E?style=flat-square)](https://github.com/topics/claude-code)
+[![claude](https://img.shields.io/badge/-claude-2C4A6E?style=flat-square)](https://github.com/topics/claude)
+[![anthropic](https://img.shields.io/badge/-anthropic-2C4A6E?style=flat-square)](https://github.com/topics/anthropic)
+[![llm](https://img.shields.io/badge/-llm-2C4A6E?style=flat-square)](https://github.com/topics/llm)
+[![ai-agent](https://img.shields.io/badge/-ai--agent-2C4A6E?style=flat-square)](https://github.com/topics/ai-agent)
+[![documentation](https://img.shields.io/badge/-documentation-2C4A6E?style=flat-square)](https://github.com/topics/documentation)
+[![traditional-chinese](https://img.shields.io/badge/-traditional--chinese-2C4A6E?style=flat-square)](https://github.com/topics/traditional-chinese)
+[![chinese](https://img.shields.io/badge/-chinese-2C4A6E?style=flat-square)](https://github.com/topics/chinese)
+[![tutorial](https://img.shields.io/badge/-tutorial-2C4A6E?style=flat-square)](https://github.com/topics/tutorial)
+[![learning-resources](https://img.shields.io/badge/-learning--resources-2C4A6E?style=flat-square)](https://github.com/topics/learning-resources)
+[![developer-tools](https://img.shields.io/badge/-developer--tools-2C4A6E?style=flat-square)](https://github.com/topics/developer-tools)
+[![cli](https://img.shields.io/badge/-cli-2C4A6E?style=flat-square)](https://github.com/topics/cli)
+[![agent-sdk](https://img.shields.io/badge/-agent--sdk-2C4A6E?style=flat-square)](https://github.com/topics/agent-sdk)
+[![knowledge-base](https://img.shields.io/badge/-knowledge--base-2C4A6E?style=flat-square)](https://github.com/topics/knowledge-base)
+
 本專案整理並轉譯 Anthropic 官方 Claude Code 文件, 依主題劃分為十二個學習階段, 每個主題皆保留官方原文 (Markdown) , 並額外製作一份繁體中文互動式單頁課程 (HTML) , 方便循序閱讀與查閱.
 
 ## 專案簡介
