@@ -342,8 +342,14 @@
     max-width:62ch;
   }
 
-  .chapter__toggle{
+  .chapter__actions{
     margin-top:14px;
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:22px;
+  }
+  .chapter__toggle{
     display:inline-flex;
     align-items:center;
     gap:8px;
@@ -367,6 +373,32 @@
     transition:transform 0.25s ease;
   }
   .chapter__toggle[aria-expanded="true"] .chapter__toggle-icon{
+    transform:rotate(45deg);
+  }
+  .chapter__full{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 0;
+    color:var(--signal);
+    text-decoration:none;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    border-bottom:1px solid transparent;
+    transition:border-color 0.2s;
+  }
+  .chapter__full:hover,
+  .chapter__full:focus-visible{
+    border-bottom-color:var(--signal);
+  }
+  .chapter__full-icon{
+    display:inline-block;
+    width:9px;
+    height:9px;
+    border-right:1.4px solid var(--signal);
+    border-top:1.4px solid var(--signal);
     transform:rotate(45deg);
   }
 
@@ -522,7 +554,10 @@
               <span class="chapter__count">9 篇文件</span>
             </div>
             <p class="chapter__desc">先了解 Claude Code 是什麼, 如何安裝與啟動.</p>
-            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__actions">
+              <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+              <a class="chapter__full" href="stage1-12/stage1-getting-started.html">閱讀單頁合併版<span class="chapter__full-icon"></span></a>
+            </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
                 <li><a href="01_入門與基本認識/overview.html"><code>overview.html</code></a></li>
@@ -548,7 +583,10 @@
               <span class="chapter__count">13 篇文件</span>
             </div>
             <p class="chapter__desc">熟悉互動模式, 常用指令與個人偏好設定.</p>
-            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__actions">
+              <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+              <a class="chapter__full" href="stage1-12/stage2-daily-operations.html">閱讀單頁合併版<span class="chapter__full-icon"></span></a>
+            </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
                 <li><a href="02_日常操作與個人化設定/interactive-mode.html"><code>interactive-mode.html</code></a></li>
@@ -578,7 +616,10 @@
               <span class="chapter__count">12 篇文件</span>
             </div>
             <p class="chapter__desc">在編輯器, 桌面, 瀏覽器與行動裝置等不同環境中使用 Claude Code.</p>
-            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__actions">
+              <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+              <a class="chapter__full" href="stage1-12/stage3-platforms-integrations.html">閱讀單頁合併版<span class="chapter__full-icon"></span></a>
+            </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
                 <li><a href="03_使用介面與平台整合/platforms.html"><code>platforms.html</code></a></li>
@@ -607,7 +648,10 @@
               <span class="chapter__count">5 篇文件</span>
             </div>
             <p class="chapter__desc">學習如何以 skills, hooks 與子代理客製化 Claude 的能力.</p>
-            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__actions">
+              <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+              <a class="chapter__full" href="stage1-12/stage4-extend-skills-hooks-mcp.html">閱讀單頁合併版<span class="chapter__full-icon"></span></a>
+            </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
                 <li><a href="04_擴充能力/features-overview.html"><code>features-overview.html</code></a></li>
@@ -629,7 +673,10 @@
               <span class="chapter__count">11 篇文件</span>
             </div>
             <p class="chapter__desc">讓 Claude 自主執行任務, 排程, 或多個代理協同工作.</p>
-            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__actions">
+              <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+              <a class="chapter__full" href="stage1-12/stage5-automation-multi-agent.html">閱讀單頁合併版<span class="chapter__full-icon"></span></a>
+            </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
                 <li><a href="05_自動化與多代理協作/goal.html"><code>goal.html</code></a></li>
@@ -657,7 +704,10 @@
               <span class="chapter__count">7 篇文件</span>
             </div>
             <p class="chapter__desc">確保程式碼品質與安全性的工具.</p>
-            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__actions">
+              <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+              <a class="chapter__full" href="stage1-12/stage6-quality-security-compliance.html">閱讀單頁合併版<span class="chapter__full-icon"></span></a>
+            </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
                 <li><a href="06_品質安全與合規/checkpointing.html"><code>checkpointing.html</code></a></li>
@@ -681,7 +731,10 @@
               <span class="chapter__count">3 篇文件</span>
             </div>
             <p class="chapter__desc">理解並管理 token 用量, 快取與成本.</p>
-            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__actions">
+              <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+              <a class="chapter__full" href="stage1-12/stage7-cost-performance-observability.html">閱讀單頁合併版<span class="chapter__full-icon"></span></a>
+            </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
                 <li><a href="07_成本效能與可觀測性/costs.html"><code>costs.html</code></a></li>
@@ -701,7 +754,10 @@
               <span class="chapter__count">5 篇文件</span>
             </div>
             <p class="chapter__desc">將 Claude Code 導入既有開發流程與大型程式庫.</p>
-            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__actions">
+              <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+              <a class="chapter__full" href="stage1-12/stage8-cicd-large-codebases.html">閱讀單頁合併版<span class="chapter__full-icon"></span></a>
+            </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
                 <li><a href="08_CICD與大型專案整合/github-actions.html"><code>github-actions.html</code></a></li>
@@ -723,7 +779,10 @@
               <span class="chapter__count">27 篇文件</span>
             </div>
             <p class="chapter__desc">給想以程式方式建置自訂代理應用的開發者.</p>
-            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__actions">
+              <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+              <a class="chapter__full" href="stage1-12/stage9-agent-sdk.html">閱讀單頁合併版<span class="chapter__full-icon"></span></a>
+            </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
                 <li><a href="09_Agent_SDK開發/overview.html"><code>overview.html</code></a></li>
@@ -767,7 +826,10 @@
               <span class="chapter__count">22 篇文件</span>
             </div>
             <p class="chapter__desc">給需要在組織內大規模部署與治理 Claude Code 的管理者.</p>
-            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__actions">
+              <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+              <a class="chapter__full" href="stage1-12/stage10-enterprise-deployment.html">閱讀單頁合併版<span class="chapter__full-icon"></span></a>
+            </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
                 <li><a href="10_企業級部署與治理/admin-setup.html"><code>admin-setup.html</code></a></li>
@@ -806,7 +868,10 @@
               <span class="chapter__count">6 篇文件</span>
             </div>
             <p class="chapter__desc">遇到問題時查閱的除錯與參考資料.</p>
-            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__actions">
+              <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+              <a class="chapter__full" href="stage1-12/stage11-troubleshooting-reference.html">閱讀單頁合併版<span class="chapter__full-icon"></span></a>
+            </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
                 <li><a href="11_疑難排解與參考資料/debug-your-config.html"><code>debug-your-config.html</code></a></li>
@@ -829,7 +894,10 @@
               <span class="chapter__count">5 篇文件</span>
             </div>
             <p class="chapter__desc">推廣, 溝通與延伸閱讀素材.</p>
-            <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+            <div class="chapter__actions">
+              <button class="chapter__toggle" aria-expanded="false">展開檔案清單<span class="chapter__toggle-icon"></span></button>
+              <a class="chapter__full" href="stage1-12/stage12-other-resources.html">閱讀單頁合併版<span class="chapter__full-icon"></span></a>
+            </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
                 <li><a href="12_其他資源/advisor.html"><code>advisor.html</code></a></li>
