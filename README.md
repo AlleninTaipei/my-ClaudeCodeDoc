@@ -17,6 +17,10 @@
 
 本專案整理並轉譯 Anthropic 官方 Claude Code 文件, 依主題劃分為十二個學習階段, 每個主題皆保留官方原文 (Markdown) , 並額外製作一份繁體中文互動式單頁課程 (HTML) , 方便循序閱讀與查閱.
 
+本專案為非官方之中文翻譯與整理, 版權仍屬 Anthropic 所有, 內容為特定時間點的翻譯快照, 可能與官方文件站的最新版本有落差. 官方文件請參閱 [https://code.claude.com/docs](https://code.claude.com/docs), 若內容有出入, 請以官方文件為準.
+
+最後更新: 2026-07-09.
+
 ## 專案簡介
 
 Claude Code 官方文件涵蓋範圍廣, 主題間彼此獨立, 初學者不易掌握閱讀順序.
@@ -69,4 +73,4 @@ Claude Code 官方文件涵蓋範圍廣, 主題間彼此獨立, 初學者不易�
 
 內容整理自 Claude Code 官方文件站: [https://code.claude.com/docs](https://code.claude.com/docs)
 
-本專案僅作個人學習與內部知識整理用途, 內容版權仍屬原文件所有者 Anthropic.
+本專案僅作個人學習與內部知識整理用途, 內容版權仍屬原文件所有者 Anthropic. 本專案並非 Anthropic 官方發布, 不保證與官方文件同步更新, 使用前請自行核對官方最新內容.
