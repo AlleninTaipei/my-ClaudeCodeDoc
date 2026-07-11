@@ -33,15 +33,15 @@ Claude Code 官方文件涵蓋範圍廣, 主題間彼此獨立, 初學者不易�
 | 資料夾 | 主題範圍 | 篇數 |
 |---|---|---|
 | 01_入門與基本認識 | Claude Code 是什麼, 安裝方式, 運作原理, 名詞解釋 | 9 |
-| 02_日常操作與個人化設定 | 互動模式, 常用指令, 權限模式, 設定檔, session 管理 | 13 |
-| 03_使用介面與平台整合 | 終端機, IDE 外掛, 桌面版, 瀏覽器版, Slack 等平台整合 | 12 |
-| 04_擴充能力 | Hooks, Skills, Sub agents 等擴充機制總覽 | 5 |
+| 02_日常操作與個人化設定 | 互動模式, 常用指令, 權限模式, 設定檔, session 管理 | 16 |
+| 03_使用介面與平台整合 | 終端機, IDE 外掛, 桌面版, 瀏覽器版, Slack 等平台整合 | 13 |
+| 04_擴充能力 | Hooks, Skills, Sub agents 等擴充機制總覽 | 15 |
 | 05_自動化與多代理協作 | Headless 模式, 排程任務, 多代理團隊協作, channels | 11 |
 | 06_品質安全與合規 | Code review, checkpointing, 資料使用政策, 安全機制 | 7 |
-| 07_成本效能與可觀測性 | Context window, prompt caching, 費用估算 | 3 |
+| 07_成本效能與可觀測性 | Context window, prompt caching, 費用估算 | 5 |
 | 08_CICD與大型專案整合 | GitHub Actions, GitLab CI/CD, devcontainer, 大型程式庫 | 5 |
-| 09_Agent_SDK開發 | Agent SDK 架構, 工具, streaming, session, 部署與監控 | 27 |
-| 10_企業級部署與治理 | 組織管理, LLM gateway, 雲端平台整合 (AWS, GCP, Azure) , 沙箱環境 | 22 |
+| 09_Agent_SDK開發 | Agent SDK 架構, 工具, streaming, session, 部署與監控 | 30 |
+| 10_企業級部署與治理 | 組織管理, LLM gateway, 雲端平台整合 (AWS, GCP, Azure) , 沙箱環境 | 23 |
 | 11_疑難排解與參考資料 | 除錯, 環境變數, 錯誤代碼, 工具參考 | 6 |
 | 12_其他資源 | Changelog, prompt library, advisor, 對外溝通資源包 | 5 |
 
