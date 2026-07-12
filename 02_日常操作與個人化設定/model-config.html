@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Model configuration</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 170px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 140px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-top: 10px; display: block; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+.slider-wrap { margin-top: 16px; background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 18px 20px; }
+.slider-wrap input[type=range] { width: 100%; margin: 10px 0; }
+.slider-label { font-size: 0.85rem; color: #1e40af; font-weight: 700; }
+.slider-desc { font-size: 0.82rem; color: #4a5568; margin-top: 6px; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark .slider-wrap { background: #1a202c; border-color: #2d3748; }
+body.dark .slider-label { color: #90cdf4; } body.dark .slider-desc { color: #a0aec0; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Model configuration</h1>
+  <p>Learn about the Claude Code model configuration, including model aliases like opusplan.</p>
+</header>
+
+<main>
+
+<section>
+  <h2>Available models</h2>
+  <p>For the <code>model</code> setting you can configure a model alias, or a model name: a full Anthropic API model name, a Bedrock inference profile ARN, a Microsoft Foundry deployment name, or a Google Cloud Agent Platform version name.</p>
+  <h3>Model aliases</h3>
+  <div class="api-fields">
+    <div class="field"><div class="name">default</div><div class="desc">Clears any override, reverts to the recommended model or org default</div></div>
+    <div class="field"><div class="name">best</div><div class="desc">Fable 5 where available, otherwise the latest Opus</div></div>
+    <div class="field"><div class="name">fable</div><div class="desc">Claude Fable 5, hardest and longest-running tasks</div></div>
+    <div class="field"><div class="name">sonnet</div><div class="desc">Latest Sonnet model for daily coding tasks</div></div>
+    <div class="field"><div class="name">opus</div><div class="desc">Latest Opus model for complex reasoning</div></div>
+    <div class="field"><div class="name">haiku</div><div class="desc">Fast and efficient model for simple tasks</div></div>
+    <div class="field"><div class="name">sonnet[1m] / opus[1m]</div><div class="desc">1 million token context window for long sessions</div></div>
+    <div class="field"><div class="name">opusplan</div><div class="desc">opus during plan mode, then switches to sonnet for execution</div></div>
+  </div>
+  <div class="info-box">
+    <span class="tag">NOTE</span>
+    <p>Where an alias resolves to an older model, newer models are available by selecting the full model name explicitly or setting ANTHROPIC_DEFAULT_OPUS_MODEL / ANTHROPIC_DEFAULT_SONNET_MODEL. Sonnet 5 requires Claude Code v2.1.197+, Opus 4.8 requires v2.1.154+.</p>
+  </div>
+
+  <h3>Work with Fable 5</h3>
+  <p>Claude Fable 5 is the most capable model in Claude Code, suited to tasks larger than a single sitting. It sustains long autonomous sessions, investigates before acting, and verifies its work more often. Not the default model, select it with <code>/model fable</code>.</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">Describe the outcome</span><span class="event-desc">Hand it the result, let it plan the path</span></div>
+    <div class="event-item"><span class="event-name">Hand it ambiguous problems</span><span class="event-desc">Root-cause investigations, outage debugging, architecture decisions</span></div>
+    <div class="event-item"><span class="event-name">Skip verification reminders</span><span class="event-desc">It verifies its own work with less prompting</span></div>
+    <div class="event-item"><span class="event-name">Size up larger tasks</span><span class="event-desc">Holds long sessions without losing the thread</span></div>
+  </div>
+
+  <h3>Setting your model</h3>
+  <div class="stage-tabs">
+    <div class="sm-tab stage-tab active" onclick="smGoTo(0)">1 · During session</div>
+    <div class="sm-tab stage-tab" onclick="smGoTo(1)">2 · At startup</div>
+    <div class="sm-tab stage-tab" onclick="smGoTo(2)">3 · Env variable</div>
+    <div class="sm-tab stage-tab" onclick="smGoTo(3)">4 · Settings file</div>
+  </div>
+  <div class="sm-panel demo-panel visible" id="sm-p0">
+    <pre class="code-block"><span class="fn">/model</span> sonnet
+<span class="cmt"># or run /model with no argument to open the picker</span></pre>
+    <p>Enter switches and saves as default; <code>s</code> switches for this session only.</p>
+  </div>
+  <div class="sm-panel demo-panel" id="sm-p1">
+    <pre class="code-block"><span class="fn">claude</span> <span class="key">--model</span> opus</pre>
+  </div>
+  <div class="sm-panel demo-panel" id="sm-p2">
+    <pre class="code-block"><span class="key">ANTHROPIC_MODEL</span>=sonnet</pre>
+  </div>
+  <div class="sm-panel demo-panel" id="sm-p3">
+    <pre class="code-block"><span class="kw">{</span>
+    <span class="str">"model"</span>: <span class="str">"opus"</span>
+<span class="kw">}</span></pre>
+  </div>
+  <span class="step-indicator" id="smIndicator">Priority 1 of 4 (highest first)</span>
+</section>
+
+<section>
+  <h2>Restrict model selection</h2>
+  <p>Enterprise administrators use <code>availableModels</code> in managed or policy settings to restrict which models users can select. Entries match a model family, a version prefix, or a full model ID.</p>
+  <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"availableModels"</span>: [<span class="str">"sonnet"</span>, <span class="str">"haiku"</span>]
+<span class="kw">}</span></pre>
+  <h3>Surface coverage</h3>
+  <div class="response-box">
+    <div class="response-field"><div class="rf-key">Server-managed</div><div class="rf-val">Enforced on CLI/IDE, Desktop, web/mobile/cloud, Agent SDK. Not delivered to Cowork</div></div>
+    <div class="response-field"><div class="rf-key">MDM / managed file</div><div class="rf-val">Enforced on CLI/IDE, Desktop. Not delivered to web/mobile/cloud sessions</div></div>
+  </div>
+  <h3>Enforce the allowlist for Default</h3>
+  <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"availableModels"</span>: [<span class="str">"sonnet"</span>, <span class="str">"haiku"</span>],
+  <span class="str">"enforceAvailableModels"</span>: <span class="kw">true</span>
+<span class="kw">}</span></pre>
+  <p>Without <code>enforceAvailableModels</code>, the Default option resolves to the account-type default regardless of the allowlist. With it, Default resolves to the first allowlist entry that names an allowed, available model.</p>
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">Organization model restrictions</div>
+      <p>Enterprise admins disable individual models in the admin console. Delivered with account entitlements. Haiku models can never be disabled.</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">Merge behavior</div>
+      <p>When the highest-precedence managed source defines availableModels, that list alone applies. Otherwise lists from user, project, and local settings are concatenated and deduplicated.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Organization default model</h2>
+  <p>Enterprise admins can set a default model for the whole organization or per custom role, requiring Claude Code v2.1.196+. The Default row shows Org default. Any other model selection takes precedence: the <code>--model</code> flag, <code>ANTHROPIC_MODEL</code>, or a <code>model</code> value in settings.</p>
+  <div class="info-box">
+    <span class="tag">OVERRIDE</span>
+    <p>With override on, the org default takes precedence over user, project, and local settings, so a model saved with /model applies only for the current session and the org default returns on the next launch.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Organization effort limits</h2>
+  <p>Enterprise admins can set a maximum effort level per model for each custom role. Levels above the cap aren't offered in the /effort picker; naming a higher level runs at the cap instead. Requires Claude Code v2.1.195+.</p>
+</section>
+
+<section>
+  <h2>Special model behavior</h2>
+  <h3>default model setting</h3>
+  <div class="api-fields">
+    <div class="field"><div class="name">Max, Team Premium, Enterprise PAYG, API</div><div class="desc">Opus 4.8</div></div>
+    <div class="field"><div class="name">Pro, Team Standard, Enterprise seat</div><div class="desc">Sonnet 5</div></div>
+    <div class="field"><div class="name">Bedrock, Agent Platform</div><div class="desc">Opus 4.8</div></div>
+    <div class="field"><div class="name">Microsoft Foundry</div><div class="desc">Sonnet 4.5</div></div>
+  </div>
+
+  <h3>opusplan model setting</h3>
+  <p>Uses opus for complex reasoning and architecture decisions in plan mode, then automatically switches to sonnet for code generation and implementation.</p>
+
+  <h3>Fallback model chains</h3>
+  <p>When the primary model is overloaded, unavailable, or returns a non-retryable server error, Claude Code can switch to a fallback model. Chains are capped at three models after duplicate removal.</p>
+  <pre class="code-block"><span class="fn">claude</span> <span class="key">--fallback-model</span> sonnet,haiku</pre>
+  <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"fallbackModel"</span>: [<span class="str">"claude-sonnet-5"</span>, <span class="str">"claude-haiku-4-5"</span>]
+<span class="kw">}</span></pre>
+
+  <h3>Automatic model fallback</h3>
+  <p>Fable 5 runs with safety classifiers for cybersecurity and biology content. When flagged, Claude Code re-runs the request on Opus 4.8. To decide each time instead, run /config and turn off "switch models when a message is flagged".</p>
+  <div class="info-box">
+    <span class="tag">CHECK</span>
+    <p>Fallback can trigger on the first request of a session because it carries workspace context such as CLAUDE.md and git status. Start with <code>claude --safe-mode</code> to check whether customizations are the trigger.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Checking your current model</h2>
+  <p>You can see which model you're currently using in the status line, if configured, or in <code>/status</code>, which also displays your account information.</p>
+</section>
+
+<section>
+  <h2>Add a custom model option</h2>
+  <p>Use <code>ANTHROPIC_CUSTOM_MODEL_OPTION</code> to add a single custom entry to the /model picker without replacing the built-in aliases.</p>
+  <pre class="code-block"><span class="fn">export</span> <span class="key">ANTHROPIC_CUSTOM_MODEL_OPTION</span>=<span class="str">"my-gateway/claude-opus-4-8"</span>
+<span class="fn">export</span> <span class="key">ANTHROPIC_CUSTOM_MODEL_OPTION_NAME</span>=<span class="str">"Opus via Gateway"</span>
+<span class="fn">export</span> <span class="key">ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION</span>=<span class="str">"Custom deployment routed through the internal LLM gateway"</span></pre>
+</section>
+
+<section>
+  <h2>Environment variables</h2>
+  <div class="api-fields">
+    <div class="field"><div class="name">ANTHROPIC_DEFAULT_FABLE_MODEL</div><div class="desc">Model used for fable and Fable 5 identification</div></div>
+    <div class="field"><div class="name">ANTHROPIC_DEFAULT_OPUS_MODEL</div><div class="desc">Model for opus, or opusplan in Plan Mode</div></div>
+    <div class="field"><div class="name">ANTHROPIC_DEFAULT_SONNET_MODEL</div><div class="desc">Model for sonnet, or opusplan outside Plan Mode</div></div>
+    <div class="field"><div class="name">CLAUDE_CODE_SUBAGENT_MODEL</div><div class="desc">Model for all subagents and agent teams</div></div>
+  </div>
+
+  <h3>Adjust effort level</h3>
+  <p>Effort levels control adaptive reasoning: lower effort is faster and cheaper, higher effort provides deeper reasoning.</p>
+  <div class="slider-wrap">
+    <div class="slider-label" id="effortLabel">high</div>
+    <input type="range" min="0" max="4" value="2" step="1" id="effortSlider" oninput="effortUpdate(this.value)" />
+    <div class="slider-desc" id="effortDesc">Balances token usage and intelligence. Default on Fable 5, Sonnet 5, Opus 4.8, Opus 4.6, and Sonnet 4.6.</div>
+  </div>
+
+  <h3>Prompt caching configuration</h3>
+  <div class="response-box">
+    <div class="response-field"><div class="rf-key">DISABLE_PROMPT_CACHING</div><div class="rf-val">Disable for all models, takes precedence over per-model settings</div></div>
+    <div class="response-field"><div class="rf-key">DISABLE_PROMPT_CACHING_HAIKU</div><div class="rf-val">Disable for Haiku models only</div></div>
+    <div class="response-field"><div class="rf-key">DISABLE_PROMPT_CACHING_SONNET</div><div class="rf-val">Disable for Sonnet models only</div></div>
+    <div class="response-field"><div class="rf-key">DISABLE_PROMPT_CACHING_OPUS</div><div class="rf-val">Disable for Opus models only</div></div>
+  </div>
+
+  <div class="takeaway">
+    <p>Third-party deployments (Bedrock, Google Cloud's Agent Platform, Microsoft Foundry, Claude Platform on AWS) should pin model versions with these environment variables before rollout, since aliases resolve to a built-in default that can lag the newest release. Use modelOverrides to map individual model IDs to provider-specific strings for governance or regional routing.</p>
+  </div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+let smStep = 0;
+function smGoTo(n) {
+  smStep = Math.max(0, Math.min(3, n));
+  document.querySelectorAll('.sm-panel').forEach((el, i) => el.classList.toggle('visible', i === smStep));
+  document.querySelectorAll('.sm-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === smStep) t.classList.add('active');
+    else if (i < smStep) t.classList.add('done');
+  });
+  document.getElementById('smIndicator').textContent = `Priority ${smStep + 1} of 4 (highest first)`;
+}
+smGoTo(0);
+
+const effortLevels = [
+  { name: 'low', desc: 'Reserve for short, scoped, latency-sensitive tasks that are not intelligence-sensitive.' },
+  { name: 'medium', desc: 'Reduces token usage for cost-sensitive work that can trade off some intelligence.' },
+  { name: 'high', desc: 'Balances token usage and intelligence. Default on Fable 5, Sonnet 5, Opus 4.8, Opus 4.6, and Sonnet 4.6.' },
+  { name: 'xhigh', desc: 'Deeper reasoning at higher token spend. Default on Opus 4.7.' },
+  { name: 'max', desc: 'Can improve performance on demanding tasks but may show diminishing returns and is prone to overthinking.' }
+];
+function effortUpdate(v) {
+  const lvl = effortLevels[v];
+  document.getElementById('effortLabel').textContent = lvl.name;
+  document.getElementById('effortDesc').textContent = lvl.desc;
+}
+</script>
+</body>
+</html>

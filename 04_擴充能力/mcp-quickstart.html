@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Connect to MCP servers</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 130px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-top: 10px; display: block; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Connect to MCP servers</h1>
+  <p>Add an MCP server to Claude Code, verify the connection, and find the configuration on disk.</p>
+</header>
+
+<main>
+
+<section>
+  <h2>Before you begin</h2>
+  <p>Model Context Protocol (MCP) lets Claude Code use tools beyond its built-in set, such as searching an issue tracker, querying a database, or controlling a web browser. These tools come from MCP servers, which run on your machine or as hosted services.</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">Claude Code</div><div class="desc">Installed and authenticated</div></div>
+    <div class="field"><div class="name">Terminal</div><div class="desc">Open in a project directory, any directory works, including an empty one</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Add and verify a server</h2>
+  <p>The example connects to the Claude Code documentation MCP server, a hosted server with full-text search over the Claude Code docs. The steps are the same for any server: add it, check the connection status, then use it in a session, with an optional cleanup step at the end.</p>
+
+  <div class="stage-tabs">
+    <div class="mcp-tab stage-tab active" onclick="mcpGoTo(0)">1 · Add</div>
+    <div class="mcp-tab stage-tab" onclick="mcpGoTo(1)">2 · Check status</div>
+    <div class="mcp-tab stage-tab" onclick="mcpGoTo(2)">3 · Use</div>
+    <div class="mcp-tab stage-tab" onclick="mcpGoTo(3)">4 · Remove</div>
+  </div>
+
+  <div class="mcp-panel demo-panel visible" id="mcp-p0">
+    <p>Register the server with Claude Code. Run this in your terminal, not inside a <code>claude</code> session.</p>
+    <pre class="code-block"><span class="fn">claude mcp add</span> <span class="key">--transport</span> http claude-code-docs <span class="str">https://code.claude.com/docs/mcp</span></pre>
+    <p><code>claude mcp add</code> registers a server. <code>--transport http</code> means the server is hosted at a URL. <code>claude-code-docs</code> is a name you make up, used to label the server's tools and to refer to it in commands like <code>claude mcp remove</code>. By default the server is registered at <code>local</code> scope: private to you, active only in the current project.</p>
+  </div>
+  <div class="mcp-panel demo-panel" id="mcp-p1">
+    <p>Confirm the server appears in your server list and check its status:</p>
+    <pre class="code-block"><span class="fn">claude mcp list</span></pre>
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">✓ Connected</span><span class="event-desc">Ready to use</span></div>
+      <div class="event-item"><span class="event-name">! tools fetch failed</span><span class="event-desc">Connected but couldn't list tools, run <code>claude mcp get &lt;name&gt;</code></span></div>
+      <div class="event-item"><span class="event-name">! Needs authentication</span><span class="event-desc">Reachable but needs a browser sign-in or a token</span></div>
+      <div class="event-item"><span class="event-name">✗ Failed to connect</span><span class="event-desc">Server didn't respond</span></div>
+      <div class="event-item"><span class="event-name">✗ Connection error</span><span class="event-desc">The connection attempt threw an error</span></div>
+      <div class="event-item"><span class="event-name">⏸ Pending approval</span><span class="event-desc">A project-scoped server you haven't approved yet</span></div>
+    </div>
+  </div>
+  <div class="mcp-panel demo-panel" id="mcp-p2">
+    <p>Start a session and ask Claude to use the new server by name:</p>
+    <pre class="code-block"><span class="fn">claude</span>
+<span class="cmt"># in the session</span>
+Use the claude-code-docs server to look up what MCP_TIMEOUT does</pre>
+    <div class="info-box">
+      <span class="tag">INFO</span>
+      <p>You don't normally need to name a server in your prompt, since Claude chooses relevant tools on its own. The first time Claude calls the server, it asks for permission. The tool call in Claude's output is labeled with the server name.</p>
+    </div>
+  </div>
+  <div class="mcp-panel demo-panel" id="mcp-p3">
+    <p>Optional. When you're done experimenting, remove the server:</p>
+    <pre class="code-block"><span class="fn">claude mcp remove</span> claude-code-docs</pre>
+    <div class="info-box">
+      <span class="tag">NOTE</span>
+      <p>Each connected server takes some space in Claude's context window because its tool names and server instructions load into every session. Removing servers you no longer use keeps that space free.</p>
+    </div>
+  </div>
+  <span class="step-indicator" id="mcpIndicator">Step 1 of 4</span>
+</section>
+
+<section>
+  <h2>Where servers are saved</h2>
+  <p>The <code>claude mcp add</code> command writes the server's details to a configuration file, depending on the <code>--scope</code> flag.</p>
+  <div class="response-box">
+    <div class="response-field"><div class="rf-key">local</div><div class="rf-val"><code>~/.claude.json</code>, under the entry for this project. Only you, only this project. The default.</div></div>
+    <div class="response-field"><div class="rf-key">project</div><div class="rf-val"><code>.mcp.json</code> in your project root. Everyone who clones the project.</div></div>
+    <div class="response-field"><div class="rf-key">user</div><div class="rf-val"><code>~/.claude.json</code>, under the top-level <code>mcpServers</code> key. Only you, all projects.</div></div>
+  </div>
+  <p>On Windows, <code>~/.claude.json</code> resolves to <code>%USERPROFILE%\.claude.json</code>. Run <code>claude mcp get claude-code-docs</code> to see which scope holds a server's definition.</p>
+</section>
+
+<section>
+  <h2>Change server scope</h2>
+  <p>A server's scope is fixed when you add it, so changing scope means removing the entry and re-adding it at the new one.</p>
+  <pre class="code-block"><span class="fn">claude mcp remove</span> claude-code-docs <span class="key">--scope</span> local</pre>
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">Use in all your projects</div>
+      <pre class="code-block"><span class="fn">claude mcp add</span> <span class="key">--scope</span> user <span class="key">--transport</span> http claude-code-docs <span class="str">https://code.claude.com/docs/mcp</span></pre>
+      <p>Active in every project you open, still private to you.</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">Share with your team</div>
+      <pre class="code-block"><span class="fn">claude mcp add</span> <span class="key">--scope</span> project <span class="key">--transport</span> http claude-code-docs <span class="str">https://code.claude.com/docs/mcp</span></pre>
+      <p>Writes to <code>.mcp.json</code> in the project root. Commit it so teammates get a prompt to approve the server.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Additional MCP server examples</h2>
+  <p>Beyond a hosted server with no sign-in, two other common shapes exist, with the same add, check, use flow.</p>
+  <div class="chip-row">
+    <span class="chip-label">Server type:</span>
+    <div class="mex-chip chip active" onclick="mexShow(0)">Local (stdio)</div>
+    <div class="mex-chip chip" onclick="mexShow(1)">Requires sign-in</div>
+  </div>
+  <div class="mex-panel demo-panel visible" id="mex-p0">
+    <p>A local stdio server is a program Claude Code starts as a subprocess on your machine. The Playwright MCP server gives Claude a browser it can navigate, click, and read, and runs through <code>npx</code>.</p>
+    <pre class="code-block"><span class="fn">claude mcp add</span> playwright -- <span class="fn">npx</span> <span class="key">-y</span> @playwright/mcp@latest</pre>
+    <p>No <code>--transport</code> flag, because local servers use the default <code>stdio</code> transport. Everything after <code>--</code> is the command Claude Code runs to start the server.</p>
+    <pre class="code-block"><span class="fn">claude mcp list</span>
+<span class="cmt"># may show "Failed to connect" while npx downloads the package</span></pre>
+    <pre class="code-block">Use playwright to open <span class="str">https://example.com</span> and tell me the page title</pre>
+  </div>
+  <div class="mex-panel demo-panel" id="mex-p1">
+    <p>Hosted services like Sentry, Linear, and Notion run their MCP servers behind OAuth: add the server's URL, then sign in through your browser.</p>
+    <pre class="code-block"><span class="fn">claude mcp add</span> <span class="key">--transport</span> http sentry <span class="str">https://mcp.sentry.dev/mcp</span>
+<span class="cmt"># claude mcp list shows "! Needs authentication"</span></pre>
+    <pre class="code-block"><span class="cmt"># inside a session</span>
+/mcp
+<span class="cmt"># select sentry, press Enter, choose Authenticate</span></pre>
+    <p>Servers that authenticate with a static token instead of OAuth take the token at add time with <code>--header "Authorization: Bearer &lt;token&gt;"</code>.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Edit .mcp.json directly</h2>
+  <p>Every scope uses the same JSON format for server entries. Editing <code>.mcp.json</code> directly is worth it because it's checked into the repository, doubling as configuration-as-code for your team.</p>
+  <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"mcpServers"</span>: <span class="kw">{</span>
+    <span class="str">"claude-code-docs"</span>: <span class="kw">{</span>
+      <span class="str">"type"</span>: <span class="str">"http"</span>,
+      <span class="str">"url"</span>: <span class="str">"https://code.claude.com/docs/mcp"</span>
+    <span class="kw">}</span>,
+    <span class="str">"playwright"</span>: <span class="kw">{</span>
+      <span class="str">"type"</span>: <span class="str">"stdio"</span>,
+      <span class="str">"command"</span>: <span class="str">"npx"</span>,
+      <span class="str">"args"</span>: [<span class="str">"-y"</span>, <span class="str">"@playwright/mcp@latest"</span>]
+    <span class="kw">}</span>
+  <span class="kw">}</span>
+<span class="kw">}</span></pre>
+  <div class="api-fields">
+    <div class="field"><div class="name">url</div><div class="desc">For HTTP servers, the endpoint Claude Code connects to</div></div>
+    <div class="field"><div class="name">command / args</div><div class="desc">For stdio servers, the program it runs</div></div>
+  </div>
+  <p>The first time Claude Code sees a project-scoped server, it asks you to approve it, so a repository you clone can't launch processes without your consent.</p>
+</section>
+
+<section>
+  <h2>Connect from other surfaces</h2>
+  <p>This guide uses the <code>claude mcp</code> CLI commands, but every Claude Code surface can connect to MCP servers.</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">Desktop app</span><span class="event-desc">Add servers through the Connectors UI</span></div>
+    <div class="event-item"><span class="event-name">Claude Desktop chat app</span><span class="event-desc">Run <code>claude mcp add-from-claude-desktop</code> on macOS or WSL</span></div>
+    <div class="event-item"><span class="event-name">VS Code</span><span class="event-desc">Connect to external tools with MCP</span></div>
+    <div class="event-item"><span class="event-name">Claude Code on the web</span><span class="event-desc">Reads <code>.mcp.json</code> from your repository</span></div>
+    <div class="event-item"><span class="event-name">Claude.ai</span><span class="event-desc">Connectors added at claude.ai load automatically in the CLI when signed in</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>Troubleshooting</h2>
+  <div class="chip-row">
+    <span class="chip-label">Symptom:</span>
+    <div class="tr-chip chip active" onclick="trShow(0)">No servers configured</div>
+    <div class="tr-chip chip" onclick="trShow(1)">Failed / Connection error</div>
+    <div class="tr-chip chip" onclick="trShow(2)">Timed out at startup</div>
+    <div class="tr-chip chip" onclick="trShow(3)">Already exists</div>
+  </div>
+  <div class="tr-panel demo-panel visible" id="tr-p0">
+    <p>Claude Code didn't find any servers for the current directory. Local-scoped servers are tied to the project where you added them. Re-add the server from the project you're in now, or add it with <code>--scope user</code>. Correct files are <code>~/.claude.json</code> and <code>&lt;project&gt;/.mcp.json</code>.</p>
+  </div>
+  <div class="tr-panel demo-panel" id="tr-p1">
+    <p>The server didn't start or the URL didn't respond. Confirm the URL is reachable:</p>
+    <pre class="code-block"><span class="fn">curl</span> <span class="key">-I</span> <span class="str">https://mcp.sentry.dev/mcp</span></pre>
+    <div class="api-fields">
+      <div class="field"><div class="name">404 / 405</div><div class="desc">Server is up, many endpoints answer only POST</div></div>
+      <div class="field"><div class="name">401 / 403</div><div class="desc">Server is up, needs authentication</div></div>
+    </div>
+    <p>For stdio servers, run the configured command directly in your terminal to see the underlying error.</p>
+  </div>
+  <div class="tr-panel demo-panel" id="tr-p2">
+    <p>The server took longer than the default 30-second startup timeout. Increase the limit with <code>MCP_TIMEOUT</code>, in milliseconds:</p>
+    <pre class="code-block"><span class="key">MCP_TIMEOUT</span>=<span class="str">60000</span> <span class="fn">claude</span></pre>
+  </div>
+  <div class="tr-panel demo-panel" id="tr-p3">
+    <p>You've already added a server with that name at the same scope. Remove the existing entry first or choose a different name:</p>
+    <pre class="code-block"><span class="fn">claude mcp remove</span> claude-code-docs <span class="key">--scope</span> local</pre>
+  </div>
+</section>
+
+<section>
+  <h2>Next steps</h2>
+  <div class="takeaway">
+    <p>With one server connected, find more servers in the Anthropic Directory, share servers with your team using installation scopes, manage MCP access for an organization, reference MCP resources in prompts with @ mentions, run MCP prompts as commands, or build your own server with the MCP SDK.</p>
+  </div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+let mcpStep = 0;
+const MCP_MAX = 3;
+function mcpGoTo(n) {
+  mcpStep = Math.max(0, Math.min(MCP_MAX, n));
+  document.querySelectorAll('.mcp-panel').forEach((el, i) => el.classList.toggle('visible', i === mcpStep));
+  document.querySelectorAll('.mcp-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === mcpStep) t.classList.add('active');
+    else if (i < mcpStep) t.classList.add('done');
+  });
+  document.getElementById('mcpIndicator').textContent = `Step ${mcpStep + 1} of ${MCP_MAX + 1}`;
+}
+mcpGoTo(0);
+
+function mexShow(n) {
+  document.querySelectorAll('.mex-panel').forEach((el, i) => el.classList.toggle('visible', i === n));
+  document.querySelectorAll('.mex-chip').forEach((c, i) => c.classList.toggle('active', i === n));
+}
+function trShow(n) {
+  document.querySelectorAll('.tr-panel').forEach((el, i) => el.classList.toggle('visible', i === n));
+  document.querySelectorAll('.tr-chip').forEach((c, i) => c.classList.toggle('active', i === n));
+}
+</script>
+</body>
+</html>

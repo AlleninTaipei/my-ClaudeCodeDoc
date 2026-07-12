@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Output styles</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+           background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+    header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+             border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+    header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+    header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
+    main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+    section { margin-bottom: 52px; }
+    h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+    h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+    p  { color: #4a5568; margin-bottom: 12px; }
+    .code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px;
+      font-family: monospace; font-size: 0.82rem; color: #1a202c; overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+    .kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; } .cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+    .info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+    .info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+    .info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+    .takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+    .takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+    .api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+    .field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+    .field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+    .field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+    .response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 20px; margin-top: 16px; }
+    .response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+    .response-field:last-child { border-bottom: none; }
+    .rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 160px; flex-shrink: 0; }
+    .rf-val { font-size: 0.85rem; color: #374151; }
+    .stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+    .stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+    .stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+    .step-indicator { color: #6b7280; font-size: 0.82rem; margin-top: 10px; display: block; }
+    .demo-panel { display: none; }
+    .demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+    .col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+    .col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+    .col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+    .col-card p:last-child { margin-bottom: 0; }
+    .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .chip-label { font-size: 0.75rem; color: #6b7280; }
+    .chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+    .chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+    @media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+    #themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+      cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+    #themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+    body.dark { background: #0f1117; color: #e2e8f0; }
+    body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+    body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+    body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; }
+    body.dark p { color: #a0aec0; }
+    body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+    body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+    body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+    body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; } body.dark .info-box p { color: #a0aec0; }
+    body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; } body.dark .takeaway p { color: #c6f6d5; }
+    body.dark .field { background: #1a202c; border-color: #2d3748; } body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+    body.dark .response-box { background: #1a202c; border-color: #2d3748; } body.dark .response-field { border-bottom-color: #2d3748; }
+    body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+    body.dark .step-indicator { color: #718096; }
+    body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+    body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+    body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+    body.dark .col-card { background: #1a202c; border-color: #2d3748; } body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+    body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+    body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+    body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+    body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+  </style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Output styles</h1>
+  <p>Adapt Claude Code for uses beyond software engineering.</p>
+</header>
+
+<main>
+
+<section>
+  <h2>Built-in output styles</h2>
+  <p>Output styles change how Claude responds, not what Claude knows — they modify the system prompt to set role, tone, and output format.</p>
+  <div class="chip-row">
+    <span class="chip-label">Style:</span>
+    <div class="bi-chip chip active" onclick="biShow(0)">Default</div>
+    <div class="bi-chip chip" onclick="biShow(1)">Proactive</div>
+    <div class="bi-chip chip" onclick="biShow(2)">Explanatory</div>
+    <div class="bi-chip chip" onclick="biShow(3)">Learning</div>
+  </div>
+  <div class="bi-panel demo-panel visible" id="bi-0">
+    <p>The existing system prompt, designed to help complete software engineering tasks efficiently.</p>
+  </div>
+  <div class="bi-panel demo-panel" id="bi-1">
+    <p>Claude executes immediately, makes reasonable assumptions instead of pausing for routine decisions, and prefers action over planning. Stronger autonomous-execution guidance than auto mode, but permission prompts still appear before tools run since it doesn't change your permission mode.</p>
+  </div>
+  <div class="bi-panel demo-panel" id="bi-2">
+    <p>Provides educational "Insights" in between helping complete software engineering tasks, to help understand implementation choices and codebase patterns.</p>
+  </div>
+  <div class="bi-panel demo-panel" id="bi-3">
+    <p>Collaborative, learn-by-doing mode. Shares "Insights" while coding and asks you to contribute small, strategic pieces of code yourself — Claude Code adds <code>TODO(human)</code> markers for you to implement.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Change your output style</h2>
+  <p>Run <code>/config</code> and select <strong>Output style</strong> to pick from a menu. Saved to <code>.claude/settings.local.json</code> at the local project level.</p>
+  <pre class="code-block">{ <span class="str">"outputStyle"</span>: <span class="str">"Explanatory"</span> }</pre>
+  <div class="info-box"><span class="tag">NOTE</span><p>The standalone /output-style command was deprecated in v2.1.73 and removed in v2.1.91 (max-version 2.1.90). Use /config or edit the outputStyle setting directly.</p></div>
+  <p>Output style is part of the system prompt, read once at session start. Changes take effect after <code>/clear</code> or a new session.</p>
+</section>
+
+<section>
+  <h2>Create a custom output style</h2>
+  <p>A custom output style is a Markdown file: frontmatter for metadata, then instructions added to the system prompt.</p>
+
+  <div class="stage-tabs">
+    <div name="cs" class="cs-tab stage-tab active" onclick="csGoTo(0)">1 · Create file</div>
+    <div class="cs-tab stage-tab" onclick="csGoTo(1)">2 · Frontmatter</div>
+    <div class="cs-tab stage-tab" onclick="csGoTo(2)">3 · Switch</div>
+  </div>
+  <div class="cs-panel demo-panel visible" id="cs-p0">
+    <p>Save at one of three levels; the file name becomes the style name unless <code>name</code> is set in frontmatter.</p>
+    <div class="response-box">
+      <div class="response-field"><span class="rf-key">User</span><span class="rf-val">~/.claude/output-styles</span></div>
+      <div class="response-field"><span class="rf-key">Project</span><span class="rf-val">.claude/output-styles</span></div>
+      <div class="response-field"><span class="rf-key">Managed policy</span><span class="rf-val">.claude/output-styles inside the managed settings directory</span></div>
+    </div>
+    <p>Project output styles load from every .claude/output-styles/ between the working directory and the repo root. As of v2.1.178, when multiple nested directories define the same style name, the one closest to the working directory wins.</p>
+  </div>
+  <div class="cs-panel demo-panel" id="cs-p1">
+    <p>Decide whether to keep Claude Code's software engineering instructions with <code>keep-coding-instructions: true</code>.</p>
+    <pre class="code-block"><span class="cmt">---</span>
+<span class="key">name</span>: Diagrams first
+<span class="key">description</span>: <span class="str">Lead every explanation with a diagram</span>
+<span class="key">keep-coding-instructions</span>: <span class="kw">true</span>
+<span class="cmt">---</span>
+
+When explaining code, architecture, or data flow, start with a Mermaid diagram showing the structure, then explain in prose.
+
+## Diagram conventions
+
+Use `flowchart TD` for control flow and `sequenceDiagram` for request paths. Keep diagrams under 15 nodes.</pre>
+  </div>
+  <div class="cs-panel demo-panel" id="cs-p2">
+    <p>Run <code>/config</code> and select your style under <strong>Output style</strong>. Takes effect after <code>/clear</code> or the next session.</p>
+    <p>Plugins can also ship output styles in an <code>output-styles/</code> directory.</p>
+  </div>
+  <span class="step-indicator" id="csIndicator">Step 1 of 3</span>
+
+  <h3>Frontmatter fields</h3>
+  <div class="api-fields">
+    <div class="field"><span class="name">name</span><div class="desc">Style name if not the file name. Default: inherits from file name</div></div>
+    <div class="field"><span class="name">description</span><div class="desc">Shown in the /config picker. Default: none</div></div>
+    <div class="field"><span class="name">keep-coding-instructions</span><div class="desc">Keep built-in software engineering instructions. Default: false</div></div>
+    <div class="field"><span class="name">force-for-plugin</span><div class="desc">Plugin output styles only: apply automatically when the plugin is enabled, overriding the user's setting. Default: false</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>How output styles work</h2>
+  <ul style="color:#4a5568;margin-left:20px;">
+    <li>Custom instructions are added to the end of the system prompt</li>
+    <li>All styles trigger reminders for Claude to adhere to the instructions during the conversation</li>
+    <li>Custom styles leave out the built-in software engineering instructions (scoping changes, comments, verification) unless <code>keep-coding-instructions: true</code></li>
+  </ul>
+  <p>Adding instructions increases input tokens, though prompt caching reduces this after the first request. Explanatory and Learning produce longer responses by design, increasing output tokens. For custom styles, output usage depends on your instructions.</p>
+</section>
+
+<section>
+  <h2>Comparisons to related features</h2>
+  <div class="response-box">
+    <div class="response-field"><span class="rf-key">Output styles</span><span class="rf-val">Modifies the system prompt — different role/tone/format every turn</span></div>
+    <div class="response-field"><span class="rf-key">CLAUDE.md</span><span class="rf-val">Adds a user message after the system prompt — always-on project context</span></div>
+    <div class="response-field"><span class="rf-key">--append-system-prompt</span><span class="rf-val">Appends without removing anything — one-off addition for a single invocation</span></div>
+    <div class="response-field"><span class="rf-key">Agents</span><span class="rf-val">Subagent with its own system prompt, model, tools — separately scoped helper</span></div>
+    <div class="response-field"><span class="rf-key">Skills</span><span class="rf-val">Loads task-specific instructions when invoked or relevant — reusable workflow</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>Related resources</h2>
+  <div class="two-col">
+    <div class="col-card"><div class="col-card-title">Settings</div><p>Where the outputStyle field lives and how settings precedence works.</p></div>
+    <div class="col-card"><div class="col-card-title">Permission modes</div><p>How the Proactive style compares to auto mode.</p></div>
+    <div class="col-card"><div class="col-card-title">Plugins</div><p>Package and distribute output styles alongside skills, hooks, and agents.</p></div>
+    <div class="col-card"><div class="col-card-title">Debug your configuration</div><p>Diagnose why an output style isn't taking effect.</p></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+  }
+
+  function biShow(n) {
+    document.querySelectorAll('.bi-panel').forEach((el, i) => el.classList.toggle('visible', i === n));
+    document.querySelectorAll('.bi-chip').forEach((c, i) => c.classList.toggle('active', i === n));
+  }
+
+  let csStep = 0; const CS_MAX = 2;
+  function csGoTo(n) {
+    csStep = Math.max(0, Math.min(CS_MAX, n));
+    document.querySelectorAll('.cs-panel').forEach((el, i) => el.classList.toggle('visible', i === csStep));
+    document.querySelectorAll('.cs-tab').forEach((t, i) => {
+      t.classList.remove('active', 'done');
+      if (i === csStep) t.classList.add('active'); else if (i < csStep) t.classList.add('done');
+    });
+    document.getElementById('csIndicator').textContent = `Step ${csStep + 1} of ${CS_MAX + 1}`;
+  }
+  csGoTo(0);
+</script>
+</body>
+</html>

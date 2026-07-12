@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Customize your status line</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 190px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 170px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-top: 10px; display: block; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Customize your status line</h1>
+  <p>Configure a custom status bar to monitor context window usage, costs, and git status in Claude Code.</p>
+</header>
+
+<main>
+
+<section>
+  <h2>Set up a status line</h2>
+  <p>The status line is a customizable bar at the bottom of Claude Code that runs any shell script you configure. It receives JSON session data on stdin and displays whatever your script prints.</p>
+  <div class="chip-row">
+    <span class="chip-label">Method:</span>
+    <div class="setup-chip chip active" onclick="setupShow(0)">/statusline command</div>
+    <div class="setup-chip chip" onclick="setupShow(1)">Manual settings.json</div>
+  </div>
+  <div class="setup-panel demo-panel visible" id="setup-p0">
+    <pre class="code-block">/statusline show model name and context percentage with a progress bar</pre>
+    <p>Claude Code generates a script file in <code>~/.claude/</code> and updates your settings automatically.</p>
+  </div>
+  <div class="setup-panel demo-panel" id="setup-p1">
+    <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"statusLine"</span>: <span class="kw">{</span>
+    <span class="str">"type"</span>: <span class="str">"command"</span>,
+    <span class="str">"command"</span>: <span class="str">"~/.claude/statusline.sh"</span>,
+    <span class="str">"padding"</span>: <span class="kw">2</span>
+  <span class="kw">}</span>
+<span class="kw">}</span></pre>
+    <div class="api-fields">
+      <div class="field"><div class="name">padding</div><div class="desc">Extra horizontal spacing in characters, default 0</div></div>
+      <div class="field"><div class="name">refreshInterval</div><div class="desc">Re-runs the command every N seconds, minimum 1</div></div>
+      <div class="field"><div class="name">hideVimModeIndicator</div><div class="desc">Suppresses the built-in -- INSERT -- text</div></div>
+    </div>
+  </div>
+  <div class="info-box">
+    <span class="tag">DISABLE</span>
+    <p>Run /statusline and ask it to remove or clear your status line, or manually delete the statusLine field from settings.json.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Build a status line step by step</h2>
+  <p>This walkthrough shows what's happening under the hood by manually creating a status line that displays the current model, working directory, and context window usage percentage.</p>
+  <div class="stage-tabs">
+    <div class="bs-tab stage-tab active" onclick="bsGoTo(0)">1 · Write script</div>
+    <div class="bs-tab stage-tab" onclick="bsGoTo(1)">2 · Make executable</div>
+    <div class="bs-tab stage-tab" onclick="bsGoTo(2)">3 · Add to settings</div>
+  </div>
+  <div class="bs-panel demo-panel visible" id="bs-p0">
+    <pre class="code-block"><span class="cmt">#!/bin/bash</span>
+<span class="cmt"># Read JSON data that Claude Code sends to stdin</span>
+<span class="key">input</span>=$(<span class="fn">cat</span>)
+
+<span class="key">MODEL</span>=$(<span class="fn">echo</span> <span class="str">"$input"</span> | <span class="fn">jq</span> <span class="key">-r</span> <span class="str">'.model.display_name'</span>)
+<span class="key">DIR</span>=$(<span class="fn">echo</span> <span class="str">"$input"</span> | <span class="fn">jq</span> <span class="key">-r</span> <span class="str">'.workspace.current_dir'</span>)
+<span class="key">PCT</span>=$(<span class="fn">echo</span> <span class="str">"$input"</span> | <span class="fn">jq</span> <span class="key">-r</span> <span class="str">'.context_window.used_percentage // 0'</span> | <span class="fn">cut</span> <span class="key">-d.</span> <span class="key">-f1</span>)
+
+<span class="fn">echo</span> <span class="str">"[$MODEL] 📁 ${DIR##*/} | ${PCT}% context"</span></pre>
+    <p>Save to <code>~/.claude/statusline.sh</code>.</p>
+  </div>
+  <div class="bs-panel demo-panel" id="bs-p1">
+    <pre class="code-block"><span class="fn">chmod</span> <span class="key">+x</span> ~/.claude/statusline.sh</pre>
+  </div>
+  <div class="bs-panel demo-panel" id="bs-p2">
+    <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"statusLine"</span>: <span class="kw">{</span>
+    <span class="str">"type"</span>: <span class="str">"command"</span>,
+    <span class="str">"command"</span>: <span class="str">"~/.claude/statusline.sh"</span>
+  <span class="kw">}</span>
+<span class="kw">}</span></pre>
+    <p>Settings reload automatically, but changes won't appear until your next interaction.</p>
+  </div>
+  <span class="step-indicator" id="bsIndicator">Step 1 of 3</span>
+</section>
+
+<section>
+  <h2>How status lines work</h2>
+  <p>Claude Code runs your script and pipes JSON session data to it via stdin. Your script reads the JSON, extracts what it needs, and prints text to stdout.</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">Trigger events</span><span class="event-desc">After each new assistant message, /compact finishing, permission mode change, vim toggle</span></div>
+    <div class="event-item"><span class="event-name">Debounce</span><span class="event-desc">300ms, rapid changes batch together</span></div>
+    <div class="event-item"><span class="event-name">Multiple lines</span><span class="event-desc">Each echo/print statement displays as a separate row</span></div>
+    <div class="event-item"><span class="event-name">Colors</span><span class="event-desc">ANSI escape codes like \033[32m for green</span></div>
+    <div class="event-item"><span class="event-name">Links</span><span class="event-desc">OSC 8 escape sequences for clickable text</span></div>
+  </div>
+  <div class="info-box">
+    <span class="tag">NOTE</span>
+    <p>Claude Code captures your script's output, so tput cols cannot read terminal size. Read the COLUMNS and LINES environment variables instead (v2.1.153+). The status line runs locally and does not consume API tokens.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Available data</h2>
+  <p>Claude Code sends a JSON object to your script via stdin. Key fields:</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">model.display_name</div><div class="desc">Current model display name</div></div>
+    <div class="field"><div class="name">workspace.current_dir</div><div class="desc">Current working directory</div></div>
+    <div class="field"><div class="name">cost.total_cost_usd</div><div class="desc">Estimated session cost in USD</div></div>
+    <div class="field"><div class="name">cost.total_duration_ms</div><div class="desc">Wall-clock time since session started</div></div>
+    <div class="field"><div class="name">context_window.used_percentage</div><div class="desc">Pre-calculated context window usage</div></div>
+    <div class="field"><div class="name">effort.level</div><div class="desc">Current reasoning effort level</div></div>
+    <div class="field"><div class="name">rate_limits.five_hour.used_percentage</div><div class="desc">5-hour rate limit consumed, Pro/Max only</div></div>
+    <div class="field"><div class="name">pr.number, pr.url</div><div class="desc">Open pull request for the current branch</div></div>
+    <div class="field"><div class="name">vim.mode</div><div class="desc">NORMAL, INSERT, VISUAL, or VISUAL LINE</div></div>
+    <div class="field"><div class="name">session_id</div><div class="desc">Unique session identifier, stable across invocations</div></div>
+  </div>
+  <div class="response-box">
+    <div class="response-field"><div class="rf-key">May be absent</div><div class="rf-val">session_name, prompt_id, workspace.git_worktree, effort, vim, agent, pr, worktree, rate_limits</div></div>
+    <div class="response-field"><div class="rf-key">May be null</div><div class="rf-val">context_window.current_usage before first API call or right after /compact</div></div>
+  </div>
+  <h3>Context window fields</h3>
+  <p><code>used_percentage</code> is calculated from input tokens only: <code>input_tokens + cache_creation_input_tokens + cache_read_input_tokens</code>, not including output tokens.</p>
+</section>
+
+<section>
+  <h2>Examples</h2>
+  <p>Common status line patterns, all reading JSON from stdin via jq.</p>
+  <div class="chip-row">
+    <span class="chip-label">Pattern:</span>
+    <div class="ex-chip chip active" onclick="exShow(0)">Context window</div>
+    <div class="ex-chip chip" onclick="exShow(1)">Git status colors</div>
+    <div class="ex-chip chip" onclick="exShow(2)">Cost & duration</div>
+    <div class="ex-chip chip" onclick="exShow(3)">Multi-line</div>
+    <div class="ex-chip chip" onclick="exShow(4)">Clickable links</div>
+    <div class="ex-chip chip" onclick="exShow(5)">Rate limits</div>
+  </div>
+  <div class="ex-panel demo-panel visible" id="ex-p0">
+    <pre class="code-block"><span class="key">PCT</span>=$(<span class="fn">echo</span> <span class="str">"$input"</span> | <span class="fn">jq</span> <span class="key">-r</span> <span class="str">'.context_window.used_percentage // 0'</span> | <span class="fn">cut</span> <span class="key">-d.</span> <span class="key">-f1</span>)
+<span class="key">BAR_WIDTH</span>=10
+<span class="key">FILLED</span>=$((PCT * BAR_WIDTH / 100))
+<span class="cmt"># build bar from filled ▓ and empty ░ blocks</span>
+<span class="fn">echo</span> <span class="str">"[$MODEL] $BAR $PCT%"</span></pre>
+  </div>
+  <div class="ex-panel demo-panel" id="ex-p1">
+    <pre class="code-block"><span class="key">GREEN</span>=<span class="str">'\033[32m'</span>; <span class="key">YELLOW</span>=<span class="str">'\033[33m'</span>; <span class="key">RESET</span>=<span class="str">'\033[0m'</span>
+<span class="key">STAGED</span>=$(<span class="fn">git</span> diff --cached --numstat | <span class="fn">wc</span> -l)
+<span class="key">MODIFIED</span>=$(<span class="fn">git</span> diff --numstat | <span class="fn">wc</span> -l)
+<span class="fn">echo</span> -e <span class="str">"[$MODEL] 🌿 $BRANCH ${GREEN}+${STAGED}${RESET}${YELLOW}~${MODIFIED}${RESET}"</span></pre>
+  </div>
+  <div class="ex-panel demo-panel" id="ex-p2">
+    <pre class="code-block"><span class="key">COST</span>=$(<span class="fn">echo</span> <span class="str">"$input"</span> | <span class="fn">jq</span> <span class="key">-r</span> <span class="str">'.cost.total_cost_usd // 0'</span>)
+<span class="key">DURATION_MS</span>=$(<span class="fn">echo</span> <span class="str">"$input"</span> | <span class="fn">jq</span> <span class="key">-r</span> <span class="str">'.cost.total_duration_ms // 0'</span>)
+<span class="fn">echo</span> <span class="str">"[$MODEL] 💰 $COST_FMT | ⏱️ ${MINS}m ${SECS}s"</span></pre>
+  </div>
+  <div class="ex-panel demo-panel" id="ex-p3">
+    <pre class="code-block"><span class="cmt"># each echo prints a separate row</span>
+<span class="fn">echo</span> -e <span class="str">"${CYAN}[$MODEL]${RESET} 📁 ${DIR##*/}$BRANCH"</span>
+<span class="fn">echo</span> -e <span class="str">"${BAR_COLOR}${BAR}${RESET} ${PCT}% | ${YELLOW}${COST_FMT}${RESET}"</span></pre>
+    <p>Threshold-based colors: green under 70%, yellow 70-89%, red 90%+.</p>
+  </div>
+  <div class="ex-panel demo-panel" id="ex-p4">
+    <pre class="code-block"><span class="key">REMOTE</span>=$(<span class="fn">git</span> remote get-url origin | <span class="fn">sed</span> <span class="str">'s/git@github.com:/https:\/\/github.com\//'</span>)
+<span class="cmt"># OSC 8 format: \e]8;;URL\a then TEXT then \e]8;;\a</span>
+<span class="fn">printf</span> <span class="str">'%b'</span> <span class="str">"[$MODEL] 🔗 \e]8;;${REMOTE}\a${REPO_NAME}\e]8;;\a\n"</span></pre>
+  </div>
+  <div class="ex-panel demo-panel" id="ex-p5">
+    <pre class="code-block"><span class="key">FIVE_H</span>=$(<span class="fn">echo</span> <span class="str">"$input"</span> | <span class="fn">jq</span> <span class="key">-r</span> <span class="str">'.rate_limits.five_hour.used_percentage // empty'</span>)
+<span class="key">WEEK</span>=$(<span class="fn">echo</span> <span class="str">"$input"</span> | <span class="fn">jq</span> <span class="key">-r</span> <span class="str">'.rate_limits.seven_day.used_percentage // empty'</span>)
+<span class="fn">echo</span> <span class="str">"[$MODEL] | 5h: $FIVE_H% 7d: $WEEK%"</span></pre>
+    <p>Only present for Claude.ai subscribers (Pro/Max) after the first API response.</p>
+  </div>
+  <div class="info-box">
+    <span class="tag">CACHING</span>
+    <p>git status or git diff can be slow. Cache git info to a temp file keyed by session_id, and only refresh every 5 seconds. Use session_id, not process PID, since the PID changes on every invocation.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Subagent status lines</h2>
+  <p>The <code>subagentStatusLine</code> setting renders a custom row body for each subagent shown in the agent panel below the prompt.</p>
+  <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"subagentStatusLine"</span>: <span class="kw">{</span>
+    <span class="str">"type"</span>: <span class="str">"command"</span>,
+    <span class="str">"command"</span>: <span class="str">"~/.claude/subagent-statusline.sh"</span>
+  <span class="kw">}</span>
+<span class="kw">}</span></pre>
+  <p>The command runs once per refresh tick with all visible subagent rows passed as JSON on stdin. Write one JSON line per row to override: <code>{"id": "&lt;task id&gt;", "content": "&lt;row body&gt;"}</code>.</p>
+</section>
+
+<section>
+  <h2>Tips</h2>
+  <div class="takeaway">
+    <p>Test with mock input piped directly to your script. Keep output short since the status bar has limited width. Cache slow operations like git status, since your script runs frequently during active sessions. Community projects like ccstatusline and starship-claude provide pre-built configurations.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Troubleshooting</h2>
+  <div class="chip-row">
+    <span class="chip-label">Symptom:</span>
+    <div name="tr" class="tr-chip chip active" onclick="trShow(0)">Not appearing</div>
+    <div class="tr-chip chip" onclick="trShow(1)">Shows -- or empty</div>
+    <div class="tr-chip chip" onclick="trShow(2)">Links not clickable</div>
+    <div class="tr-chip chip" onclick="trShow(3)">Workspace trust</div>
+  </div>
+  <div class="tr-panel demo-panel visible" id="tr-p0">
+    <p>Verify the script is executable with <code>chmod +x</code>, outputs to stdout not stderr, and run <code>claude --debug</code> to log the exit code and stderr from the first invocation.</p>
+  </div>
+  <div class="tr-panel demo-panel" id="tr-p1">
+    <p>Fields may be null before the first API response completes. Handle null values with fallbacks such as <code>// 0</code> in jq, and restart Claude Code if values remain empty.</p>
+  </div>
+  <div class="tr-panel demo-panel" id="tr-p2">
+    <p>Verify your terminal supports OSC 8 hyperlinks (iTerm2, Kitty, WezTerm). Terminal.app does not. Set <code>FORCE_HYPERLINK=1</code> to override detection.</p>
+  </div>
+  <div class="tr-panel demo-panel" id="tr-p3">
+    <p>The status line command only runs after you've accepted the workspace trust dialog for the current directory. If not accepted, you'll see "statusline skipped · restart to fix".</p>
+  </div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+function setupShow(n) {
+  document.querySelectorAll('.setup-panel').forEach((el, i) => el.classList.toggle('visible', i === n));
+  document.querySelectorAll('.setup-chip').forEach((c, i) => c.classList.toggle('active', i === n));
+}
+
+let bsStep = 0;
+function bsGoTo(n) {
+  bsStep = Math.max(0, Math.min(2, n));
+  document.querySelectorAll('.bs-panel').forEach((el, i) => el.classList.toggle('visible', i === bsStep));
+  document.querySelectorAll('.bs-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === bsStep) t.classList.add('active');
+    else if (i < bsStep) t.classList.add('done');
+  });
+  document.getElementById('bsIndicator').textContent = `Step ${bsStep + 1} of 3`;
+}
+bsGoTo(0);
+
+function exShow(n) {
+  document.querySelectorAll('.ex-panel').forEach((el, i) => el.classList.toggle('visible', i === n));
+  document.querySelectorAll('.ex-chip').forEach((c, i) => c.classList.toggle('active', i === n));
+}
+function trShow(n) {
+  document.querySelectorAll('.tr-panel').forEach((el, i) => el.classList.toggle('visible', i === n));
+  document.querySelectorAll('.tr-chip').forEach((c, i) => c.classList.toggle('active', i === n));
+}
+</script>
+</body>
+</html>

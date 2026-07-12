@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TypeScript SDK V2 session API (removed)</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f0f4f8;color:#1a202c;line-height:1.7;}
+header{background:linear-gradient(135deg,#dbeafe 0%,#f0f4f8 100%);border-bottom:1px solid #bfdbfe;padding:48px 24px 40px;text-align:center;}
+header h1{font-size:2.1rem;font-weight:700;color:#1e3a5f;}
+header p{margin-top:10px;color:#4a5568;font-size:1.02rem;max-width:640px;margin-inline:auto;}
+main{max-width:900px;margin:0 auto;padding:40px 24px 80px;}
+section{margin-bottom:44px;}
+h2{font-size:1.35rem;font-weight:600;color:#1e40af;border-left:4px solid #3b82f6;padding-left:14px;margin-bottom:16px;}
+h3{font-size:1.0rem;font-weight:600;color:#1a202c;margin:16px 0 8px;}
+h4{font-size:0.88rem;font-weight:700;color:#374151;margin:12px 0 6px;}
+p{color:#4a5568;margin-bottom:10px;font-size:0.92rem;}
+ul,ol{color:#4a5568;font-size:0.88rem;margin:8px 0 8px 20px;}
+li{margin-bottom:5px;}
+code.inline{font-family:monospace;background:#e2e8f0;padding:1px 5px;border-radius:4px;font-size:0.85em;color:#7c3aed;}
+.code-block{background:#f8fafc;border:1px solid #cbd5e0;border-radius:8px;padding:14px 16px;font-family:monospace;font-size:0.8rem;color:#1a202c;overflow-x:auto;margin-top:10px;line-height:1.65;white-space:pre;}
+.kw{color:#7c3aed;} .fn{color:#16a34a;} .str{color:#d97706;} .cmt{color:#94a3b8;font-style:italic;} .key{color:#2563eb;}
+.warn-box{background:#fef3c7;border:1px solid #fcd34d;border-radius:10px;padding:16px 20px;margin-top:14px;}
+.warn-box .tag{display:inline-block;background:#d97706;color:#fff;font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:10px;letter-spacing:0.05em;}
+.warn-box p{color:#78350f;font-size:0.88rem;margin:0;}
+.info-box{background:#dbeafe;border:1px solid #93c5fd;border-radius:10px;padding:14px 18px;margin-top:12px;}
+.info-box .tag{display:inline-block;background:#3b82f6;color:#fff;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:0.05em;}
+.info-box p{color:#1e3a5f;font-size:0.85rem;margin:0;}
+.takeaway{background:linear-gradient(135deg,#dcfce7,#f0fdf4);border:1px solid #4ade80;border-radius:10px;padding:16px 20px;margin-top:14px;}
+.takeaway p{color:#166534;font-size:0.88rem;margin:0;}
+.stage-tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+.stage-tab{padding:7px 15px;border-radius:20px;font-size:0.8rem;font-weight:600;cursor:pointer;border:1px solid #cbd5e0;background:#e2e8f0;color:#4a5568;transition:all .2s;}
+.stage-tab.active{background:#2563eb;border-color:#3b82f6;color:#fff;}
+.stage-tab.done{background:#166534;border-color:#4ade80;color:#dcfce7;}
+.step-indicator{color:#6b7280;font-size:0.8rem;margin-top:10px;display:block;}
+.demo-panel{display:none;}
+.demo-panel.visible{display:block;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+details.v1cmp{margin-top:12px;background:#fff;border:1px solid #cbd5e0;border-radius:8px;}
+details.v1cmp summary{cursor:pointer;padding:9px 14px;font-size:0.82rem;font-weight:600;color:#6b7280;}
+details.v1cmp[open] summary{border-bottom:1px solid #e2e8f0;}
+details.v1cmp .code-block{margin:10px 14px 14px;}
+.acc{background:#fff;border:1px solid #cbd5e0;border-radius:8px;margin-top:10px;overflow:hidden;}
+.acc summary{cursor:pointer;padding:11px 16px;font-family:monospace;font-size:0.86rem;font-weight:700;color:#2563eb;list-style:none;}
+.acc summary::-webkit-details-marker{display:none;}
+.acc summary::after{content:'+';float:right;color:#9ca3af;font-family:sans-serif;font-weight:400;}
+.acc[open] summary::after{content:'\2212';}
+.acc-body{padding:2px 16px 16px;}
+.spec-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:0.8rem;}
+.spec-table th{text-align:left;color:#6b7280;font-weight:700;text-transform:uppercase;font-size:0.65rem;letter-spacing:0.05em;padding:6px 8px;border-bottom:1px solid #cbd5e0;}
+.spec-table td{padding:6px 8px;border-bottom:1px solid #e2e8f0;vertical-align:top;font-size:0.8rem;color:#374151;}
+.spec-table td:first-child{font-family:monospace;color:#16a34a;white-space:nowrap;}
+#themeToggle{position:fixed;top:16px;right:16px;z-index:9999;padding:7px 14px;border-radius:20px;font-size:0.78rem;font-weight:700;cursor:pointer;border:1px solid #cbd5e0;background:#fff;color:#1a202c;transition:all .25s;box-shadow:0 2px 8px rgba(0,0,0,.12);letter-spacing:.03em;}
+#themeToggle:hover{border-color:#2563eb;color:#2563eb;}
+
+body.dark{background:#0f1117;color:#e2e8f0;}
+body.dark header{background:linear-gradient(135deg,#1a1f2e 0%,#0f1117 100%);border-bottom-color:#2d3748;}
+body.dark header h1{color:#f7fafc;} body.dark header p{color:#a0aec0;}
+body.dark h2{color:#90cdf4;border-left-color:#4299e1;} body.dark h3{color:#e2e8f0;} body.dark h4{color:#cbd5e0;}
+body.dark p,body.dark ul,body.dark ol{color:#a0aec0;}
+body.dark code.inline{background:#1a202c;color:#b794f4;}
+body.dark .code-block{background:#0d1117;border-color:#2d3748;color:#e2e8f0;}
+body.dark .kw{color:#9f7aea;} body.dark .fn{color:#68d391;} body.dark .str{color:#f6ad55;} body.dark .cmt{color:#4a5568;} body.dark .key{color:#63b3ed;}
+body.dark .warn-box{background:#2a2010;border-color:#7a5a20;}
+body.dark .warn-box .tag{background:#7a5a20;color:#fbd38d;}
+body.dark .warn-box p{color:#fbd38d;}
+body.dark .info-box{background:#1a202c;border-color:#2a4a6a;}
+body.dark .info-box .tag{background:#2a4a6a;color:#90cdf4;}
+body.dark .info-box p{color:#a0aec0;}
+body.dark .takeaway{background:linear-gradient(135deg,#1a2a1a,#1a202c);border-color:#276749;}
+body.dark .takeaway p{color:#c6f6d5;}
+body.dark .stage-tab{background:#1a202c;border-color:#2d3748;color:#718096;}
+body.dark .stage-tab.active{background:#2b6cb0;border-color:#4299e1;color:#fff;}
+body.dark .stage-tab.done{background:#276749;border-color:#48bb78;color:#c6f6d5;}
+body.dark .step-indicator{color:#718096;}
+body.dark details.v1cmp{background:#1a202c;border-color:#2d3748;}
+body.dark details.v1cmp summary{color:#718096;border-color:#2d3748;}
+body.dark .acc{background:#1a202c;border-color:#2d3748;}
+body.dark .acc summary{color:#63b3ed;}
+body.dark .spec-table th{color:#4a5568;border-bottom-color:#2d3748;}
+body.dark .spec-table td{color:#a0aec0;border-bottom-color:#2d3748;}
+body.dark .spec-table td:first-child{color:#68d391;}
+body.dark #themeToggle{background:#1a202c;color:#e2e8f0;border-color:#4a5568;box-shadow:0 2px 8px rgba(0,0,0,.4);}
+body.dark #themeToggle:hover{border-color:#90cdf4;color:#90cdf4;}
+</style>
+</head>
+<body>
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+<header>
+<h1>TypeScript SDK V2 session API <span style="color:#d97706;">(removed)</span></h1>
+<p>Reference for the removed V2 TypeScript Agent SDK session API — kept for teams still on Agent SDK 0.2.x or earlier.</p>
+</header>
+
+<main>
+<div class="warn-box"><span class="tag">REMOVED</span><p>TypeScript Agent SDK 0.3.142 removes <code class="inline">unstable_v2_createSession</code>, <code class="inline">unstable_v2_resumeSession</code>, <code class="inline">unstable_v2_prompt</code>, and the <code class="inline">SDKSession</code>/<code class="inline">SDKSessionOptions</code> types. To migrate, use the <code class="inline">query()</code> API and the session options it accepts — pass an <code class="inline">AsyncIterable&lt;SDKUserMessage&gt;</code> for multi-turn conversations, or <code class="inline">options.resume</code> to continue a saved session.</p></div>
+
+<section>
+<h2>What V2 was</h2>
+<p>V2 was an experimental session API that removed the need for async generators and yield coordination. Instead of managing generator state across turns, each turn was a separate <code class="inline">send()</code>/<code class="inline">stream()</code> cycle. The API surface reduced to three concepts:</p>
+<ul>
+<li><code class="inline">createSession()</code> / <code class="inline">resumeSession()</code> — start or continue a conversation</li>
+<li><code class="inline">session.send()</code> — send a message</li>
+<li><code class="inline">session.stream()</code> — get the response</li>
+</ul>
+</section>
+
+<section>
+<h2>Installation</h2>
+<p>Agent SDK 0.2.x is the last version including the V2 interface. The package jumped from 0.2.x directly to 0.3.142, so the removal version above and the install pin below describe the same boundary.</p>
+<pre class="code-block"><code class="autohl">npm install @anthropic-ai/claude-agent-sdk@0.2</code></pre>
+<div class="info-box"><span class="tag">NOTE</span><p>The SDK bundles a native Claude Code binary for your platform as an optional dependency, so a separate Claude Code install isn't needed.</p></div>
+</section>
+
+<section>
+<h2>Quick start</h2>
+<p>Five stages, from a one-shot prompt to session cleanup. Each panel shows the V2 code; open "See the same operation in V1" to compare against the current, supported API.</p>
+
+<div class="stage-tabs" id="qsTabs">
+<div class="qs-tab stage-tab active" onclick="qsGoTo(0)">1 · One-shot prompt</div>
+<div class="qs-tab stage-tab" onclick="qsGoTo(1)">2 · Basic session</div>
+<div class="qs-tab stage-tab" onclick="qsGoTo(2)">3 · Multi-turn</div>
+<div class="qs-tab stage-tab" onclick="qsGoTo(3)">4 · Session resume</div>
+<div class="qs-tab stage-tab" onclick="qsGoTo(4)">5 · Cleanup</div>
+</div>
+
+<div class="qs-panel demo-panel visible" id="qs-p0">
+<p>For simple single-turn queries where you don't need to maintain a session, use <code class="inline">unstable_v2_prompt()</code>. This example sends a math question and logs the answer.</p>
+<pre class="code-block"><code class="autohl">import { unstable_v2_prompt } from "@anthropic-ai/claude-agent-sdk";
+
+const result = await unstable_v2_prompt("What is 2 + 2?", {
+  model: "claude-opus-4-7"
+});
+if (result.subtype === "success") {
+  console.log(result.result);
+}</code></pre>
+<details class="v1cmp"><summary>See the same operation in V1</summary>
+<pre class="code-block"><code class="autohl">import { query } from "@anthropic-ai/claude-agent-sdk";
+
+const q = query({
+  prompt: "What is 2 + 2?",
+  options: { model: "claude-opus-4-7" }
+});
+
+for await (const msg of q) {
+  if (msg.type === "result" && msg.subtype === "success") {
+    console.log(msg.result);
+  }
+}</code></pre>
+</details>
+</div>
+
+<div class="qs-panel demo-panel" id="qs-p1">
+<p>For interactions beyond a single prompt, create a session. V2 separates sending (<code class="inline">send()</code>) and streaming (<code class="inline">stream()</code>) into distinct steps, making it easier to add logic between turns. This example uses <code class="inline">await using</code> (TypeScript 5.2+) to close the session automatically when the block exits.</p>
+<pre class="code-block"><code class="autohl">import { unstable_v2_createSession } from "@anthropic-ai/claude-agent-sdk";
+
+await using session = unstable_v2_createSession({
+  model: "claude-opus-4-7"
+});
+
+await session.send("Hello!");
+for await (const msg of session.stream()) {
+  if (msg.type === "assistant") {
+    const text = msg.message.content
+      .filter((block) => block.type === "text")
+      .map((block) => block.text)
+      .join("");
+    console.log(text);
+  }
+}</code></pre>
+<details class="v1cmp"><summary>See the same operation in V1</summary>
+<p style="padding:10px 14px 0;">In V1, both input and output flow through a single async generator. A basic prompt looks similar, but adding multi-turn logic requires restructuring around an input generator.</p>
+<pre class="code-block"><code class="autohl">import { query } from "@anthropic-ai/claude-agent-sdk";
+
+const q = query({
+  prompt: "Hello!",
+  options: { model: "claude-opus-4-7" }
+});
+
+for await (const msg of q) {
+  if (msg.type === "assistant") {
+    const text = msg.message.content
+      .filter((block) => block.type === "text")
+      .map((block) => block.text)
+      .join("");
+    console.log(text);
+  }
+}</code></pre>
+</details>
+</div>
+
+<div class="qs-panel demo-panel" id="qs-p2">
+<p>Sessions persist context across multiple exchanges — call <code class="inline">send()</code> again on the same session and Claude remembers the previous turns. This example asks a math question, then a follow-up referencing the previous answer.</p>
+<pre class="code-block"><code class="autohl">import { unstable_v2_createSession } from "@anthropic-ai/claude-agent-sdk";
+
+await using session = unstable_v2_createSession({ model: "claude-opus-4-7" });
+
+// Turn 1
+await session.send("What is 5 + 3?");
+for await (const msg of session.stream()) {
+  if (msg.type === "assistant") {
+    const text = msg.message.content.filter((block) => block.type === "text").map((block) => block.text).join("");
+    console.log(text);
+  }
+}
+
+// Turn 2
+await session.send("Multiply that by 2");
+for await (const msg of session.stream()) {
+  if (msg.type === "assistant") {
+    const text = msg.message.content.filter((block) => block.type === "text").map((block) => block.text).join("");
+    console.log(text);
+  }
+}</code></pre>
+<details class="v1cmp"><summary>See the same operation in V1</summary>
+<pre class="code-block"><code class="autohl">import { query } from "@anthropic-ai/claude-agent-sdk";
+
+// Must create an async iterable to feed messages
+async function* createInputStream() {
+  yield {
+    type: "user", session_id: "",
+    message: { role: "user", content: [{ type: "text", text: "What is 5 + 3?" }] },
+    parent_tool_use_id: null
+  };
+  // Must coordinate when to yield next message
+  yield {
+    type: "user", session_id: "",
+    message: { role: "user", content: [{ type: "text", text: "Multiply by 2" }] },
+    parent_tool_use_id: null
+  };
+}
+
+const q = query({ prompt: createInputStream(), options: { model: "claude-opus-4-7" } });
+
+for await (const msg of q) {
+  if (msg.type === "assistant") {
+    const text = msg.message.content.filter((block) => block.type === "text").map((block) => block.text).join("");
+    console.log(text);
+  }
+}</code></pre>
+</details>
+</div>
+
+<div class="qs-panel demo-panel" id="qs-p3">
+<p>If you have a session ID from a previous interaction, resume it later — useful for long-running workflows or persisting conversations across app restarts. This example creates a session, stores its ID, closes it, then resumes.</p>
+<pre class="code-block"><code class="autohl">import {
+  unstable_v2_createSession,
+  unstable_v2_resumeSession,
+  type SDKMessage
+} from "@anthropic-ai/claude-agent-sdk";
+
+function getAssistantText(msg: SDKMessage): string | null {
+  if (msg.type !== "assistant") return null;
+  return msg.message.content.filter((block) => block.type === "text").map((block) => block.text).join("");
+}
+
+const session = unstable_v2_createSession({ model: "claude-opus-4-7" });
+await session.send("Remember this number: 42");
+
+let sessionId: string | undefined;
+for await (const msg of session.stream()) {
+  sessionId = msg.session_id;
+  const text = getAssistantText(msg);
+  if (text) console.log("Initial response:", text);
+}
+
+console.log("Session ID:", sessionId);
+session.close();
+
+// Later: resume the session using the stored ID
+await using resumedSession = unstable_v2_resumeSession(sessionId!, { model: "claude-opus-4-7" });
+
+await resumedSession.send("What number did I ask you to remember?");
+for await (const msg of resumedSession.stream()) {
+  const text = getAssistantText(msg);
+  if (text) console.log("Resumed response:", text);
+}</code></pre>
+<details class="v1cmp"><summary>See the same operation in V1</summary>
+<pre class="code-block"><code class="autohl">import { query } from "@anthropic-ai/claude-agent-sdk";
+
+const initialQuery = query({ prompt: "Remember this number: 42", options: { model: "claude-opus-4-7" } });
+
+let sessionId: string | undefined;
+for await (const msg of initialQuery) {
+  sessionId = msg.session_id;
+  if (msg.type === "assistant") {
+    const text = msg.message.content.filter((block) => block.type === "text").map((block) => block.text).join("");
+    console.log("Initial response:", text);
+  }
+}
+
+console.log("Session ID:", sessionId);
+
+const resumedQuery = query({
+  prompt: "What number did I ask you to remember?",
+  options: { model: "claude-opus-4-7", resume: sessionId }
+});
+
+for await (const msg of resumedQuery) {
+  if (msg.type === "assistant") {
+    const text = msg.message.content.filter((block) => block.type === "text").map((block) => block.text).join("");
+    console.log("Resumed response:", text);
+  }
+}</code></pre>
+</details>
+</div>
+
+<div class="qs-panel demo-panel" id="qs-p4">
+<p>Sessions can be closed manually or automatically using <code class="inline">await using</code> (TypeScript 5.2+). If on an older TypeScript version or hitting compatibility issues, use manual cleanup.</p>
+<h4>Automatic cleanup (TypeScript 5.2+)</h4>
+<pre class="code-block"><code class="autohl">import { unstable_v2_createSession } from "@anthropic-ai/claude-agent-sdk";
+
+await using session = unstable_v2_createSession({ model: "claude-opus-4-7" });
+// Session closes automatically when the block exits</code></pre>
+<h4>Manual cleanup</h4>
+<pre class="code-block"><code class="autohl">import { unstable_v2_createSession } from "@anthropic-ai/claude-agent-sdk";
+
+const session = unstable_v2_createSession({ model: "claude-opus-4-7" });
+// ... use the session ...
+session.close();</code></pre>
+</div>
+
+<span class="step-indicator" id="qsIndicator">Step 1 of 5</span>
+</section>
+
+<section>
+<h2>API reference</h2>
+<details class="acc"><summary>unstable_v2_createSession()</summary><div class="acc-body">
+<p>Creates a new session for multi-turn conversations.</p>
+<pre class="code-block"><code class="autohl">function unstable_v2_createSession(options: {
+  model: string;
+  // Additional options supported
+}): SDKSession;</code></pre>
+</div></details>
+<details class="acc"><summary>unstable_v2_resumeSession()</summary><div class="acc-body">
+<p>Resumes an existing session by ID.</p>
+<pre class="code-block"><code class="autohl">function unstable_v2_resumeSession(
+  sessionId: string,
+  options: {
+    model: string;
+    // Additional options supported
+  }
+): SDKSession;</code></pre>
+</div></details>
+<details class="acc"><summary>unstable_v2_prompt()</summary><div class="acc-body">
+<p>One-shot convenience function for single-turn queries.</p>
+<pre class="code-block"><code class="autohl">function unstable_v2_prompt(
+  prompt: string,
+  options: {
+    model: string;
+    // Additional options supported
+  }
+): Promise&lt;SDKResultMessage&gt;;</code></pre>
+</div></details>
+<details class="acc"><summary>SDKSession interface</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">interface SDKSession {
+  readonly sessionId: string;
+  send(message: string | SDKUserMessage): Promise&lt;void&gt;;
+  stream(): AsyncGenerator&lt;SDKMessage, void&gt;;
+  close(): void;
+}</code></pre>
+</div></details>
+</section>
+
+<section>
+<h2>Feature availability</h2>
+<p>The V2 session API does not support every V1 feature. These require the V1 SDK:</p>
+<table class="spec-table"><tr><th>Feature</th><th>Availability</th></tr>
+<tr><td>forkSession option</td><td>V1 only — session forking</td></tr>
+<tr><td>Advanced streaming input patterns</td><td>V1 only</td></tr></table>
+</section>
+
+<section>
+<h2>See also</h2>
+<div class="takeaway"><p>TypeScript SDK reference (V1) — full V1 SDK documentation. SDK overview — general SDK concepts. V2 examples on GitHub — working code examples from the claude-agent-sdk-demos repository.</p></div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme(){
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+let qsStep = 0;
+const QS_MAX = 4;
+function qsGoTo(n){
+  qsStep = Math.max(0, Math.min(QS_MAX, n));
+  document.querySelectorAll('.qs-panel').forEach((el,i)=>el.classList.toggle('visible', i===qsStep));
+  document.querySelectorAll('.qs-tab').forEach((t,i)=>{
+    t.classList.remove('active','done');
+    if(i===qsStep) t.classList.add('active');
+    else if(i<qsStep) t.classList.add('done');
+  });
+  document.getElementById('qsIndicator').textContent = `Step ${qsStep+1} of ${QS_MAX+1}`;
+}
+qsGoTo(0);
+
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function hl(raw){
+  const pattern = /(\/\/.*)|(#.*)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)|(\b(?:function|const|let|var|type|interface|class|import|export|from|async|await|return|if|else|for|while|new|readonly|as|yield|void|null|undefined)\b)/g;
+  let out = '', last = 0, m;
+  while ((m = pattern.exec(raw))) {
+    out += esc(raw.slice(last, m.index));
+    if (m[1] || m[2]) out += '<span class="cmt">' + esc(m[1] || m[2]) + '</span>';
+    else if (m[3]) out += '<span class="str">' + esc(m[3]) + '</span>';
+    else if (m[4]) out += '<span class="kw">' + esc(m[4]) + '</span>';
+    last = pattern.lastIndex;
+  }
+  out += esc(raw.slice(last));
+  return out;
+}
+document.querySelectorAll('code.autohl').forEach(el => {
+  const raw = el.textContent;
+  el.innerHTML = hl(raw);
+});
+</script>
+</body>
+</html>

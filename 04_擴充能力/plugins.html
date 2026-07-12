@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create plugins</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+           background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+    header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+             border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+    header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+    header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 620px; margin-inline: auto; }
+    main    { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+    section { margin-bottom: 52px; }
+    h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+    h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+    p  { color: #4a5568; margin-bottom: 12px; }
+    ul, ol { color: #4a5568; margin: 0 0 12px 20px; }
+    li { margin-bottom: 4px; }
+    .code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px;
+      font-family: monospace; font-size: 0.8rem; color: #1a202c; overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+    .kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; } .cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+    .info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+    .info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+    .info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+    .warn-box { background: #fef3c7; border: 1px solid #fcd34d; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+    .warn-box .tag { display: inline-block; background: #d97706; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+    .warn-box p { color: #78350f; font-size: 0.88rem; margin: 0; }
+    .takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+    .takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+    .api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+    .field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+    .field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+    .field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+    .event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+    .event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+    .event-name { font-family: monospace; font-size: 0.8rem; color: #16a34a; min-width: 190px; flex-shrink: 0; }
+    .event-desc { font-size: 0.82rem; color: #4a5568; }
+    .response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 20px; margin-top: 16px; }
+    .response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+    .response-field:last-child { border-bottom: none; }
+    .rf-key { font-family: monospace; font-size: 0.8rem; color: #d97706; width: 190px; flex-shrink: 0; }
+    .rf-val { font-size: 0.85rem; color: #374151; }
+    .stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+    .stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+    .stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+    .step-indicator { color: #6b7280; font-size: 0.82rem; margin-top: 10px; display: block; }
+    .demo-panel { display: none; }
+    .demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+    .col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+    .col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+    .col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+    .col-card p:last-child { margin-bottom: 0; }
+    .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .chip-label { font-size: 0.75rem; color: #6b7280; }
+    .chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+    .chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+    @media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+    #themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+      cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+    #themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+    body.dark { background: #0f1117; color: #e2e8f0; }
+    body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+    body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+    body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; }
+    body.dark p, body.dark ul, body.dark ol { color: #a0aec0; }
+    body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+    body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+    body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+    body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; } body.dark .info-box p { color: #a0aec0; }
+    body.dark .warn-box { background: #3a2a10; border-color: #7a5a20; }
+    body.dark .warn-box .tag { background: #7a5a20; color: #f6ad55; } body.dark .warn-box p { color: #f6ad55; }
+    body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; } body.dark .takeaway p { color: #c6f6d5; }
+    body.dark .field { background: #1a202c; border-color: #2d3748; } body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+    body.dark .event-item { background: #1a202c; border-color: #2d3748; } body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+    body.dark .response-box { background: #1a202c; border-color: #2d3748; } body.dark .response-field { border-bottom-color: #2d3748; }
+    body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+    body.dark .step-indicator { color: #718096; }
+    body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+    body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+    body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+    body.dark .col-card { background: #1a202c; border-color: #2d3748; } body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+    body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+    body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+    body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+    body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+  </style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Create plugins</h1>
+  <p>Create custom plugins to extend Claude Code with skills, agents, hooks, and MCP servers.</p>
+</header>
+
+<main>
+
+<section>
+  <h2>When to use plugins vs standalone configuration</h2>
+  <div class="two-col">
+    <div class="col-card"><div class="col-card-title">Standalone (.claude/)</div><p>Skill names like /hello. Best for personal workflows, project-specific customizations, quick experiments.</p></div>
+    <div class="col-card"><div class="col-card-title">Plugins</div><p>Skill names like /plugin-name:hello. Best for sharing with teammates, distributing to a community, versioned releases, reuse across projects.</p></div>
+  </div>
+  <div class="takeaway"><p>Start with standalone configuration in .claude/ for quick iteration, then convert to a plugin when ready to share.</p></div>
+</section>
+
+<section>
+  <h2>Quickstart</h2>
+  <p>Create a manifest, add a skill, and test it locally with <code>--plugin-dir</code>.</p>
+  <div class="stage-tabs">
+    <div class="qs-tab stage-tab active" onclick="qsGoTo(0)">1 · Directory</div>
+    <div class="qs-tab stage-tab" onclick="qsGoTo(1)">2 · Manifest</div>
+    <div class="qs-tab stage-tab" onclick="qsGoTo(2)">3 · Add a skill</div>
+    <div class="qs-tab stage-tab" onclick="qsGoTo(3)">4 · Test</div>
+    <div class="qs-tab stage-tab" onclick="qsGoTo(4)">5 · Arguments</div>
+  </div>
+  <div class="qs-panel demo-panel visible" id="qs-p0">
+    <pre class="code-block"><span class="fn">mkdir</span> my-first-plugin</pre>
+    <p>Every plugin lives in its own directory. Location doesn't matter for this quickstart since <code>--plugin-dir</code> points at it directly.</p>
+  </div>
+  <div class="qs-panel demo-panel" id="qs-p1">
+    <pre class="code-block"><span class="fn">mkdir</span> my-first-plugin/.claude-plugin</pre>
+    <pre class="code-block"><span class="cmt">// my-first-plugin/.claude-plugin/plugin.json</span>
+{
+  <span class="str">"name"</span>: <span class="str">"my-first-plugin"</span>,
+  <span class="str">"description"</span>: <span class="str">"A greeting plugin to learn the basics"</span>,
+  <span class="str">"version"</span>: <span class="str">"1.0.0"</span>,
+  <span class="str">"author"</span>: { <span class="str">"name"</span>: <span class="str">"Your Name"</span> }
+}</pre>
+    <div class="api-fields">
+      <div class="field"><span class="name">name</span><div class="desc">Unique identifier and skill namespace, e.g. /my-first-plugin:hello</div></div>
+      <div class="field"><span class="name">description</span><div class="desc">Shown in the plugin manager</div></div>
+      <div class="field"><span class="name">version</span><div class="desc">Optional; omit to use commit SHA versioning</div></div>
+      <div class="field"><span class="name">author</span><div class="desc">Optional attribution</div></div>
+    </div>
+  </div>
+  <div class="qs-panel demo-panel" id="qs-p2">
+    <pre class="code-block"><span class="fn">mkdir</span> -p my-first-plugin/skills/hello</pre>
+    <pre class="code-block"><span class="cmt">---</span>
+<span class="key">description</span>: <span class="str">Greet the user with a friendly message</span>
+<span class="key">disable-model-invocation</span>: <span class="kw">true</span>
+<span class="cmt">---</span>
+
+Greet the user warmly and ask how you can help them today.</pre>
+  </div>
+  <div class="qs-panel demo-panel" id="qs-p3">
+    <pre class="code-block">claude --plugin-dir ./my-first-plugin
+/my-first-plugin:hello</pre>
+    <div class="info-box"><span class="tag">WHY NAMESPACING?</span><p>Plugin skills are always namespaced (like /my-first-plugin:hello) to prevent conflicts between plugins. Change the prefix by editing plugin.json's name field.</p></div>
+  </div>
+  <div class="qs-panel demo-panel" id="qs-p4">
+    <pre class="code-block"><span class="cmt">---</span>
+<span class="key">description</span>: <span class="str">Greet the user with a personalized message</span>
+<span class="cmt">---</span>
+
+# Hello Skill
+
+Greet the user named "$ARGUMENTS" warmly and ask how you can help them today.</pre>
+    <pre class="code-block">/reload-plugins
+/my-first-plugin:hello Alex</pre>
+  </div>
+  <span class="step-indicator" id="qsIndicator">Step 1 of 5</span>
+</section>
+
+<section>
+  <h2>Develop a plugin in your skills directory</h2>
+  <p>Instead of passing <code>--plugin-dir</code> every launch, keep a plugin in the skills directory:</p>
+  <pre class="code-block">claude plugin init my-tool</pre>
+  <p>Creates <code>~/.claude/skills/my-tool/</code> with a manifest and starter SKILL.md. Loads next session as <code>my-tool@skills-dir</code> with no marketplace or install step.</p>
+</section>
+
+<section>
+  <h2>Plugin structure overview</h2>
+  <div class="warn-box"><span class="tag">COMMON MISTAKE</span><p>Don't put commands/, agents/, skills/, or hooks/ inside .claude-plugin/. Only plugin.json goes there. All other directories must be at the plugin root — which is the individual plugin's own directory, never ~/.claude/.</p></div>
+  <div class="api-fields">
+    <div class="field"><span class="name">.claude-plugin/</span><div class="desc">Contains plugin.json manifest (optional)</div></div>
+    <div class="field"><span class="name">skills/</span><div class="desc">&lt;name&gt;/SKILL.md directories</div></div>
+    <div class="field"><span class="name">commands/</span><div class="desc">Skills as flat markdown files (legacy; use skills/)</div></div>
+    <div class="field"><span class="name">agents/</span><div class="desc">Custom agent definitions</div></div>
+    <div class="field"><span class="name">hooks/</span><div class="desc">Event handlers in hooks.json</div></div>
+    <div class="field"><span class="name">.mcp.json / .lsp.json</span><div class="desc">MCP / LSP server configurations</div></div>
+    <div class="field"><span class="name">monitors/</span><div class="desc">Background monitor configurations</div></div>
+    <div class="field"><span class="name">bin/</span><div class="desc">Executables added to the Bash tool's PATH</div></div>
+    <div class="field"><span class="name">settings.json</span><div class="desc">Default settings applied when enabled</div></div>
+  </div>
+  <p>A plugin with exactly one skill can place SKILL.md directly at the plugin root instead of creating a skills/ directory.</p>
+</section>
+
+<section>
+  <h2>Develop more complex plugins</h2>
+  <div class="chip-row">
+    <span class="chip-label">Component:</span>
+    <div class="dc-chip chip active" onclick="dcShow(0)">Skills</div>
+    <div class="dc-chip chip" onclick="dcShow(1)">LSP servers</div>
+    <div class="dc-chip chip" onclick="dcShow(2)">Monitors</div>
+    <div class="dc-chip chip" onclick="dcShow(3)">Default settings</div>
+    <div class="dc-chip chip" onclick="dcShow(4)">Test locally</div>
+    <div class="dc-chip chip" onclick="dcShow(5)">Debug</div>
+  </div>
+  <div class="dc-panel demo-panel visible" id="dc-0">
+    <pre class="code-block">my-plugin/
+├── .claude-plugin/plugin.json
+└── skills/
+    └── code-review/
+        └── SKILL.md</pre>
+    <pre class="code-block"><span class="cmt">---</span>
+<span class="key">description</span>: <span class="str">Reviews code for best practices and issues. Use when reviewing code or checking PRs.</span>
+<span class="cmt">---</span>
+When reviewing code, check for:
+1. Code organization and structure
+2. Error handling
+3. Security concerns
+4. Test coverage</pre>
+    <p>Skills are model-invoked — Claude uses them automatically based on task context. Run <code>/reload-plugins</code> after installing.</p>
+  </div>
+  <div class="dc-panel demo-panel" id="dc-1">
+    <pre class="code-block"><span class="cmt">// .lsp.json</span>
+{ <span class="str">"go"</span>: { <span class="str">"command"</span>: <span class="str">"gopls"</span>, <span class="str">"args"</span>: [<span class="str">"serve"</span>], <span class="str">"extensionToLanguage"</span>: { <span class="str">".go"</span>: <span class="str">"go"</span> } } }</pre>
+    <p>For common languages, install pre-built LSP plugins from the official marketplace instead. Users installing a custom LSP plugin must have the language server binary installed themselves.</p>
+  </div>
+  <div class="dc-panel demo-panel" id="dc-2">
+    <pre class="code-block"><span class="cmt">// monitors/monitors.json</span>
+[
+  { <span class="str">"name"</span>: <span class="str">"error-log"</span>, <span class="str">"command"</span>: <span class="str">"tail -F ./logs/error.log"</span>, <span class="str">"description"</span>: <span class="str">"Application error log"</span> }
+]</pre>
+    <p>Claude Code starts each monitor automatically when the plugin is active; each stdout line is delivered to Claude as a notification.</p>
+  </div>
+  <div class="dc-panel demo-panel" id="dc-3">
+    <pre class="code-block"><span class="cmt">// settings.json</span>
+{ <span class="str">"agent"</span>: <span class="str">"security-reviewer"</span> }</pre>
+    <p>Only <code>agent</code> and <code>subagentStatusLine</code> keys are supported. Setting <code>agent</code> activates a plugin agent as the main thread — its prompt, tool restrictions, and model. Takes priority over settings in plugin.json; unknown keys are ignored.</p>
+  </div>
+  <div class="dc-panel demo-panel" id="dc-4">
+    <pre class="code-block">claude --plugin-dir ./my-plugin
+claude --plugin-dir ./my-plugin.zip  <span class="cmt"># v2.1.128+</span>
+claude --plugin-dir ./plugin-one --plugin-dir ./plugin-two</pre>
+    <p>A <code>--plugin-dir</code> plugin with the same name as an installed marketplace plugin takes precedence for that session (except force-enabled/disabled managed plugins). Run <code>/reload-plugins</code> after edits. Test with <code>/plugin-name:skill-name</code>, check <code>/context</code> for agents, verify hooks.</p>
+    <pre class="code-block">claude --plugin-url https://example.com/my-plugin.zip --plugin-url https://example.com/other.zip</pre>
+    <p>Fetches and loads a hosted .zip archive for that session only; only point this at archives you trust.</p>
+  </div>
+  <div class="dc-panel demo-panel" id="dc-5">
+    <ol>
+      <li>Check the structure: directories at plugin root, not inside .claude-plugin/</li>
+      <li>Test components individually: skills, agents, hooks separately</li>
+      <li>Use validation/debugging tools per the Plugins reference</li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <h2>Share your plugins</h2>
+  <ol>
+    <li>Add documentation: a README.md with install and usage instructions</li>
+    <li>Choose a versioning strategy: explicit version or git commit SHA</li>
+    <li>Create or use a marketplace to distribute</li>
+    <li>Test with team members before wider distribution</li>
+  </ol>
+
+  <h3>Submit your plugin to the community marketplace</h3>
+  <div class="two-col">
+    <div class="col-card"><div class="col-card-title">claude-plugins-official</div><p>Curated by Anthropic, registered automatically on first interactive launch. No application process for inclusion.</p></div>
+    <div class="col-card"><div class="col-card-title">claude-community</div><p>Public marketplace where third-party submissions land after review. Add with /plugin marketplace add anthropics/claude-plugins-community.</p></div>
+  </div>
+  <p>Submit via claude.ai's directory submissions form (Team/Enterprise) or the Console form (individual authors). Run <code>claude plugin validate</code> before submitting — the review pipeline runs the same check plus automated safety screening. Approved plugins are pinned to a commit SHA in the community catalog and synced nightly.</p>
+</section>
+
+<section>
+  <h2>Convert existing configurations to plugins</h2>
+  <div class="stage-tabs">
+    <div class="mig-tab stage-tab active" onclick="migGoTo(0)">1 · Structure</div>
+    <div class="mig-tab stage-tab" onclick="migGoTo(1)">2 · Copy files</div>
+    <div class="mig-tab stage-tab" onclick="migGoTo(2)">3 · Migrate hooks</div>
+    <div class="mig-tab stage-tab" onclick="migGoTo(3)">4 · Test</div>
+  </div>
+  <div class="mig-panel demo-panel visible" id="mig-p0">
+    <pre class="code-block"><span class="fn">mkdir</span> -p my-plugin/.claude-plugin</pre>
+    <pre class="code-block">{ <span class="str">"name"</span>: <span class="str">"my-plugin"</span>, <span class="str">"description"</span>: <span class="str">"Migrated from standalone configuration"</span>, <span class="str">"version"</span>: <span class="str">"1.0.0"</span> }</pre>
+  </div>
+  <div class="mig-panel demo-panel" id="mig-p1">
+    <pre class="code-block"><span class="fn">cp</span> -r .claude/commands my-plugin/
+<span class="fn">cp</span> -r .claude/agents my-plugin/
+<span class="fn">cp</span> -r .claude/skills my-plugin/</pre>
+  </div>
+  <div class="mig-panel demo-panel" id="mig-p2">
+    <pre class="code-block"><span class="fn">mkdir</span> my-plugin/hooks</pre>
+    <pre class="code-block">{
+  <span class="str">"hooks"</span>: { <span class="str">"PostToolUse"</span>: [{ <span class="str">"matcher"</span>: <span class="str">"Write|Edit"</span>,
+    <span class="str">"hooks"</span>: [{ <span class="str">"type"</span>: <span class="str">"command"</span>, <span class="str">"command"</span>: <span class="str">"jq -r '.tool_input.file_path' | xargs npm run lint:fix"</span> }] }] }
+}</pre>
+  </div>
+  <div class="mig-panel demo-panel" id="mig-p3">
+    <pre class="code-block">claude --plugin-dir ./my-plugin</pre>
+    <p>Test each component: run commands, check agents in /context, verify hooks trigger.</p>
+  </div>
+  <span class="step-indicator" id="migIndicator">Step 1 of 4</span>
+
+  <h3>What changes when migrating</h3>
+  <div class="response-box">
+    <div class="response-field"><span class="rf-key">Only in one project</span><span class="rf-val">→ Can be shared via marketplaces</span></div>
+    <div class="response-field"><span class="rf-key">.claude/commands/</span><span class="rf-val">→ plugin-name/commands/</span></div>
+    <div class="response-field"><span class="rf-key">Hooks in settings.json</span><span class="rf-val">→ hooks/hooks.json</span></div>
+    <div class="response-field"><span class="rf-key">Manually copy to share</span><span class="rf-val">→ Install with /plugin install</span></div>
+  </div>
+  <div class="info-box"><span class="tag">NOTE</span><p>After migrating, remove the original .claude/ files to avoid duplicates. Project/user .claude/agents/ definitions override same-named plugin agents.</p></div>
+</section>
+
+<section>
+  <h2>Next steps</h2>
+  <div class="two-col">
+    <div class="col-card"><div class="col-card-title">For plugin users</div><p>Discover and install plugins; configure team marketplaces for repository-level plugins.</p></div>
+    <div class="col-card"><div class="col-card-title">For plugin developers</div><p>Create and distribute a marketplace; Plugins reference; dive into Skills, Subagents, Hooks, MCP.</p></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+  }
+
+  let qsStep = 0; const QS_MAX = 4;
+  function qsGoTo(n) {
+    qsStep = Math.max(0, Math.min(QS_MAX, n));
+    document.querySelectorAll('.qs-panel').forEach((el, i) => el.classList.toggle('visible', i === qsStep));
+    document.querySelectorAll('.qs-tab').forEach((t, i) => {
+      t.classList.remove('active', 'done');
+      if (i === qsStep) t.classList.add('active'); else if (i < qsStep) t.classList.add('done');
+    });
+    document.getElementById('qsIndicator').textContent = `Step ${qsStep + 1} of ${QS_MAX + 1}`;
+  }
+  qsGoTo(0);
+
+  function dcShow(n) {
+    document.querySelectorAll('.dc-panel').forEach((el, i) => el.classList.toggle('visible', i === n));
+    document.querySelectorAll('.dc-chip').forEach((c, i) => c.classList.toggle('active', i === n));
+  }
+
+  let migStep = 0; const MIG_MAX = 3;
+  function migGoTo(n) {
+    migStep = Math.max(0, Math.min(MIG_MAX, n));
+    document.querySelectorAll('.mig-panel').forEach((el, i) => el.classList.toggle('visible', i === migStep));
+    document.querySelectorAll('.mig-tab').forEach((t, i) => {
+      t.classList.remove('active', 'done');
+      if (i === migStep) t.classList.add('active'); else if (i < migStep) t.classList.add('done');
+    });
+    document.getElementById('migIndicator').textContent = `Step ${migStep + 1} of ${MIG_MAX + 1}`;
+  }
+  migGoTo(0);
+</script>
+</body>
+</html>

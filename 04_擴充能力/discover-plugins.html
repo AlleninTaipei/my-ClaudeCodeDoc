@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Discover and install prebuilt plugins</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+           background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+    header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+             border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+    header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+    header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+                max-width: 600px; margin-inline: auto; }
+    main    { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+    section { margin-bottom: 52px; }
+    h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+         border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+    h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+    p  { color: #4a5568; margin-bottom: 12px; }
+    ul.plain { margin: 10px 0 0 0; list-style: none; }
+    ul.plain li { color: #4a5568; font-size: 0.88rem; padding: 4px 0 4px 16px; position: relative; }
+    ul.plain li::before { content: "›"; position: absolute; left: 0; color: #3b82f6; font-weight: 700; }
+    .code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+      padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+      overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+    .kw  { color: #7c3aed; }
+    .fn  { color: #16a34a; }
+    .str { color: #d97706; }
+    .cmt { color: #94a3b8; font-style: italic; }
+    .key { color: #2563eb; }
+    .info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+      padding: 16px 20px; margin-top: 14px; }
+    .info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+      font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+      margin-bottom: 10px; letter-spacing: 0.05em; }
+    .info-box.warn { background: #fef3c7; border-color: #fcd34d; }
+    .info-box.warn .tag { background: #d97706; }
+    .info-box.warn p { color: #92400e; }
+    .info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+    .info-box p + p { margin-top: 8px; }
+    .takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+      border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+    .takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+    .api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+    .field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+    .field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+    .field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+    .event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+    .event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+      padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+    .event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+      min-width: 170px; flex-shrink: 0; }
+    .event-desc { font-size: 0.82rem; color: #4a5568; }
+    .stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+    .stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+    .stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+    .step-indicator { color: #6b7280; font-size: 0.82rem; margin-top: 10px; display: block; }
+    .demo-panel { display: none; }
+    .demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+    .col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+    .col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+      text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+    .col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+    .col-card p:last-child { margin-bottom: 0; }
+    .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .chip-label { font-size: 0.75rem; color: #6b7280; }
+    .chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+      cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+    .chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+    .data-table-wrap { overflow-x: auto; margin-top: 14px; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; background: #fff;
+      border: 1px solid #cbd5e0; border-radius: 8px; overflow: hidden; }
+    .data-table th { text-align: left; background: #e2e8f0; color: #374151; padding: 9px 12px;
+      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .data-table td { padding: 9px 12px; border-top: 1px solid #e2e8f0; color: #4a5568; vertical-align: top; }
+    .data-table td code { font-family: monospace; color: #16a34a; }
+    @media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+    #themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+      padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+      cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+      transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+    #themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+    body.dark { background: #0f1117; color: #e2e8f0; }
+    body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+    body.dark header h1 { color: #f7fafc; }
+    body.dark header p  { color: #a0aec0; }
+    body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+    body.dark h3 { color: #e2e8f0; }
+    body.dark p  { color: #a0aec0; }
+    body.dark ul.plain li { color: #a0aec0; }
+    body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+    body.dark .kw  { color: #9f7aea; }
+    body.dark .fn  { color: #68d391; }
+    body.dark .str { color: #f6ad55; }
+    body.dark .cmt { color: #4a5568; }
+    body.dark .key { color: #63b3ed; }
+    body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+    body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+    body.dark .info-box p { color: #a0aec0; }
+    body.dark .info-box.warn { background: #3a2a10; border-color: #7a5a20; }
+    body.dark .info-box.warn .tag { background: #7a5a20; color: #f6ad55; }
+    body.dark .info-box.warn p { color: #f6ad55; }
+    body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+    body.dark .takeaway p { color: #c6f6d5; }
+    body.dark .field { background: #1a202c; border-color: #2d3748; }
+    body.dark .field .name { color: #68d391; }
+    body.dark .field .desc { color: #718096; }
+    body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+    body.dark .event-name { color: #68d391; }
+    body.dark .event-desc { color: #718096; }
+    body.dark .step-indicator { color: #718096; }
+    body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+    body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+    body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+    body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+    body.dark .col-card-title { color: #4a5568; }
+    body.dark .col-card p { color: #a0aec0; }
+    body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+    body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+    body.dark .data-table { background: #1a202c; border-color: #2d3748; }
+    body.dark .data-table th { background: #1a202c; color: #718096; }
+    body.dark .data-table td { border-top-color: #2d3748; color: #a0aec0; }
+    body.dark .data-table td code { color: #68d391; }
+    body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+    body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+  </style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Discover and install prebuilt plugins</h1>
+  <p>Find and install plugins from marketplaces to extend Claude Code with new skills, agents, and capabilities.</p>
+</header>
+
+<main>
+
+  <section id="how-marketplaces-work">
+    <h2>How marketplaces work</h2>
+    <p>A marketplace is a catalog of plugins that someone else has created and shared. Using a marketplace is a two-step process:</p>
+    <div class="stage-tabs">
+      <div class="mw-tab stage-tab active" onclick="mwGoTo(0)">1 · Add the marketplace</div>
+      <div class="mw-tab stage-tab" onclick="mwGoTo(1)">2 · Install individual plugins</div>
+    </div>
+    <div class="mw-panel demo-panel visible" id="mw-p0">
+      <div class="response-box" style="background:#fff;border:1px solid #cbd5e0;border-radius:10px;padding:18px 20px;">
+        <p style="margin:0;">This registers the catalog with Claude Code so you can browse what's available. No plugins are installed yet.</p>
+      </div>
+    </div>
+    <div class="mw-panel demo-panel" id="mw-p1">
+      <div class="response-box" style="background:#fff;border:1px solid #cbd5e0;border-radius:10px;padding:18px 20px;">
+        <p style="margin:0;">Browse the catalog and install the plugins you want.</p>
+      </div>
+    </div>
+    <span class="step-indicator" id="mwIndicator">Step 1 of 2</span>
+    <div class="takeaway">
+      <p>Think of it like adding an app store: adding the store gives you access to browse its collection, but you still choose which apps to download individually.</p>
+    </div>
+  </section>
+
+  <section id="official-marketplace">
+    <h2>Official Anthropic marketplace</h2>
+    <p>The official Anthropic marketplace (<code>claude-plugins-official</code>) is automatically available when you start Claude Code. Run <code>/plugin</code> and go to the <strong>Discover</strong> tab to browse what's available, or view the catalog at claude.com/plugins.</p>
+    <pre class="code-block">/plugin install github@claude-plugins-official</pre>
+    <div class="info-box">
+      <span class="tag">NOTE</span>
+      <p>The official marketplace is curated by Anthropic, and inclusion is at Anthropic's discretion. The in-app submission forms add plugins to the community marketplace, not the official one. If Claude Code reports a plugin as not found, run <code>/plugin marketplace update claude-plugins-official</code> to refresh it, or add it first with <code>/plugin marketplace add anthropics/claude-plugins-official</code>.</p>
+    </div>
+    <p>The official marketplace includes several categories of plugins:</p>
+    <div class="chip-row">
+      <span class="chip-label">選擇分類:</span>
+      <div class="chip active" data-target="cat-lsp" onclick="showTab('.cat-panel','.chip',this.dataset.target)">Code intelligence</div>
+      <div class="chip" data-target="cat-ext" onclick="showTab('.cat-panel','.chip',this.dataset.target)">External integrations</div>
+      <div class="chip" data-target="cat-sec" onclick="showTab('.cat-panel','.chip',this.dataset.target)">Security review</div>
+      <div class="chip" data-target="cat-dev" onclick="showTab('.cat-panel','.chip',this.dataset.target)">Dev workflows</div>
+      <div class="chip" data-target="cat-out" onclick="showTab('.cat-panel','.chip',this.dataset.target)">Output styles</div>
+    </div>
+    <div class="cat-panel demo-panel visible" id="cat-lsp">
+      <p>These plugins enable Claude Code's built-in LSP tool — jump to definitions, find references, and see type errors immediately after edits, using the same Language Server Protocol technology that powers VS Code.</p>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <tr><th>Language</th><th>Plugin</th><th>Binary required</th></tr>
+          <tr><td>C/C++</td><td><code>clangd-lsp</code></td><td><code>clangd</code></td></tr>
+          <tr><td>C#</td><td><code>csharp-lsp</code></td><td><code>csharp-ls</code></td></tr>
+          <tr><td>Go</td><td><code>gopls-lsp</code></td><td><code>gopls</code></td></tr>
+          <tr><td>Java</td><td><code>jdtls-lsp</code></td><td><code>jdtls</code></td></tr>
+          <tr><td>Kotlin</td><td><code>kotlin-lsp</code></td><td><code>kotlin-language-server</code></td></tr>
+          <tr><td>Lua</td><td><code>lua-lsp</code></td><td><code>lua-language-server</code></td></tr>
+          <tr><td>PHP</td><td><code>php-lsp</code></td><td><code>intelephense</code></td></tr>
+          <tr><td>Python</td><td><code>pyright-lsp</code></td><td><code>pyright-langserver</code></td></tr>
+          <tr><td>Rust</td><td><code>rust-analyzer-lsp</code></td><td><code>rust-analyzer</code></td></tr>
+          <tr><td>Swift</td><td><code>swift-lsp</code></td><td><code>sourcekit-lsp</code></td></tr>
+          <tr><td>TypeScript</td><td><code>typescript-lsp</code></td><td><code>typescript-language-server</code></td></tr>
+        </table>
+      </div>
+      <p>These plugins require the language server binary on your system. If you already have one installed, Claude may prompt you to install the corresponding plugin when you open a project. You can also create your own LSP plugin for other languages.</p>
+      <div class="info-box">
+        <span class="tag">GAINS</span>
+        <p><strong>Automatic diagnostics:</strong> after every edit, the language server reports errors and warnings back automatically — Claude sees type errors and missing imports without running a compiler. Press <strong>Ctrl+O</strong> to see diagnostics inline.</p>
+        <p><strong>Code navigation:</strong> jump to definitions, find references, get type info on hover, list symbols, find implementations, and trace call hierarchies — more precise than grep-based search.</p>
+      </div>
+    </div>
+    <div class="cat-panel demo-panel" id="cat-ext">
+      <p>These plugins bundle pre-configured MCP servers so you can connect Claude to external services without manual setup:</p>
+      <ul class="plain">
+        <li><strong>Source control:</strong> github, gitlab</li>
+        <li><strong>Project management:</strong> atlassian (Jira/Confluence), asana, linear, notion</li>
+        <li><strong>Design:</strong> figma</li>
+        <li><strong>Infrastructure:</strong> vercel, firebase, supabase</li>
+        <li><strong>Communication:</strong> slack</li>
+        <li><strong>Monitoring:</strong> sentry</li>
+      </ul>
+    </div>
+    <div class="cat-panel demo-panel" id="cat-sec">
+      <p>The <code>security-guidance</code> plugin reviews each change Claude makes for common vulnerabilities and instructs Claude to fix what it finds in the same session. See the dedicated security-guidance guide for what it checks and how to add project-specific rules.</p>
+    </div>
+    <div class="cat-panel demo-panel" id="cat-dev">
+      <p>Plugins that add skills and agents for common development tasks:</p>
+      <ul class="plain">
+        <li><strong>commit-commands:</strong> git commit workflows including commit, push, and PR creation</li>
+        <li><strong>pr-review-toolkit:</strong> specialized agents for reviewing pull requests</li>
+        <li><strong>agent-sdk-dev:</strong> tools for building with the Claude Agent SDK</li>
+        <li><strong>plugin-dev:</strong> toolkit for creating your own plugins</li>
+      </ul>
+    </div>
+    <div class="cat-panel demo-panel" id="cat-out">
+      <p>Customize how Claude responds:</p>
+      <ul class="plain">
+        <li><strong>explanatory-output-style:</strong> educational insights about implementation choices</li>
+        <li><strong>learning-output-style:</strong> interactive learning mode for skill building</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="community-marketplace">
+    <h2>Community marketplace</h2>
+    <p>The community marketplace at <code>anthropics/claude-plugins-community</code> hosts third-party plugins that have passed Anthropic's automated validation and safety screening. Each plugin is pinned to a specific commit SHA in the catalog. Unlike the official marketplace, you add it manually:</p>
+    <pre class="code-block">/plugin marketplace add anthropics/claude-plugins-community</pre>
+    <p>Then install plugins from it using the <code>claude-community</code> marketplace name:</p>
+    <pre class="code-block">/plugin install &lt;plugin-name&gt;@claude-community</pre>
+  </section>
+
+  <section id="try-demo">
+    <h2>Try it: add the demo marketplace</h2>
+    <p>Anthropic also maintains a demo plugins marketplace (<code>claude-code-plugins</code>) with example plugins that show what's possible with the plugin system. Unlike the official marketplace, you need to add this one manually.</p>
+    <div class="stage-tabs">
+      <div class="demo-tab stage-tab active" onclick="demoGoTo(0)">1 · Add</div>
+      <div class="demo-tab stage-tab" onclick="demoGoTo(1)">2 · Browse</div>
+      <div class="demo-tab stage-tab" onclick="demoGoTo(2)">3 · Install</div>
+      <div class="demo-tab stage-tab" onclick="demoGoTo(3)">4 · Use</div>
+    </div>
+    <div class="demo-panel-step demo-panel visible" id="demo-p0">
+      <p>Run the <code>plugin marketplace add</code> command for the <code>anthropics/claude-code</code> marketplace. This downloads the catalog and makes its plugins available to you.</p>
+      <pre class="code-block">/plugin marketplace add anthropics/claude-code</pre>
+    </div>
+    <div class="demo-panel-step demo-panel" id="demo-p1">
+      <p>Run <code>/plugin</code> to open the plugin manager — a tabbed interface with four tabs cycled with <strong>Tab</strong> / <strong>Shift+Tab</strong>:</p>
+      <ul class="plain">
+        <li><strong>Discover:</strong> browse available plugins from all your marketplaces</li>
+        <li><strong>Installed:</strong> view and manage your installed plugins</li>
+        <li><strong>Marketplaces:</strong> add, remove, or update your added marketplaces</li>
+        <li><strong>Errors:</strong> view any plugin loading errors</li>
+      </ul>
+      <p>When an administrator has allowlisted the marketplace via <code>pluginSuggestionMarketplaces</code>, plugins relevant to your working directory are pinned at the top with a "suggested for this directory" label (v2.1.154+).</p>
+    </div>
+    <div class="demo-panel-step demo-panel" id="demo-p2">
+      <p>Select a plugin to view its details: a <strong>Context cost</strong> estimate (v2.1.143+), the plugin's <strong>Last updated</strong> date (v2.1.144+), and a <strong>Will install</strong> section listing its commands, agents, skills, hooks, and MCP/LSP servers (v2.1.145+).</p>
+      <p>Choose a scope — <strong>User</strong> (yourself, all projects), <strong>Project</strong> (all collaborators), or <strong>Local</strong> (yourself, this repo only) — or install directly:</p>
+      <pre class="code-block">/plugin install commit-commands@claude-code-plugins</pre>
+    </div>
+    <div class="demo-panel-step demo-panel" id="demo-p3">
+      <p>After installing, run <code>/reload-plugins</code> to activate it. Plugin skills are namespaced by plugin name:</p>
+      <pre class="code-block">/reload-plugins
+/commit-commands:commit</pre>
+      <p>This stages your changes, generates a commit message, and creates the commit. Each plugin works differently — check its details in the Discover tab or its homepage for usage guidance.</p>
+    </div>
+    <span class="step-indicator" id="demoIndicator">Step 1 of 4</span>
+  </section>
+
+  <section id="add-marketplaces">
+    <h2>Add marketplaces</h2>
+    <p>Use <code>/plugin marketplace add</code> to add marketplaces from different sources. Shortcuts: <code>/plugin market</code> instead of <code>/plugin marketplace</code>, and <code>rm</code> instead of <code>remove</code>.</p>
+    <div class="chip-row">
+      <span class="chip-label">選擇來源:</span>
+      <div class="chip active" data-target="src-github" onclick="showTab('.src-panel','.chip',this.dataset.target)">GitHub</div>
+      <div class="chip" data-target="src-git" onclick="showTab('.src-panel','.chip',this.dataset.target)">Other Git hosts</div>
+      <div class="chip" data-target="src-local" onclick="showTab('.src-panel','.chip',this.dataset.target)">Local paths</div>
+      <div class="chip" data-target="src-remote" onclick="showTab('.src-panel','.chip',this.dataset.target)">Remote URLs</div>
+    </div>
+    <div class="src-panel demo-panel visible" id="src-github">
+      <p>Add a GitHub repository containing a <code>.claude-plugin/marketplace.json</code> file, using <code>owner/repo</code> format:</p>
+      <pre class="code-block">/plugin marketplace add anthropics/claude-code</pre>
+    </div>
+    <div class="src-panel demo-panel" id="src-git">
+      <p>Add any git repository by its full URL — works with GitLab, Bitbucket, and self-hosted servers. Include the <code>.git</code> suffix and the <code>https://</code> prefix (v2.1.196+ rejects a bare host as an invalid GitHub shorthand).</p>
+      <pre class="code-block"><span class="cmt"># HTTPS</span>
+/plugin marketplace add https://gitlab.com/company/plugins.git
+
+<span class="cmt"># SSH</span>
+/plugin marketplace add git@gitlab.com:company/plugins.git
+
+<span class="cmt"># Specific branch or tag</span>
+/plugin marketplace add https://gitlab.com/company/plugins.git#v1.0.0</pre>
+    </div>
+    <div class="src-panel demo-panel" id="src-local">
+      <p>Add a local directory containing a <code>.claude-plugin/marketplace.json</code> file, or a direct path to that file:</p>
+      <pre class="code-block">/plugin marketplace add ./my-marketplace
+/plugin marketplace add ./path/to/marketplace.json</pre>
+    </div>
+    <div class="src-panel demo-panel" id="src-remote">
+      <p>Add a remote <code>marketplace.json</code> file via URL:</p>
+      <pre class="code-block">/plugin marketplace add https://example.com/marketplace.json</pre>
+      <div class="info-box warn">
+        <span class="tag">LIMITATION</span>
+        <p>URL-based marketplaces have limitations compared to Git-based ones. "Path not found" errors when installing plugins usually mean relative-path resolution failed for a URL-based marketplace.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="install-plugins">
+    <h2>Install plugins</h2>
+    <p>Once you've added marketplaces, install plugins directly:</p>
+    <pre class="code-block">/plugin install plugin-name@marketplace-name</pre>
+    <p>The command opens the plugin's details, where you choose an installation scope — the same choice you see running <code>/plugin</code>, going to Discover, and pressing Enter:</p>
+    <div class="api-fields">
+      <div class="field"><div class="name">User scope (default)</div><div class="desc">Install for yourself across all projects.</div></div>
+      <div class="field"><div class="name">Project scope</div><div class="desc">Install for all collaborators on this repository, added to .claude/settings.json.</div></div>
+      <div class="field"><div class="name">Local scope</div><div class="desc">Install for yourself in this repository only, not shared with collaborators.</div></div>
+      <div class="field"><div class="name">Managed scope</div><div class="desc">Installed by administrators via managed settings, and can't be modified by users.</div></div>
+    </div>
+    <p>To install without an interactive step, use the <code>claude plugin install</code> shell command, which installs to user scope unless you pass <code>--scope</code>.</p>
+    <div class="info-box warn">
+      <span class="tag">WARNING</span>
+      <p>Make sure you trust a plugin before installing it. Anthropic doesn't control what MCP servers, files, or other software are included in plugins and can't verify that they work as intended. Check each plugin's homepage first.</p>
+    </div>
+  </section>
+
+  <section id="manage-installed">
+    <h2>Manage installed plugins</h2>
+    <p>Run <code>/plugin</code> and go to the <strong>Installed</strong> tab to view, enable, disable, or uninstall your plugins. The list is grouped by scope: load errors and unresolved dependencies first, then favorites, with disabled plugins folded behind a collapsed header at the bottom.</p>
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">f</span><span class="event-desc">Favorite or unfavorite the selected plugin.</span></div>
+      <div class="event-item"><span class="event-name">type to filter</span><span class="event-desc">Filter by plugin name or description.</span></div>
+      <div class="event-item"><span class="event-name">Enter</span><span class="event-desc">Open a plugin's detail view to enable, disable, or uninstall it.</span></div>
+    </div>
+    <p>Uninstalling a plugin that a project's <code>.claude/settings.json</code> enables asks which scope you mean: disable it for you alone (writes to <code>.claude/settings.local.json</code>, keeps it installed for the project) or uninstall it for everyone, removing it from the shared settings file (v2.1.203+; earlier versions offer only the local disable).</p>
+    <p>The <strong>Installed</strong> tab also flags marketplace plugins you installed yourself but haven't used in at least two weeks across 10+ sessions, under a <strong>Not used recently</strong> header, with a <strong>Last used</strong> line in the detail view (v2.1.187+). Never listed as unused: org-managed plugins, plugins loaded with <code>--plugin-dir</code>, and plugins contributing only a theme, output style, monitor, or workflow.</p>
+    <h3>Apply plugin changes without restarting</h3>
+    <pre class="code-block">/reload-plugins</pre>
+    <div class="info-box">
+      <span class="tag">COST</span>
+      <p>Reloading has a token cost on the next request: newly loaded components announce themselves in appended content, while existing history still reads from the prompt cache. A plugin providing MCP servers costs more when its tools aren't deferred by tool search — the change invalidates the cache and the next request re-reads the entire conversation. v2.1.163+ warns and skips the reload in that case; pass <code>--force</code> to apply anyway.</p>
+    </div>
+    <pre class="code-block"><span class="cmt"># Direct commands</span>
+/plugin list <span class="cmt">           # supports --enabled / --disabled</span>
+/plugin disable plugin-name@marketplace-name
+/plugin enable plugin-name@marketplace-name
+/plugin uninstall plugin-name@marketplace-name
+
+claude plugin install formatter@your-org --scope project
+claude plugin uninstall formatter@your-org --scope project</pre>
+    <p>As of v2.1.195, Enable/Disable work for plugins whose marketplace-entry name differs from their plugin.json name, and both commands accept either name.</p>
+  </section>
+
+  <section id="manage-marketplaces">
+    <h2>Manage marketplaces</h2>
+    <div class="chip-row">
+      <span class="chip-label">介面:</span>
+      <div class="chip active" data-target="mm-ui" onclick="showTab('.mm-panel','.chip',this.dataset.target)">Interactive /plugin</div>
+      <div class="chip" data-target="mm-cli" onclick="showTab('.mm-panel','.chip',this.dataset.target)">CLI commands</div>
+      <div class="chip" data-target="mm-auto" onclick="showTab('.mm-panel','.chip',this.dataset.target)">Auto-updates</div>
+    </div>
+    <div class="mm-panel demo-panel visible" id="mm-ui">
+      <p>Run <code>/plugin</code> and go to the <strong>Marketplaces</strong> tab to view all added marketplaces with their sources and status, add new ones, refresh listings, or remove marketplaces you no longer need.</p>
+    </div>
+    <div class="mm-panel demo-panel" id="mm-cli">
+      <pre class="code-block">/plugin marketplace list
+/plugin marketplace update marketplace-name
+/plugin marketplace remove marketplace-name</pre>
+      <div class="info-box warn">
+        <span class="tag">WARNING</span>
+        <p>Removing a marketplace will uninstall any plugins you installed from it.</p>
+      </div>
+    </div>
+    <div class="mm-panel demo-panel" id="mm-auto">
+      <p>Claude Code can automatically update marketplaces and their installed plugins at startup, refreshing marketplace data and updating plugins to their latest versions, with a notification prompting <code>/reload-plugins</code>.</p>
+      <p>Toggle per marketplace: run <code>/plugin</code> → <strong>Marketplaces</strong> → choose a marketplace → <strong>Enable auto-update</strong> / <strong>Disable auto-update</strong>. Official Anthropic marketplaces default to enabled; third-party and local development marketplaces default to disabled. Administrators can set <code>"autoUpdate": true</code> on an <code>extraKnownMarketplaces</code> entry to enable it org-wide without per-user toggling.</p>
+      <pre class="code-block"><span class="cmt"># Disable all automatic updates (Claude Code + plugins)</span>
+<span class="kw">export</span> DISABLE_AUTOUPDATER=1
+
+<span class="cmt"># Keep plugin auto-updates while disabling Claude Code auto-updates</span>
+<span class="kw">export</span> DISABLE_AUTOUPDATER=1
+<span class="kw">export</span> FORCE_AUTOUPDATE_PLUGINS=1</pre>
+    </div>
+  </section>
+
+  <section id="team-marketplaces">
+    <h2>Configure team marketplaces</h2>
+    <p>Team admins can set up automatic marketplace installation for projects by adding marketplace configuration to <code>.claude/settings.json</code>. When team members trust the repository folder, Claude Code prompts them to install these marketplaces and plugins.</p>
+    <pre class="code-block"><span class="key">{</span>
+  <span class="str">"extraKnownMarketplaces"</span>: {
+    <span class="str">"my-team-tools"</span>: {
+      <span class="str">"source"</span>: {
+        <span class="str">"source"</span>: <span class="str">"github"</span>,
+        <span class="str">"repo"</span>: <span class="str">"your-org/claude-plugins"</span>
+      }
+    }
+  }
+}</pre>
+    <div class="info-box">
+      <span class="tag">v2.1.195+</span>
+      <p>This install step applies on every path that loads plugins. A plugin that only the project's settings.json enables, and that comes from an external source, doesn't load until the team member installs it — Claude Code reports it as not installed and shows the install command to run.</p>
+    </div>
+  </section>
+
+  <section id="security">
+    <h2>Security</h2>
+    <div class="info-box warn">
+      <span class="tag">HIGH TRUST</span>
+      <p>Plugins and marketplaces are highly trusted components that can execute arbitrary code on your machine with your user privileges. Only install plugins and add marketplaces from sources you trust. Organizations can restrict which marketplaces users are allowed to add using managed marketplace restrictions.</p>
+    </div>
+  </section>
+
+  <section id="troubleshooting">
+    <h2>Troubleshooting</h2>
+    <div class="chip-row">
+      <span class="chip-label">問題類型:</span>
+      <div class="chip active" data-target="tr-cmd" onclick="showTab('.tr-panel','.chip',this.dataset.target)">/plugin not recognized</div>
+      <div class="chip" data-target="tr-common" onclick="showTab('.tr-panel','.chip',this.dataset.target)">Common issues</div>
+      <div class="chip" data-target="tr-lsp" onclick="showTab('.tr-panel','.chip',this.dataset.target)">Code intelligence</div>
+    </div>
+    <div class="tr-panel demo-panel visible" id="tr-cmd">
+      <ol style="margin-left:18px;color:#4a5568;font-size:0.88rem;">
+        <li>Run <code>claude --version</code> to check what's installed.</li>
+        <li>Update: Homebrew <code>brew upgrade claude-code</code>; npm <code>npm install -g @anthropic-ai/claude-code@latest</code>; or re-run the native installer.</li>
+        <li>Restart your terminal and run <code>claude</code> again.</li>
+      </ol>
+    </div>
+    <div class="tr-panel demo-panel" id="tr-common">
+      <ul class="plain">
+        <li><strong>Marketplace not loading:</strong> verify the URL is accessible and .claude-plugin/marketplace.json exists at the path.</li>
+        <li><strong>Plugin installation failures:</strong> check plugin source URLs are accessible and repositories are public or you have access.</li>
+        <li><strong>Files not found after installation:</strong> plugins are copied to a cache, so paths referencing files outside the plugin directory won't work.</li>
+        <li><strong>Plugin skills not appearing:</strong> clear the cache with <code>rm -rf ~/.claude/plugins/cache</code>, restart Claude Code, and reinstall.</li>
+      </ul>
+    </div>
+    <div class="tr-panel demo-panel" id="tr-lsp">
+      <ul class="plain">
+        <li><strong>Language server not starting:</strong> verify the binary is installed and on your $PATH. Check the /plugin Errors tab.</li>
+        <li><strong>High memory usage:</strong> servers like rust-analyzer and pyright can consume significant memory on large projects — disable with <code>/plugin disable &lt;plugin-name&gt;</code> and rely on Claude's built-in search instead.</li>
+        <li><strong>False positive diagnostics in monorepos:</strong> language servers may report unresolved import errors for internal packages if the workspace isn't configured correctly. These don't affect Claude's ability to edit code.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="next-steps">
+    <h2>Next steps</h2>
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">plugins</span><span class="event-desc">Build your own plugins — create skills, agents, and hooks.</span></div>
+      <div class="event-item"><span class="event-name">plugin-marketplaces</span><span class="event-desc">Create a marketplace to distribute plugins to your team or community.</span></div>
+      <div class="event-item"><span class="event-name">plugins-reference</span><span class="event-desc">Technical reference — complete specifications.</span></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+  }
+
+  function showTab(panelSelector, chipSelector, targetId) {
+    document.querySelectorAll(panelSelector).forEach(el => el.classList.toggle('visible', el.id === targetId));
+    document.querySelectorAll(chipSelector).forEach(el => el.classList.toggle('active', el.dataset.target === targetId));
+  }
+
+  let mwStep = 0;
+  const MW_MAX = 1;
+  function mwGoTo(n) {
+    mwStep = Math.max(0, Math.min(MW_MAX, n));
+    document.querySelectorAll('.mw-panel').forEach((el, i) => el.classList.toggle('visible', i === mwStep));
+    document.querySelectorAll('.mw-tab').forEach((t, i) => {
+      t.classList.remove('active', 'done');
+      if (i === mwStep) t.classList.add('active');
+      else if (i < mwStep) t.classList.add('done');
+    });
+    document.getElementById('mwIndicator').textContent = `Step ${mwStep + 1} of ${MW_MAX + 1}`;
+  }
+  mwGoTo(0);
+
+  let demoStep = 0;
+  const DEMO_MAX = 3;
+  function demoGoTo(n) {
+    demoStep = Math.max(0, Math.min(DEMO_MAX, n));
+    document.querySelectorAll('.demo-panel-step').forEach((el, i) => el.classList.toggle('visible', i === demoStep));
+    document.querySelectorAll('.demo-tab').forEach((t, i) => {
+      t.classList.remove('active', 'done');
+      if (i === demoStep) t.classList.add('active');
+      else if (i < demoStep) t.classList.add('done');
+    });
+    document.getElementById('demoIndicator').textContent = `Step ${demoStep + 1} of ${DEMO_MAX + 1}`;
+  }
+  demoGoTo(0);
+</script>
+</body>
+</html>

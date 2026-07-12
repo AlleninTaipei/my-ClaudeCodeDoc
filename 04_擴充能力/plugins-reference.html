@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plugins reference</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+           background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+    header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+             border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+    header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+    header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 620px; margin-inline: auto; }
+    main    { max-width: 920px; margin: 0 auto; padding: 48px 24px 80px; }
+    section { margin-bottom: 52px; }
+    h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+    h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+    p  { color: #4a5568; margin-bottom: 12px; }
+    ul { color: #4a5568; margin: 0 0 12px 20px; }
+    li { margin-bottom: 4px; }
+    .code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px;
+      font-family: monospace; font-size: 0.8rem; color: #1a202c; overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+    .kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; } .cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+    .info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+    .info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+    .info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+    .warn-box { background: #fef3c7; border: 1px solid #fcd34d; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+    .warn-box .tag { display: inline-block; background: #d97706; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+    .warn-box p { color: #78350f; font-size: 0.88rem; margin: 0; }
+    .takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+    .takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+    .api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+    .field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+    .field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+    .field .type { font-size: 0.7rem; color: #9ca3af; margin-left: 6px; }
+    .field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+    .event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+    .event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+    .event-name { font-family: monospace; font-size: 0.8rem; color: #16a34a; min-width: 200px; flex-shrink: 0; }
+    .event-desc { font-size: 0.82rem; color: #4a5568; }
+    .response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 20px; margin-top: 16px; }
+    .response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+    .response-field:last-child { border-bottom: none; }
+    .rf-key { font-family: monospace; font-size: 0.8rem; color: #d97706; width: 190px; flex-shrink: 0; }
+    .rf-val { font-size: 0.85rem; color: #374151; }
+    .stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+    .stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+    .stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+    .step-indicator { color: #6b7280; font-size: 0.82rem; margin-top: 10px; display: block; }
+    .demo-panel { display: none; }
+    .demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+    .col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+    .col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+    .col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+    .col-card p:last-child { margin-bottom: 0; }
+    .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .chip-label { font-size: 0.75rem; color: #6b7280; }
+    .chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+    .chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+    @media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+    #themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+      cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+    #themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+    body.dark { background: #0f1117; color: #e2e8f0; }
+    body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+    body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+    body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; }
+    body.dark p, body.dark ul { color: #a0aec0; }
+    body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+    body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+    body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+    body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; } body.dark .info-box p { color: #a0aec0; }
+    body.dark .warn-box { background: #3a2a10; border-color: #7a5a20; }
+    body.dark .warn-box .tag { background: #7a5a20; color: #f6ad55; } body.dark .warn-box p { color: #f6ad55; }
+    body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; } body.dark .takeaway p { color: #c6f6d5; }
+    body.dark .field { background: #1a202c; border-color: #2d3748; } body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+    body.dark .event-item { background: #1a202c; border-color: #2d3748; } body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+    body.dark .response-box { background: #1a202c; border-color: #2d3748; } body.dark .response-field { border-bottom-color: #2d3748; }
+    body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+    body.dark .step-indicator { color: #718096; }
+    body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+    body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+    body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+    body.dark .col-card { background: #1a202c; border-color: #2d3748; } body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+    body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+    body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+    body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+    body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+  </style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Plugins reference</h1>
+  <p>Complete technical reference for the Claude Code plugin system: schemas, CLI commands, and component specifications.</p>
+</header>
+
+<main>
+
+<section>
+  <h2>Plugin components reference</h2>
+  <p>A plugin is a self-contained directory of components that extends Claude Code. Components include skills, agents, hooks, MCP servers, LSP servers, and monitors.</p>
+
+  <div class="chip-row">
+    <span class="chip-label">Component:</span>
+    <div class="comp-chip chip active" onclick="compShow(0)">Skills</div>
+    <div class="comp-chip chip" onclick="compShow(1)">Agents</div>
+    <div class="comp-chip chip" onclick="compShow(2)">Hooks</div>
+    <div class="comp-chip chip" onclick="compShow(3)">MCP servers</div>
+    <div class="comp-chip chip" onclick="compShow(4)">LSP servers</div>
+    <div class="comp-chip chip" onclick="compShow(5)">Monitors</div>
+    <div class="comp-chip chip" onclick="compShow(6)">Themes</div>
+  </div>
+
+  <div class="comp-panel demo-panel visible" id="comp-0">
+    <p><strong>Location:</strong> <code>skills/</code> or <code>commands/</code>, or a single <code>SKILL.md</code> at the plugin root. Skills are directories with SKILL.md; commands are flat markdown files.</p>
+    <pre class="code-block">skills/
+├── pdf-processor/
+│   ├── SKILL.md
+│   ├── reference.md (optional)
+│   └── scripts/ (optional)
+└── code-reviewer/
+    └── SKILL.md</pre>
+    <p>Auto-discovered on install; Claude invokes them based on task context. If no <code>skills/</code> dir and no manifest field, a root <code>SKILL.md</code> loads as a single skill — set frontmatter <code>name</code> to control the invocation name.</p>
+  </div>
+  <div class="comp-panel demo-panel" id="comp-1">
+    <p><strong>Location:</strong> <code>agents/</code> directory. Markdown files with frontmatter: <code>name</code>, <code>description</code>, <code>model</code>, <code>effort</code>, <code>maxTurns</code>, <code>tools</code>, <code>disallowedTools</code>, <code>skills</code>, <code>memory</code>, <code>background</code>, <code>isolation</code> (only valid value <code>"worktree"</code>).</p>
+    <pre class="code-block"><span class="cmt">---</span>
+<span class="key">name</span>: agent-name
+<span class="key">description</span>: What this agent specializes in
+<span class="key">model</span>: sonnet
+<span class="key">effort</span>: medium
+<span class="key">maxTurns</span>: 20
+<span class="key">disallowedTools</span>: Write, Edit
+<span class="cmt">---</span>
+Detailed system prompt...</pre>
+    <p>For security, <code>hooks</code>, <code>mcpServers</code>, and <code>permissionMode</code> are not supported for plugin-shipped agents. Appear in @-mention typeahead as <code>my-plugin:code-reviewer</code>.</p>
+  </div>
+  <div class="comp-panel demo-panel" id="comp-2">
+    <p><strong>Location:</strong> <code>hooks/hooks.json</code> or inline in plugin.json.</p>
+    <pre class="code-block">{
+  <span class="str">"hooks"</span>: { <span class="str">"PostToolUse"</span>: [{ <span class="str">"matcher"</span>: <span class="str">"Write|Edit"</span>,
+    <span class="str">"hooks"</span>: [{ <span class="str">"type"</span>: <span class="str">"command"</span>, <span class="str">"command"</span>: <span class="str">"\"${CLAUDE_PLUGIN_ROOT}\"/scripts/format-code.sh"</span> }] }] }
+}</pre>
+    <p>Hook types: <code>command</code>, <code>http</code>, <code>mcp_tool</code>, <code>prompt</code>, <code>agent</code>. Lifecycle events include SessionStart, Setup, UserPromptSubmit, PreToolUse, PermissionRequest, PostToolUse, PostToolUseFailure, PostToolBatch, Notification, SubagentStart/Stop, TaskCreated/Completed, Stop, TeammateIdle, InstructionsLoaded, ConfigChange, CwdChanged, FileChanged, WorktreeCreate/Remove, PreCompact/PostCompact, Elicitation(Result), SessionEnd, and more.</p>
+    <div class="info-box"><span class="tag">NOTE</span><p>Hooks targeting a plugin's own bundled MCP server must use scoped tool names: <code>mcp__plugin_&lt;plugin-name&gt;_&lt;server-name&gt;__&lt;tool&gt;</code>. A matcher against the bare server key never fires.</p></div>
+  </div>
+  <div class="comp-panel demo-panel" id="comp-3">
+    <p><strong>Location:</strong> <code>.mcp.json</code> at plugin root, or inline in plugin.json.</p>
+    <pre class="code-block">{
+  <span class="str">"mcpServers"</span>: {
+    <span class="str">"plugin-database"</span>: {
+      <span class="str">"command"</span>: <span class="str">"${CLAUDE_PLUGIN_ROOT}/servers/db-server"</span>,
+      <span class="str">"args"</span>: [<span class="str">"--config"</span>, <span class="str">"${CLAUDE_PLUGIN_ROOT}/config.json"</span>]
+    }
+  }
+}</pre>
+    <p>Start automatically when the plugin is enabled; appear as standard MCP tools alongside user-configured servers.</p>
+  </div>
+  <div class="comp-panel demo-panel" id="comp-4">
+    <p><strong>Location:</strong> <code>.lsp.json</code> at plugin root, or inline. Provides go-to-definition, find references, hover info, and instant diagnostics.</p>
+    <pre class="code-block">{ <span class="str">"go"</span>: { <span class="str">"command"</span>: <span class="str">"gopls"</span>, <span class="str">"args"</span>: [<span class="str">"serve"</span>], <span class="str">"extensionToLanguage"</span>: { <span class="str">".go"</span>: <span class="str">"go"</span> } } }</pre>
+    <div class="api-fields">
+      <div class="field"><span class="name">command</span><span class="type">required</span><div class="desc">LSP binary to execute (must be in PATH)</div></div>
+      <div class="field"><span class="name">extensionToLanguage</span><span class="type">required</span><div class="desc">Maps file extensions to language identifiers</div></div>
+      <div class="field"><span class="name">restartOnCrash / shutdownTimeout</span><span class="type">optional</span><div class="desc">Restart behavior; require v2.1.205+</div></div>
+      <div class="field"><span class="name">diagnostics</span><span class="type">optional</span><div class="desc">Push diagnostics after edits (default true)</div></div>
+    </div>
+    <p>When multiple enabled servers claim the same extension, the first registered wins. A server missing required fields is skipped and doesn't claim its extensions (v2.1.205+). You must install the language server binary yourself.</p>
+  </div>
+  <div class="comp-panel demo-panel" id="comp-5">
+    <p><strong>Location:</strong> <code>monitors/monitors.json</code>, or <code>experimental.monitors</code> in plugin.json. Requires v2.1.105+. Runs a shell command for the session lifetime, delivering stdout lines as notifications. Runs only in interactive CLI sessions, unsandboxed at hook trust level.</p>
+    <pre class="code-block">[
+  { <span class="str">"name"</span>: <span class="str">"deploy-status"</span>, <span class="str">"command"</span>: <span class="str">"\"${CLAUDE_PLUGIN_ROOT}\"/scripts/poll-deploy.sh"</span>, <span class="str">"description"</span>: <span class="str">"Deployment status changes"</span> },
+  { <span class="str">"name"</span>: <span class="str">"error-log"</span>, <span class="str">"command"</span>: <span class="str">"tail -F ./logs/error.log"</span>, <span class="str">"description"</span>: <span class="str">"Application error log"</span>, <span class="str">"when"</span>: <span class="str">"on-skill-invoke:debug"</span> }
+]</pre>
+    <p><code>when</code>: <code>"always"</code> (default, starts at session start/reload) or <code>"on-skill-invoke:&lt;skill-name&gt;"</code>. Disabling a plugin mid-session doesn't stop already-running monitors.</p>
+  </div>
+  <div class="comp-panel demo-panel" id="comp-6">
+    <p>Ship color themes appearing in <code>/theme</code> alongside built-ins. JSON file in <code>themes/</code> with a <code>base</code> preset and sparse <code>overrides</code> map.</p>
+    <pre class="code-block">{ <span class="str">"name"</span>: <span class="str">"Dracula"</span>, <span class="str">"base"</span>: <span class="str">"dark"</span>, <span class="str">"overrides"</span>: { <span class="str">"claude"</span>: <span class="str">"#bd93f9"</span>, <span class="str">"error"</span>: <span class="str">"#ff5555"</span> } }</pre>
+    <p>Selecting persists <code>custom:&lt;plugin-name&gt;:&lt;slug&gt;</code>. Plugin themes are read-only; <code>Ctrl+E</code> copies into <code>~/.claude/themes/</code> for editing.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Plugin installation scopes</h2>
+  <div class="response-box">
+    <div class="response-field"><span class="rf-key">user</span><span class="rf-val">~/.claude/settings.json — personal, all projects (default)</span></div>
+    <div class="response-field"><span class="rf-key">project</span><span class="rf-val">.claude/settings.json — shared via version control</span></div>
+    <div class="response-field"><span class="rf-key">local</span><span class="rf-val">.claude/settings.local.json — project-specific, gitignored</span></div>
+    <div class="response-field"><span class="rf-key">managed</span><span class="rf-val">Managed settings — read-only, update only</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>Skills-directory plugins</h2>
+  <p>A folder under a skills directory containing <code>.claude-plugin/plugin.json</code> loads as <code>&lt;name&gt;@skills-dir</code> next session, with no marketplace or install step. Scaffold with <code>plugin init</code>.</p>
+  <div class="response-box">
+    <div class="response-field"><span class="rf-key">foo/SKILL.md, no manifest</span><span class="rf-val">A plain skill named foo</span></div>
+    <div class="response-field"><span class="rf-key">foo/.claude-plugin/plugin.json</span><span class="rf-val">A plugin foo@skills-dir</span></div>
+    <div class="response-field"><span class="rf-key">plugin/skills/bar/SKILL.md</span><span class="rf-val">A skill bar packaged inside a plugin</span></div>
+  </div>
+  <div class="two-col">
+    <div class="col-card"><div class="col-card-title">~/.claude/skills/ (personal)</div><p>Loads in every project — the location is yours alone.</p></div>
+    <div class="col-card"><div class="col-card-title">&lt;cwd&gt;/.claude/skills/ (project)</div><p>Loads only after accepting the trust dialog. MCP servers get per-server approval, LSP servers need trust, background monitors don't load.</p></div>
+  </div>
+  <div class="warn-box"><span class="tag">WARNING</span><p>Project-scope @skills-dir plugins load only from the .claude/skills/ of the launch directory — they don't walk up to the repo root. Launch from the repo root or run /reload-plugins after changing directories.</p></div>
+  <p>Skill.md edits apply immediately; other component changes (hooks/, .mcp.json, agents/, output-styles/) need <code>/reload-plugins</code> or a restart. Disable with <code>claude plugin disable my-tool@skills-dir</code>; no uninstall step exists.</p>
+</section>
+
+<section>
+  <h2>Plugin manifest schema</h2>
+  <p><code>.claude-plugin/plugin.json</code> defines metadata and configuration. Optional overall — if omitted, components auto-discover from default locations and the name derives from the directory.</p>
+  <pre class="code-block">{
+  <span class="str">"name"</span>: <span class="str">"plugin-name"</span>, <span class="str">"displayName"</span>: <span class="str">"Plugin Name"</span>, <span class="str">"version"</span>: <span class="str">"1.2.0"</span>,
+  <span class="str">"description"</span>: <span class="str">"Brief plugin description"</span>,
+  <span class="str">"author"</span>: { <span class="str">"name"</span>: <span class="str">"Author Name"</span>, <span class="str">"email"</span>: <span class="str">"author@example.com"</span> },
+  <span class="str">"skills"</span>: <span class="str">"./custom/skills/"</span>, <span class="str">"commands"</span>: [<span class="str">"./custom/commands/special.md"</span>],
+  <span class="str">"hooks"</span>: <span class="str">"./config/hooks.json"</span>, <span class="str">"mcpServers"</span>: <span class="str">"./mcp-config.json"</span>,
+  <span class="str">"experimental"</span>: { <span class="str">"themes"</span>: <span class="str">"./themes/"</span>, <span class="str">"monitors"</span>: <span class="str">"./monitors.json"</span> },
+  <span class="str">"dependencies"</span>: [<span class="str">"helper-lib"</span>, { <span class="str">"name"</span>: <span class="str">"secrets-vault"</span>, <span class="str">"version"</span>: <span class="str">"~2.1.0"</span> }]
+}</pre>
+  <p><code>name</code> is the only required field if a manifest is included. Unrecognized top-level fields are ignored (reported as warnings by <code>claude plugin validate</code>, or errors with <code>--strict</code>), which lets one manifest double as a VS Code/Cursor/npm/MCPB manifest.</p>
+
+  <h3>Metadata fields</h3>
+  <div class="api-fields">
+    <div class="field"><span class="name">$schema</span><span class="type">string</span><div class="desc">JSON Schema URL for editor tooling; ignored at load</div></div>
+    <div class="field"><span class="name">displayName</span><span class="type">string</span><div class="desc">UI picker label. Falls back to name. v2.1.143+</div></div>
+    <div class="field"><span class="name">version</span><span class="type">string</span><div class="desc">Pins the plugin; plugin.json wins over marketplace entry</div></div>
+    <div class="field"><span class="name">defaultEnabled</span><span class="type">boolean</span><div class="desc">Starts enabled unless false. v2.1.154+</div></div>
+  </div>
+  <div class="info-box"><span class="tag">DEFAULT ENABLEMENT PRECEDENCE</span><p>The user's <code>enabledPlugins</code> setting, once written, persists across updates. A dependency requirement writes an explicit <code>true</code> for a plugin another active plugin requires. Either overrides <code>defaultEnabled</code>.</p></div>
+
+  <h3>Component path fields</h3>
+  <div class="api-fields">
+    <div class="field"><span class="name">skills</span><span class="type">string|array</span><div class="desc">Adds to default skills/ scan</div></div>
+    <div class="field"><span class="name">commands / agents / outputStyles</span><span class="type">string|array</span><div class="desc">Replace their default directory</div></div>
+    <div class="field"><span class="name">hooks / mcpServers / lspServers</span><span class="type">string|array|object</span><div class="desc">Own merge rules per component</div></div>
+    <div class="field"><span class="name">userConfig</span><span class="type">object</span><div class="desc">Values prompted at enable time</div></div>
+    <div class="field"><span class="name">channels</span><span class="type">array</span><div class="desc">Message-channel declarations bound to an MCP server</div></div>
+    <div class="field"><span class="name">dependencies</span><span class="type">array</span><div class="desc">Other required plugins, optionally with semver constraints</div></div>
+  </div>
+
+  <h3>User configuration</h3>
+  <pre class="code-block">{
+  <span class="str">"userConfig"</span>: {
+    <span class="str">"api_endpoint"</span>: { <span class="str">"type"</span>: <span class="str">"string"</span>, <span class="str">"title"</span>: <span class="str">"API endpoint"</span>, <span class="str">"description"</span>: <span class="str">"Your team's API endpoint"</span> },
+    <span class="str">"api_token"</span>: { <span class="str">"type"</span>: <span class="str">"string"</span>, <span class="str">"title"</span>: <span class="str">"API token"</span>, <span class="str">"description"</span>: <span class="str">"API auth token"</span>, <span class="str">"sensitive"</span>: <span class="kw">true</span> }
+  }
+}</pre>
+  <p>Fields per option: <code>type</code> (string/number/boolean/directory/file), <code>title</code>, <code>description</code> (required); <code>sensitive</code>, <code>required</code>, <code>default</code>, <code>multiple</code>, <code>min</code>/<code>max</code> (optional). Available as <code>${user_config.KEY}</code>; non-sensitive values in <code>settings.json</code>, sensitive values in the system keychain (~2 KB limit).</p>
+
+  <h3>Path behavior rules</h3>
+  <div class="two-col">
+    <div class="col-card"><div class="col-card-title">Replaces default</div><p>commands, agents, outputStyles, experimental.themes, experimental.monitors</p></div>
+    <div class="col-card"><div class="col-card-title">Adds to default</div><p>skills — default skills/ always scanned, listed dirs load alongside it (exception: marketplace-root source with explicit subdirs)</p></div>
+  </div>
+
+  <h3>Environment variables</h3>
+  <div class="api-fields">
+    <div class="field"><span class="name">${CLAUDE_PLUGIN_ROOT}</span><div class="desc">Absolute path to install directory. Changes on update; previous version stays ~7 days, treat as ephemeral</div></div>
+    <div class="field"><span class="name">${CLAUDE_PLUGIN_DATA}</span><div class="desc">Persistent dir for state surviving updates: node_modules, venvs, caches</div></div>
+    <div class="field"><span class="name">${CLAUDE_PROJECT_DIR}</span><div class="desc">Project root, same as hooks receive</div></div>
+  </div>
+  <p><code>${CLAUDE_PLUGIN_DATA}</code> resolves to <code>~/.claude/plugins/data/{id}/</code>. Common pattern: a SessionStart hook diffs a bundled manifest against a stored copy and reinstalls dependencies when they differ.</p>
+</section>
+
+<section>
+  <h2>Plugin caching and file resolution</h2>
+  <p>Marketplace plugins are copied to <code>~/.claude/plugins/cache</code> rather than used in place, for security and verification. Each installed version is a separate cache directory; the previous version is marked orphaned and auto-removed 7 days after an update, giving concurrent sessions a grace period. Glob/Grep skip orphaned directories.</p>
+  <h3>Path traversal limitations</h3>
+  <p>Paths that traverse outside the plugin root (<code>../shared-utils</code>) don't work after install because those files aren't copied.</p>
+  <h3>Share files with symlinks</h3>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">Within own directory</span><span class="event-desc">Preserved as a relative symlink in the cache</span></div>
+    <div class="event-item"><span class="event-name">Elsewhere in same marketplace</span><span class="event-desc">Dereferenced — target content copied in its place</span></div>
+    <div class="event-item"><span class="event-name">Outside the marketplace</span><span class="event-desc">Skipped for security</span></div>
+  </div>
+  <pre class="code-block">ln -s ../../shared-plugin/skills/foo ./skills/foo</pre>
+</section>
+
+<section>
+  <h2>Plugin directory structure</h2>
+  <pre class="code-block">enterprise-plugin/
+├── .claude-plugin/plugin.json
+├── skills/&lt;name&gt;/SKILL.md
+├── commands/*.md
+├── agents/*.md
+├── output-styles/*.md
+├── themes/*.json
+├── monitors/monitors.json
+├── hooks/hooks.json
+├── bin/my-tool
+├── settings.json
+├── .mcp.json
+├── .lsp.json
+├── scripts/
+├── LICENSE
+└── CHANGELOG.md</pre>
+  <div class="warn-box"><span class="tag">WARNING</span><p>Only plugin.json goes inside .claude-plugin/. All other directories must be at the plugin root. A CLAUDE.md at the plugin root is NOT loaded as project context — use a skill instead.</p></div>
+</section>
+
+<section>
+  <h2>CLI commands reference</h2>
+  <div class="stage-tabs">
+    <div class="cli2-tab stage-tab active" onclick="cli2GoTo(0)">init</div>
+    <div class="cli2-tab stage-tab" onclick="cli2GoTo(1)">install</div>
+    <div class="cli2-tab stage-tab" onclick="cli2GoTo(2)">uninstall</div>
+    <div class="cli2-tab stage-tab" onclick="cli2GoTo(3)">prune</div>
+    <div class="cli2-tab stage-tab" onclick="cli2GoTo(4)">enable / disable</div>
+    <div class="cli2-tab stage-tab" onclick="cli2GoTo(5)">update / list</div>
+    <div class="cli2-tab stage-tab" onclick="cli2GoTo(6)">details / tag</div>
+  </div>
+  <div class="cli2-panel demo-panel visible" id="cli2-p0">
+    <pre class="code-block">claude plugin init &lt;name&gt; [--description] [--author] [--with skills agents hooks mcp lsp output-style channel] [-f] </pre>
+    <p>Scaffolds at <code>~/.claude/skills/&lt;name&gt;/</code>, loads as <code>&lt;name&gt;@skills-dir</code> next session. Alias: <code>new</code>. Admins can block via <code>strictKnownMarketplaces</code> or <code>blockedMarketplaces</code>.</p>
+  </div>
+  <div class="cli2-panel demo-panel" id="cli2-p1">
+    <pre class="code-block">claude plugin install &lt;plugin&gt; [-s user|project|local]
+
+claude plugin install formatter@my-marketplace --scope project</pre>
+  </div>
+  <div class="cli2-panel demo-panel" id="cli2-p2">
+    <pre class="code-block">claude plugin uninstall &lt;plugin&gt; [-s scope] [--keep-data] [--prune] [-y]</pre>
+    <p>Aliases: <code>remove</code>, <code>rm</code>. Uninstalling from the last scope deletes <code>${CLAUDE_PLUGIN_DATA}</code> unless <code>--keep-data</code>.</p>
+  </div>
+  <div class="cli2-panel demo-panel" id="cli2-p3">
+    <pre class="code-block">claude plugin prune [-s scope] [--dry-run] [-y]</pre>
+    <p>Alias: <code>autoremove</code>. Removes auto-installed dependencies no plugin needs anymore. Requires v2.1.121+.</p>
+  </div>
+  <div class="cli2-panel demo-panel" id="cli2-p4">
+    <pre class="code-block">claude plugin enable &lt;plugin&gt; [-s scope]
+claude plugin disable &lt;plugin&gt; [-s scope]</pre>
+    <p>Enable transitively enables dependencies. Disable fails if another enabled plugin depends on the target — the error names a chained disable command.</p>
+  </div>
+  <div class="cli2-panel demo-panel" id="cli2-p5">
+    <pre class="code-block">claude plugin update &lt;plugin&gt; [-s user|project|local|managed]
+claude plugin list [--json] [--available]</pre>
+    <p><code>/plugin list</code> works inline in a session; accepts <code>--enabled</code>/<code>--disabled</code> and <code>ls</code> shorthand.</p>
+  </div>
+  <div class="cli2-panel demo-panel" id="cli2-p6">
+    <pre class="code-block">claude plugin details &lt;name&gt;
+claude plugin tag [--push] [--dry-run] [-f]</pre>
+    <p><code>details</code> shows component inventory and projected token cost (always-on vs on-invoke). <code>tag</code> creates a release git tag for the plugin in the current directory.</p>
+  </div>
+  <span class="step-indicator" id="cli2Indicator">1 of 7</span>
+</section>
+
+<section>
+  <h2>Debugging and development tools</h2>
+  <p>Use <code>claude --debug</code> to see which plugins load, manifest errors, component registration, and MCP server initialization.</p>
+  <h3>Common issues</h3>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">Plugin not loading</span><span class="event-desc">Invalid plugin.json — run claude plugin validate</span></div>
+    <div class="event-item"><span class="event-name">Skills not appearing</span><span class="event-desc">skills/ or commands/ must be at plugin root, not inside .claude-plugin/</span></div>
+    <div class="event-item"><span class="event-name">Hooks not firing</span><span class="event-desc">chmod +x script.sh</span></div>
+    <div class="event-item"><span class="event-name">MCP server fails</span><span class="event-desc">Missing ${CLAUDE_PLUGIN_ROOT} in paths</span></div>
+    <div class="event-item"><span class="event-name">Path errors</span><span class="event-desc">All paths must be relative and start with ./</span></div>
+    <div class="event-item"><span class="event-name">LSP executable not found</span><span class="event-desc">Install the language server binary separately</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>Distribution and versioning reference</h2>
+  <p>Version resolves from: <code>plugin.json</code> version → marketplace entry version → git commit SHA (git-based sources) → <code>unknown</code> (npm/non-git local).</p>
+  <div class="two-col">
+    <div class="col-card"><div class="col-card-title">Explicit version</div><p>Set "version" in plugin.json. Users get updates only when you bump it. Best for published plugins with stable releases.</p></div>
+    <div class="col-card"><div class="col-card-title">Commit-SHA version</div><p>Omit version entirely. Users get updates on every new commit. Best for internal/actively-developed plugins.</p></div>
+  </div>
+  <p>Follow semantic versioning (MAJOR.MINOR.PATCH) for explicit versions and document changes in CHANGELOG.md.</p>
+</section>
+
+<section>
+  <h2>See also</h2>
+  <ul>
+    <li>Plugins — tutorials and practical usage</li>
+    <li>Plugin marketplaces — creating and managing marketplaces</li>
+    <li>Skills, Subagents, Hooks, MCP, Settings — related reference pages</li>
+  </ul>
+</section>
+
+</main>
+
+<script>
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+  }
+
+  function compShow(n) {
+    document.querySelectorAll('.comp-panel').forEach((el, i) => el.classList.toggle('visible', i === n));
+    document.querySelectorAll('.comp-chip').forEach((c, i) => c.classList.toggle('active', i === n));
+  }
+
+  let cli2Step = 0;
+  const CLI2_MAX = 6;
+  function cli2GoTo(n) {
+    cli2Step = Math.max(0, Math.min(CLI2_MAX, n));
+    document.querySelectorAll('.cli2-panel').forEach((el, i) => el.classList.toggle('visible', i === cli2Step));
+    document.querySelectorAll('.cli2-tab').forEach((t, i) => {
+      t.classList.remove('active', 'done');
+      if (i === cli2Step) t.classList.add('active'); else if (i < cli2Step) t.classList.add('done');
+    });
+    document.getElementById('cli2Indicator').textContent = `${cli2Step + 1} of ${CLI2_MAX + 1}`;
+  }
+  cli2GoTo(0);
+</script>
+</body>
+</html>

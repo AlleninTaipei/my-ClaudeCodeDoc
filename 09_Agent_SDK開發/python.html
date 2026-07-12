@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Agent SDK reference — Python</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f0f4f8;color:#1a202c;line-height:1.7;}
+header{background:linear-gradient(135deg,#dbeafe 0%,#f0f4f8 100%);border-bottom:1px solid #bfdbfe;padding:48px 24px 40px;text-align:center;}
+header h1{font-size:2.1rem;font-weight:700;color:#1e3a5f;}
+header p{margin-top:10px;color:#4a5568;font-size:1.02rem;max-width:640px;margin-inline:auto;}
+main{max-width:920px;margin:0 auto;padding:40px 24px 80px;}
+section{margin-bottom:40px;}
+h2{font-size:1.35rem;font-weight:600;color:#1e40af;border-left:4px solid #3b82f6;padding-left:14px;margin-bottom:16px;}
+h3{font-size:1.0rem;font-weight:600;color:#1a202c;margin:18px 0 8px;}
+h4{font-size:0.9rem;font-weight:700;color:#374151;margin:14px 0 6px;}
+p{color:#4a5568;margin-bottom:10px;font-size:0.92rem;}
+ul,ol{color:#4a5568;font-size:0.88rem;margin:8px 0 8px 20px;}
+li{margin-bottom:4px;}
+code.inline{font-family:monospace;background:#e2e8f0;padding:1px 5px;border-radius:4px;font-size:0.85em;color:#7c3aed;}
+.code-block{background:#f8fafc;border:1px solid #cbd5e0;border-radius:8px;padding:14px 16px;font-family:monospace;font-size:0.78rem;color:#1a202c;overflow-x:auto;margin-top:10px;line-height:1.65;white-space:pre;}
+.kw{color:#7c3aed;}
+.fn{color:#16a34a;}
+.str{color:#d97706;}
+.cmt{color:#94a3b8;font-style:italic;}
+.key{color:#2563eb;}
+.info-box{background:#dbeafe;border:1px solid #93c5fd;border-radius:10px;padding:14px 18px;margin-top:12px;}
+.info-box .tag{display:inline-block;background:#3b82f6;color:#fff;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:0.05em;}
+.info-box p{color:#1e3a5f;font-size:0.84rem;margin:0;}
+.warn-box{background:#fef3c7;border:1px solid #fcd34d;border-radius:10px;padding:14px 18px;margin-top:12px;}
+.warn-box .tag{display:inline-block;background:#d97706;color:#fff;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:0.05em;}
+.warn-box p{color:#78350f;font-size:0.84rem;margin:0;}
+.takeaway{background:linear-gradient(135deg,#dcfce7,#f0fdf4);border:1px solid #4ade80;border-radius:10px;padding:16px 20px;margin-top:14px;}
+.takeaway p{color:#166534;font-size:0.86rem;margin:0;}
+.stage-tabs{display:flex;gap:6px;margin-bottom:22px;flex-wrap:wrap;position:sticky;top:0;background:#f0f4f8;padding:10px 0;z-index:10;}
+.stage-tab{padding:6px 13px;border-radius:20px;font-size:0.76rem;font-weight:600;cursor:pointer;border:1px solid #cbd5e0;background:#e2e8f0;color:#4a5568;transition:all .2s;}
+.stage-tab.active{background:#2563eb;border-color:#3b82f6;color:#fff;}
+.cat-panel{display:none;}
+.cat-panel.visible{display:block;animation:fadeIn .25s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.cat-intro{color:#4a5568;font-size:0.92rem;margin-bottom:16px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;}
+.col-card{background:#fff;border:1px solid #cbd5e0;border-radius:10px;padding:16px 18px;}
+.col-card-title{font-size:0.75rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:#6b7280;margin-bottom:10px;}
+.col-card p{font-size:0.83rem;color:#4a5568;margin-bottom:6px;}
+.col-card ul{margin:4px 0 4px 18px;}
+.acc{background:#fff;border:1px solid #cbd5e0;border-radius:8px;margin-top:10px;overflow:hidden;}
+.acc summary{cursor:pointer;padding:11px 16px;font-family:monospace;font-size:0.86rem;font-weight:700;color:#2563eb;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.acc summary::-webkit-details-marker{display:none;}
+.acc summary::after{content:'+';color:#9ca3af;font-weight:400;font-family:sans-serif;flex-shrink:0;}
+.acc[open] summary::after{content:'\2212';}
+.acc summary:hover{background:#f0f4f8;}
+.acc-body{padding:2px 16px 16px;}
+.acc-desc{font-size:0.85rem;color:#4a5568;margin-bottom:6px;}
+.acc-sub{font-size:0.72rem;color:#9ca3af;font-weight:400;font-family:-apple-system,sans-serif;}
+.spec-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:0.78rem;}
+.spec-table th{text-align:left;color:#6b7280;font-weight:700;text-transform:uppercase;font-size:0.65rem;letter-spacing:0.05em;padding:6px 8px;border-bottom:1px solid #cbd5e0;}
+.spec-table td{padding:6px 8px;border-bottom:1px solid #e2e8f0;vertical-align:top;font-size:0.78rem;color:#374151;}
+.spec-table td:first-child{font-family:monospace;color:#16a34a;white-space:nowrap;}
+.badge{display:inline-block;font-size:0.62rem;font-weight:700;background:#ede9fe;color:#6d28d9;border:1px solid #a78bfa;border-radius:4px;padding:1px 7px;margin-left:8px;vertical-align:middle;}
+#themeToggle{position:fixed;top:16px;right:16px;z-index:9999;padding:7px 14px;border-radius:20px;font-size:0.78rem;font-weight:700;cursor:pointer;border:1px solid #cbd5e0;background:#fff;color:#1a202c;transition:all .25s;box-shadow:0 2px 8px rgba(0,0,0,.12);letter-spacing:.03em;}
+#themeToggle:hover{border-color:#2563eb;color:#2563eb;}
+@media(max-width:640px){.two-col{grid-template-columns:1fr;}}
+
+body.dark{background:#0f1117;color:#e2e8f0;}
+body.dark header{background:linear-gradient(135deg,#1a1f2e 0%,#0f1117 100%);border-bottom-color:#2d3748;}
+body.dark header h1{color:#f7fafc;}
+body.dark header p{color:#a0aec0;}
+body.dark h2{color:#90cdf4;border-left-color:#4299e1;}
+body.dark h3{color:#e2e8f0;}
+body.dark h4{color:#cbd5e0;}
+body.dark p,body.dark ul,body.dark ol{color:#a0aec0;}
+body.dark code.inline{background:#1a202c;color:#b794f4;}
+body.dark .code-block{background:#0d1117;border-color:#2d3748;color:#e2e8f0;}
+body.dark .kw{color:#9f7aea;}
+body.dark .fn{color:#68d391;}
+body.dark .str{color:#f6ad55;}
+body.dark .cmt{color:#4a5568;}
+body.dark .key{color:#63b3ed;}
+body.dark .info-box{background:#1a202c;border-color:#2a4a6a;}
+body.dark .info-box .tag{background:#2a4a6a;color:#90cdf4;}
+body.dark .info-box p{color:#a0aec0;}
+body.dark .warn-box{background:#2a2010;border-color:#7a5a20;}
+body.dark .warn-box .tag{background:#7a5a20;color:#fbd38d;}
+body.dark .warn-box p{color:#fbd38d;}
+body.dark .takeaway{background:linear-gradient(135deg,#1a2a1a,#1a202c);border-color:#276749;}
+body.dark .takeaway p{color:#c6f6d5;}
+body.dark .stage-tabs{background:#0f1117;}
+body.dark .stage-tab{background:#1a202c;border-color:#2d3748;color:#718096;}
+body.dark .stage-tab.active{background:#2b6cb0;border-color:#4299e1;color:#fff;}
+body.dark .cat-intro{color:#a0aec0;}
+body.dark .col-card{background:#1a202c;border-color:#2d3748;}
+body.dark .col-card-title{color:#4a5568;}
+body.dark .col-card p{color:#a0aec0;}
+body.dark .acc{background:#1a202c;border-color:#2d3748;}
+body.dark .acc summary{color:#63b3ed;}
+body.dark .acc summary:hover{background:#0f1117;}
+body.dark .acc-desc{color:#a0aec0;}
+body.dark .acc-sub{color:#4a5568;}
+body.dark .spec-table th{color:#4a5568;border-bottom-color:#2d3748;}
+body.dark .spec-table td{color:#a0aec0;border-bottom-color:#2d3748;}
+body.dark .spec-table td:first-child{color:#68d391;}
+body.dark .badge{background:#2d1f4a;color:#b794f4;border-color:#553c8b;}
+body.dark #themeToggle{background:#1a202c;color:#e2e8f0;border-color:#4a5568;box-shadow:0 2px 8px rgba(0,0,0,.4);}
+body.dark #themeToggle:hover{border-color:#90cdf4;color:#90cdf4;}
+</style>
+</head>
+<body>
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+<header>
+<h1>Agent SDK reference — Python</h1>
+<p>Complete API reference for the Python Agent SDK: functions, the ClaudeSDKClient class, message and hook types, tool schemas, and sandbox configuration.</p>
+</header>
+
+<main>
+<div class="stage-tabs" id="catTabs">
+<div class="cat-tab stage-tab active" onclick="catGoTo(0)">Installation</div>
+<div class="cat-tab stage-tab" onclick="catGoTo(1)">query() vs Client</div>
+<div class="cat-tab stage-tab" onclick="catGoTo(2)">Functions</div>
+<div class="cat-tab stage-tab" onclick="catGoTo(3)">ClaudeSDKClient</div>
+<div class="cat-tab stage-tab" onclick="catGoTo(4)">Types</div>
+<div class="cat-tab stage-tab" onclick="catGoTo(5)">Message Types</div>
+<div class="cat-tab stage-tab" onclick="catGoTo(6)">Content Blocks</div>
+<div class="cat-tab stage-tab" onclick="catGoTo(7)">Error Types</div>
+<div class="cat-tab stage-tab" onclick="catGoTo(8)">Hook Types</div>
+<div class="cat-tab stage-tab" onclick="catGoTo(9)">Tool I/O Types</div>
+<div class="cat-tab stage-tab" onclick="catGoTo(10)">Advanced Examples</div>
+<div class="cat-tab stage-tab" onclick="catGoTo(11)">Sandbox Configuration</div>
+<div class="cat-tab stage-tab" onclick="catGoTo(12)">See also</div>
+</div>
+
+<!-- 0 Installation -->
+<section class="cat-panel visible" id="cat-0">
+<h2>Installation</h2>
+<p class="cat-intro">A single pip install gets you the SDK and a bundled native Claude Code binary.</p>
+<pre class="code-block"><code class="autohl">pip install claude-agent-sdk</code></pre>
+</section>
+
+<!-- 1 query vs client -->
+<section class="cat-panel" id="cat-1">
+<h2>Choosing between query() and ClaudeSDKClient</h2>
+<p class="cat-intro">The Python SDK offers two entry points depending on whether you need a single exchange or a continuous conversation.</p>
+<table class="spec-table">
+<tr><th>Feature</th><th>query()</th><th>ClaudeSDKClient</th></tr>
+<tr><td>Session</td><td>Creates a new session by default</td><td>Reuses same session</td></tr>
+<tr><td>Conversation</td><td>Single exchange</td><td>Multiple exchanges in same context</td></tr>
+<tr><td>Connection</td><td>Managed automatically</td><td>Manual control</td></tr>
+<tr><td>Streaming Input</td><td>Supported</td><td>Supported</td></tr>
+<tr><td>Interrupts</td><td>Not supported</td><td>Supported</td></tr>
+<tr><td>Hooks</td><td>Supported</td><td>Supported</td></tr>
+<tr><td>Custom Tools</td><td>Supported</td><td>Supported</td></tr>
+<tr><td>Continue Chat</td><td>Manual via continue_conversation or resume</td><td>Automatic</td></tr>
+<tr><td>Use Case</td><td>One-off tasks</td><td>Continuous conversations</td></tr>
+</table>
+<div class="two-col">
+<div class="col-card"><div class="col-card-title">When to use query()</div>
+<p>Best for:</p>
+<ul><li>One-off questions where you don't need conversation history</li><li>Independent tasks that don't require prior context</li><li>Simple automation scripts</li><li>A fresh start each time</li></ul></div>
+<div class="col-card"><div class="col-card-title">When to use ClaudeSDKClient</div>
+<p>Best for:</p>
+<ul><li>Continuing conversations — Claude remembers context</li><li>Follow-up questions building on previous responses</li><li>Interactive applications — chat interfaces, REPLs</li><li>Response-driven logic and explicit session control</li></ul></div>
+</div>
+</section>
+
+<!-- 2 Functions -->
+<section class="cat-panel" id="cat-2">
+<h2>Functions</h2>
+<p class="cat-intro">Module-level functions for one-off queries, custom tools, and session management.</p>
+
+<details class="acc"><summary>query()</summary><div class="acc-body">
+<p class="acc-desc">Creates a new session for each interaction by default. Returns an async iterator yielding messages as they arrive. Each call starts fresh unless you pass continue_conversation=True or resume in ClaudeAgentOptions.</p>
+<pre class="code-block"><code class="autohl">async def query(
+    *,
+    prompt: str | AsyncIterable[dict[str, Any]],
+    options: ClaudeAgentOptions | None = None,
+    transport: Transport | None = None
+) -> AsyncIterator[Message]</code></pre>
+<table class="spec-table"><tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+<tr><td>prompt</td><td>str | AsyncIterable[dict]</td><td>The input prompt as a string or async iterable for streaming mode</td></tr>
+<tr><td>options</td><td>ClaudeAgentOptions | None</td><td>Optional configuration (defaults to ClaudeAgentOptions())</td></tr>
+<tr><td>transport</td><td>Transport | None</td><td>Optional custom transport for communicating with the CLI process</td></tr></table>
+<pre class="code-block"><code class="autohl">import asyncio
+from claude_agent_sdk import query, ClaudeAgentOptions
+
+
+async def main():
+    options = ClaudeAgentOptions(
+        system_prompt="You are an expert Python developer",
+        permission_mode="acceptEdits",
+        cwd="/home/user/project",
+    )
+
+    async for message in query(prompt="Create a Python web server", options=options):
+        print(message)
+
+
+asyncio.run(main())</code></pre>
+</div></details>
+
+<details class="acc"><summary>tool()</summary><div class="acc-body">
+<p class="acc-desc">Decorator for defining MCP tools with type safety.</p>
+<pre class="code-block"><code class="autohl">def tool(
+    name: str,
+    description: str,
+    input_schema: type | dict[str, Any],
+    annotations: ToolAnnotations | None = None
+) -> Callable[[Callable[[Any], Awaitable[dict[str, Any]]]], SdkMcpTool[Any]]</code></pre>
+<h4>Input schema options</h4>
+<pre class="code-block"><code class="autohl"># 1. Simple type mapping (recommended)
+{"text": str, "count": int, "enabled": bool}
+
+# 2. JSON Schema format (for complex validation)
+{
+    "type": "object",
+    "properties": {
+        "text": {"type": "string"},
+        "count": {"type": "integer", "minimum": 0},
+    },
+    "required": ["text"],
+}</code></pre>
+<h4>ToolAnnotations</h4>
+<table class="spec-table"><tr><th>Field</th><th>Default</th><th>Description</th></tr>
+<tr><td>title</td><td>None</td><td>Human-readable title for the tool</td></tr>
+<tr><td>readOnlyHint</td><td>False</td><td>If True, the tool does not modify its environment</td></tr>
+<tr><td>destructiveHint</td><td>True</td><td>If True, may perform destructive updates</td></tr>
+<tr><td>idempotentHint</td><td>False</td><td>If True, repeated calls have no additional effect</td></tr>
+<tr><td>openWorldHint</td><td>True</td><td>If True, interacts with external entities</td></tr></table>
+<pre class="code-block"><code class="autohl">from claude_agent_sdk import tool, ToolAnnotations
+from typing import Any
+
+
+@tool(
+    "search",
+    "Search the web",
+    {"query": str},
+    annotations=ToolAnnotations(readOnlyHint=True, openWorldHint=True),
+)
+async def search(args: dict[str, Any]) -> dict[str, Any]:
+    return {"content": [{"type": "text", "text": f"Results for: {args['query']}"}]}</code></pre>
+</div></details>
+
+<details class="acc"><summary>create_sdk_mcp_server()</summary><div class="acc-body">
+<p class="acc-desc">Creates an in-process MCP server that runs within your Python application.</p>
+<pre class="code-block"><code class="autohl">def create_sdk_mcp_server(
+    name: str,
+    version: str = "1.0.0",
+    tools: list[SdkMcpTool[Any]] | None = None
+) -> McpSdkServerConfig</code></pre>
+<pre class="code-block"><code class="autohl">from claude_agent_sdk import tool, create_sdk_mcp_server
+
+
+@tool("add", "Add two numbers", {"a": float, "b": float})
+async def add(args):
+    return {"content": [{"type": "text", "text": f"Sum: {args['a'] + args['b']}"}]}
+
+
+calculator = create_sdk_mcp_server(name="calculator", version="2.0.0", tools=[add])
+
+options = ClaudeAgentOptions(
+    mcp_servers={"calc": calculator},
+    allowed_tools=["mcp__calc__add"],
+)</code></pre>
+</div></details>
+
+<details class="acc"><summary>list_sessions()</summary><div class="acc-body">
+<p class="acc-desc">Lists past sessions with metadata. Filter by project directory or list across all projects. Synchronous; returns immediately.</p>
+<pre class="code-block"><code class="autohl">def list_sessions(
+    directory: str | None = None,
+    limit: int | None = None,
+    include_worktrees: bool = True
+) -> list[SDKSessionInfo]</code></pre>
+<h4>Return type: SDKSessionInfo</h4>
+<table class="spec-table"><tr><th>Property</th><th>Type</th><th>Description</th></tr>
+<tr><td>session_id</td><td>str</td><td>Unique session identifier</td></tr>
+<tr><td>summary</td><td>str</td><td>Display title: custom title, auto-summary, or first prompt</td></tr>
+<tr><td>last_modified</td><td>int</td><td>Last modified time, ms since epoch</td></tr>
+<tr><td>file_size</td><td>int|None</td><td>Session file size in bytes (None for remote storage)</td></tr>
+<tr><td>custom_title</td><td>str|None</td><td>User-set session title</td></tr>
+<tr><td>first_prompt</td><td>str|None</td><td>First meaningful user prompt</td></tr>
+<tr><td>git_branch</td><td>str|None</td><td>Git branch at end of session</td></tr>
+<tr><td>cwd</td><td>str|None</td><td>Working directory for the session</td></tr>
+<tr><td>tag</td><td>str|None</td><td>User-set session tag</td></tr>
+<tr><td>created_at</td><td>int|None</td><td>Session creation time, ms since epoch</td></tr></table>
+</div></details>
+
+<details class="acc"><summary>get_session_messages()</summary><div class="acc-body">
+<p class="acc-desc">Retrieves messages from a past session. Synchronous.</p>
+<pre class="code-block"><code class="autohl">def get_session_messages(
+    session_id: str,
+    directory: str | None = None,
+    limit: int | None = None,
+    offset: int = 0
+) -> list[SessionMessage]</code></pre>
+</div></details>
+
+<details class="acc"><summary>get_session_info() / rename_session() / tag_session()</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">def get_session_info(session_id: str, directory: str | None = None) -> SDKSessionInfo | None
+
+def rename_session(session_id: str, title: str, directory: str | None = None) -> None
+
+def tag_session(session_id: str, tag: str | None, directory: str | None = None) -> None</code></pre>
+<p class="acc-desc">rename_session raises ValueError for an invalid UUID or empty title, FileNotFoundError if the session can't be found. tag_session sanitizes the tag as Unicode before storing; pass None to clear.</p>
+<pre class="code-block"><code class="autohl">from claude_agent_sdk import list_sessions, tag_session
+
+tag_session("550e8400-e29b-41d4-a716-446655440000", "needs-review")
+
+for session in list_sessions(directory="/path/to/project"):
+    if session.tag == "needs-review":
+        print(session.summary)</code></pre>
+</div></details>
+</section>
+
+<!-- 3 ClaudeSDKClient -->
+<section class="cat-panel" id="cat-3">
+<h2>ClaudeSDKClient</h2>
+<p class="cat-intro">Maintains a conversation session across multiple exchanges — the Python equivalent of how the TypeScript SDK's query() works internally.</p>
+<pre class="code-block"><code class="autohl">class ClaudeSDKClient:
+    def __init__(self, options: ClaudeAgentOptions | None = None, transport: Transport | None = None)
+    async def connect(self, prompt: str | AsyncIterable[dict] | None = None) -> None
+    async def query(self, prompt: str | AsyncIterable[dict], session_id: str = "default") -> None
+    async def receive_messages(self) -> AsyncIterator[Message]
+    async def receive_response(self) -> AsyncIterator[Message]
+    async def interrupt(self) -> None
+    async def set_permission_mode(self, mode: str) -> None
+    async def set_model(self, model: str | None = None) -> None
+    async def rewind_files(self, user_message_id: str) -> None
+    async def get_mcp_status(self) -> McpStatusResponse
+    async def reconnect_mcp_server(self, server_name: str) -> None
+    async def toggle_mcp_server(self, server_name: str, enabled: bool) -> None
+    async def stop_task(self, task_id: str) -> None
+    async def get_server_info(self) -> dict[str, Any] | None
+    async def disconnect(self) -> None</code></pre>
+<table class="spec-table"><tr><th>Method</th><th>Description</th></tr>
+<tr><td>__init__(options)</td><td>Initialize the client with optional configuration</td></tr>
+<tr><td>connect(prompt)</td><td>Connect with an optional initial prompt or message stream</td></tr>
+<tr><td>query(prompt, session_id)</td><td>Send a new request in streaming mode</td></tr>
+<tr><td>receive_messages()</td><td>Receive all messages as an async iterator</td></tr>
+<tr><td>receive_response()</td><td>Receive messages up to and including a ResultMessage</td></tr>
+<tr><td>interrupt()</td><td>Send interrupt signal (streaming mode only)</td></tr>
+<tr><td>set_permission_mode(mode)</td><td>Change permission mode for the current session</td></tr>
+<tr><td>set_model(model)</td><td>Change the model; pass None to reset to default</td></tr>
+<tr><td>rewind_files(user_message_id)</td><td>Restore files to their state at that message; requires enable_file_checkpointing</td></tr>
+<tr><td>get_mcp_status()</td><td>Status of all configured MCP servers</td></tr>
+<tr><td>reconnect_mcp_server(name)</td><td>Retry a failed or disconnected MCP server</td></tr>
+<tr><td>toggle_mcp_server(name, enabled)</td><td>Enable/disable an MCP server mid-session; disabling removes its tools</td></tr>
+<tr><td>stop_task(task_id)</td><td>Stop a running background task</td></tr>
+<tr><td>get_server_info()</td><td>Session ID and capabilities</td></tr>
+<tr><td>disconnect()</td><td>Disconnect from Claude</td></tr></table>
+
+<h3>Context manager support</h3>
+<pre class="code-block"><code class="autohl">async with ClaudeSDKClient() as client:
+    await client.query("Hello Claude")
+    async for message in client.receive_response():
+        print(message)</code></pre>
+<div class="warn-box"><span class="tag">IMPORTANT</span><p>When iterating over messages, avoid using break to exit early — it can cause asyncio cleanup issues. Let iteration complete naturally, or use flags to track when you've found what you need.</p></div>
+
+<details class="acc"><summary>Example: continuing a conversation</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">import asyncio
+from claude_agent_sdk import ClaudeSDKClient, AssistantMessage, TextBlock
+
+
+async def main():
+    async with ClaudeSDKClient() as client:
+        await client.query("What's the capital of France?")
+        async for message in client.receive_response():
+            if isinstance(message, AssistantMessage):
+                for block in message.content:
+                    if isinstance(block, TextBlock):
+                        print(f"Claude: {block.text}")
+
+        # Follow-up question - the session retains the previous context
+        await client.query("What's the population of that city?")
+        async for message in client.receive_response():
+            if isinstance(message, AssistantMessage):
+                for block in message.content:
+                    if isinstance(block, TextBlock):
+                        print(f"Claude: {block.text}")
+
+
+asyncio.run(main())</code></pre>
+</div></details>
+
+<details class="acc"><summary>Example: using interrupts</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">import asyncio
+from claude_agent_sdk import ClaudeSDKClient, ClaudeAgentOptions, ResultMessage
+
+
+async def interruptible_task():
+    options = ClaudeAgentOptions(allowed_tools=["Bash"], permission_mode="acceptEdits")
+
+    async with ClaudeSDKClient(options=options) as client:
+        await client.query("Count from 1 to 100 slowly, using the bash sleep command")
+        await asyncio.sleep(2)
+        await client.interrupt()
+        print("Task interrupted!")
+
+        # Drain the interrupted task's messages (including its ResultMessage)
+        async for message in client.receive_response():
+            if isinstance(message, ResultMessage):
+                print(f"Interrupted task finished with subtype={message.subtype!r}")
+
+        await client.query("Just say hello instead")
+        async for message in client.receive_response():
+            if isinstance(message, ResultMessage) and message.subtype == "success":
+                print(f"New result: {message.result}")
+
+
+asyncio.run(interruptible_task())</code></pre>
+<div class="info-box"><span class="tag">NOTE</span><p>Buffer behavior after interrupt: interrupt() sends a stop signal but does not clear the message buffer. Messages already produced, including a ResultMessage with subtype="error_during_execution", remain in the stream. Drain them with receive_response() before reading the response to a new query.</p></div>
+</div></details>
+
+<details class="acc"><summary>Example: advanced permission control</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">from claude_agent_sdk import ClaudeSDKClient, ClaudeAgentOptions
+from claude_agent_sdk.types import PermissionResultAllow, PermissionResultDeny, ToolPermissionContext
+
+
+async def custom_permission_handler(
+    tool_name: str, input_data: dict, context: ToolPermissionContext
+) -> PermissionResultAllow | PermissionResultDeny:
+    if tool_name == "Write" and input_data.get("file_path", "").startswith("/system/"):
+        return PermissionResultDeny(message="System directory write not allowed", interrupt=True)
+
+    if tool_name in ["Write", "Edit"] and "config" in input_data.get("file_path", ""):
+        safe_path = f"./sandbox/{input_data['file_path']}"
+        return PermissionResultAllow(updated_input={**input_data, "file_path": safe_path})
+
+    return PermissionResultAllow(updated_input=input_data)
+
+
+async def main():
+    # Don't also list gated tools in allowed_tools: allow rules approve calls before can_use_tool runs
+    options = ClaudeAgentOptions(can_use_tool=custom_permission_handler)
+
+    async with ClaudeSDKClient(options=options) as client:
+        await client.query("Update the system config file")
+        async for message in client.receive_response():
+            print(message)  # Will use sandbox path instead
+
+
+asyncio.run(main())</code></pre>
+</div></details>
+</section>
+
+<!-- 4 Types -->
+<section class="cat-panel" id="cat-4">
+<h2>Types</h2>
+<p class="cat-intro">Configuration, transport, and permission types, led by the large <code class="inline">ClaudeAgentOptions</code> dataclass passed to every query.</p>
+<div class="info-box"><span class="tag">DATACLASS VS TYPEDDICT</span><p>@dataclass classes (ResultMessage, AgentDefinition, TextBlock) are object instances at runtime with attribute access: msg.result. TypedDict classes (ThinkingConfigEnabled, McpStdioServerConfig, SyncHookJSONOutput) are plain dicts at runtime and require key access: config["budget_tokens"], not config.budget_tokens.</p></div>
+
+<details class="acc"><summary>ClaudeAgentOptions <span class="acc-sub">configuration dataclass</span></summary><div class="acc-body">
+<table class="spec-table">
+<tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td>tools</td><td>list[str]|ToolsPreset|None</td><td>None</td><td>Tools configuration; use the claude_code preset for defaults</td></tr>
+<tr><td>allowed_tools</td><td>list[str]</td><td>[]</td><td>Tools to auto-approve without prompting</td></tr>
+<tr><td>system_prompt</td><td>str|SystemPromptPreset|SystemPromptFile|None</td><td>None</td><td>Custom prompt, preset with optional append, or file path for large prompts</td></tr>
+<tr><td>mcp_servers</td><td>dict|str|Path</td><td>{}</td><td>MCP server configs or path to a config file</td></tr>
+<tr><td>strict_mcp_config</td><td>bool</td><td>False</td><td>Use only mcp_servers, ignore project .mcp.json / user settings / plugins / connectors</td></tr>
+<tr><td>permission_mode</td><td>PermissionMode|None</td><td>None</td><td>Permission mode for tool usage</td></tr>
+<tr><td>continue_conversation</td><td>bool</td><td>False</td><td>Continue the most recent conversation</td></tr>
+<tr><td>resume</td><td>str|None</td><td>None</td><td>Session ID to resume</td></tr>
+<tr><td>max_turns</td><td>int|None</td><td>None</td><td>Maximum agentic turns</td></tr>
+<tr><td>max_budget_usd</td><td>float|None</td><td>None</td><td>Stop when client-side cost estimate reaches this USD value</td></tr>
+<tr><td>disallowed_tools</td><td>list[str]</td><td>[]</td><td>Tools to deny; scoped rules deny in every permission mode including bypassPermissions</td></tr>
+<tr><td>enable_file_checkpointing</td><td>bool</td><td>False</td><td>Enable file change tracking for rewinding</td></tr>
+<tr><td>model</td><td>str|None</td><td>None</td><td>Claude model alias or full model name</td></tr>
+<tr><td>fallback_model</td><td>str|None</td><td>None</td><td>Fallback model if the primary fails</td></tr>
+<tr><td>betas</td><td>list[SdkBeta]</td><td>[]</td><td>Beta features to enable</td></tr>
+<tr><td>output_format</td><td>dict|None</td><td>None</td><td>Structured output config, e.g. json_schema</td></tr>
+<tr><td>permission_prompt_tool_name</td><td>str|None</td><td>None</td><td>MCP tool name for permission prompts</td></tr>
+<tr><td>cwd</td><td>str|Path|None</td><td>None</td><td>Current working directory</td></tr>
+<tr><td>cli_path</td><td>str|Path|None</td><td>None</td><td>Custom path to the Claude Code CLI executable</td></tr>
+<tr><td>settings</td><td>str|None</td><td>None</td><td>Path to settings file</td></tr>
+<tr><td>add_dirs</td><td>list[str|Path]</td><td>[]</td><td>Additional directories Claude can access</td></tr>
+<tr><td>env</td><td>dict[str,str]</td><td>{}</td><td>Environment variables merged onto the inherited process environment</td></tr>
+<tr><td>extra_args</td><td>dict</td><td>{}</td><td>Additional CLI arguments passed directly to the CLI</td></tr>
+<tr><td>max_buffer_size</td><td>int|None</td><td>None</td><td>Maximum bytes when buffering CLI stdout</td></tr>
+<tr><td>stderr</td><td>Callable|None</td><td>None</td><td>Callback for stderr output from the CLI</td></tr>
+<tr><td>can_use_tool</td><td>CanUseTool|None</td><td>None</td><td>Permission callback, invoked only when the flow falls through to a prompt</td></tr>
+<tr><td>hooks</td><td>dict|None</td><td>None</td><td>Hook configurations for intercepting events</td></tr>
+<tr><td>user</td><td>str|None</td><td>None</td><td>User identifier</td></tr>
+<tr><td>include_partial_messages</td><td>bool</td><td>False</td><td>Include partial streaming message events</td></tr>
+<tr><td>include_hook_events</td><td>bool</td><td>False</td><td>Include hook lifecycle events as HookEventMessage objects</td></tr>
+<tr><td>fork_session</td><td>bool</td><td>False</td><td>When resuming, fork to a new session ID instead of continuing the original</td></tr>
+<tr><td>agents</td><td>dict|None</td><td>None</td><td>Programmatically defined subagents</td></tr>
+<tr><td>plugins</td><td>list[SdkPluginConfig]</td><td>[]</td><td>Load custom plugins from local paths</td></tr>
+<tr><td>sandbox</td><td>SandboxSettings|None</td><td>None</td><td>Configure sandbox behavior programmatically</td></tr>
+<tr><td>setting_sources</td><td>list[SettingSource]|None</td><td>None (all)</td><td>Which filesystem settings to load</td></tr>
+<tr><td>skills</td><td>list[str]|"all"|None</td><td>None</td><td>Skills available to the session; auto-adds the Skill tool</td></tr>
+<tr><td>thinking</td><td>ThinkingConfig|None</td><td>None</td><td>Controls extended thinking; overrides deprecated max_thinking_tokens</td></tr>
+<tr><td>effort</td><td>EffortLevel|None</td><td>None</td><td>Effort level for thinking depth</td></tr>
+<tr><td>session_store</td><td>SessionStore|None</td><td>None</td><td>Mirror session transcripts to an external backend</td></tr>
+<tr><td>session_store_flush</td><td>"batched"|"eager"</td><td>"batched"</td><td>When to flush mirrored entries; ignored when session_store is None</td></tr>
+</table>
+<h4>Handle slow or stalled API responses</h4>
+<pre class="code-block"><code class="autohl">options = ClaudeAgentOptions(
+    env={
+        "API_TIMEOUT_MS": "120000",
+        "CLAUDE_CODE_MAX_RETRIES": "2",
+        "CLAUDE_ASYNC_AGENT_STALL_TIMEOUT_MS": "120000",
+    },
+)</code></pre>
+<ul>
+<li><b>API_TIMEOUT_MS</b>: per-request timeout, ms. Default 600000. Applies to main loop and all subagents.</li>
+<li><b>CLAUDE_CODE_MAX_RETRIES</b>: max API retries. Default 10, capped at 15. Set CLAUDE_CODE_RETRY_WATCHDOG=1 to retry capacity errors indefinitely.</li>
+<li><b>CLAUDE_ASYNC_AGENT_STALL_TIMEOUT_MS</b>: stall watchdog for run_in_background subagents. Default 600000.</li>
+<li><b>CLAUDE_ENABLE_STREAM_WATCHDOG</b> / CLAUDE_STREAM_IDLE_TIMEOUT_MS: aborts a request whose body stops streaming after headers arrive. On by default; default idle timeout 300000ms.</li>
+</ul>
+</div></details>
+
+<details class="acc"><summary>SystemPromptPreset / SystemPromptFile</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">class SystemPromptPreset(TypedDict):
+    type: Literal["preset"]
+    preset: Literal["claude_code"]
+    append: NotRequired[str]
+    exclude_dynamic_sections: NotRequired[bool]
+
+class SystemPromptFile(TypedDict):
+    type: Literal["file"]
+    path: str</code></pre>
+<p class="acc-desc">exclude_dynamic_sections moves per-session context (cwd, git-repo flag, memory paths) into the first user message, improving prompt-cache reuse. SystemPromptFile maps to the CLI --system-prompt-file flag; use it when the prompt is large, since a string system_prompt is subject to OS argv length limits (~128KB on Linux, ~32KB total on Windows).</p>
+</div></details>
+
+<details class="acc"><summary>SettingSource</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">SettingSource = Literal["user", "project", "local"]</code></pre>
+<table class="spec-table"><tr><th>Value</th><th>Description</th><th>Location</th></tr>
+<tr><td>"user"</td><td>Global user settings</td><td>~/.claude/settings.json</td></tr>
+<tr><td>"project"</td><td>Shared project settings (version controlled)</td><td>.claude/settings.json</td></tr>
+<tr><td>"local"</td><td>Local project settings (not version controlled)</td><td>.claude/settings.local.json</td></tr></table>
+<div class="warn-box"><span class="tag">NOTE</span><p>In Python SDK 0.1.59 and earlier, setting_sources=[] was treated the same as omitting the option and did not disable filesystem settings. Upgrade for an empty list to take effect. TypeScript SDK is unaffected.</p></div>
+<pre class="code-block"><code class="autohl"># Disable filesystem settings
+async for message in query(
+    prompt="Analyze this code",
+    options=ClaudeAgentOptions(setting_sources=[]),
+):
+    print(message)</code></pre>
+</div></details>
+
+<details class="acc"><summary>AgentDefinition</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">@dataclass
+class AgentDefinition:
+    description: str
+    prompt: str
+    tools: list[str] | None = None
+    disallowedTools: list[str] | None = None
+    model: str | None = None
+    skills: list[str] | None = None
+    memory: Literal["user", "project", "local"] | None = None
+    mcpServers: list[str | dict[str, Any]] | None = None
+    initialPrompt: str | None = None
+    maxTurns: int | None = None
+    background: bool | None = None
+    effort: EffortLevel | int | None = None
+    permissionMode: PermissionMode | None = None</code></pre>
+<div class="info-box"><span class="tag">NOTE</span><p>Field names use camelCase (disallowedTools, permissionMode, maxTurns) to match the wire format shared with the TypeScript SDK — unlike ClaudeAgentOptions, which uses snake_case. Passing a snake_case keyword raises TypeError at construction.</p></div>
+</div></details>
+
+<details class="acc"><summary>PermissionMode / EffortLevel</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">PermissionMode = Literal[
+    "default",             # Standard permission behavior
+    "acceptEdits",         # Auto-accept file edits
+    "plan",                # Planning mode - explore without editing
+    "dontAsk",              # Deny anything not pre-approved instead of prompting
+    "bypassPermissions",   # Bypass permission checks; explicit ask rules still prompt
+    "auto",                # A model classifier approves or denies each tool call
+]
+
+EffortLevel = Literal[
+    "low",     # Minimal thinking, fastest responses
+    "medium",  # Moderate thinking
+    "high",    # Deep reasoning
+    "xhigh",   # Extended reasoning; falls back to "high" on unsupported models
+    "max",     # Maximum effort
+]</code></pre>
+</div></details>
+
+<details class="acc"><summary>CanUseTool / ToolPermissionContext</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">CanUseTool = Callable[
+    [str, dict[str, Any], ToolPermissionContext], Awaitable[PermissionResult]
+]
+
+@dataclass
+class ToolPermissionContext:
+    signal: Any | None = None
+    suggestions: list[PermissionUpdate] = field(default_factory=list)
+    blocked_path: str | None = None
+    decision_reason: str | None = None
+    title: str | None = None
+    display_name: str | None = None
+    description: str | None = None</code></pre>
+<p class="acc-desc">The callback is invoked only when the permission flow resolves to a prompt — calls already approved by allowed_tools, an allow rule, or the permission mode never invoke it. To gate every call, use a PreToolUse hook instead.</p>
+<table class="spec-table"><tr><th>Field</th><th>Description</th></tr>
+<tr><td>suggestions</td><td>Permission update suggestions from the CLI; Bash includes a localSettings suggestion</td></tr>
+<tr><td>blocked_path</td><td>File path that triggered the request, when applicable</td></tr>
+<tr><td>decision_reason</td><td>Reason this request was triggered, forwarded from a PreToolUse hook's "ask" decision</td></tr>
+<tr><td>title</td><td>Full permission prompt sentence, e.g. "Claude wants to read foo.txt"</td></tr>
+<tr><td>display_name</td><td>Short noun phrase, e.g. "Read file", for button labels</td></tr>
+<tr><td>description</td><td>Human-readable subtitle for the permission UI</td></tr></table>
+</div></details>
+
+<details class="acc"><summary>PermissionResultAllow / PermissionResultDeny</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">@dataclass
+class PermissionResultAllow:
+    behavior: Literal["allow"] = "allow"
+    updated_input: dict[str, Any] | None = None
+    updated_permissions: list[PermissionUpdate] | None = None
+
+@dataclass
+class PermissionResultDeny:
+    behavior: Literal["deny"] = "deny"
+    message: str = ""
+    interrupt: bool = False</code></pre>
+</div></details>
+
+<details class="acc"><summary>PermissionUpdate / PermissionRuleValue</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">@dataclass
+class PermissionUpdate:
+    type: Literal[
+        "addRules", "replaceRules", "removeRules",
+        "setMode", "addDirectories", "removeDirectories",
+    ]
+    rules: list[PermissionRuleValue] | None = None
+    behavior: Literal["allow", "deny", "ask"] | None = None
+    mode: PermissionMode | None = None
+    directories: list[str] | None = None
+    destination: (
+        Literal["userSettings", "projectSettings", "localSettings", "session"] | None
+    ) = None
+
+@dataclass
+class PermissionRuleValue:
+    tool_name: str
+    rule_content: str | None = None</code></pre>
+</div></details>
+
+<details class="acc"><summary>ThinkingConfig <span class="acc-sub">adaptive / enabled / disabled</span></summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">ThinkingDisplay = Literal["summarized", "omitted"]
+
+class ThinkingConfigAdaptive(TypedDict):
+    type: Literal["adaptive"]
+    display: NotRequired[ThinkingDisplay]
+
+class ThinkingConfigEnabled(TypedDict):
+    type: Literal["enabled"]
+    budget_tokens: int
+    display: NotRequired[ThinkingDisplay]
+
+class ThinkingConfigDisabled(TypedDict):
+    type: Literal["disabled"]
+
+ThinkingConfig = ThinkingConfigAdaptive | ThinkingConfigEnabled | ThinkingConfigDisabled</code></pre>
+<p class="acc-desc">On Claude Opus 4.7+, the API default display is "omitted" — set "summarized" to receive thinking content.</p>
+<pre class="code-block"><code class="autohl">from claude_agent_sdk import ClaudeAgentOptions, ThinkingConfigEnabled
+
+# Option 1: dict literal (recommended, no import needed)
+options = ClaudeAgentOptions(thinking={"type": "enabled", "budget_tokens": 20000})
+
+# Option 2: constructor-style (returns a plain dict)
+config = ThinkingConfigEnabled(type="enabled", budget_tokens=20000)
+print(config["budget_tokens"])  # 20000
+# config.budget_tokens would raise AttributeError</code></pre>
+</div></details>
+
+<details class="acc"><summary>SdkBeta / McpServerConfig variants</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">SdkBeta = Literal["context-1m-2025-08-07"]
+
+McpServerConfig = (
+    McpStdioServerConfig | McpSSEServerConfig | McpHttpServerConfig | McpSdkServerConfig
+)
+
+class McpStdioServerConfig(TypedDict):
+    type: NotRequired[Literal["stdio"]]
+    command: str
+    args: NotRequired[list[str]]
+    env: NotRequired[dict[str, str]]
+
+class McpSSEServerConfig(TypedDict):
+    type: Literal["sse"]
+    url: str
+    headers: NotRequired[dict[str, str]]
+
+class McpHttpServerConfig(TypedDict):
+    type: Literal["http"]
+    url: str
+    headers: NotRequired[dict[str, str]]
+
+class McpSdkServerConfig(TypedDict):
+    type: Literal["sdk"]
+    name: str
+    instance: Any</code></pre>
+<div class="warn-box"><span class="tag">RETIRED</span><p>context-1m-2025-08-07 is retired as of April 30, 2026. Migrate to Sonnet 5, Sonnet 4.6, or Opus 4.6/4.7/4.8 for 1M context at standard pricing.</p></div>
+</div></details>
+
+<details class="acc"><summary>Transport <span class="acc-sub">abstract base for custom transports</span></summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">from abc import ABC, abstractmethod
+from collections.abc import AsyncIterator
+from typing import Any
+
+
+class Transport(ABC):
+    @abstractmethod
+    async def connect(self) -> None: ...
+
+    @abstractmethod
+    async def write(self, data: str) -> None: ...
+
+    @abstractmethod
+    def read_messages(self) -> AsyncIterator[dict[str, Any]]: ...
+
+    @abstractmethod
+    async def close(self) -> None: ...
+
+    @abstractmethod
+    def is_ready(self) -> bool: ...
+
+    @abstractmethod
+    async def end_input(self) -> None: ...</code></pre>
+<div class="warn-box"><span class="tag">WARNING</span><p>Low-level internal API. The interface may change in future releases; custom implementations must be updated to match.</p></div>
+</div></details>
+
+<details class="acc"><summary>McpServerStatus / McpStatusResponse</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">class McpStatusResponse(TypedDict):
+    mcpServers: list[McpServerStatus]
+
+class McpServerStatus(TypedDict):
+    name: str
+    status: McpServerConnectionStatus  # "connected"|"failed"|"needs-auth"|"pending"|"disabled"
+    serverInfo: NotRequired[McpServerInfo]
+    error: NotRequired[str]
+    config: NotRequired[McpServerStatusConfig]
+    scope: NotRequired[str]
+    tools: NotRequired[list[McpToolInfo]]</code></pre>
+</div></details>
+
+<details class="acc"><summary>SdkPluginConfig</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">class SdkPluginConfig(TypedDict):
+    type: Literal["local"]
+    path: str</code></pre>
+<pre class="code-block"><code class="autohl">plugins = [
+    {"type": "local", "path": "./my-plugin"},
+    {"type": "local", "path": "/absolute/path/to/plugin"},
+]</code></pre>
+</div></details>
+</section>
+
+<!-- 5 Message Types -->
+<section class="cat-panel" id="cat-5">
+<h2>Message Types</h2>
+<p class="cat-intro">Every value yielded by <code class="inline">query()</code> or received from <code class="inline">ClaudeSDKClient</code> is a member of the Message union.</p>
+
+<details class="acc"><summary>Message <span class="acc-sub">union of all message types</span></summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">Message = (
+    UserMessage | AssistantMessage | SystemMessage | ResultMessage
+    | StreamEvent | RateLimitEvent
+)</code></pre>
+</div></details>
+
+<details class="acc"><summary>UserMessage / AssistantMessage</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">@dataclass
+class UserMessage:
+    content: str | list[ContentBlock]
+    uuid: str | None = None
+    parent_tool_use_id: str | None = None
+    tool_use_result: dict[str, Any] | None = None
+
+@dataclass
+class AssistantMessage:
+    content: list[ContentBlock]
+    model: str
+    parent_tool_use_id: str | None = None
+    error: AssistantMessageError | None = None
+    usage: dict[str, Any] | None = None
+    message_id: str | None = None
+
+AssistantMessageError = Literal[
+    "authentication_failed", "billing_error", "rate_limit",
+    "invalid_request", "server_error", "max_output_tokens", "unknown",
+]</code></pre>
+<p class="acc-desc">AssistantMessage.message_id is the API message ID; multiple messages from one turn share the same ID.</p>
+</div></details>
+
+<details class="acc"><summary>SystemMessage / ResultMessage</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">@dataclass
+class SystemMessage:
+    subtype: str
+    data: dict[str, Any]
+
+@dataclass
+class ResultMessage:
+    subtype: str
+    duration_ms: int
+    duration_api_ms: int
+    is_error: bool
+    num_turns: int
+    session_id: str
+    stop_reason: str | None = None
+    total_cost_usd: float | None = None
+    usage: dict[str, Any] | None = None
+    result: str | None = None
+    structured_output: Any = None
+    model_usage: dict[str, Any] | None = None
+    permission_denials: list[Any] | None = None
+    deferred_tool_use: DeferredToolUse | None = None
+    errors: list[str] | None = None
+    api_error_status: int | None = None
+    uuid: str | None = None</code></pre>
+<p class="acc-desc">subtype is one of "success", "error_during_execution", "error_max_turns", "error_max_budget_usd", or "error_max_structured_output_retries". The dataclass flattens all variants, so fields that don't apply are None.</p>
+<table class="spec-table"><tr><th>Field</th><th>Description</th></tr>
+<tr><td>is_error</td><td>True on any error_* subtype; on subtype="success" it's True only if the final model request itself failed</td></tr>
+<tr><td>api_error_status</td><td>HTTP status of the terminating API error; populated only on subtype="success"</td></tr>
+<tr><td>result</td><td>Final assistant message text on success, None on error_* subtypes</td></tr>
+<tr><td>errors</td><td>Loop-level error strings, e.g. the max-turns message; populated only on error_* subtypes</td></tr></table>
+<h4>usage dict keys</h4>
+<table class="spec-table"><tr><th>Key</th><th>Type</th><th>Description</th></tr>
+<tr><td>input_tokens</td><td>int</td><td>Total input tokens consumed</td></tr>
+<tr><td>output_tokens</td><td>int</td><td>Total output tokens generated</td></tr>
+<tr><td>cache_creation_input_tokens</td><td>int</td><td>Tokens used to create new cache entries</td></tr>
+<tr><td>cache_read_input_tokens</td><td>int</td><td>Tokens read from existing cache entries</td></tr></table>
+<h4>model_usage dict keys (camelCase, passed through from the CLI)</h4>
+<table class="spec-table"><tr><th>Key</th><th>Type</th><th>Description</th></tr>
+<tr><td>inputTokens / outputTokens</td><td>int</td><td>Per-model input/output tokens</td></tr>
+<tr><td>cacheReadInputTokens / cacheCreationInputTokens</td><td>int</td><td>Per-model cache tokens</td></tr>
+<tr><td>webSearchRequests</td><td>int</td><td>Web search requests made by this model</td></tr>
+<tr><td>costUSD</td><td>float</td><td>Client-side cost estimate; see cost-tracking docs for billing caveats</td></tr>
+<tr><td>contextWindow / maxOutputTokens</td><td>int</td><td>Model limits</td></tr></table>
+</div></details>
+
+<details class="acc"><summary>StreamEvent / RateLimitEvent / RateLimitInfo</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl"># Only received when include_partial_messages=True. Import from claude_agent_sdk.types
+@dataclass
+class StreamEvent:
+    uuid: str
+    session_id: str
+    event: dict[str, Any]  # The raw Claude API stream event
+    parent_tool_use_id: str | None = None
+
+@dataclass
+class RateLimitEvent:
+    rate_limit_info: RateLimitInfo
+    uuid: str
+    session_id: str
+
+RateLimitStatus = Literal["allowed", "allowed_warning", "rejected"]
+RateLimitType = Literal["five_hour", "seven_day", "seven_day_opus", "seven_day_sonnet", "overage"]
+
+@dataclass
+class RateLimitInfo:
+    status: RateLimitStatus
+    resets_at: int | None = None
+    rate_limit_type: RateLimitType | None = None
+    utilization: float | None = None
+    overage_status: RateLimitStatus | None = None
+    overage_resets_at: int | None = None
+    overage_disabled_reason: str | None = None
+    raw: dict[str, Any] = field(default_factory=dict)</code></pre>
+<p class="acc-desc">RateLimitEvent fires on status changes (e.g. "allowed" to "allowed_warning") so you can warn users before a hard limit, or back off on "rejected".</p>
+</div></details>
+
+<details class="acc"><summary>TaskStartedMessage / TaskUsage / TaskProgressMessage / TaskNotificationMessage</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl"># A background task is anything tracked outside the main turn: a backgrounded Bash
+# command, a Monitor watch, a subagent via the Agent tool, or a remote agent.
+@dataclass
+class TaskStartedMessage(SystemMessage):
+    task_id: str
+    description: str
+    uuid: str
+    session_id: str
+    tool_use_id: str | None = None
+    task_type: str | None = None  # "local_bash" | "local_agent" | "remote_agent"
+
+class TaskUsage(TypedDict):
+    total_tokens: int
+    tool_uses: int
+    duration_ms: int
+
+@dataclass
+class TaskProgressMessage(SystemMessage):
+    task_id: str
+    description: str
+    usage: TaskUsage
+    uuid: str
+    session_id: str
+    tool_use_id: str | None = None
+    last_tool_name: str | None = None
+
+@dataclass
+class TaskNotificationMessage(SystemMessage):
+    task_id: str
+    status: TaskNotificationStatus  # "completed" | "failed" | "stopped"
+    output_file: str
+    summary: str
+    uuid: str
+    session_id: str
+    tool_use_id: str | None = None
+    usage: TaskUsage | None = None</code></pre>
+</div></details>
+</section>
+
+<!-- 6 Content Block Types -->
+<section class="cat-panel" id="cat-6">
+<h2>Content Block Types</h2>
+<p class="cat-intro">The building blocks of message content: text, thinking, tool use, and tool results.</p>
+<details class="acc" open><summary>ContentBlock <span class="acc-sub">union + 4 variants</span></summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">ContentBlock = TextBlock | ThinkingBlock | ToolUseBlock | ToolResultBlock
+
+@dataclass
+class TextBlock:
+    text: str
+
+@dataclass
+class ThinkingBlock:
+    thinking: str
+    signature: str
+
+@dataclass
+class ToolUseBlock:
+    id: str
+    name: str
+    input: dict[str, Any]
+
+@dataclass
+class ToolResultBlock:
+    tool_use_id: str
+    content: str | list[dict[str, Any]] | None = None
+    is_error: bool | None = None</code></pre>
+</div></details>
+</section>
+
+<!-- 7 Error Types -->
+<section class="cat-panel" id="cat-7">
+<h2>Error Types</h2>
+<p class="cat-intro">All SDK errors inherit from <code class="inline">ClaudeSDKError</code>.</p>
+<details class="acc" open><summary>ClaudeSDKError and subclasses</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">class ClaudeSDKError(Exception):
+    """Base error for Claude SDK."""
+
+class CLIConnectionError(ClaudeSDKError):
+    """Failed to connect to Claude Code."""
+
+class CLINotFoundError(CLIConnectionError):
+    def __init__(self, message: str = "Claude Code not found", cli_path: str | None = None):
+        """
+        Args:
+            message: Error message
+            cli_path: Optional path to the CLI that was not found
+        """
+
+class ProcessError(ClaudeSDKError):
+    def __init__(self, message: str, exit_code: int | None = None, stderr: str | None = None):
+        self.exit_code = exit_code
+        self.stderr = stderr
+
+class CLIJSONDecodeError(ClaudeSDKError):
+    def __init__(self, line: str, original_error: Exception):
+        """
+        Args:
+            line: The line that failed to parse
+            original_error: The original JSON decode exception
+        """
+        self.line = line
+        self.original_error = original_error</code></pre>
+<pre class="code-block"><code class="autohl">from claude_agent_sdk import query, CLINotFoundError, ProcessError, CLIJSONDecodeError
+
+try:
+    async for message in query(prompt="Hello"):
+        print(message)
+except CLINotFoundError:
+    print("Claude Code CLI not found. Try: pip install --force-reinstall claude-agent-sdk")
+except ProcessError as e:
+    print(f"Process failed with exit code: {e.exit_code}")
+except CLIJSONDecodeError as e:
+    print(f"Failed to parse response: {e}")</code></pre>
+</div></details>
+</section>
+
+<!-- 8 Hook Types -->
+<section class="cat-panel" id="cat-8">
+<h2>Hook Types</h2>
+<p class="cat-intro">The Python SDK supports a subset of the events the TypeScript SDK exposes.</p>
+<div class="info-box"><span class="tag">NOTE</span><p>TypeScript supports additional events not yet in Python: SessionStart, SessionEnd, Setup, TeammateIdle, TaskCompleted, ConfigChange, WorktreeCreate, WorktreeRemove, PostToolBatch, MessageDisplay.</p></div>
+
+<details class="acc"><summary>HookEvent / HookCallback / HookMatcher / HookContext</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">HookEvent = Literal[
+    "PreToolUse", "PostToolUse", "PostToolUseFailure", "UserPromptSubmit",
+    "Stop", "SubagentStop", "PreCompact", "Notification", "SubagentStart",
+    "PermissionRequest",
+]
+
+HookCallback = Callable[[HookInput, str | None, HookContext], Awaitable[HookJSONOutput]]
+
+class HookContext(TypedDict):
+    signal: Any | None  # Future: abort signal support
+
+@dataclass
+class HookMatcher:
+    matcher: str | None = None       # Tool name or pattern, e.g. "Bash", "Write|Edit"
+    hooks: list[HookCallback] = field(default_factory=list)
+    timeout: float | None = None     # Seconds for all hooks in this matcher (default 60)</code></pre>
+<p class="acc-desc">The callback receives tool_name, input_data, and a ToolPermissionContext-like HookContext. Returns a HookJSONOutput that may contain decision ("block"), systemMessage, and hookSpecificOutput.</p>
+</div></details>
+
+<details class="acc"><summary>HookInput <span class="acc-sub">union + BaseHookInput + 10 per-event shapes</span></summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">HookInput = (
+    PreToolUseHookInput | PostToolUseHookInput | PostToolUseFailureHookInput
+    | UserPromptSubmitHookInput | StopHookInput | SubagentStopHookInput
+    | PreCompactHookInput | NotificationHookInput | SubagentStartHookInput
+    | PermissionRequestHookInput
+)
+
+class BaseHookInput(TypedDict):
+    session_id: str
+    transcript_path: str
+    cwd: str
+    permission_mode: NotRequired[str]
+
+class PreToolUseHookInput(BaseHookInput):
+    hook_event_name: Literal["PreToolUse"]
+    tool_name: str
+    tool_input: dict[str, Any]
+    tool_use_id: str
+    agent_id: NotRequired[str]
+    agent_type: NotRequired[str]
+
+class PostToolUseHookInput(BaseHookInput):
+    hook_event_name: Literal["PostToolUse"]
+    tool_name: str
+    tool_input: dict[str, Any]
+    tool_response: Any
+    tool_use_id: str
+    agent_id: NotRequired[str]
+    agent_type: NotRequired[str]
+
+class PostToolUseFailureHookInput(BaseHookInput):
+    hook_event_name: Literal["PostToolUseFailure"]
+    tool_name: str
+    tool_input: dict[str, Any]
+    tool_use_id: str
+    error: str
+    is_interrupt: NotRequired[bool]
+    agent_id: NotRequired[str]
+    agent_type: NotRequired[str]
+
+class UserPromptSubmitHookInput(BaseHookInput):
+    hook_event_name: Literal["UserPromptSubmit"]
+    prompt: str
+
+class StopHookInput(BaseHookInput):
+    hook_event_name: Literal["Stop"]
+    stop_hook_active: bool
+
+class SubagentStopHookInput(BaseHookInput):
+    hook_event_name: Literal["SubagentStop"]
+    stop_hook_active: bool
+    agent_id: str
+    agent_transcript_path: str
+    agent_type: str
+
+class PreCompactHookInput(BaseHookInput):
+    hook_event_name: Literal["PreCompact"]
+    trigger: Literal["manual", "auto"]
+    custom_instructions: str | None
+
+class NotificationHookInput(BaseHookInput):
+    hook_event_name: Literal["Notification"]
+    message: str
+    title: NotRequired[str]
+    notification_type: str
+
+class SubagentStartHookInput(BaseHookInput):
+    hook_event_name: Literal["SubagentStart"]
+    agent_id: str
+    agent_type: str
+
+class PermissionRequestHookInput(BaseHookInput):
+    hook_event_name: Literal["PermissionRequest"]
+    tool_name: str
+    tool_input: dict[str, Any]
+    permission_suggestions: NotRequired[list[Any]]
+    agent_id: NotRequired[str]
+    agent_type: NotRequired[str]</code></pre>
+</div></details>
+
+<details class="acc"><summary>HookJSONOutput <span class="acc-sub">sync / async / hook-specific output</span></summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">HookJSONOutput = AsyncHookJSONOutput | SyncHookJSONOutput
+
+class SyncHookJSONOutput(TypedDict):
+    continue_: NotRequired[bool]        # Whether to proceed (default True)
+    suppressOutput: NotRequired[bool]   # Hide stdout from transcript
+    stopReason: NotRequired[str]        # Message when continue is False
+    decision: NotRequired[Literal["block"]]
+    systemMessage: NotRequired[str]     # Warning message for user
+    reason: NotRequired[str]            # Feedback for Claude
+    hookSpecificOutput: NotRequired[HookSpecificOutput]
+
+class AsyncHookJSONOutput(TypedDict):
+    async_: Literal[True]               # Set to True to defer execution
+    asyncTimeout: NotRequired[int]      # Timeout in milliseconds</code></pre>
+<div class="info-box"><span class="tag">NOTE</span><p>Use continue_ and async_ (trailing underscore) in Python code — automatically converted to continue/async when sent to the CLI.</p></div>
+<pre class="code-block"><code class="autohl">class PreToolUseHookSpecificOutput(TypedDict):
+    hookEventName: Literal["PreToolUse"]
+    permissionDecision: NotRequired[Literal["allow", "deny", "ask", "defer"]]
+    permissionDecisionReason: NotRequired[str]
+    updatedInput: NotRequired[dict[str, Any]]
+    additionalContext: NotRequired[str]
+
+class PostToolUseHookSpecificOutput(TypedDict):
+    hookEventName: Literal["PostToolUse"]
+    additionalContext: NotRequired[str]
+    updatedToolOutput: NotRequired[Any]
+    updatedMCPToolOutput: NotRequired[Any]  # Deprecated: use updatedToolOutput
+
+class PermissionRequestHookSpecificOutput(TypedDict):
+    hookEventName: Literal["PermissionRequest"]
+    decision: dict[str, Any]
+
+HookSpecificOutput = (
+    PreToolUseHookSpecificOutput | PostToolUseHookSpecificOutput
+    | PostToolUseFailureHookSpecificOutput | UserPromptSubmitHookSpecificOutput
+    | NotificationHookSpecificOutput | SubagentStartHookSpecificOutput
+    | PermissionRequestHookSpecificOutput
+)</code></pre>
+</div></details>
+
+<details class="acc"><summary>Hook usage example</summary><div class="acc-body">
+<p class="acc-desc">Registers a hook that blocks dangerous bash commands like rm -rf /, and another that logs all tool usage for auditing.</p>
+<pre class="code-block"><code class="autohl">from claude_agent_sdk import query, ClaudeAgentOptions, HookMatcher, HookContext
+from typing import Any
+
+
+async def validate_bash_command(
+    input_data: dict[str, Any], tool_use_id: str | None, context: HookContext
+) -> dict[str, Any]:
+    if input_data["tool_name"] == "Bash":
+        command = input_data["tool_input"].get("command", "")
+        if "rm -rf /" in command:
+            return {
+                "hookSpecificOutput": {
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "deny",
+                    "permissionDecisionReason": "Dangerous command blocked",
+                }
+            }
+    return {}
+
+
+async def log_tool_use(
+    input_data: dict[str, Any], tool_use_id: str | None, context: HookContext
+) -> dict[str, Any]:
+    print(f"Tool used: {input_data.get('tool_name')}")
+    return {}
+
+
+options = ClaudeAgentOptions(
+    hooks={
+        "PreToolUse": [
+            HookMatcher(matcher="Bash", hooks=[validate_bash_command], timeout=120),
+            HookMatcher(hooks=[log_tool_use]),  # applies to all tools
+        ],
+        "PostToolUse": [HookMatcher(hooks=[log_tool_use])],
+    }
+)
+
+async for message in query(prompt="Analyze this codebase", options=options):
+    print(message)</code></pre>
+</div></details>
+</section>
+
+<!-- 9 Tool I/O Types -->
+<section class="cat-panel" id="cat-9">
+<h2>Tool Input/Output Types</h2>
+<p class="cat-intro">The Python SDK doesn't export these as formal types, but every built-in tool has a documented input and output shape.</p>
+
+<details class="acc"><summary>Agent <span class="acc-sub">was Task</span></summary><div class="acc-body">
+<pre class="code-block"><code class="autohl"># Input
+{
+    "description": str,   # A short (3-5 word) description of the task
+    "prompt": str,         # The task for the agent to perform
+    "subagent_type": str,  # The type of specialized agent to use
+}
+
+# Output
+{
+    "result": str,
+    "usage": dict | None,
+    "total_cost_usd": float | None,
+    "duration_ms": int | None,
+}</code></pre>
+</div></details>
+
+<details class="acc"><summary>AskUserQuestion</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl"># Input
+{
+    "questions": [
+        {
+            "question": str, "header": str,
+            "options": [{"label": str, "description": str}],
+            "multiSelect": bool,
+        }
+    ],
+    "answers": dict[str, str | list[str]] | None,
+}
+
+# Output
+{
+    "questions": [{"question": str, "header": str, "options": [...], "multiSelect": bool}],
+    "answers": dict[str, str],  # Multi-select answers are comma-separated
+}</code></pre>
+</div></details>
+
+<details class="acc"><summary>Bash</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl"># Input
+{
+    "command": str, "timeout": int | None, "description": str | None,
+    "run_in_background": bool | None,
+}
+
+# Output
+{
+    "output": str, "exitCode": int, "killed": bool | None, "shellId": str | None,
+}</code></pre>
+</div></details>
+
+<details class="acc"><summary>Monitor</summary><div class="acc-body">
+<p class="acc-desc">command runs a script (one event per stdout line); ws opens a WebSocket (one event per text frame, v2.1.195+). Provide exactly one.</p>
+<pre class="code-block"><code class="autohl"># Input
+{
+    "command": str | None, "ws": dict | None,
+    "description": str, "timeout_ms": int | None, "persistent": bool | None,
+}
+
+# Output
+{
+    "taskId": str, "timeoutMs": int, "persistent": bool | None,
+}</code></pre>
+</div></details>
+
+<details class="acc"><summary>Edit / Read / Write</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl"># Edit
+# Input: {"file_path": str, "old_string": str, "new_string": str, "replace_all": bool | None}
+# Output: {"message": str, "replacements": int, "file_path": str}
+
+# Read
+# Input: {"file_path": str, "offset": int | None, "limit": int | None}
+# Output (text): {"content": str, "total_lines": int, "lines_returned": int}
+# Output (image): {"image": str, "mime_type": str, "file_size": int}
+
+# Write
+# Input: {"file_path": str, "content": str}
+# Output: {"message": str, "bytes_written": int, "file_path": str}</code></pre>
+</div></details>
+
+<details class="acc"><summary>Glob / Grep</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl"># Glob
+# Input: {"pattern": str, "path": str | None}
+# Output: {"matches": list[str], "count": int, "search_path": str}
+
+# Grep — Input
+{
+    "pattern": str, "path": str | None, "glob": str | None, "type": str | None,
+    "output_mode": str | None,
+    "-i": bool | None, "-n": bool | None, "-B": int | None, "-A": int | None, "-C": int | None,
+    "head_limit": int | None, "multiline": bool | None,
+}
+
+# Grep — Output (content mode)
+{
+    "matches": [{"file": str, "line_number": int | None, "line": str,
+        "before_context": list[str] | None, "after_context": list[str] | None}],
+    "total_matches": int,
+}
+
+# Grep — Output (files_with_matches mode)
+{"files": list[str], "count": int}</code></pre>
+</div></details>
+
+<details class="acc"><summary>NotebookEdit</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl"># Input
+{
+    "notebook_path": str, "cell_id": str | None, "new_source": str,
+    "cell_type": "code" | "markdown" | None,
+    "edit_mode": "replace" | "insert" | "delete" | None,
+}
+
+# Output
+{
+    "message": str, "edit_type": "replaced" | "inserted" | "deleted",
+    "cell_id": str | None, "total_cells": int,
+}</code></pre>
+</div></details>
+
+<details class="acc"><summary>WebFetch / WebSearch</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl"># WebFetch
+# Input: {"url": str, "prompt": str}
+# Output: {"bytes": int, "code": int, "codeText": str, "result": str, "durationMs": int, "url": str}
+
+# WebSearch
+# Input: {"query": str, "allowed_domains": list[str] | None, "blocked_domains": list[str] | None}
+# Output
+{
+    "query": str,
+    "results": list[str | {"tool_use_id": str, "content": list[{"title": str, "url": str}]}],
+    "durationSeconds": float,
+}</code></pre>
+</div></details>
+
+<details class="acc"><summary>TodoWrite <span class="badge">disabled by default</span></summary><div class="acc-body">
+<div class="warn-box"><span class="tag">DEPRECATED</span><p>As of Claude Code v2.1.142, TodoWrite is disabled by default. Use TaskCreate, TaskGet, TaskUpdate, TaskList instead, or set CLAUDE_CODE_ENABLE_TASKS=0 to revert.</p></div>
+<pre class="code-block"><code class="autohl"># Input
+{"todos": [{"content": str, "status": "pending" | "in_progress" | "completed", "activeForm": str}]}
+
+# Output
+{"message": str, "stats": {"total": int, "pending": int, "in_progress": int, "completed": int}}</code></pre>
+</div></details>
+
+<details class="acc"><summary>TaskCreate / TaskUpdate / TaskGet / TaskList</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl"># TaskCreate
+# Input: {"subject": str, "description": str, "activeForm": str | None, "metadata": dict | None}
+# Output: {"task": {"id": str, "subject": str}}
+
+# TaskUpdate — Input
+{
+    "taskId": str,
+    "status": Literal["pending", "in_progress", "completed", "deleted"] | None,
+    "subject": str | None, "description": str | None, "activeForm": str | None,
+    "addBlocks": list[str] | None, "addBlockedBy": list[str] | None,
+    "owner": str | None, "metadata": dict | None,
+}
+# TaskUpdate — Output
+{
+    "success": bool, "taskId": str, "updatedFields": list[str], "error": str | None,
+    "statusChange": {"from": str, "to": str} | None,
+}
+
+# TaskGet — Input: {"taskId": str}
+# TaskGet — Output
+{"task": {"id": str, "subject": str, "description": str,
+    "status": Literal["pending","in_progress","completed"],
+    "blocks": list[str], "blockedBy": list[str]} | None}
+
+# TaskList — Input: {}
+# TaskList — Output
+{"tasks": [{"id": str, "subject": str, "status": Literal["pending","in_progress","completed"],
+    "owner": str | None, "blockedBy": list[str]}]}</code></pre>
+</div></details>
+
+<details class="acc"><summary>BashOutput / KillBash / ExitPlanMode</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl"># BashOutput
+# Input: {"bash_id": str, "filter": str | None}
+# Output: {"output": str, "status": "running"|"completed"|"failed", "exitCode": int | None}
+
+# KillBash
+# Input: {"shell_id": str}
+# Output: {"message": str, "shell_id": str}
+
+# ExitPlanMode
+# Input: {"plan": str}
+# Output: {"message": str, "approved": bool | None}</code></pre>
+</div></details>
+
+<details class="acc"><summary>ListMcpResources / ReadMcpResource</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl"># ListMcpResourcesTool
+# Input: {"server": str | None}
+# Output: {"resources": [{"uri": str, "name": str, "description": str | None,
+#   "mimeType": str | None, "server": str}], "total": int}
+
+# ReadMcpResourceTool
+# Input: {"server": str, "uri": str}
+# Output: {"contents": [{"uri": str, "mimeType": str | None, "text": str | None, "blob": str | None}],
+#   "server": str}</code></pre>
+</div></details>
+</section>
+
+<!-- 10 Advanced Examples -->
+<section class="cat-panel" id="cat-10">
+<h2>Advanced Examples</h2>
+<p class="cat-intro">Full worked examples combining ClaudeSDKClient, hooks, and custom tools.</p>
+
+<details class="acc"><summary>Building a continuous conversation interface</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">from claude_agent_sdk import ClaudeSDKClient, ClaudeAgentOptions, AssistantMessage, TextBlock
+import asyncio
+
+
+class ConversationSession:
+    """Maintains a single conversation session with Claude."""
+
+    def __init__(self, options: ClaudeAgentOptions | None = None):
+        self.client = ClaudeSDKClient(options)
+        self.turn_count = 0
+
+    async def start(self):
+        await self.client.connect()
+        while True:
+            user_input = input(f"\n[Turn {self.turn_count + 1}] You: ")
+            if user_input.lower() == "exit":
+                break
+            elif user_input.lower() == "interrupt":
+                await self.client.interrupt()
+                continue
+            elif user_input.lower() == "new":
+                await self.client.disconnect()
+                await self.client.connect()
+                self.turn_count = 0
+                continue
+
+            await self.client.query(user_input)
+            self.turn_count += 1
+
+            print(f"[Turn {self.turn_count}] Claude: ", end="")
+            async for message in self.client.receive_response():
+                if isinstance(message, AssistantMessage):
+                    for block in message.content:
+                        if isinstance(block, TextBlock):
+                            print(block.text, end="")
+            print()
+
+        await self.client.disconnect()
+
+
+async def main():
+    options = ClaudeAgentOptions(allowed_tools=["Read", "Write", "Bash"], permission_mode="acceptEdits")
+    session = ConversationSession(options)
+    await session.start()
+
+asyncio.run(main())</code></pre>
+</div></details>
+
+<details class="acc"><summary>Real-time progress monitoring</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">from claude_agent_sdk import (
+    ClaudeSDKClient, ClaudeAgentOptions, AssistantMessage, ToolUseBlock, ToolResultBlock, TextBlock,
+)
+import asyncio
+
+
+async def monitor_progress():
+    options = ClaudeAgentOptions(allowed_tools=["Write", "Bash"], permission_mode="acceptEdits")
+
+    async with ClaudeSDKClient(options=options) as client:
+        await client.query("Create 5 Python files with different sorting algorithms")
+
+        async for message in client.receive_response():
+            if isinstance(message, AssistantMessage):
+                for block in message.content:
+                    if isinstance(block, ToolUseBlock):
+                        if block.name == "Write":
+                            print(f"Creating: {block.input.get('file_path', '')}")
+                    elif isinstance(block, ToolResultBlock):
+                        print("Completed tool execution")
+                    elif isinstance(block, TextBlock):
+                        print(f"Claude says: {block.text[:100]}...")
+
+        print("Task completed!")
+
+asyncio.run(monitor_progress())</code></pre>
+</div></details>
+
+<details class="acc"><summary>Streaming mode with client</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">from claude_agent_sdk import ClaudeSDKClient
+import asyncio
+
+
+async def interactive_session():
+    async with ClaudeSDKClient() as client:
+        await client.query("What's the weather like?")
+        async for msg in client.receive_response():
+            print(msg)
+
+        await client.query("Tell me more about that")
+        async for msg in client.receive_response():
+            print(msg)
+
+asyncio.run(interactive_session())</code></pre>
+</div></details>
+
+<details class="acc"><summary>Using custom tools with ClaudeSDKClient</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">from claude_agent_sdk import (
+    ClaudeSDKClient, ClaudeAgentOptions, tool, create_sdk_mcp_server, AssistantMessage, TextBlock,
+)
+import asyncio
+from typing import Any
+
+
+@tool("calculate", "Perform mathematical calculations", {"expression": str})
+async def calculate(args: dict[str, Any]) -> dict[str, Any]:
+    try:
+        result = eval(args["expression"], {"__builtins__": {}})
+        return {"content": [{"type": "text", "text": f"Result: {result}"}]}
+    except Exception as e:
+        return {"content": [{"type": "text", "text": f"Error: {str(e)}"}], "is_error": True}
+
+
+@tool("get_time", "Get current time", {})
+async def get_time(args: dict[str, Any]) -> dict[str, Any]:
+    from datetime import datetime
+    return {"content": [{"type": "text", "text": f"Current time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"}]}
+
+
+async def main():
+    my_server = create_sdk_mcp_server(name="utilities", version="1.0.0", tools=[calculate, get_time])
+    options = ClaudeAgentOptions(
+        mcp_servers={"utils": my_server},
+        allowed_tools=["mcp__utils__calculate", "mcp__utils__get_time"],
+    )
+
+    async with ClaudeSDKClient(options=options) as client:
+        await client.query("What's 123 * 456?")
+        async for message in client.receive_response():
+            if isinstance(message, AssistantMessage):
+                for block in message.content:
+                    if isinstance(block, TextBlock):
+                        print(f"Calculation: {block.text}")
+
+asyncio.run(main())</code></pre>
+</div></details>
+</section>
+
+<!-- 11 Sandbox Configuration -->
+<section class="cat-panel" id="cat-11">
+<h2>Sandbox Configuration</h2>
+<p class="cat-intro">Enable command sandboxing and configure network restrictions programmatically.</p>
+
+<details class="acc" open><summary>SandboxSettings</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">class SandboxSettings(TypedDict, total=False):
+    enabled: bool
+    autoAllowBashIfSandboxed: bool
+    excludedCommands: list[str]
+    allowUnsandboxedCommands: bool
+    network: SandboxNetworkConfig
+    ignoreViolations: SandboxIgnoreViolations
+    enableWeakerNestedSandbox: bool</code></pre>
+<table class="spec-table"><tr><th>Property</th><th>Default</th><th>Description</th></tr>
+<tr><td>enabled</td><td>False</td><td>Enable sandbox mode for command execution</td></tr>
+<tr><td>autoAllowBashIfSandboxed</td><td>True</td><td>Auto-approve bash commands when sandbox is enabled</td></tr>
+<tr><td>excludedCommands</td><td>[]</td><td>Commands that always bypass sandbox restrictions, e.g. ["docker"]</td></tr>
+<tr><td>allowUnsandboxedCommands</td><td>True</td><td>Let the model request unsandboxed execution via dangerouslyDisableSandbox</td></tr>
+<tr><td>network</td><td>None</td><td>SandboxNetworkConfig</td></tr>
+<tr><td>ignoreViolations</td><td>None</td><td>SandboxIgnoreViolations</td></tr>
+<tr><td>enableWeakerNestedSandbox</td><td>False</td><td>Enable a weaker nested sandbox for compatibility</td></tr></table>
+<div class="info-box"><span class="tag">NOTE</span><p>Depends on platform support and, on Linux, bubblewrap/socat. By default, if enabled but the sandbox can't start, commands run unsandboxed with a stderr warning — this differs from the TypeScript SDK, where failIfUnavailable defaults to true. Set "failIfUnavailable": True (forwarded to Claude Code though not yet declared on SandboxSettings) to stop instead; watch for ResultMessage subtype="error_during_execution".</p></div>
+<pre class="code-block"><code class="autohl">from claude_agent_sdk import query, ClaudeAgentOptions, SandboxSettings
+
+sandbox_settings: SandboxSettings = {
+    "enabled": True,
+    "autoAllowBashIfSandboxed": True,
+    "network": {"allowLocalBinding": True},
+}
+
+async for message in query(
+    prompt="Build and test my project",
+    options=ClaudeAgentOptions(sandbox=sandbox_settings),
+):
+    print(message)</code></pre>
+<div class="warn-box"><span class="tag">WARNING</span><p>Unix socket security: allowUnixSockets can grant access to powerful system services, e.g. /var/run/docker.sock effectively grants full host access via the Docker API.</p></div>
+</div></details>
+
+<details class="acc"><summary>SandboxNetworkConfig / SandboxIgnoreViolations</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">class SandboxNetworkConfig(TypedDict, total=False):
+    allowedDomains: list[str]
+    deniedDomains: list[str]
+    allowManagedDomainsOnly: bool
+    allowUnixSockets: list[str]
+    allowAllUnixSockets: bool
+    allowLocalBinding: bool
+    allowMachLookup: list[str]  # macOS only, XPC/Mach service names
+    httpProxyPort: int
+    socksProxyPort: int
+
+class SandboxIgnoreViolations(TypedDict, total=False):
+    file: list[str]
+    network: list[str]</code></pre>
+<div class="info-box"><span class="tag">NOTE</span><p>Applies to sandboxed Bash only, not WebFetch (which uses permission rules). The proxy enforces the allowlist by hostname without TLS inspection, so domain fronting can potentially bypass it.</p></div>
+</div></details>
+
+<details class="acc"><summary>Permissions fallback for unsandboxed commands</summary><div class="acc-body">
+<p class="acc-desc">excludedCommands is a static, model-uncontrolled bypass list; allowUnsandboxedCommands lets the model decide at runtime by setting dangerouslyDisableSandbox: True, which falls back to can_use_tool for custom authorization.</p>
+<pre class="code-block"><code class="autohl">from claude_agent_sdk import (
+    query, ClaudeAgentOptions, HookMatcher,
+    PermissionResultAllow, PermissionResultDeny, ToolPermissionContext,
+)
+
+
+async def can_use_tool(tool: str, input: dict, context: ToolPermissionContext) -> PermissionResultAllow | PermissionResultDeny:
+    if tool == "Bash" and input.get("dangerouslyDisableSandbox"):
+        print(f"Unsandboxed command requested: {input.get('command')}")
+        if is_command_authorized(input.get("command")):
+            return PermissionResultAllow()
+        return PermissionResultDeny(message="Command not authorized for unsandboxed execution")
+    return PermissionResultAllow()
+
+
+# Required: dummy hook keeps the stream open for can_use_tool
+async def dummy_hook(input_data, tool_use_id, context):
+    return {"continue_": True}
+
+
+async def main():
+    async for message in query(
+        prompt=prompt_stream(),
+        options=ClaudeAgentOptions(
+            sandbox={"enabled": True, "allowUnsandboxedCommands": True},
+            permission_mode="default",
+            can_use_tool=can_use_tool,
+            hooks={"PreToolUse": [HookMatcher(matcher=None, hooks=[dummy_hook])]},
+        ),
+    ):
+        print(message)</code></pre>
+<div class="warn-box"><span class="tag">WARNING</span><p>Commands with dangerouslyDisableSandbox: True have full system access. If permission_mode is bypassPermissions and allow_unsandboxed_commands is enabled, the model can escape sandbox isolation silently (an explicit ask rule still forces a prompt).</p></div>
+</div></details>
+</section>
+
+<!-- 12 See also -->
+<section class="cat-panel" id="cat-12">
+<h2>See also</h2>
+<div class="takeaway"><p>SDK overview — general SDK concepts. TypeScript SDK reference — TypeScript SDK documentation. CLI reference — command-line interface. Common workflows — step-by-step guides.</p></div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme(){
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+let catStep = 0;
+const CAT_MAX = 12;
+function catGoTo(n){
+  catStep = Math.max(0, Math.min(CAT_MAX, n));
+  document.querySelectorAll('.cat-panel').forEach((el,i)=>el.classList.toggle('visible', i===catStep));
+  document.querySelectorAll('.cat-tab').forEach((t,i)=>t.classList.toggle('active', i===catStep));
+  window.scrollTo({top:0, behavior:'instant'});
+}
+
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function hl(raw){
+  const pattern = /(\/\/.*)|(#.*)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)|(\b(?:def|class|import|from|async|await|return|if|elif|else|for|while|try|except|finally|raise|with|as|pass|lambda|yield|global|nonlocal|and|or|not|is|in|None|True|False|self|dataclass|field|Literal|Optional|NotRequired|abstractmethod)\b)/g;
+  let out = '', last = 0, m;
+  while ((m = pattern.exec(raw))) {
+    out += esc(raw.slice(last, m.index));
+    if (m[1] || m[2]) out += '<span class="cmt">' + esc(m[1] || m[2]) + '</span>';
+    else if (m[3]) out += '<span class="str">' + esc(m[3]) + '</span>';
+    else if (m[4]) out += '<span class="kw">' + esc(m[4]) + '</span>';
+    last = pattern.lastIndex;
+  }
+  out += esc(raw.slice(last));
+  return out;
+}
+document.querySelectorAll('code.autohl').forEach(el => {
+  const raw = el.textContent;
+  el.innerHTML = hl(raw);
+});
+</script>
+</body>
+</html>

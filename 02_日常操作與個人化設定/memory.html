@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>How Claude remembers your project</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 190px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 170px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-top: 10px; display: block; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>How Claude remembers your project</h1>
+  <p>Give Claude persistent instructions with CLAUDE.md files, and let Claude accumulate learnings automatically with auto memory.</p>
+</header>
+
+<main>
+
+<section>
+  <h2>CLAUDE.md vs auto memory</h2>
+  <p>Claude Code has two complementary memory systems, both loaded at the start of every conversation. Claude treats them as context, not enforced configuration. To block an action regardless of what Claude decides, use a PreToolUse hook instead.</p>
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">CLAUDE.md files</div>
+      <p>Who writes it: you.</p>
+      <p>What it contains: instructions and rules.</p>
+      <p>Scope: project, user, or org.</p>
+      <p>Use for: coding standards, workflows, project architecture.</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">Auto memory</div>
+      <p>Who writes it: Claude.</p>
+      <p>What it contains: learnings and patterns.</p>
+      <p>Scope: per repository, shared across worktrees.</p>
+      <p>Use for: build commands, debugging insights, preferences Claude discovers.</p>
+    </div>
+  </div>
+  <p>Both load into every session, though CLAUDE.md files load in full while auto memory's MEMORY.md loads only its first 200 lines or 25KB. Subagents can also maintain their own auto memory.</p>
+</section>
+
+<section>
+  <h2>CLAUDE.md files</h2>
+  <p>CLAUDE.md files are markdown files that give Claude persistent instructions for a project, personal workflow, or entire organization. Claude reads them at the start of every session.</p>
+
+  <h3>When to add to CLAUDE.md</h3>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">Repeated mistake</span><span class="event-desc">Claude makes the same mistake a second time</span></div>
+    <div class="event-item"><span class="event-name">Code review catch</span><span class="event-desc">A review catches something Claude should have known about this codebase</span></div>
+    <div class="event-item"><span class="event-name">Repeated correction</span><span class="event-desc">You type the same clarification into chat that you typed last session</span></div>
+    <div class="event-item"><span class="event-name">Onboarding context</span><span class="event-desc">A new teammate would need the same context to be productive</span></div>
+  </div>
+
+  <h3>Choose where to put CLAUDE.md files</h3>
+  <div class="response-box">
+    <div class="response-field"><div class="rf-key">Managed policy</div><div class="rf-val">e.g. /etc/claude-code/CLAUDE.md, org-wide instructions managed by IT/DevOps, all users</div></div>
+    <div class="response-field"><div class="rf-key">User instructions</div><div class="rf-val">~/.claude/CLAUDE.md, personal preferences for all projects, just you</div></div>
+    <div class="response-field"><div class="rf-key">Project instructions</div><div class="rf-val">./CLAUDE.md or ./.claude/CLAUDE.md, team-shared, shared via source control</div></div>
+    <div class="response-field"><div class="rf-key">Local instructions</div><div class="rf-val">./CLAUDE.local.md, personal project-specific, add to .gitignore, just you</div></div>
+  </div>
+  <p>Loaded in order from broadest to most specific, so a project instruction appears in context after a user instruction.</p>
+
+  <h3>Write effective instructions</h3>
+  <div class="api-fields">
+    <div class="field"><div class="name">Size</div><div class="desc">Target under 200 lines per file. Longer files reduce adherence</div></div>
+    <div class="field"><div class="name">Structure</div><div class="desc">Use markdown headers and bullets to group related instructions</div></div>
+    <div class="field"><div class="name">Specificity</div><div class="desc">"Use 2-space indentation" beats "Format code properly"</div></div>
+    <div class="field"><div class="name">Consistency</div><div class="desc">Contradicting rules make Claude pick one arbitrarily</div></div>
+  </div>
+
+  <h3>Import additional files</h3>
+  <pre class="code-block">See @README for project overview and @package.json for available npm commands.
+
+<span class="cmt"># Additional Instructions</span>
+- git workflow @docs/git-instructions.md</pre>
+  <p>Relative paths resolve relative to the file containing the import, with a maximum depth of four hops. Wrap a path in backticks to mention it without importing it.</p>
+  <div class="info-box">
+    <span class="tag">WARNING</span>
+    <p>The first time Claude Code encounters external imports in a project, it shows an approval dialog listing the files. Declining disables the imports and the dialog does not appear again.</p>
+  </div>
+
+  <h3>AGENTS.md</h3>
+  <p>Claude Code reads CLAUDE.md, not AGENTS.md. Create a CLAUDE.md that imports it so both tools read the same instructions:</p>
+  <pre class="code-block"><span class="str">@AGENTS.md</span>
+
+<span class="cmt">## Claude Code</span>
+
+Use plan mode for changes under `src/billing/`.</pre>
+
+  <h3>How CLAUDE.md files load</h3>
+  <p>Claude Code walks up the directory tree from your working directory, checking each directory for CLAUDE.md and CLAUDE.local.md. All discovered files are concatenated, ordered from filesystem root down to your working directory, so instructions closer to where you launched Claude are read last. Block-level HTML comments are stripped before injection into context.</p>
+
+  <h3>Organize rules with .claude/rules/</h3>
+  <p>For larger projects, organize instructions into multiple files in <code>.claude/rules/</code>. Rules can be scoped to specific file paths with YAML frontmatter.</p>
+  <pre class="code-block"><span class="kw">---</span>
+paths:
+  - <span class="str">"src/api/**/*.ts"</span>
+<span class="kw">---</span>
+
+<span class="cmt"># API Development Rules</span>
+
+- All API endpoints must include input validation</pre>
+  <div class="api-fields">
+    <div class="field"><div class="name">**/*.ts</div><div class="desc">All TypeScript files in any directory</div></div>
+    <div class="field"><div class="name">src/**/*</div><div class="desc">All files under src/ directory</div></div>
+  </div>
+  <p>User-level rules in <code>~/.claude/rules/</code> apply to every project and load before project rules.</p>
+
+  <h3>Manage CLAUDE.md for large teams</h3>
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">Managed CLAUDE.md</div>
+      <p>Behavioral instructions, code style, data handling and compliance reminders.</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">Managed settings</div>
+      <p>Technical enforcement: permissions.deny, sandbox.enabled, env, forceLoginMethod.</p>
+    </div>
+  </div>
+  <p>The <code>claudeMdExcludes</code> setting lets you skip specific ancestor CLAUDE.md files in large monorepos by path or glob pattern. Managed policy CLAUDE.md files cannot be excluded.</p>
+</section>
+
+<section>
+  <h2>Auto memory</h2>
+  <p>Auto memory lets Claude accumulate knowledge across sessions without you writing anything: build commands, debugging insights, architecture notes, code style preferences, and workflow habits. Requires Claude Code v2.1.59 or later.</p>
+
+  <h3>Enable or disable</h3>
+  <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"autoMemoryEnabled"</span>: <span class="kw">false</span>
+<span class="kw">}</span></pre>
+  <p>Or set <code>CLAUDE_CODE_DISABLE_AUTO_MEMORY=1</code>.</p>
+
+  <h3>Storage location</h3>
+  <pre class="code-block">~/.claude/projects/&lt;project&gt;/memory/
+├── MEMORY.md          <span class="cmt"># Concise index, loaded into every session</span>
+├── debugging.md       <span class="cmt"># Detailed notes on debugging patterns</span>
+├── api-conventions.md <span class="cmt"># API design decisions</span>
+└── ...                <span class="cmt"># Any other topic files Claude creates</span></pre>
+  <p>Each project gets its own memory directory derived from the git repository, so all worktrees and subdirectories share one auto memory directory. Auto memory is machine-local.</p>
+
+  <h3>How it works</h3>
+  <div class="takeaway">
+    <p>The first 200 lines of MEMORY.md, or the first 25KB, whichever comes first, load at the start of every conversation. Topic files like debugging.md are not loaded at startup; Claude reads them on demand with its standard file tools when it needs the information.</p>
+  </div>
+</section>
+
+<section>
+  <h2>View and edit with /memory</h2>
+  <p>The <code>/memory</code> command lists all CLAUDE.md, CLAUDE.local.md, and rules files loaded in your current session, lets you toggle auto memory on or off, and links to the auto memory folder.</p>
+  <pre class="code-block">remember that the API tests require a local Redis instance</pre>
+  <p>Saying this saves it to auto memory. To add instructions to CLAUDE.md instead, ask Claude directly, like "add this to CLAUDE.md."</p>
+</section>
+
+<section>
+  <h2>Troubleshoot memory issues</h2>
+  <div class="chip-row">
+    <span class="chip-label">Issue:</span>
+    <div class="mtr-chip chip active" onclick="mtrShow(0)">Not following CLAUDE.md</div>
+    <div class="mtr-chip chip" onclick="mtrShow(1)">Don't know what was saved</div>
+    <div class="mtr-chip chip" onclick="mtrShow(2)">CLAUDE.md too large</div>
+    <div class="mtr-chip chip" onclick="mtrShow(3)">Lost after /compact</div>
+  </div>
+  <div class="mtr-panel demo-panel visible" id="mtr-p0">
+    <p>CLAUDE.md is delivered as a user message after the system prompt, not part of it, so there's no guarantee of strict compliance. Run <code>/memory</code> to verify files are loaded, check the location is one that gets loaded, and make instructions more specific. For instructions that must run at a fixed point, use a hook instead.</p>
+  </div>
+  <div class="mtr-panel demo-panel" id="mtr-p1">
+    <p>Run <code>/memory</code> and select the auto memory folder to browse what Claude has saved. Everything is plain markdown you can read, edit, or delete.</p>
+  </div>
+  <div class="mtr-panel demo-panel" id="mtr-p2">
+    <p>Files over 200 lines consume more context and may reduce adherence. Use path-scoped rules to load instructions only when Claude works with matching files.</p>
+  </div>
+  <div class="mtr-panel demo-panel" id="mtr-p3">
+    <p>Project-root CLAUDE.md survives compaction and is re-injected after /compact. Nested CLAUDE.md files in subdirectories are not re-injected automatically; they reload the next time Claude reads a file in that subdirectory.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Related resources</h2>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">Debug your configuration</span><span class="event-desc">Diagnose why CLAUDE.md or settings aren't taking effect</span></div>
+    <div class="event-item"><span class="event-name">Skills</span><span class="event-desc">Package repeatable workflows that load on demand</span></div>
+    <div class="event-item"><span class="event-name">Settings</span><span class="event-desc">Configure Claude Code behavior with settings files</span></div>
+    <div class="event-item"><span class="event-name">Subagent memory</span><span class="event-desc">Let subagents maintain their own auto memory</span></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+function mtrShow(n) {
+  document.querySelectorAll('.mtr-panel').forEach((el, i) => el.classList.toggle('visible', i === n));
+  document.querySelectorAll('.mtr-chip').forEach((c, i) => c.classList.toggle('active', i === n));
+}
+</script>
+</body>
+</html>

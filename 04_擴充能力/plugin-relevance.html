@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recommend plugins for your org</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+           background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+    header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+             border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+    header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+    header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+                max-width: 600px; margin-inline: auto; }
+    main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+    section { margin-bottom: 52px; }
+    h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+         border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+    h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+    p  { color: #4a5568; margin-bottom: 12px; }
+    .code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+      padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+      overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+    .kw  { color: #7c3aed; }
+    .fn  { color: #16a34a; }
+    .str { color: #d97706; }
+    .cmt { color: #94a3b8; font-style: italic; }
+    .key { color: #2563eb; }
+    .info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+      padding: 16px 20px; margin-top: 14px; }
+    .info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+      font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+      margin-bottom: 10px; letter-spacing: 0.05em; }
+    .info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+    .takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+      border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+    .takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+    .api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+    .field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+    .field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+    .field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+    .event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+    .event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+      padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+    .event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+      min-width: 160px; flex-shrink: 0; }
+    .event-desc { font-size: 0.82rem; color: #4a5568; }
+    .response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+      padding: 20px; margin-top: 16px; }
+    .response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+    .response-field:last-child { border-bottom: none; }
+    .rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 130px; flex-shrink: 0; }
+    .rf-val { font-size: 0.85rem; color: #374151; }
+    .stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+    .stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+    .stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+    .step-indicator { color: #6b7280; font-size: 0.82rem; margin-top: 10px; display: block; }
+    .demo-panel { display: none; }
+    .demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+    .col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+    .col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+      text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+    .col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+    .col-card p:last-child { margin-bottom: 0; }
+    .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .chip-label { font-size: 0.75rem; color: #6b7280; }
+    .chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+      cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+    .chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+    @media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+    #themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+      padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+      cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+      transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+    #themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+    body.dark { background: #0f1117; color: #e2e8f0; }
+    body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+    body.dark header h1 { color: #f7fafc; }
+    body.dark header p  { color: #a0aec0; }
+    body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+    body.dark h3 { color: #e2e8f0; }
+    body.dark p  { color: #a0aec0; }
+    body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+    body.dark .kw  { color: #9f7aea; }
+    body.dark .fn  { color: #68d391; }
+    body.dark .str { color: #f6ad55; }
+    body.dark .cmt { color: #4a5568; }
+    body.dark .key { color: #63b3ed; }
+    body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+    body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+    body.dark .info-box p { color: #a0aec0; }
+    body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+    body.dark .takeaway p { color: #c6f6d5; }
+    body.dark .field { background: #1a202c; border-color: #2d3748; }
+    body.dark .field .name { color: #68d391; }
+    body.dark .field .desc { color: #718096; }
+    body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+    body.dark .event-name { color: #68d391; }
+    body.dark .event-desc { color: #718096; }
+    body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+    body.dark .response-field { border-bottom-color: #2d3748; }
+    body.dark .rf-key { color: #f6ad55; }
+    body.dark .rf-val { color: #a0aec0; }
+    body.dark .step-indicator { color: #718096; }
+    body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+    body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+    body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+    body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+    body.dark .col-card-title { color: #4a5568; }
+    body.dark .col-card p { color: #a0aec0; }
+    body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+    body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+    body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+    body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+
+    /* additional: surfaces chip panels reuse .demo-panel; user-sees chip reuse .demo-panel too */
+  </style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Recommend plugins for your org</h1>
+  <p>Add a relevance block to marketplace plugin entries so Claude Code suggests them when a user's work matches.</p>
+</header>
+
+<main>
+
+  <section id="how-it-works">
+    <h2>How it works</h2>
+    <p>Each plugin entry in <code>marketplace.json</code> can carry a <code>relevance</code> object naming a topic and one or more signals. A signal is a pattern Claude Code tests against the current session, such as the working directory or files Claude has read. Signal matching happens locally on the user's machine — it adds no network traffic and reports nothing to Anthropic or the marketplace operator.</p>
+    <p>When a signal matches and the plugin is not already installed, Claude Code shows the plugin in three places:</p>
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">Spinner tip</span><span class="event-desc">"Working with <em>topic</em>? Install the <em>plugin</em> plugin" appears below the spinner while Claude responds.</span></div>
+      <div class="event-item"><span class="event-name">Session-start suggestion</span><span class="event-desc">If the <code>cwd</code> signal matches, a one-line notification appears before the first turn (v2.1.153+).</span></div>
+      <div class="event-item"><span class="event-name">/plugin Discover tab</span><span class="event-desc">The plugin is pinned to the top of the Discover list with an annotation such as "suggested for this directory" (v2.1.154+).</span></div>
+    </div>
+    <div class="info-box">
+      <span class="tag">NOTE</span>
+      <p>Suggestions are opt-in per marketplace through managed settings. No marketplace's declarations produce suggestions until an administrator adds it to the allowlist — including the official Anthropic marketplace. Claude Code never installs a plugin automatically; the user always confirms.</p>
+    </div>
+  </section>
+
+  <section id="add-relevance">
+    <h2>Add relevance to a plugin entry</h2>
+    <p>Add a <code>relevance</code> object to the plugin's entry in your <code>marketplace.json</code>. This example declares that <code>terraform-helpers</code> is relevant when Claude reads a <code>.tf</code> file or runs <code>terraform</code>:</p>
+    <pre class="code-block"><span class="key">{</span>
+  <span class="str">"name"</span>: <span class="str">"acme-corp-plugins"</span>,
+  <span class="str">"owner"</span>: { <span class="str">"name"</span>: <span class="str">"Acme Platform Team"</span> },
+  <span class="str">"plugins"</span>: [
+    {
+      <span class="str">"name"</span>: <span class="str">"terraform-helpers"</span>,
+      <span class="str">"source"</span>: <span class="str">"./plugins/terraform-helpers"</span>,
+      <span class="str">"description"</span>: <span class="str">"Acme conventions and helpers for Terraform"</span>,
+      <span class="str">"relevance"</span>: {
+        <span class="str">"topic"</span>: <span class="str">"Terraform"</span>,
+        <span class="str">"signals"</span>: {
+          <span class="str">"cli"</span>: [<span class="str">"terraform"</span>],
+          <span class="str">"filesRead"</span>: [<span class="str">"**/*.tf"</span>]
+        }
+      }
+    }
+  ]
+}</pre>
+    <div class="takeaway">
+      <p>A plugin with a <code>relevance</code> block but no matching signal behaves like any other marketplace entry — it appears in the Discover list in its normal position and never surfaces as a spinner tip.</p>
+    </div>
+  </section>
+
+  <section id="field-reference">
+    <h2>Field reference</h2>
+    <h3>relevance</h3>
+    <div class="api-fields">
+      <div class="field"><div class="name">topic</div><div class="desc">Optional string. Fills "Working with <em>topic</em>?" in the spinner tip. Defaults to the plugin name with each hyphen segment capitalized. Max 64 characters. The session-start notification does not use this value.</div></div>
+      <div class="field"><div class="name">signals</div><div class="desc">Object of matchers that determine when the plugin is relevant. At least one signal is required for the plugin to be suggestible.</div></div>
+    </div>
+    <h3>relevance.signals</h3>
+    <div class="chip-row">
+      <span class="chip-label">選擇 signal 類型:</span>
+      <div class="chip active" data-target="sig-cwd" onclick="showTab('.sig-panel','.chip',this.dataset.target,this)">cwd</div>
+      <div class="chip" data-target="sig-cli" onclick="showTab('.sig-panel','.chip',this.dataset.target,this)">cli</div>
+      <div class="chip" data-target="sig-hosts" onclick="showTab('.sig-panel','.chip',this.dataset.target,this)">hosts</div>
+      <div class="chip" data-target="sig-filesread" onclick="showTab('.sig-panel','.chip',this.dataset.target,this)">filesRead</div>
+      <div class="chip" data-target="sig-manifestdeps" onclick="showTab('.sig-panel','.chip',this.dataset.target,this)">manifestDeps</div>
+    </div>
+    <div class="sig-panel demo-panel visible" id="sig-cwd">
+      <div class="response-box">
+        <div class="response-field"><div class="rf-key">type</div><div class="rf-val">array of strings</div></div>
+        <div class="response-field"><div class="rf-key">matches</div><div class="rf-val">Glob patterns matched against the session's working directory, as an absolute path and, inside a git repo, relative to the repo root. Forward-slash normalized, case-insensitive.</div></div>
+        <div class="response-field"><div class="rf-key">detail</div><div class="rf-val">Every pattern matches the directory itself and everything under it — <code>infra</code>, <code>infra/</code>, and <code>infra/**</code> behave identically. This is the only signal that can match at session start, before the first turn.</div></div>
+        <div class="response-field"><div class="rf-key">limits</div><div class="rf-val">Max 10 patterns of 256 characters each. Requires v2.1.153+.</div></div>
+      </div>
+    </div>
+    <div class="sig-panel demo-panel" id="sig-cli">
+      <div class="response-box">
+        <div class="response-field"><div class="rf-key">type</div><div class="rf-val">array of strings</div></div>
+        <div class="response-field"><div class="rf-key">matches</div><div class="rf-val">Command names from shell commands Claude has run this session, e.g. <code>["stripe"]</code>. Applies on every platform, including Windows via PowerShell or Git Bash.</div></div>
+        <div class="response-field"><div class="rf-key">detail</div><div class="rf-val">Claude Code records one command name per shell invocation: the first token after any leading env-var assignments and <code>sudo</code>. Compound commands contribute only their leading command — <code>cd infra &amp;&amp; terraform plan</code> records <code>cd</code>, not <code>terraform</code>. Exact match.</div></div>
+        <div class="response-field"><div class="rf-key">limits</div><div class="rf-val">Max 10 entries of 64 characters each.</div></div>
+      </div>
+    </div>
+    <div class="sig-panel demo-panel" id="sig-hosts">
+      <div class="response-box">
+        <div class="response-field"><div class="rf-key">type</div><div class="rf-val">array of strings</div></div>
+        <div class="response-field"><div class="rf-key">matches</div><div class="rf-val">Hostnames seen in http:// or https:// URLs in Bash commands this session, e.g. <code>["api.stripe.com"]</code>.</div></div>
+        <div class="response-field"><div class="rf-key">detail</div><div class="rf-val">Bare lowercase hostname only — no scheme, port, or path. Exact case-insensitive match.</div></div>
+        <div class="response-field"><div class="rf-key">limits</div><div class="rf-val">Max 20 entries of 128 characters each.</div></div>
+      </div>
+    </div>
+    <div class="sig-panel demo-panel" id="sig-filesread">
+      <div class="response-box">
+        <div class="response-field"><div class="rf-key">type</div><div class="rf-val">array of strings</div></div>
+        <div class="response-field"><div class="rf-key">matches</div><div class="rf-val">Glob patterns matched against paths of files Claude has read this session, e.g. <code>["**/*.tf"]</code>. Forward-slash normalized, case-insensitive.</div></div>
+        <div class="response-field"><div class="rf-key">detail</div><div class="rf-val">Also covers files Claude has written or edited and auto-loaded CLAUDE.md memory files.</div></div>
+        <div class="response-field"><div class="rf-key">limits</div><div class="rf-val">Max 10 patterns of 256 characters each. Requires v2.1.153+.</div></div>
+      </div>
+    </div>
+    <div class="sig-panel demo-panel" id="sig-manifestdeps">
+      <div class="response-box">
+        <div class="response-field"><div class="rf-key">type</div><div class="rf-val">array of objects</div></div>
+        <div class="response-field"><div class="rf-key">matches</div><div class="rf-val">Dependencies declared in package manifests Claude has read this session. Each entry is <code>{ "file": "...", "pattern": "..." }</code>.</div></div>
+        <div class="response-field"><div class="rf-key">detail</div><div class="rf-val"><code>file</code> is a regex matched against the manifest's path (anchor at the end, e.g. <code>[/\\]package\.json$</code>, since a start-anchored pattern never matches an absolute path); paths are not separator-normalized, so Windows paths use backslashes. <code>pattern</code> is a regex matched against file contents, case-sensitive. Manifests over 512 KB are skipped.</div></div>
+        <div class="response-field"><div class="rf-key">limits</div><div class="rf-val">Both values are JS RegExp source strings of at most 256 characters. Max 10 entries.</div></div>
+      </div>
+    </div>
+    <pre class="code-block"><span class="key">{</span>
+  <span class="str">"name"</span>: <span class="str">"stripe-helpers"</span>,
+  <span class="str">"source"</span>: <span class="str">"./plugins/stripe-helpers"</span>,
+  <span class="str">"relevance"</span>: {
+    <span class="str">"topic"</span>: <span class="str">"Stripe"</span>,
+    <span class="str">"signals"</span>: {
+      <span class="str">"manifestDeps"</span>: [
+        {
+          <span class="str">"file"</span>: <span class="str">"[/\\\\]package\\.json$"</span>,
+          <span class="str">"pattern"</span>: <span class="str">"\"stripe\"\\s*:"</span>
+        }
+      ]
+    }
+  }
+}</pre>
+    <div class="info-box">
+      <span class="tag">NOTE</span>
+      <p>Unknown fields under <code>relevance</code> and <code>relevance.signals</code> are ignored at load time so older Claude Code clients keep loading your marketplace. Run <code>claude plugin validate</code> to surface them as warnings. Only <code>cwd</code> can match at session start; <code>cli</code>, <code>hosts</code>, <code>filesRead</code>, and <code>manifestDeps</code> need session history, so they can only match on the spinner tip and the Discover tab.</p>
+    </div>
+  </section>
+
+  <section id="enable-suggestions">
+    <h2>Enable suggestions in managed settings</h2>
+    <p>Declaring <code>relevance</code> in <code>marketplace.json</code> is not enough on its own. An administrator must allowlist the marketplace in managed settings before its suggestions appear to users. Add the marketplace name to <code>pluginSuggestionMarketplaces</code>. For any marketplace other than the official one, also declare the marketplace source, either in <code>extraKnownMarketplaces</code> or <code>strictKnownMarketplaces</code> — otherwise the allowlisted name is ignored.</p>
+    <div class="two-col">
+      <div class="col-card">
+        <div class="col-card-title">Org marketplace</div>
+        <pre class="code-block"><span class="key">{</span>
+  <span class="str">"extraKnownMarketplaces"</span>: {
+    <span class="str">"acme-corp-plugins"</span>: {
+      <span class="str">"source"</span>: {
+        <span class="str">"source"</span>: <span class="str">"github"</span>,
+        <span class="str">"repo"</span>: <span class="str">"acme-corp/claude-plugins"</span>
+      }
+    }
+  },
+  <span class="str">"pluginSuggestionMarketplaces"</span>: [<span class="str">"acme-corp-plugins"</span>]
+}</pre>
+      </div>
+      <div class="col-card">
+        <div class="col-card-title">Official marketplace</div>
+        <pre class="code-block"><span class="key">{</span>
+  <span class="str">"pluginSuggestionMarketplaces"</span>: [<span class="str">"claude-plugins-official"</span>]
+}</pre>
+        <p>Exempt from the source-declaration requirement because its name can only register from the official Anthropic source.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="what-user-sees">
+    <h2>What the user sees</h2>
+    <p>When a signal matches during a session, the spinner tip reads:</p>
+    <pre class="code-block">Working with Terraform? Install the terraform-helpers plugin:
+/plugin install terraform-helpers@acme-corp-plugins</pre>
+    <p>At session start, a matching <code>cwd</code> signal surfaces the one-line notification:</p>
+    <pre class="code-block">plugin suggestion: terraform-helpers@acme-corp-plugins · /plugin</pre>
+    <div class="takeaway">
+      <p>A given plugin's suggestion appears at most once every three sessions across the spinner tip and the session-start notification combined, and neither repeats once the plugin is installed. The session-start notification additionally stops appearing after being shown twice. In the Discover tab, the plugin is pinned above other results once, with an annotation naming the matching signal (v2.1.154+; on v2.1.152 only the spinner tip appears, v2.1.153 adds the session-start notification).</p>
+    </div>
+  </section>
+
+  <section id="validate">
+    <h2>Validate your marketplace</h2>
+    <p>Run <code>claude plugin validate</code> against your marketplace directory to check the <code>relevance</code> block before publishing:</p>
+    <pre class="code-block"><span class="fn">claude</span> plugin validate ./my-marketplace</pre>
+    <div class="info-box">
+      <span class="tag">CHECKS</span>
+      <p>The validator reports unknown keys under <code>relevance</code> and <code>relevance.signals</code> as warnings, flags a <code>relevance</code> value that is not an object, and rejects a <code>signals.hosts</code> entry that includes a scheme, port, or path.</p>
+    </div>
+  </section>
+
+  <section id="see-also">
+    <h2>See also</h2>
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">plugin-marketplaces</span><span class="event-desc">Create and distribute a plugin marketplace — build the marketplace that hosts your plugins.</span></div>
+      <div class="event-item"><span class="event-name">plugin-hints</span><span class="event-desc">Recommend your plugin from your CLI instead of from Claude Code's session signals.</span></div>
+      <div class="event-item"><span class="event-name">settings</span><span class="event-desc">Full reference for pluginSuggestionMarketplaces and extraKnownMarketplaces.</span></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+  }
+
+  function showTab(panelSelector, chipSelector, targetId) {
+    document.querySelectorAll(panelSelector).forEach(el => el.classList.toggle('visible', el.id === targetId));
+    document.querySelectorAll(chipSelector).forEach(el => el.classList.toggle('active', el.dataset.target === targetId));
+  }
+</script>
+</body>
+</html>

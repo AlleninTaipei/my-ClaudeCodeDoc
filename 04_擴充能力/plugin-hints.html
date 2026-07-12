@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recommend your plugin from your CLI</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+           background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+    header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+             border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+    header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+    header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+                max-width: 600px; margin-inline: auto; }
+    main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+    section { margin-bottom: 52px; }
+    h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+         border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+    h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+    p  { color: #4a5568; margin-bottom: 12px; }
+    .code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+      padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+      overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+    .kw  { color: #7c3aed; }
+    .fn  { color: #16a34a; }
+    .str { color: #d97706; }
+    .cmt { color: #94a3b8; font-style: italic; }
+    .key { color: #2563eb; }
+    .info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+      padding: 16px 20px; margin-top: 14px; }
+    .info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+      font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+      margin-bottom: 10px; letter-spacing: 0.05em; }
+    .info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+    .info-box p + p { margin-top: 8px; }
+    .takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+      border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+    .takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+    .api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+    .field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+    .field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+    .field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+    .event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+    .event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+      padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+    .event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+      min-width: 160px; flex-shrink: 0; }
+    .event-desc { font-size: 0.82rem; color: #4a5568; }
+    .demo-panel { display: none; }
+    .demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+    .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .chip-label { font-size: 0.75rem; color: #6b7280; }
+    .chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+      cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+    .chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+    .data-table-wrap { overflow-x: auto; margin-top: 14px; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; background: #fff;
+      border: 1px solid #cbd5e0; border-radius: 8px; overflow: hidden; }
+    .data-table th { text-align: left; background: #e2e8f0; color: #374151; padding: 9px 12px;
+      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .data-table td { padding: 9px 12px; border-top: 1px solid #e2e8f0; color: #4a5568; vertical-align: top; }
+    .data-table td code { font-family: monospace; color: #16a34a; }
+    @media (max-width: 640px) { .api-fields { grid-template-columns: 1fr; } }
+    #themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+      padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+      cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+      transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+    #themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+    body.dark { background: #0f1117; color: #e2e8f0; }
+    body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+    body.dark header h1 { color: #f7fafc; }
+    body.dark header p  { color: #a0aec0; }
+    body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+    body.dark h3 { color: #e2e8f0; }
+    body.dark p  { color: #a0aec0; }
+    body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+    body.dark .kw  { color: #9f7aea; }
+    body.dark .fn  { color: #68d391; }
+    body.dark .str { color: #f6ad55; }
+    body.dark .cmt { color: #4a5568; }
+    body.dark .key { color: #63b3ed; }
+    body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+    body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+    body.dark .info-box p { color: #a0aec0; }
+    body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+    body.dark .takeaway p { color: #c6f6d5; }
+    body.dark .field { background: #1a202c; border-color: #2d3748; }
+    body.dark .field .name { color: #68d391; }
+    body.dark .field .desc { color: #718096; }
+    body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+    body.dark .event-name { color: #68d391; }
+    body.dark .event-desc { color: #718096; }
+    body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+    body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+    body.dark .data-table { background: #1a202c; border-color: #2d3748; }
+    body.dark .data-table th { background: #1a202c; color: #718096; }
+    body.dark .data-table td { border-top-color: #2d3748; color: #a0aec0; }
+    body.dark .data-table td code { color: #68d391; }
+    body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+    body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+  </style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Recommend your plugin from your CLI</h1>
+  <p>Emit a one-line marker from your CLI so Claude Code prompts users to install your official plugin.</p>
+</header>
+
+<main>
+
+  <section id="how-it-works">
+    <h2>How it works</h2>
+    <p>Claude Code sets the <code>CLAUDECODE</code> environment variable to <code>1</code> for every command it runs through the Bash and PowerShell tools, and for hook commands. From v2.1.172 it also sets <code>CLAUDE_CODE_CHILD_SESSION</code> to <code>1</code> in those same subprocesses. When your CLI sees one of these variables, it writes a self-closing <code>&lt;claude-code-hint /&gt;</code> tag to stderr. In hook commands the hint tag is stripped and ignored. Only Bash and PowerShell tool output triggers the install prompt.</p>
+    <p>When Claude Code receives the command output, it walks through four checks:</p>
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">1 · Scan</span><span class="event-desc">Finds hint lines and removes them before the output reaches the model.</span></div>
+      <div class="event-item"><span class="event-name">2 · Verify</span><span class="event-desc">Checks that the hint targets a plugin in an official Anthropic marketplace.</span></div>
+      <div class="event-item"><span class="event-name">3 · Dedupe</span><span class="event-desc">Checks the plugin is not already installed and has not been prompted before.</span></div>
+      <div class="event-item"><span class="event-name">4 · Prompt</span><span class="event-desc">Shows the user an install prompt that names the command that emitted the hint.</span></div>
+    </div>
+    <div class="takeaway"><p>Claude Code never installs a plugin automatically. The user always confirms.</p></div>
+  </section>
+
+  <section id="emit-the-hint">
+    <h2>Emit the hint</h2>
+    <p>Gate emission on an environment variable so the marker is unlikely to appear when a human runs your CLI directly, then write the tag to stderr on its own line. Choose which variable to check:</p>
+    <div class="api-fields">
+      <div class="field"><div class="name">CLAUDECODE</div><div class="desc">Set on every Claude Code version, so it reaches the most sessions. Also set in tmux sessions and stdio MCP server subprocesses. IDE extensions also set it in integrated terminals, where a human may run your CLI directly.</div></div>
+      <div class="field"><div class="name">CLAUDE_CODE_CHILD_SESSION</div><div class="desc">Set only in subprocesses Claude Code itself spawns — tool calls, hooks, status line commands — so the tag does not normally reach a human terminal. Requires v2.1.172+; older sessions miss the hint. A long-lived process like a tmux server captures the variable, so shells later launched from it still see the raw tag.</div></div>
+    </div>
+    <p>The examples below gate on <code>CLAUDECODE</code> for maximum reach and emit a hint for a plugin named <code>example-cli</code> in the official marketplace:</p>
+    <div class="chip-row">
+      <span class="chip-label">選擇語言:</span>
+      <div class="chip active" data-target="lang-node" onclick="showTab('.lang-panel','.chip',this.dataset.target)">Node.js</div>
+      <div class="chip" data-target="lang-python" onclick="showTab('.lang-panel','.chip',this.dataset.target)">Python</div>
+      <div class="chip" data-target="lang-go" onclick="showTab('.lang-panel','.chip',this.dataset.target)">Go</div>
+      <div class="chip" data-target="lang-shell" onclick="showTab('.lang-panel','.chip',this.dataset.target)">Shell</div>
+    </div>
+    <div class="lang-panel demo-panel visible" id="lang-node">
+      <pre class="code-block"><span class="kw">if</span> (process.env.CLAUDECODE) {
+  process.stderr.write(
+    <span class="str">'&lt;claude-code-hint v="1" type="plugin" value="example-cli@claude-plugins-official" /&gt;\n'</span>,
+  )
+}</pre>
+    </div>
+    <div class="lang-panel demo-panel" id="lang-python">
+      <pre class="code-block"><span class="kw">import</span> os, sys
+
+<span class="kw">if</span> os.environ.get(<span class="str">"CLAUDECODE"</span>):
+    <span class="fn">print</span>(
+        <span class="str">'&lt;claude-code-hint v="1" type="plugin" value="example-cli@claude-plugins-official" /&gt;'</span>,
+        file=sys.stderr,
+    )</pre>
+    </div>
+    <div class="lang-panel demo-panel" id="lang-go">
+      <pre class="code-block"><span class="kw">if</span> os.Getenv(<span class="str">"CLAUDECODE"</span>) != <span class="str">""</span> {
+    fmt.Fprintln(os.Stderr,
+        `&lt;claude-code-hint v="1" type="plugin" value="example-cli@claude-plugins-official" /&gt;`)
+}</pre>
+    </div>
+    <div class="lang-panel demo-panel" id="lang-shell">
+      <pre class="code-block"><span class="cmt"># Shell</span>
+[ -n <span class="str">"$CLAUDECODE"</span> ] &&
+  printf <span class="str">'%s\n'</span> <span class="str">'&lt;claude-code-hint v="1" type="plugin" value="example-cli@claude-plugins-official" /&gt;'</span> &gt;&amp;2</pre>
+    </div>
+    <p>Replace <code>example-cli</code> with your plugin's name in the official marketplace.</p>
+  </section>
+
+  <section id="choose-where">
+    <h2>Choose where to emit</h2>
+    <p>You control which code paths emit the hint. Claude Code deduplicates by plugin, so emitting on every invocation has no downside. Touchpoints that work well:</p>
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <tr><th>Placement</th><th>Why it works</th></tr>
+        <tr><td><code>--help</code> output</td><td>Claude often runs help when exploring an unfamiliar CLI.</td></tr>
+        <tr><td>Unknown-subcommand errors</td><td>Reaches the moment Claude is confused about your interface.</td></tr>
+        <tr><td>Login or auth success</td><td>The user is already in a setup mindset.</td></tr>
+        <tr><td>First-run welcome message</td><td>A natural onboarding moment.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="what-user-sees">
+    <h2>What the user sees</h2>
+    <p>When the hint passes all checks, Claude Code shows a prompt like the following:</p>
+    <pre class="code-block">─────────────────────────────────────────────────────────────
+  Plugin recommendation
+
+    The example-cli command suggests installing a plugin.
+
+    Plugin: example-cli
+    Marketplace: claude-plugins-official
+    Official integration for example-cli deployments
+
+    Would you like to install it?
+    &#10095; 1. Yes, install example-cli
+      2. No
+      3. No, and don't show plugin installation hints again
+
+─────────────────────────────────────────────────────────────</pre>
+    <p>The prompt names the command that produced the hint so users can spot a mismatch between the tool and the plugin it recommends. If the user does not respond within 30 seconds, the prompt dismisses as <strong>No</strong>.</p>
+    <div class="info-box">
+      <span class="tag">FREQUENCY</span>
+      <p><strong>Once per plugin:</strong> after the prompt is shown, Claude Code records the plugin and never prompts for it again, regardless of the answer.</p>
+      <p><strong>Once per session:</strong> across all CLIs on the machine, at most one hint prompt appears per Claude Code session.</p>
+    </div>
+    <p>Selecting <strong>Yes</strong> installs the plugin to user scope. Selecting <strong>No, and don't show plugin installation hints again</strong> disables all future hint prompts for the user.</p>
+  </section>
+
+  <section id="hint-format">
+    <h2>Hint format</h2>
+    <p>The hint is a self-closing tag with three required attributes.</p>
+    <pre class="code-block">&lt;claude-code-hint v="1" type="plugin" value="example-cli@claude-plugins-official" /&gt;</pre>
+    <div class="api-fields">
+      <div class="field"><div class="name">v <span style="color:#d97706;font-family:inherit;font-weight:400;font-size:0.72rem;">required</span></div><div class="desc">Protocol version. <code>1</code> is the only supported value.</div></div>
+      <div class="field"><div class="name">type <span style="color:#d97706;font-family:inherit;font-weight:400;font-size:0.72rem;">required</span></div><div class="desc">Hint kind. <code>plugin</code> is the only supported value.</div></div>
+      <div class="field"><div class="name">value <span style="color:#d97706;font-family:inherit;font-weight:400;font-size:0.72rem;">required</span></div><div class="desc">Plugin identifier in <code>name@marketplace</code> form.</div></div>
+    </div>
+    <p>Attribute values may be quoted with double quotes or left unquoted. Unquoted values cannot contain whitespace. Escape sequences are not supported.</p>
+  </section>
+
+  <section id="requirements">
+    <h2>Requirements</h2>
+    <p>Claude Code enforces two conditions before acting on a hint. Hints that fail either check are dropped:</p>
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">Own line</span><span class="event-desc">The tag must occupy its own line. A tag embedded mid-line, for example inside a log statement, is ignored. Leading and trailing whitespace on the line is allowed.</span></div>
+      <div class="event-item"><span class="event-name">Official marketplace</span><span class="event-desc">The value must reference a plugin in an Anthropic-controlled marketplace such as claude-plugins-official. Hints pointing to other marketplaces are silently dropped.</span></div>
+    </div>
+    <p>The hint line is always removed from the output before it reaches the model, even when the version or type is unrecognized, so the marker is never counted toward token usage.</p>
+    <div class="info-box">
+      <span class="tag">RECOMMENDED, NOT ENFORCED</span>
+      <p><strong>Write to stderr:</strong> keeps the tag out of shell pipelines such as <code>example-cli deploy | jq</code>. Claude Code scans both streams, so stdout also works.</p>
+      <p><strong>Gate on an environment variable:</strong> only emit when CLAUDECODE or CLAUDE_CODE_CHILD_SESSION is set.</p>
+    </div>
+  </section>
+
+  <section id="official-marketplace">
+    <h2>Get your plugin into the official marketplace</h2>
+    <p>The hint protocol only takes effect for plugins listed in the official Anthropic marketplace, <code>claude-plugins-official</code>. Anthropic curates that marketplace at its discretion, and the in-app submission forms add plugins to the community marketplace instead, which the hint protocol does not check. If you are working with an Anthropic partner contact, reach out to them to coordinate an official-marketplace listing.</p>
+  </section>
+
+  <section id="see-also">
+    <h2>See also</h2>
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">plugins</span><span class="event-desc">Create plugins — build the plugin your CLI recommends.</span></div>
+      <div class="event-item"><span class="event-name">plugin-marketplaces</span><span class="event-desc">Create and distribute a plugin marketplace — host plugins outside the official marketplace.</span></div>
+      <div class="event-item"><span class="event-name">env-vars</span><span class="event-desc">Environment variables — full reference for CLAUDECODE and related variables.</span></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+  }
+
+  function showTab(panelSelector, chipSelector, targetId) {
+    document.querySelectorAll(panelSelector).forEach(el => el.classList.toggle('visible', el.id === targetId));
+    document.querySelectorAll(chipSelector).forEach(el => el.classList.toggle('active', el.dataset.target === targetId));
+  }
+</script>
+</body>
+</html>

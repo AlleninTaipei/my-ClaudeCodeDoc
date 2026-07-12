@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Constrain plugin dependency versions</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+           background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+    header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+             border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+    header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+    header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+                max-width: 600px; margin-inline: auto; }
+    main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+    section { margin-bottom: 52px; }
+    h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+         border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+    h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+    p  { color: #4a5568; margin-bottom: 12px; }
+    .code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+      padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+      overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+    .kw  { color: #7c3aed; }
+    .fn  { color: #16a34a; }
+    .str { color: #d97706; }
+    .cmt { color: #94a3b8; font-style: italic; }
+    .key { color: #2563eb; }
+    .info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+      padding: 16px 20px; margin-top: 14px; }
+    .info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+      font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+      margin-bottom: 10px; letter-spacing: 0.05em; }
+    .info-box.warn { background: #fef3c7; border-color: #fcd34d; }
+    .info-box.warn .tag { background: #d97706; }
+    .info-box.warn p { color: #92400e; }
+    .info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+    .takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+      border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+    .takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+    .api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+    .field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+    .field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+    .field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+    .event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+    .event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+      padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+    .event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+      min-width: 160px; flex-shrink: 0; }
+    .event-desc { font-size: 0.82rem; color: #4a5568; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+    .col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+    .col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+      text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+    .col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+    .col-card p:last-child { margin-bottom: 0; }
+    .col-card.bad .col-card-title { color: #b91c1c; }
+    .col-card.good .col-card-title { color: #166534; }
+    .data-table-wrap { overflow-x: auto; margin-top: 14px; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; background: #fff;
+      border: 1px solid #cbd5e0; border-radius: 8px; overflow: hidden; }
+    .data-table th { text-align: left; background: #e2e8f0; color: #374151; padding: 9px 12px;
+      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .data-table td { padding: 9px 12px; border-top: 1px solid #e2e8f0; color: #4a5568; vertical-align: top; }
+    .data-table td code { font-family: monospace; color: #16a34a; }
+    @media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+    #themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+      padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+      cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+      transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+    #themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+    body.dark { background: #0f1117; color: #e2e8f0; }
+    body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+    body.dark header h1 { color: #f7fafc; }
+    body.dark header p  { color: #a0aec0; }
+    body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+    body.dark h3 { color: #e2e8f0; }
+    body.dark p  { color: #a0aec0; }
+    body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+    body.dark .kw  { color: #9f7aea; }
+    body.dark .fn  { color: #68d391; }
+    body.dark .str { color: #f6ad55; }
+    body.dark .cmt { color: #4a5568; }
+    body.dark .key { color: #63b3ed; }
+    body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+    body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+    body.dark .info-box p { color: #a0aec0; }
+    body.dark .info-box.warn { background: #3a2a10; border-color: #7a5a20; }
+    body.dark .info-box.warn .tag { background: #7a5a20; color: #f6ad55; }
+    body.dark .info-box.warn p { color: #f6ad55; }
+    body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+    body.dark .takeaway p { color: #c6f6d5; }
+    body.dark .field { background: #1a202c; border-color: #2d3748; }
+    body.dark .field .name { color: #68d391; }
+    body.dark .field .desc { color: #718096; }
+    body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+    body.dark .event-name { color: #68d391; }
+    body.dark .event-desc { color: #718096; }
+    body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+    body.dark .col-card-title { color: #4a5568; }
+    body.dark .col-card p { color: #a0aec0; }
+    body.dark .col-card.bad .col-card-title { color: #fc8181; }
+    body.dark .col-card.good .col-card-title { color: #68d391; }
+    body.dark .data-table { background: #1a202c; border-color: #2d3748; }
+    body.dark .data-table th { background: #1a202c; color: #718096; }
+    body.dark .data-table td { border-top-color: #2d3748; color: #a0aec0; }
+    body.dark .data-table td code { color: #68d391; }
+    body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+    body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+  </style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Constrain plugin dependency versions</h1>
+  <p>Declare version constraints on plugin dependencies so your plugin keeps working when an upstream plugin ships a breaking change.</p>
+</header>
+
+<main>
+
+  <section id="why">
+    <h2>Why constrain dependency versions</h2>
+    <p>Consider an internal marketplace where two teams publish plugins. The platform team maintains <code>secrets-vault</code>, an MCP server wrapping a secrets backend. The deploy team maintains <code>deploy-kit</code>, which calls <code>secrets-vault</code> to fetch credentials during deploys. <code>deploy-kit</code> is tested against <code>secrets-vault</code> v2.1.0.</p>
+    <div class="two-col">
+      <div class="col-card bad">
+        <div class="col-card-title">Without a constraint</div>
+        <p>The next time the platform team tags a release that renames an MCP tool, auto-update moves every engineer's <code>secrets-vault</code> to the new version and <code>deploy-kit</code> breaks.</p>
+      </div>
+      <div class="col-card good">
+        <div class="col-card-title">With a constraint (~2.1.0)</div>
+        <p>Engineers with <code>deploy-kit</code> installed stay on the highest matching 2.1.x patch. The deploy team upgrades on their own schedule by publishing a new <code>deploy-kit</code> version with a wider constraint.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="declare">
+    <h2>Declare a dependency with a version constraint</h2>
+    <p>List dependencies in the <code>dependencies</code> array of your plugin's <code>.claude-plugin/plugin.json</code>. Each entry is either a plugin name or an object with a version constraint.</p>
+    <pre class="code-block"><span class="cmt">// .claude-plugin/plugin.json</span>
+<span class="key">{</span>
+  <span class="str">"name"</span>: <span class="str">"deploy-kit"</span>,
+  <span class="str">"version"</span>: <span class="str">"3.1.0"</span>,
+  <span class="str">"dependencies"</span>: [
+    <span class="str">"audit-logger"</span>,
+    { <span class="str">"name"</span>: <span class="str">"secrets-vault"</span>, <span class="str">"version"</span>: <span class="str">"~2.1.0"</span> }
+  ]
+}</pre>
+    <p>A bare string like <code>"audit-logger"</code> depends on whatever version that plugin's marketplace provides. For more control, use an object:</p>
+    <div class="api-fields">
+      <div class="field"><div class="name">name</div><div class="desc">Plugin name. Resolves within the same marketplace as the declaring plugin. Required.</div></div>
+      <div class="field"><div class="name">version</div><div class="desc">A semver range such as <code>~2.1.0</code>, <code>^2.0</code>, <code>&gt;=1.4</code>, or <code>=2.1.0</code>. Fetched at the highest tagged version satisfying this range. Accepts any Node semver expression; pre-release versions are excluded unless the range opts in with a suffix like <code>^2.0.0-0</code>.</div></div>
+      <div class="field"><div class="name">marketplace</div><div class="desc">A different marketplace to resolve name in. Cross-marketplace dependencies are blocked unless the target marketplace is allowlisted in the root marketplace's marketplace.json.</div></div>
+    </div>
+  </section>
+
+  <section id="cross-marketplace">
+    <h2>Depend on a plugin from another marketplace</h2>
+    <p>By default, Claude Code refuses to auto-install a dependency that lives in a different marketplace than the plugin declaring it, preventing one marketplace from silently pulling in plugins from an unreviewed source. The maintainer of the root marketplace — the one hosting the plugin the user is installing — adds the target marketplace name to <code>allowCrossMarketplaceDependenciesOn</code> in <code>marketplace.json</code>. Only the root marketplace's allowlist is consulted; trust does not chain through intermediate marketplaces.</p>
+    <pre class="code-block"><span class="cmt">// .claude-plugin/marketplace.json</span>
+<span class="key">{</span>
+  <span class="str">"name"</span>: <span class="str">"acme-tools"</span>,
+  <span class="str">"owner"</span>: { <span class="str">"name"</span>: <span class="str">"Acme"</span> },
+  <span class="str">"allowCrossMarketplaceDependenciesOn"</span>: [<span class="str">"acme-shared"</span>],
+  <span class="str">"plugins"</span>: [
+    {
+      <span class="str">"name"</span>: <span class="str">"deploy-kit"</span>,
+      <span class="str">"source"</span>: <span class="str">"./deploy-kit"</span>,
+      <span class="str">"dependencies"</span>: [
+        { <span class="str">"name"</span>: <span class="str">"audit-logger"</span>, <span class="str">"marketplace"</span>: <span class="str">"acme-shared"</span> }
+      ]
+    }
+  ]
+}</pre>
+    <div class="info-box warn">
+      <span class="tag">IF MISSING</span>
+      <p>If the field is missing or does not include the target marketplace, install fails with a <code>cross-marketplace</code> error naming the field to set. Users can still install the dependency manually first, which satisfies the constraint without changing the allowlist.</p>
+    </div>
+  </section>
+
+  <section id="tag-releases">
+    <h2>Tag plugin releases for version resolution</h2>
+    <p>Version constraints resolve against git tags on the marketplace repository. Tag each release as <code>{plugin-name}--v{version}</code>, where version matches the <code>version</code> field in that commit's plugin.json. From the plugin directory, run:</p>
+    <pre class="code-block"><span class="fn">claude</span> plugin tag --push</pre>
+    <p>The command derives the tag name from the plugin's manifest and the enclosing marketplace entry. Before creating the tag, it validates the plugin contents, checks that plugin.json and the marketplace entry agree on the version, requires a clean working tree under the plugin directory, and refuses if the tag already exists. Add <code>--dry-run</code> to preview without creating it.</p>
+    <div class="info-box">
+      <span class="tag">NOTE</span>
+      <p>The plugin name prefix lets one repository host multiple plugins with independent version lines. A local-folder marketplace that is a git repository resolves tags the same way (v2.1.196+); earlier versions, or a folder that isn't a git repo, install from the folder's current contents instead. The resolved tag's semver is recorded separately from plugin.json's version, so a force-moved tag gets a fresh cache directory rather than reusing stale content.</p>
+    </div>
+  </section>
+
+  <section id="interact">
+    <h2>How constraints interact</h2>
+    <p>When several installed plugins constrain the same dependency, Claude Code intersects their ranges and resolves to the highest version satisfying all of them.</p>
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <tr><th>Plugin A requires</th><th>Plugin B requires</th><th>Result</th></tr>
+        <tr><td><code>^2.0</code></td><td><code>&gt;=2.1</code></td><td>One install at the highest 2.x tag at or above 2.1.0. Both plugins load.</td></tr>
+        <tr><td><code>~2.1</code></td><td><code>~3.0</code></td><td>Install of plugin B fails with <code>range-conflict</code>. Plugin A and the dependency stay as they were.</td></tr>
+        <tr><td><code>=2.1.0</code></td><td>none</td><td>The dependency stays at 2.1.0. Auto-update skips newer versions while plugin A is installed.</td></tr>
+      </table>
+    </div>
+    <p>Auto-update fetches a constrained dependency at the highest git tag satisfying every installed plugin's range. If no tag satisfies all ranges, auto-update skips it and lists the skip in the <code>/plugin</code> Errors tab. Uninstalling the last plugin that constrains a dependency releases the hold, and it resumes tracking its marketplace entry.</p>
+  </section>
+
+  <section id="enable-disable">
+    <h2>Enable or disable a plugin with dependencies</h2>
+    <p>Enabling a plugin also enables the plugins it depends on, transitively; disabling a plugin is blocked if another enabled plugin still needs it (both require v2.1.143+).</p>
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <tr><th>Condition</th><th>Result</th></tr>
+        <tr><td>A dependency is not installed</td><td>Enable fails and prints the <code>claude plugin install</code> command for each missing dependency.</td></tr>
+        <tr><td>A dependency is blocked by org policy</td><td>Enable fails and names the blocked dependency.</td></tr>
+        <tr><td>A dependency is set to false at a scope with higher precedence</td><td>Enable fails. Enable the dependency at that scope, or pass <code>--scope</code> to write there.</td></tr>
+        <tr><td>All dependencies are installed and allowed</td><td>Enable succeeds and writes true for the plugin and each dependency not already enabled at the target scope.</td></tr>
+      </table>
+    </div>
+    <p>This holds even when a dependency sets <code>defaultEnabled: false</code>, because Claude Code writes an explicit true for it. When you disable a plugin, Claude Code refuses if another enabled plugin still depends on it:</p>
+    <pre class="code-block">secrets-vault is still required by deploy-kit. Disable that plugin first, or
+disable everything together: claude plugin disable deploy-kit@acme-tools && claude plugin disable secrets-vault@acme-tools</pre>
+  </section>
+
+  <section id="prune">
+    <h2>Remove orphaned auto-installed dependencies</h2>
+    <p>Auto-installed dependencies stay on disk after the plugins that installed them are uninstalled. Run <code>claude plugin prune</code> (v2.1.121+) to list and remove auto-installed dependencies no longer required by any installed plugin:</p>
+    <pre class="code-block"><span class="fn">claude</span> plugin prune</pre>
+    <p>By default prune operates at user scope; use <code>--scope project</code> or <code>--scope local</code> to target another scope, <code>--dry-run</code> to preview, and <code>-y</code> to skip confirmation. Pass <code>--prune</code> to uninstall to clean up in one step:</p>
+    <pre class="code-block"><span class="fn">claude</span> plugin uninstall deploy-kit --prune</pre>
+    <p>Plugins you installed yourself are never pruned, only those installed automatically through another plugin's <code>dependencies</code> array.</p>
+  </section>
+
+  <section id="errors">
+    <h2>Resolve dependency errors</h2>
+    <p>Dependency problems appear in <code>claude plugin list</code> and the <code>/plugin</code> interface. Claude Code disables the affected plugin until you resolve the error.</p>
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <tr><th>Error</th><th>Meaning</th><th>How to resolve</th></tr>
+        <tr><td><code>dependency-unsatisfied</code></td><td>A declared dependency is not installed, or installed but disabled.</td><td>Run the install command shown in the error. Add the marketplace with <code>claude plugin marketplace add</code> if needed, or enable the dependency.</td></tr>
+        <tr><td><code>range-conflict</code></td><td>Version requirements for a dependency cannot be combined.</td><td>Uninstall or update a conflicting plugin, fix an invalid version string, simplify long <code>||</code> chains, or ask the upstream author to widen its constraint.</td></tr>
+        <tr><td><code>dependency-version-unsatisfied</code></td><td>The installed dependency's version is outside this plugin's declared range.</td><td>Run <code>claude plugin install &lt;dependency&gt;@&lt;marketplace&gt;</code> to re-resolve against all current constraints.</td></tr>
+        <tr><td><code>no-matching-tag</code></td><td>The dependency's repository has no <code>{name}--v*</code> tag satisfying the range.</td><td>Check the upstream has tagged releases using the convention above, or relax your range.</td></tr>
+      </table>
+    </div>
+    <p>Check these errors programmatically with <code>claude plugin list --json</code> and read the <code>errors</code> field on each plugin.</p>
+  </section>
+
+  <section id="see-also">
+    <h2>See also</h2>
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">plugins</span><span class="event-desc">Create plugins with skills, agents, and hooks.</span></div>
+      <div class="event-item"><span class="event-name">plugin-marketplaces</span><span class="event-desc">Create and distribute a plugin marketplace for your team.</span></div>
+      <div class="event-item"><span class="event-name">plugins-reference</span><span class="event-desc">The full plugin.json schema and version management details.</span></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connect Claude Code to tools via MCP</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+           background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+    header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+             border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+    header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+    header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 640px; margin-inline: auto; }
+    main    { max-width: 920px; margin: 0 auto; padding: 48px 24px 80px; }
+    section { margin-bottom: 52px; }
+    h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+    h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+    p  { color: #4a5568; margin-bottom: 12px; }
+    ul, ol { color: #4a5568; margin: 0 0 12px 20px; }
+    li { margin-bottom: 4px; }
+    .code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px;
+      font-family: monospace; font-size: 0.8rem; color: #1a202c; overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+    .kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; } .cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+    .info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+    .info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+    .info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+    .warn-box { background: #fef3c7; border: 1px solid #fcd34d; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+    .warn-box .tag { display: inline-block; background: #d97706; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
+    .warn-box p { color: #78350f; font-size: 0.88rem; margin: 0; }
+    .takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+    .takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+    .api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+    .field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+    .field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+    .field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+    .event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+    .event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+    .event-name { font-family: monospace; font-size: 0.8rem; color: #16a34a; min-width: 200px; flex-shrink: 0; }
+    .event-desc { font-size: 0.82rem; color: #4a5568; }
+    .response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 20px; margin-top: 16px; }
+    .response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+    .response-field:last-child { border-bottom: none; }
+    .rf-key { font-family: monospace; font-size: 0.8rem; color: #d97706; width: 200px; flex-shrink: 0; }
+    .rf-val { font-size: 0.85rem; color: #374151; }
+    .stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+    .stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+    .stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+    .step-indicator { color: #6b7280; font-size: 0.82rem; margin-top: 10px; display: block; }
+    .demo-panel { display: none; }
+    .demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+    .col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+    .col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+    .col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+    .col-card p:last-child { margin-bottom: 0; }
+    .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .chip-label { font-size: 0.75rem; color: #6b7280; }
+    .chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+    .chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+    @media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+    #themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+      cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+    #themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+    body.dark { background: #0f1117; color: #e2e8f0; }
+    body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+    body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+    body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; }
+    body.dark p, body.dark ul, body.dark ol { color: #a0aec0; }
+    body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+    body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+    body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+    body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; } body.dark .info-box p { color: #a0aec0; }
+    body.dark .warn-box { background: #3a2a10; border-color: #7a5a20; }
+    body.dark .warn-box .tag { background: #7a5a20; color: #f6ad55; } body.dark .warn-box p { color: #f6ad55; }
+    body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; } body.dark .takeaway p { color: #c6f6d5; }
+    body.dark .field { background: #1a202c; border-color: #2d3748; } body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+    body.dark .event-item { background: #1a202c; border-color: #2d3748; } body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+    body.dark .response-box { background: #1a202c; border-color: #2d3748; } body.dark .response-field { border-bottom-color: #2d3748; }
+    body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+    body.dark .step-indicator { color: #718096; }
+    body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+    body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+    body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+    body.dark .col-card { background: #1a202c; border-color: #2d3748; } body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+    body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+    body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+    body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+    body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+  </style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Connect Claude Code to tools via MCP</h1>
+  <p>Learn how to connect Claude Code to your tools with the Model Context Protocol.</p>
+</header>
+
+<main>
+
+<section>
+  <h2>What you can do with MCP</h2>
+  <p>MCP servers give Claude Code access to your tools, databases, and APIs. Connect a server when you find yourself copying data into chat from another tool — Claude can then read and act on that system directly.</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">Implement features</span><span class="event-desc">"Add the feature described in JIRA issue ENG-4521 and create a PR on GitHub."</span></div>
+    <div class="event-item"><span class="event-name">Analyze monitoring data</span><span class="event-desc">"Check Sentry and Statsig to check the usage of feature ENG-4521."</span></div>
+    <div class="event-item"><span class="event-name">Query databases</span><span class="event-desc">"Find emails of 10 random users who used ENG-4521, based on our PostgreSQL database."</span></div>
+    <div class="event-item"><span class="event-name">Integrate designs</span><span class="event-desc">"Update our email template based on new Figma designs posted in Slack."</span></div>
+    <div class="event-item"><span class="event-name">Automate workflows</span><span class="event-desc">"Create Gmail drafts inviting these 10 users to a feedback session."</span></div>
+    <div class="event-item"><span class="event-name">React to external events</span><span class="event-desc">An MCP server can act as a channel pushing Telegram/Discord/webhook messages into your session</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>Find and build MCP servers</h2>
+  <p>Browse reviewed connectors in the Anthropic Directory — add any remote server listed there with <code>claude mcp add</code>.</p>
+  <div class="warn-box"><span class="tag">WARNING</span><p>Verify you trust each server before connecting it. Servers that fetch external content can expose you to prompt injection risk.</p></div>
+  <p>Have Claude scaffold a server with the official <code>mcp-server-dev</code> plugin:</p>
+  <pre class="code-block">/plugin install mcp-server-dev@claude-plugins-official
+/reload-plugins
+/mcp-server-dev:build-mcp-server</pre>
+</section>
+
+<section>
+  <h2>Installing MCP servers</h2>
+  <div class="chip-row">
+    <span class="chip-label">Transport:</span>
+    <div class="tr-chip chip active" onclick="trShow(0)">HTTP</div>
+    <div class="tr-chip chip" onclick="trShow(1)">SSE (deprecated)</div>
+    <div class="tr-chip chip" onclick="trShow(2)">stdio</div>
+    <div class="tr-chip chip" onclick="trShow(3)">WebSocket</div>
+  </div>
+  <div class="tr-panel demo-panel visible" id="tr-0">
+    <p>Recommended for remote, cloud-based services.</p>
+    <pre class="code-block">claude mcp add --transport http notion https://mcp.notion.com/mcp
+
+claude mcp add --transport http secure-api https://api.example.com/mcp \
+  --header "Authorization: Bearer your-token"</pre>
+    <p>In JSON config, <code>type</code> accepts <code>streamable-http</code> as an alias for <code>http</code>. A <code>url</code> with no <code>type</code> is an error: Claude Code reads it as stdio and skips it.</p>
+  </div>
+  <div class="tr-panel demo-panel" id="tr-1">
+    <div class="warn-box"><span class="tag">DEPRECATED</span><p>Use HTTP servers instead, where available.</p></div>
+    <pre class="code-block">claude mcp add --transport sse asana https://mcp.asana.com/sse
+
+claude mcp add --transport sse private-api https://api.company.com/sse \
+  --header "X-API-Key: your-key-here"</pre>
+  </div>
+  <div class="tr-panel demo-panel" id="tr-2">
+    <p>Run as local processes — ideal for tools needing direct system access. Claude Code sets <code>CLAUDE_PROJECT_DIR</code> in the server's environment.</p>
+    <pre class="code-block">claude mcp add [options] &lt;name&gt; -- &lt;command&gt; [args...]
+
+claude mcp add --env AIRTABLE_API_KEY=YOUR_KEY --transport stdio airtable \
+  -- npx -y airtable-mcp-server</pre>
+    <div class="info-box"><span class="tag">SEPARATE WITH --</span><p>Everything after <code>--</code> is passed to the server untouched. Without it, Claude Code would try to parse the server's own flags as its own options.</p></div>
+  </div>
+  <div class="tr-panel demo-panel" id="tr-3">
+    <p>Persistent bidirectional connection for servers that push events unprompted. Use HTTP instead when the server only responds to requests (HTTP supports OAuth; WebSocket doesn't).</p>
+    <pre class="code-block">claude mcp add-json events-server \
+  '{"type":"ws","url":"wss://mcp.example.com/socket","headers":{"Authorization":"Bearer YOUR_TOKEN"}}'</pre>
+  </div>
+
+  <h3>Managing your servers</h3>
+  <pre class="code-block">claude mcp list
+claude mcp get github
+claude mcp remove github
+/mcp   <span class="cmt"># within Claude Code</span></pre>
+  <p>Project-scoped servers awaiting approval show as <code>⏸ Pending approval</code> in <code>claude mcp list</code>. As of v2.1.196, approvals from an untracked-in-git settings file are required in an untrusted folder — a cloned repo can't approve its own servers.</p>
+
+  <h3>Dynamic tool updates &amp; reconnection</h3>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">list_changed notifications</span><span class="event-desc">Servers can dynamically update tools/prompts/resources without reconnecting</span></div>
+    <div class="event-item"><span class="event-name">Automatic reconnection</span><span class="event-desc">HTTP/SSE reconnect with exponential backoff, up to 5 attempts from 1s; stdio servers are not auto-reconnected</span></div>
+    <div class="event-item"><span class="event-name">Initial connection retries</span><span class="event-desc">Up to 3 retries on transient errors (5xx, refused, timeout); auth/not-found errors are not retried</span></div>
+  </div>
+
+  <h3>Plugin-provided MCP servers</h3>
+  <pre class="code-block"><span class="cmt">// .mcp.json at plugin root</span>
+{ <span class="str">"mcpServers"</span>: { <span class="str">"database-tools"</span>: {
+  <span class="str">"command"</span>: <span class="str">"${CLAUDE_PLUGIN_ROOT}/servers/db-server"</span>,
+  <span class="str">"args"</span>: [<span class="str">"--config"</span>, <span class="str">"${CLAUDE_PLUGIN_ROOT}/config.json"</span>],
+  <span class="str">"env"</span>: { <span class="str">"DB_URL"</span>: <span class="str">"${DB_URL}"</span> } } } }</pre>
+  <p>Tool callable name: <code>mcp__plugin_&lt;plugin-name&gt;_&lt;server-name&gt;__&lt;tool&gt;</code>. Server registers as <code>plugin:&lt;plugin-name&gt;:&lt;server-name&gt;</code>.</p>
+</section>
+
+<section>
+  <h2>MCP installation scopes</h2>
+  <div class="response-box">
+    <div class="response-field"><span class="rf-key">Local (default)</span><span class="rf-val">Current project only, not shared, stored in ~/.claude.json</span></div>
+    <div class="response-field"><span class="rf-key">Project</span><span class="rf-val">Current project only, shared via .mcp.json in version control</span></div>
+    <div class="response-field"><span class="rf-key">User</span><span class="rf-val">All your projects, not shared, stored in ~/.claude.json</span></div>
+  </div>
+  <pre class="code-block">claude mcp add --transport http stripe --scope local https://mcp.stripe.com
+claude mcp add --transport http paypal --scope project https://mcp.paypal.com/mcp
+claude mcp add --transport http hubspot --scope user https://mcp.hubspot.com/anthropic</pre>
+  <p>Project-scoped servers from <code>.mcp.json</code> need approval before use; reset choices with <code>claude mcp reset-project-choices</code>.</p>
+
+  <h3>Scope hierarchy and precedence</h3>
+  <p>When the same server is defined more than once, the highest-precedence definition is used whole (fields aren't merged):</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">1. Local scope</span><span class="event-desc">Highest precedence</span></div>
+    <div class="event-item"><span class="event-name">2. Project scope</span><span class="event-desc"></span></div>
+    <div class="event-item"><span class="event-name">3. User scope</span><span class="event-desc"></span></div>
+    <div class="event-item"><span class="event-name">4. Plugin-provided servers</span><span class="event-desc"></span></div>
+    <div class="event-item"><span class="event-name">5. claude.ai connectors</span><span class="event-desc">Lowest precedence</span></div>
+  </div>
+  <p>The three scopes match by name; plugins and connectors match by endpoint URL/command.</p>
+
+  <h3>Environment variable expansion in .mcp.json</h3>
+  <pre class="code-block">{ <span class="str">"mcpServers"</span>: { <span class="str">"api-server"</span>: {
+  <span class="str">"type"</span>: <span class="str">"http"</span>, <span class="str">"url"</span>: <span class="str">"${API_BASE_URL:-https://api.example.com}/mcp"</span>,
+  <span class="str">"headers"</span>: { <span class="str">"Authorization"</span>: <span class="str">"Bearer ${API_KEY}"</span> } } } }</pre>
+  <p>Supported: <code>${VAR}</code> and <code>${VAR:-default}</code>, expandable in <code>command</code>, <code>args</code>, <code>env</code>, <code>url</code>, <code>headers</code>. Parsing fails if a required variable has no value and no default.</p>
+</section>
+
+<section>
+  <h2>Practical examples</h2>
+  <div class="chip-row">
+    <span class="chip-label">Example:</span>
+    <div class="ex-chip chip active" onclick="exShow(0)">Sentry</div>
+    <div class="ex-chip chip" onclick="exShow(1)">GitHub</div>
+    <div class="ex-chip chip" onclick="exShow(2)">PostgreSQL</div>
+  </div>
+  <div class="ex-panel demo-panel visible" id="ex-0">
+    <pre class="code-block">claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
+/mcp   <span class="cmt"># authenticate</span></pre>
+    <p>"What are the most common errors in the last 24 hours?" · "Show me the stack trace for error ID abc123" · "Which deployment introduced these new errors?"</p>
+  </div>
+  <div class="ex-panel demo-panel" id="ex-1">
+    <pre class="code-block">claude mcp add --transport http github https://api.githubcopilot.com/mcp/ \
+  --header "Authorization: Bearer YOUR_GITHUB_PAT"</pre>
+    <p>"Review PR #456 and suggest improvements" · "Create a new issue for the bug we just found" · "Show me all open PRs assigned to me"</p>
+  </div>
+  <div class="ex-panel demo-panel" id="ex-2">
+    <pre class="code-block">claude mcp add --transport stdio db -- npx -y @bytebase/dbhub \
+  --dsn "postgresql://readonly:pass@prod.db.com:5432/analytics"</pre>
+    <p>"What's our total revenue this month?" · "Show me the schema for the orders table" · "Find customers who haven't made a purchase in 90 days"</p>
+  </div>
+</section>
+
+<section>
+  <h2>Authenticate with remote MCP servers</h2>
+  <p>Claude Code supports OAuth 2.0. A server is marked as needing auth when it returns <code>401</code> or <code>403</code>, flagged in <code>/mcp</code>.</p>
+  <div class="stage-tabs">
+    <div class="au-tab stage-tab active" onclick="auGoTo(0)">Browser flow</div>
+    <div class="au-tab stage-tab" onclick="auGoTo(1)">CLI login</div>
+    <div class="au-tab stage-tab" onclick="auGoTo(2)">Fixed callback port</div>
+    <div class="au-tab stage-tab" onclick="auGoTo(3)">Pre-configured credentials</div>
+    <div class="au-tab stage-tab" onclick="auGoTo(4)">Override discovery / scopes</div>
+    <div class="au-tab stage-tab" onclick="auGoTo(5)">Dynamic headers</div>
+  </div>
+  <div class="au-panel demo-panel visible" id="au-p0">
+    <pre class="code-block">claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
+/mcp   <span class="cmt"># follow browser login</span></pre>
+    <p>In non-interactive mode, Claude Code (v2.1.196+, with tool search) tells Claude the server's tools are unavailable until authorized, instead of responding as if it weren't configured.</p>
+  </div>
+  <div class="au-panel demo-panel" id="au-p1">
+    <pre class="code-block">claude mcp login sentry
+claude mcp login sentry --no-browser
+claude mcp logout sentry</pre>
+    <p>v2.1.191+ detects no local browser (SSH, headless Linux) and prints the URL instead; needs an interactive terminal (<code>ssh -t</code>) for the paste step.</p>
+  </div>
+  <div class="au-panel demo-panel" id="au-p2">
+    <pre class="code-block">claude mcp add --transport http --callback-port 8080 my-server https://mcp.example.com/mcp</pre>
+    <p>Fixes the OAuth callback port to match a pre-registered redirect URI <code>http://localhost:PORT/callback</code>. Usable alone (dynamic client registration) or with <code>--client-id</code>.</p>
+  </div>
+  <div class="au-panel demo-panel" id="au-p3">
+    <pre class="code-block">claude mcp add --transport http \
+  --client-id your-client-id --client-secret --callback-port 8080 \
+  my-server https://mcp.example.com/mcp</pre>
+    <p>For servers without Dynamic Client Registration or Client ID Metadata Document support. Secret is stored in the system keychain or a credentials file.</p>
+  </div>
+  <div class="au-panel demo-panel" id="au-p4">
+    <pre class="code-block">{ <span class="str">"mcpServers"</span>: { <span class="str">"my-server"</span>: { <span class="str">"type"</span>: <span class="str">"http"</span>, <span class="str">"url"</span>: <span class="str">"https://mcp.example.com/mcp"</span>,
+  <span class="str">"oauth"</span>: { <span class="str">"authServerMetadataUrl"</span>: <span class="str">"https://auth.example.com/.well-known/openid-configuration"</span> } } } }</pre>
+    <pre class="code-block">{ <span class="str">"oauth"</span>: { <span class="str">"scopes"</span>: <span class="str">"channels:read chat:write search:read"</span> } }</pre>
+    <p><code>authServerMetadataUrl</code> bypasses default discovery (RFC 9728 → RFC 8414). <code>oauth.scopes</code> pins the requested scope set, taking precedence over discovered scopes.</p>
+  </div>
+  <div class="au-panel demo-panel" id="au-p5">
+    <pre class="code-block">{ <span class="str">"mcpServers"</span>: { <span class="str">"internal-api"</span>: { <span class="str">"type"</span>: <span class="str">"http"</span>, <span class="str">"url"</span>: <span class="str">"https://mcp.internal.example.com"</span>,
+  <span class="str">"headersHelper"</span>: <span class="str">"/opt/bin/get-mcp-auth-headers.sh"</span> } } }</pre>
+    <p>For Kerberos, short-lived tokens, or internal SSO. The command must write a JSON object to stdout, runs in a shell with a 10-second timeout, and re-runs fresh on every connection.</p>
+  </div>
+  <span class="step-indicator" id="auIndicator">1 of 6</span>
+</section>
+
+<section>
+  <h2>Add MCP servers from JSON configuration</h2>
+  <pre class="code-block">claude mcp add-json weather-api '{"type":"http","url":"https://api.weather.com/mcp","headers":{"Authorization":"Bearer token"}}'
+
+claude mcp add-json local-weather '{"type":"stdio","command":"/path/to/weather-cli","args":["--api-key","abc123"]}'</pre>
+  <pre class="code-block">claude mcp get weather-api</pre>
+</section>
+
+<section>
+  <h2>Import MCP servers from Claude Desktop</h2>
+  <pre class="code-block">claude mcp add-from-claude-desktop
+claude mcp list</pre>
+  <p>macOS and WSL only. Names with characters outside letters/numbers/hyphens/underscores are rejected and reported; others still import (before v2.1.205, one bad name stopped the whole import). Colliding names get a numeric suffix.</p>
+</section>
+
+<section>
+  <h2>Use MCP servers from claude.ai</h2>
+  <p>Servers added at <a>claude.ai/customize/connectors</a> (admin-only on Team/Enterprise) become available automatically when logged in with a claude.ai account. View in <code>/mcp</code>.</p>
+  <p>Connectors are fetched only when the active authentication method is your claude.ai subscription — not with <code>ANTHROPIC_API_KEY</code>, <code>apiKeyHelper</code>, Bedrock, or Google Cloud's Agent Platform.</p>
+  <pre class="code-block">{ <span class="str">"disableClaudeAiConnectors"</span>: <span class="kw">true</span> }</pre>
+  <p>Any-source-true semantics: true anywhere disables connectors; a lower-scope false can't re-enable. Or set <code>ENABLE_CLAUDEAI_MCP_SERVERS=false</code> for a shell session.</p>
+</section>
+
+<section>
+  <h2>Use Claude Code as an MCP server</h2>
+  <pre class="code-block">claude mcp serve</pre>
+  <pre class="code-block">{ <span class="str">"mcpServers"</span>: { <span class="str">"claude-code"</span>: { <span class="str">"type"</span>: <span class="str">"stdio"</span>, <span class="str">"command"</span>: <span class="str">"claude"</span>, <span class="str">"args"</span>: [<span class="str">"mcp"</span>, <span class="str">"serve"</span>] } } }</pre>
+  <div class="warn-box"><span class="tag">WARNING</span><p>The command field must reference the Claude Code executable — use `which claude` to find the full path if `claude` is not in PATH, or you'll get `spawn claude ENOENT`.</p></div>
+  <p>Exposes Claude's tools (View, Edit, LS, etc.) to your MCP client; your client is responsible for user confirmation of individual tool calls.</p>
+</section>
+
+<section>
+  <h2>MCP output limits and warnings</h2>
+  <div class="response-box">
+    <div class="response-field"><span class="rf-key">Warning threshold</span><span class="rf-val">10,000 tokens</span></div>
+    <div class="response-field"><span class="rf-key">Default limit</span><span class="rf-val">25,000 tokens (MAX_MCP_OUTPUT_TOKENS)</span></div>
+    <div class="response-field"><span class="rf-key">Per-tool override</span><span class="rf-val">_meta["anthropic/maxResultSizeChars"], up to 500,000 chars, text content only</span></div>
+  </div>
+  <pre class="code-block">export MAX_MCP_OUTPUT_TOKENS=50000</pre>
+  <p>Useful for servers querying large datasets, generating detailed reports, or processing extensive logs. Without the annotation, oversized results are persisted to disk and replaced with a file reference.</p>
+</section>
+
+<section>
+  <h2>Tool input schemas with a root-level combinator</h2>
+  <p>The Claude API rejects <code>anyOf</code>/<code>oneOf</code>/<code>allOf</code> at a tool schema's root (nested inside properties is fine). As of v2.1.195, Claude Code flattens the schema and prepends a description sentence instead of skipping the tool entirely:</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">allOf</span><span class="event-desc">Properties from every branch merged; each branch's required list still applies</span></div>
+    <div class="event-item"><span class="event-name">anyOf / oneOf</span><span class="event-desc">Properties merged; required lists described in text, not enforced by schema</span></div>
+  </div>
+  <p>Before v2.1.195, every tool with a root-level combinator was skipped entirely.</p>
+</section>
+
+<section>
+  <h2>Require approval for a specific tool</h2>
+  <pre class="code-block">{ <span class="str">"name"</span>: <span class="str">"grant_access"</span>, <span class="str">"description"</span>: <span class="str">"Requests access to a protected resource"</span>,
+  <span class="str">"_meta"</span>: { <span class="str">"anthropic/requiresUserInteraction"</span>: <span class="kw">true</span> } }</pre>
+  <p>Server authors set this so the tool's permission prompt shows on every call, even in <code>acceptEdits</code>/<code>auto</code>/<code>bypassPermissions</code> modes, with no "don't ask again." In <code>dontAsk</code> mode, the call is denied. Requires v2.1.199+.</p>
+</section>
+
+<section>
+  <h2>Respond to MCP elicitation requests</h2>
+  <p>Servers can request structured input mid-task. No configuration is required — dialogs appear automatically.</p>
+  <div class="two-col">
+    <div class="col-card"><div class="col-card-title">Form mode</div><p>A dialog with server-defined fields (e.g. username/password). Fill in and submit.</p></div>
+    <div class="col-card"><div class="col-card-title">URL mode</div><p>Opens a browser URL for authentication or approval; confirm in the CLI after completing.</p></div>
+  </div>
+  <p>Use the <code>Elicitation</code> hook to auto-respond without showing a dialog.</p>
+</section>
+
+<section>
+  <h2>Use MCP resources</h2>
+  <p>Type <code>@</code> to see available resources alongside files. Reference with <code>@server:protocol://resource/path</code>.</p>
+  <pre class="code-block">Can you analyze @github:issue://123 and suggest a fix?
+Compare @postgres:schema://users with @docs:file://database/user-model</pre>
+</section>
+
+<section>
+  <h2>Scale with MCP tool search</h2>
+  <p>Keeps MCP context usage low by deferring tool definitions until Claude needs them — only tool names and server instructions load at session start.</p>
+  <div class="response-box">
+    <div class="response-field"><span class="rf-key">(unset, default)</span><span class="rf-val">All deferred; falls back to upfront on Google Cloud Agent Platform or non-first-party ANTHROPIC_BASE_URL</span></div>
+    <div class="response-field"><span class="rf-key">true</span><span class="rf-val">All deferred, forced even through proxies (may fail if unsupported)</span></div>
+    <div class="response-field"><span class="rf-key">auto / auto:N</span><span class="rf-val">Threshold mode — load upfront if within 10% (or N%) of context window</span></div>
+    <div class="response-field"><span class="rf-key">false</span><span class="rf-val">All tools loaded upfront, no deferral</span></div>
+  </div>
+  <pre class="code-block">ENABLE_TOOL_SEARCH=auto:5 claude</pre>
+  <p>Requires a model supporting <code>tool_reference</code> blocks (not Haiku). Set <code>alwaysLoad: true</code> on a server config to exempt its tools from deferral — blocks startup until it connects (capped at 5s).</p>
+</section>
+
+<section>
+  <h2>Use MCP prompts as commands</h2>
+  <pre class="code-block">/mcp__github__list_prs
+/mcp__github__pr_review 456
+/mcp__jira__create_issue "Bug in login flow" high</pre>
+  <p>Type <code>/</code> to discover prompts as <code>/mcp__servername__promptname</code>. Server/prompt names are normalized with spaces converted to underscores.</p>
+</section>
+
+<section>
+  <h2>Managed MCP configuration</h2>
+  <p>For centralized control over which servers users can connect to: a fixed server set via <code>managed-mcp.json</code>, restrictions via <code>allowedMcpServers</code> / <code>deniedMcpServers</code>.</p>
+</section>
+
+</main>
+
+<script>
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+  }
+
+  function trShow(n) {
+    document.querySelectorAll('.tr-panel').forEach((el, i) => el.classList.toggle('visible', i === n));
+    document.querySelectorAll('.tr-chip').forEach((c, i) => c.classList.toggle('active', i === n));
+  }
+  function exShow(n) {
+    document.querySelectorAll('.ex-panel').forEach((el, i) => el.classList.toggle('visible', i === n));
+    document.querySelectorAll('.ex-chip').forEach((c, i) => c.classList.toggle('active', i === n));
+  }
+
+  let auStep = 0; const AU_MAX = 5;
+  function auGoTo(n) {
+    auStep = Math.max(0, Math.min(AU_MAX, n));
+    document.querySelectorAll('.au-panel').forEach((el, i) => el.classList.toggle('visible', i === auStep));
+    document.querySelectorAll('.au-tab').forEach((t, i) => {
+      t.classList.remove('active', 'done');
+      if (i === auStep) t.classList.add('active'); else if (i < auStep) t.classList.add('done');
+    });
+    document.getElementById('auIndicator').textContent = `${auStep + 1} of ${AU_MAX + 1}`;
+  }
+  auGoTo(0);
+</script>
+</body>
+</html>

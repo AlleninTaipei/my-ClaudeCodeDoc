@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Use Claude Code on the web</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+         border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+            max-width: 600px; margin-inline: auto; }
+main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+section { margin-bottom: 52px; }
+h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+     border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+p  { color: #4a5568; margin-bottom: 12px; }
+.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+  padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c;
+  overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; }
+.cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
+.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+  padding: 16px 20px; margin-top: 14px; }
+.info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  margin-bottom: 10px; letter-spacing: 0.05em; }
+.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+  padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a;
+  min-width: 160px; flex-shrink: 0; }
+.event-desc { font-size: 0.82rem; color: #4a5568; }
+.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+  padding: 20px; margin-top: 16px; }
+.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.response-field:last-child { border-bottom: none; }
+.rf-key { font-family: monospace; font-size: 0.82rem; color: #d97706; width: 150px; flex-shrink: 0; }
+.rf-val { font-size: 0.85rem; color: #374151; }
+.stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+.stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+.step-indicator { color: #6b7280; font-size: 0.82rem; margin-top: 10px; display: block; }
+.demo-panel { display: none; }
+.demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+.col-card p:last-child { margin-bottom: 0; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip-label { font-size: 0.75rem; color: #6b7280; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+@media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+  padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+  transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+body.dark { background: #0f1117; color: #e2e8f0; }
+body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
+body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; }
+body.dark p  { color: #a0aec0; }
+body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; }
+body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
+body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+body.dark .info-box p { color: #a0aec0; }
+body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+body.dark .takeaway p { color: #c6f6d5; }
+body.dark .field { background: #1a202c; border-color: #2d3748; }
+body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
+body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
+body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+body.dark .response-field { border-bottom-color: #2d3748; }
+body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
+body.dark .step-indicator { color: #718096; }
+body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
+body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Use Claude Code on the web</h1>
+  <p>Configure cloud environments, setup scripts, network access, and Docker in Anthropic's sandbox. Move sessions between web and terminal with --cloud and --teleport.</p>
+</header>
+
+<main>
+
+<section>
+  <h2>GitHub authentication options</h2>
+  <p>Cloud sessions need access to your GitHub repositories to clone code and push branches. You can grant access in two ways.</p>
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">GitHub App</div>
+      <p>Authorize the Claude GitHub App during web onboarding.</p>
+      <p>Best for browser onboarding and teams that want Auto-fix.</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">/web-setup</div>
+      <p>Run <code>/web-setup</code> in your terminal to sync your local <code>gh</code> CLI token to your Claude account.</p>
+      <p>Best for individual developers who already use <code>gh</code>.</p>
+    </div>
+  </div>
+  <div class="info-box">
+    <span class="tag">NOTE</span>
+    <p>With either method, a cloud session can access any repository the connecting GitHub account can see. The GitHub App is required for Auto-fix, which uses the App to receive PR webhooks. Organizations with Zero Data Retention enabled can't use /web-setup.</p>
+  </div>
+</section>
+
+<section>
+  <h2>The cloud environment</h2>
+  <p>Each session runs in a fresh Anthropic-managed VM with your repository cloned. Cloud sessions start from a fresh clone; anything committed to the repo is available, anything installed only on your own machine isn't.</p>
+
+  <h3>What carries over</h3>
+  <div class="response-box">
+    <div class="response-field"><div class="rf-key">Yes</div><div class="rf-val">Repo's CLAUDE.md, .claude/settings.json hooks, .mcp.json servers, .claude/rules/, .claude/skills, agents, commands, declared plugins, org server-managed settings</div></div>
+    <div class="response-field"><div class="rf-key">No</div><div class="rf-val">User ~/.claude/CLAUDE.md, user-level skills/agents/commands, user-scoped enabledPlugins, locally-added MCP servers, static API tokens, interactive auth like AWS SSO</div></div>
+  </div>
+
+  <h3>Installed tools</h3>
+  <div class="api-fields">
+    <div class="field"><div class="name">Python</div><div class="desc">3.x with pip, poetry, uv, black, mypy, pytest, ruff</div></div>
+    <div class="field"><div class="name">Node.js</div><div class="desc">20/21/22 via nvm, npm, yarn, pnpm, bun, eslint, prettier</div></div>
+    <div class="field"><div class="name">Docker</div><div class="desc">docker, dockerd, docker compose</div></div>
+    <div class="field"><div class="name">Databases</div><div class="desc">PostgreSQL 16, Redis 7.0</div></div>
+  </div>
+  <p>Ask Claude to run <code>check-tools</code> in a cloud session for exact versions. This command only exists there.</p>
+
+  <h3>Work with GitHub issues and pull requests</h3>
+  <p>Built-in GitHub tools let Claude read issues, list pull requests, fetch diffs, and post comments without setup, authenticated through a GitHub proxy so your token never enters the container. To use a <code>gh</code> command the built-in tools don't cover:</p>
+  <div class="stage-tabs">
+    <div class="ghs-tab stage-tab active" onclick="ghsGoTo(0)">1 · Install gh</div>
+    <div class="ghs-tab stage-tab" onclick="ghsGoTo(1)">2 · Provide token</div>
+  </div>
+  <div class="ghs-panel demo-panel visible" id="ghs-p0">
+    <p>Add <code>apt update && apt install -y gh</code> to your setup script.</p>
+  </div>
+  <div class="ghs-panel demo-panel" id="ghs-p1">
+    <p>Add a <code>GH_TOKEN</code> environment variable to your environment settings. <code>gh</code> reads <code>GH_TOKEN</code> automatically, no <code>gh auth login</code> step needed.</p>
+  </div>
+  <span class="step-indicator" id="ghsIndicator">Step 1 of 2</span>
+
+  <h3>Run tests, start services, add packages</h3>
+  <pre class="code-block"><span class="fn">service</span> postgresql start
+<span class="fn">service</span> redis-server start</pre>
+  <p>Test runners like pytest, jest, and cargo test are pre-installed. Docker is available for containerized services; ask Claude to run <code>docker compose up</code>.</p>
+
+  <h3>Resource limits</h3>
+  <div class="api-fields">
+    <div class="field"><div class="name">4 vCPUs</div><div class="desc">Approximate ceiling, may change over time</div></div>
+    <div class="field"><div class="name">16 GB RAM</div><div class="desc">Memory-intensive tasks may fail or be terminated</div></div>
+    <div class="field"><div class="name">30 GB disk</div><div class="desc">For larger workloads use Remote Control on your own hardware</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Setup scripts</h2>
+  <p>A setup script is a Bash script that runs when a new cloud session starts, before Claude Code launches. Scripts run as root on Ubuntu 24.04.</p>
+  <pre class="code-block"><span class="cmt">#!/bin/bash</span>
+<span class="fn">apt</span> update && <span class="fn">apt</span> install -y gh</pre>
+  <div class="info-box">
+    <span class="tag">TIP</span>
+    <p>If the script exits non-zero, the session fails to start. Append <code>|| true</code> to non-critical commands. Keep total runtime under roughly five minutes so the environment cache can build.</p>
+  </div>
+
+  <h3>Setup scripts vs. SessionStart hooks</h3>
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">Setup scripts</div>
+      <p>Attached to the cloud environment, configured in the cloud environment UI.</p>
+      <p>Runs before Claude Code launches, cloud environments only.</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">SessionStart hooks</div>
+      <p>Attached to your repository, configured in .claude/settings.json.</p>
+      <p>Runs after Claude Code launches, on every session, both local and cloud.</p>
+    </div>
+  </div>
+  <pre class="code-block"><span class="kw">{</span>
+  <span class="str">"hooks"</span>: <span class="kw">{</span>
+    <span class="str">"SessionStart"</span>: [<span class="kw">{</span>
+      <span class="str">"matcher"</span>: <span class="str">"startup|resume"</span>,
+      <span class="str">"hooks"</span>: [<span class="kw">{</span> <span class="str">"type"</span>: <span class="str">"command"</span>, <span class="str">"command"</span>: <span class="str">"\"$CLAUDE_PROJECT_DIR\"/scripts/install_pkgs.sh"</span> <span class="kw">}</span>]
+    <span class="kw">}</span>]
+  <span class="kw">}</span>
+<span class="kw">}</span></pre>
+</section>
+
+<section>
+  <h2>Network access</h2>
+  <p>Network access controls outbound connections from the cloud environment. The default is Trusted, which allows package registries and other allowlisted domains.</p>
+  <div class="response-box">
+    <div class="response-field"><div class="rf-key">None</div><div class="rf-val">No outbound network access</div></div>
+    <div class="response-field"><div class="rf-key">Trusted</div><div class="rf-val">Allowlisted domains only: package registries, GitHub, cloud SDKs</div></div>
+    <div class="response-field"><div class="rf-key">Full</div><div class="rf-val">Any domain</div></div>
+    <div class="response-field"><div class="rf-key">Custom</div><div class="rf-val">Your own allowlist, optionally including the defaults</div></div>
+  </div>
+  <h3>GitHub proxy and security proxy</h3>
+  <p>All GitHub operations go through a dedicated proxy: the git client authenticates using a scoped credential, restricts push to the current working branch, and enables cloning, fetching, and PR operations. All outbound internet traffic passes through a security proxy for abuse prevention, rate limiting, content filtering, and a DNS-level audit trail.</p>
+  <div class="info-box">
+    <span class="tag">DEFAULT ALLOWED</span>
+    <p>Under Trusted access, common package registries are allowed by default: npm, PyPI, RubyGems, crates.io, Go modules, Maven/Gradle, Docker Hub and other container registries, GitHub/GitLab/Bitbucket, and major cloud platform domains.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Move tasks between web and terminal</h2>
+  <div class="chip-row">
+    <span class="chip-label">Direction:</span>
+    <div class="mv-chip chip active" onclick="mvShow(0)">Terminal to web</div>
+    <div class="mv-chip chip" onclick="mvShow(1)">Web to terminal</div>
+  </div>
+  <div class="mv-panel demo-panel visible" id="mv-p0">
+    <pre class="code-block"><span class="fn">claude</span> <span class="key">--cloud</span> <span class="str">"Fix the authentication bug in src/auth/login.ts"</span></pre>
+    <p>Creates a new cloud session on claude.ai, cloning your current directory's GitHub remote at your current branch. <code>--cloud</code> works with a single repository at a time. Use <code>/tasks</code> to check progress.</p>
+    <pre class="code-block"><span class="fn">claude</span> <span class="key">--cloud</span> <span class="str">"Fix the flaky test in auth.spec.ts"</span>
+<span class="fn">claude</span> <span class="key">--cloud</span> <span class="str">"Update the API documentation"</span></pre>
+    <p>Each <code>--cloud</code> command creates its own session that runs independently, so tasks run in parallel.</p>
+  </div>
+  <div class="mv-panel demo-panel" id="mv-p1">
+    <pre class="code-block"><span class="fn">claude</span> <span class="key">--teleport</span>
+<span class="cmt"># or, inside a session:</span>
+/teleport</pre>
+    <p>Pulls a cloud session into your terminal. If you have uncommitted changes, you'll be prompted to stash them first. Distinct from <code>--resume</code>, which reopens local history without listing cloud sessions.</p>
+    <div class="api-fields">
+      <div class="field"><div class="name">Clean git state</div><div class="desc">No uncommitted changes, or you'll be prompted to stash</div></div>
+      <div class="field"><div class="name">Correct repository</div><div class="desc">Same repository, not a fork</div></div>
+      <div class="field"><div class="name">Branch available</div><div class="desc">Must have been pushed to the remote</div></div>
+      <div class="field"><div class="name">Same account</div><div class="desc">Authenticated to the account used in the cloud session</div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Work with sessions</h2>
+  <p>Sessions appear in the sidebar at claude.ai/code. From there you can review changes, share with teammates, archive finished work, or delete sessions permanently.</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">/compact</span><span class="event-desc">Summarizes the conversation to free up context</span></div>
+    <div class="event-item"><span class="event-name">/context</span><span class="event-desc">Shows what's currently in the context window</span></div>
+    <div class="event-item"><span class="event-name">/clear</span><span class="event-desc">Not available, start a new session from the sidebar instead</span></div>
+  </div>
+  <p>Each session shows a diff indicator like <code>+42 -18</code>. Select it to open the diff view and leave inline comments. Sharing visibility depends on account type: Enterprise/Team accounts get Private/Team, Max/Pro accounts get Private/Public. Archived sessions are hidden from the default list; deletion is permanent and requires confirmation.</p>
+</section>
+
+<section>
+  <h2>Auto-fix pull requests</h2>
+  <p>Claude can watch a pull request and automatically respond to CI failures and review comments, subscribing to GitHub activity and pushing a fix if one is clear. Requires the Claude GitHub App installed on the repository.</p>
+  <div class="api-fields">
+    <div class="field"><div class="name">Clear fixes</div><div class="desc">Claude makes the change, pushes it, explains what was done</div></div>
+    <div class="field"><div class="name">Ambiguous requests</div><div class="desc">Claude asks before acting</div></div>
+    <div class="field"><div class="name">Duplicate / no-action</div><div class="desc">Claude notes it and moves on</div></div>
+  </div>
+  <div class="info-box">
+    <span class="tag">WARNING</span>
+    <p>Repositories with comment-triggered automation such as Atlantis, Terraform Cloud, or custom GitHub Actions should review automation before enabling auto-fix, since Claude replies on your behalf and can trigger those workflows.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Security and isolation</h2>
+  <div class="takeaway">
+    <p>Each cloud session runs in an isolated, Anthropic-managed VM. Network access is limited by default and can be disabled, though Claude Code can still reach the Anthropic API. Sensitive credentials like git credentials or signing keys are never inside the sandbox; authentication goes through a secure proxy using scoped credentials, and code is analyzed and modified in isolated VMs before creating PRs.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Troubleshooting</h2>
+  <div class="chip-row">
+    <span class="chip-label">Issue:</span>
+    <div class="tr2-chip chip active" onclick="tr2Show(0)">Session creation failed</div>
+    <div class="tr2-chip chip" onclick="tr2Show(1)">Remote Control expired</div>
+    <div class="tr2-chip chip" onclick="tr2Show(2)">Environment expired</div>
+  </div>
+  <div class="tr2-panel demo-panel visible" id="tr2-p0">
+    <p>Claude Code could not allocate a cloud environment. Check status.claude.com, retry after a minute, and confirm the connecting GitHub account has access to the repository.</p>
+  </div>
+  <div class="tr2-panel demo-panel" id="tr2-p1">
+    <p><code>--teleport</code> connects through Remote Control infrastructure, so expiry surfaces as "Remote Control session expired" or "Access denied". Run <code>/login</code> locally to refresh credentials and confirm you're signed in to the account that owns the session.</p>
+  </div>
+  <div class="tr2-panel demo-panel" id="tr2-p2">
+    <p>Cloud sessions stop after a period of inactivity and the environment is reclaimed. Reopen the session from claude.ai/code to provision a fresh environment with conversation history restored.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Limitations</h2>
+  <div class="api-fields">
+    <div class="field"><div class="name">Rate limits</div><div class="desc">Shared with all other Claude and Claude Code usage; parallel tasks consume more proportionately</div></div>
+    <div class="field"><div class="name">Repository authentication</div><div class="desc">Can only move sessions from web to local on the same account</div></div>
+    <div class="field"><div class="name">Platform restrictions</div><div class="desc">Cloning and PR creation require GitHub; GitLab/Bitbucket can be sent as a local bundle but can't push back</div></div>
+    <div class="field"><div class="name">Org IP allowlist</div><div class="desc">Cloud sessions call the Anthropic API from Anthropic infrastructure, not your network, so IP allowlisting breaks authentication</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Related resources</h2>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">Ultraplan</span><span class="event-desc">Draft a plan in a cloud session and review it in your browser</span></div>
+    <div class="event-item"><span class="event-name">Ultrareview</span><span class="event-desc">Run a deep multi-agent code review in a cloud sandbox</span></div>
+    <div class="event-item"><span class="event-name">Routines</span><span class="event-desc">Automate work on a schedule, via API call, or GitHub events</span></div>
+    <div class="event-item"><span class="event-name">Hooks configuration</span><span class="event-desc">Run scripts at session lifecycle events</span></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+let ghsStep = 0;
+function ghsGoTo(n) {
+  ghsStep = Math.max(0, Math.min(1, n));
+  document.querySelectorAll('.ghs-panel').forEach((el, i) => el.classList.toggle('visible', i === ghsStep));
+  document.querySelectorAll('.ghs-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === ghsStep) t.classList.add('active');
+    else if (i < ghsStep) t.classList.add('done');
+  });
+  document.getElementById('ghsIndicator').textContent = `Step ${ghsStep + 1} of 2`;
+}
+ghsGoTo(0);
+
+function mvShow(n) {
+  document.querySelectorAll('.mv-panel').forEach((el, i) => el.classList.toggle('visible', i === n));
+  document.querySelectorAll('.mv-chip').forEach((c, i) => c.classList.toggle('active', i === n));
+}
+function tr2Show(n) {
+  document.querySelectorAll('.tr2-panel').forEach((el, i) => el.classList.toggle('visible', i === n));
+  document.querySelectorAll('.tr2-chip').forEach((c, i) => c.classList.toggle('active', i === n));
+}
+</script>
+</body>
+</html>

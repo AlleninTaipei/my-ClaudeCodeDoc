@@ -1,0 +1,1826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Agent SDK reference — TypeScript</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f0f4f8;color:#1a202c;line-height:1.7;}
+header{background:linear-gradient(135deg,#dbeafe 0%,#f0f4f8 100%);border-bottom:1px solid #bfdbfe;padding:48px 24px 40px;text-align:center;}
+header h1{font-size:2.1rem;font-weight:700;color:#1e3a5f;}
+header p{margin-top:10px;color:#4a5568;font-size:1.02rem;max-width:640px;margin-inline:auto;}
+main{max-width:920px;margin:0 auto;padding:40px 24px 80px;}
+section{margin-bottom:40px;}
+h2{font-size:1.35rem;font-weight:600;color:#1e40af;border-left:4px solid #3b82f6;padding-left:14px;margin-bottom:16px;}
+h3{font-size:1.0rem;font-weight:600;color:#1a202c;margin:18px 0 8px;}
+h4{font-size:0.9rem;font-weight:700;color:#374151;margin:14px 0 6px;}
+p{color:#4a5568;margin-bottom:10px;font-size:0.92rem;}
+ul,ol{color:#4a5568;font-size:0.88rem;margin:8px 0 8px 20px;}
+li{margin-bottom:4px;}
+code.inline{font-family:monospace;background:#e2e8f0;padding:1px 5px;border-radius:4px;font-size:0.85em;color:#7c3aed;}
+.code-block{background:#f8fafc;border:1px solid #cbd5e0;border-radius:8px;padding:14px 16px;font-family:monospace;font-size:0.78rem;color:#1a202c;overflow-x:auto;margin-top:10px;line-height:1.65;white-space:pre;}
+.kw{color:#7c3aed;}
+.fn{color:#16a34a;}
+.str{color:#d97706;}
+.cmt{color:#94a3b8;font-style:italic;}
+.key{color:#2563eb;}
+.info-box{background:#dbeafe;border:1px solid #93c5fd;border-radius:10px;padding:14px 18px;margin-top:12px;}
+.info-box .tag{display:inline-block;background:#3b82f6;color:#fff;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:0.05em;}
+.info-box p{color:#1e3a5f;font-size:0.84rem;margin:0;}
+.warn-box{background:#fef3c7;border:1px solid #fcd34d;border-radius:10px;padding:14px 18px;margin-top:12px;}
+.warn-box .tag{display:inline-block;background:#d97706;color:#fff;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:0.05em;}
+.warn-box p{color:#78350f;font-size:0.84rem;margin:0;}
+.takeaway{background:linear-gradient(135deg,#dcfce7,#f0fdf4);border:1px solid #4ade80;border-radius:10px;padding:16px 20px;margin-top:14px;}
+.takeaway p{color:#166534;font-size:0.86rem;margin:0;}
+.stage-tabs{display:flex;gap:6px;margin-bottom:22px;flex-wrap:wrap;position:sticky;top:0;background:#f0f4f8;padding:10px 0;z-index:10;}
+.stage-tab{padding:6px 13px;border-radius:20px;font-size:0.76rem;font-weight:600;cursor:pointer;border:1px solid #cbd5e0;background:#e2e8f0;color:#4a5568;transition:all .2s;}
+.stage-tab.active{background:#2563eb;border-color:#3b82f6;color:#fff;}
+.cat-panel{display:none;}
+.cat-panel.visible{display:block;animation:fadeIn .25s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.cat-intro{color:#4a5568;font-size:0.92rem;margin-bottom:16px;}
+.acc{background:#fff;border:1px solid #cbd5e0;border-radius:8px;margin-top:10px;overflow:hidden;}
+.acc summary{cursor:pointer;padding:11px 16px;font-family:monospace;font-size:0.86rem;font-weight:700;color:#2563eb;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.acc summary::-webkit-details-marker{display:none;}
+.acc summary::after{content:'+';color:#9ca3af;font-weight:400;font-family:sans-serif;flex-shrink:0;}
+.acc[open] summary::after{content:'\2212';}
+.acc summary:hover{background:#f0f4f8;}
+.acc-body{padding:2px 16px 16px;}
+.acc-desc{font-size:0.85rem;color:#4a5568;margin-bottom:6px;}
+.acc-sub{font-size:0.72rem;color:#9ca3af;font-weight:400;font-family:-apple-system,sans-serif;}
+.spec-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:0.78rem;}
+.spec-table th{text-align:left;color:#6b7280;font-weight:700;text-transform:uppercase;font-size:0.65rem;letter-spacing:0.05em;padding:6px 8px;border-bottom:1px solid #cbd5e0;}
+.spec-table td{padding:6px 8px;border-bottom:1px solid #e2e8f0;vertical-align:top;font-size:0.78rem;color:#374151;}
+.spec-table td:first-child{font-family:monospace;color:#16a34a;white-space:nowrap;}
+.badge{display:inline-block;font-size:0.62rem;font-weight:700;background:#ede9fe;color:#6d28d9;border:1px solid #a78bfa;border-radius:4px;padding:1px 7px;margin-left:8px;vertical-align:middle;}
+#themeToggle{position:fixed;top:16px;right:16px;z-index:9999;padding:7px 14px;border-radius:20px;font-size:0.78rem;font-weight:700;cursor:pointer;border:1px solid #cbd5e0;background:#fff;color:#1a202c;transition:all .25s;box-shadow:0 2px 8px rgba(0,0,0,.12);letter-spacing:.03em;}
+#themeToggle:hover{border-color:#2563eb;color:#2563eb;}
+@media(max-width:640px){.two-col{grid-template-columns:1fr;}}
+
+body.dark{background:#0f1117;color:#e2e8f0;}
+body.dark header{background:linear-gradient(135deg,#1a1f2e 0%,#0f1117 100%);border-bottom-color:#2d3748;}
+body.dark header h1{color:#f7fafc;}
+body.dark header p{color:#a0aec0;}
+body.dark h2{color:#90cdf4;border-left-color:#4299e1;}
+body.dark h3{color:#e2e8f0;}
+body.dark h4{color:#cbd5e0;}
+body.dark p,body.dark ul,body.dark ol{color:#a0aec0;}
+body.dark code.inline{background:#1a202c;color:#b794f4;}
+body.dark .code-block{background:#0d1117;border-color:#2d3748;color:#e2e8f0;}
+body.dark .kw{color:#9f7aea;}
+body.dark .fn{color:#68d391;}
+body.dark .str{color:#f6ad55;}
+body.dark .cmt{color:#4a5568;}
+body.dark .key{color:#63b3ed;}
+body.dark .info-box{background:#1a202c;border-color:#2a4a6a;}
+body.dark .info-box .tag{background:#2a4a6a;color:#90cdf4;}
+body.dark .info-box p{color:#a0aec0;}
+body.dark .warn-box{background:#2a2010;border-color:#7a5a20;}
+body.dark .warn-box .tag{background:#7a5a20;color:#fbd38d;}
+body.dark .warn-box p{color:#fbd38d;}
+body.dark .takeaway{background:linear-gradient(135deg,#1a2a1a,#1a202c);border-color:#276749;}
+body.dark .takeaway p{color:#c6f6d5;}
+body.dark .stage-tabs{background:#0f1117;}
+body.dark .stage-tab{background:#1a202c;border-color:#2d3748;color:#718096;}
+body.dark .stage-tab.active{background:#2b6cb0;border-color:#4299e1;color:#fff;}
+body.dark .cat-intro{color:#a0aec0;}
+body.dark .acc{background:#1a202c;border-color:#2d3748;}
+body.dark .acc summary{color:#63b3ed;}
+body.dark .acc summary:hover{background:#0f1117;}
+body.dark .acc-desc{color:#a0aec0;}
+body.dark .acc-sub{color:#4a5568;}
+body.dark .spec-table th{color:#4a5568;border-bottom-color:#2d3748;}
+body.dark .spec-table td{color:#a0aec0;border-bottom-color:#2d3748;}
+body.dark .spec-table td:first-child{color:#68d391;}
+body.dark .badge{background:#2d1f4a;color:#b794f4;border-color:#553c8b;}
+body.dark #themeToggle{background:#1a202c;color:#e2e8f0;border-color:#4a5568;box-shadow:0 2px 8px rgba(0,0,0,.4);}
+body.dark #themeToggle:hover{border-color:#90cdf4;color:#90cdf4;}
+</style>
+</head>
+<body>
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+<header>
+<h1>Agent SDK reference — TypeScript</h1>
+<p>Complete API reference for the TypeScript Agent SDK: every function, type, message, hook, and tool schema, organized into browsable categories.</p>
+</header>
+
+<main>
+<div class="stage-tabs" id="catTabs">
+<div class="cat-tab stage-tab active" onclick="catGoTo(0)">Installation</div>
+<div class="cat-tab stage-tab" onclick="catGoTo(1)">Functions</div>
+<div class="cat-tab stage-tab" onclick="catGoTo(2)">Types</div>
+<div class="cat-tab stage-tab" onclick="catGoTo(3)">Message Types</div>
+<div class="cat-tab stage-tab" onclick="catGoTo(4)">Hook Types</div>
+<div class="cat-tab stage-tab" onclick="catGoTo(5)">Tool Input Types</div>
+<div class="cat-tab stage-tab" onclick="catGoTo(6)">Tool Output Types</div>
+<div class="cat-tab stage-tab" onclick="catGoTo(7)">Permission Types</div>
+<div class="cat-tab stage-tab" onclick="catGoTo(8)">Other Types</div>
+<div class="cat-tab stage-tab" onclick="catGoTo(9)">Sandbox Configuration</div>
+<div class="cat-tab stage-tab" onclick="catGoTo(10)">See also</div>
+</div>
+
+<!-- 0 Installation -->
+<section class="cat-panel visible" id="cat-0">
+<h2>Installation</h2>
+<p class="cat-intro">Install the SDK; it bundles a native Claude Code binary for your platform as an optional dependency, so a separate Claude Code install isn't required.</p>
+<pre class="code-block"><code class="autohl">npm install @anthropic-ai/claude-agent-sdk</code></pre>
+<div class="info-box"><span class="tag">NOTE</span><p>If your package manager skips optional dependencies, the SDK throws <code class="inline">Native CLI binary for &lt;platform&gt; not found</code>. Set <code class="inline">pathToClaudeCodeExecutable</code> to a separately installed <code class="inline">claude</code> binary instead.</p></div>
+
+<h3>Compile to a single executable</h3>
+<p>When compiling with <code class="inline">bun build --compile</code>, the SDK cannot resolve the bundled CLI binary at runtime because <code class="inline">require.resolve</code> does not work inside the compiled executable's <code class="inline">$bunfs</code> virtual filesystem. Embed the platform binary as a file asset, extract it to a real path at startup with <code class="inline">extractFromBunfs()</code>, and pass that path to <code class="inline">pathToClaudeCodeExecutable</code>. Requires SDK v0.3.144 or later.</p>
+<pre class="code-block"><code class="autohl">import binPath from "@anthropic-ai/claude-agent-sdk-darwin-arm64/claude" with { type: "file" };
+import { extractFromBunfs } from "@anthropic-ai/claude-agent-sdk/extract";
+import { query } from "@anthropic-ai/claude-agent-sdk";
+
+const cliPath = extractFromBunfs(binPath);
+
+for await (const message of query({
+  prompt: "Hello",
+  options: { pathToClaudeCodeExecutable: cliPath },
+})) {
+  console.log(message);
+}</code></pre>
+<p><code class="inline">extractFromBunfs()</code> copies the embedded binary out of the compiled executable's virtual filesystem to a per-user temp directory and returns the real path. Outside a compiled executable it returns the input path unchanged, so the same code runs in development without modification.</p>
+<ul>
+<li>Each compiled executable embeds a single platform's binary; match the platform package in the import to your <code class="inline">--target</code></li>
+<li>To cross-compile, install the non-matching platform package, e.g. <code class="inline">npm install @anthropic-ai/claude-agent-sdk-linux-x64 --force</code></li>
+<li>On Windows, the binary subpath is <code class="inline">claude.exe</code>, e.g. <code class="inline">@anthropic-ai/claude-agent-sdk-win32-x64/claude.exe</code></li>
+</ul>
+</section>
+
+<!-- 1 Functions -->
+<section class="cat-panel" id="cat-1">
+<h2>Functions</h2>
+<p class="cat-intro">Ten top-level functions cover querying Claude, pre-warming a subprocess, defining custom tools, and managing session history.</p>
+
+<details class="acc"><summary>query()</summary><div class="acc-body">
+<p class="acc-desc">The primary function for interacting with Claude Code. Creates an async generator that streams messages as they arrive.</p>
+<pre class="code-block"><code class="autohl">function query({
+  prompt,
+  options
+}: {
+  prompt: string | AsyncIterable&lt;SDKUserMessage&gt;;
+  options?: Options;
+}): Query;</code></pre>
+<table class="spec-table"><tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+<tr><td>prompt</td><td>string | AsyncIterable&lt;SDKUserMessage&gt;</td><td>The input prompt as a string or async iterable for streaming mode</td></tr>
+<tr><td>options</td><td>Options</td><td>Optional configuration object</td></tr></table>
+<p class="acc-desc">Returns a <code class="inline">Query</code> object that extends <code class="inline">AsyncGenerator&lt;SDKMessage, void&gt;</code> with additional methods.</p>
+</div></details>
+
+<details class="acc"><summary>startup()</summary><div class="acc-body">
+<p class="acc-desc">Pre-warms the CLI subprocess by spawning it and completing the initialize handshake before a prompt is available. The returned <code class="inline">WarmQuery</code> handle accepts a prompt later and writes it to an already-ready process, so the first <code class="inline">query()</code> call resolves without paying subprocess spawn and initialization cost inline.</p>
+<pre class="code-block"><code class="autohl">function startup(params?: {
+  options?: Options;
+  initializeTimeoutMs?: number;
+}): Promise&lt;WarmQuery&gt;;</code></pre>
+<table class="spec-table"><tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+<tr><td>options</td><td>Options</td><td>Same as the options parameter to query()</td></tr>
+<tr><td>initializeTimeoutMs</td><td>number</td><td>Max time to wait for subprocess init. Default 60000. Rejects with a timeout error if exceeded</td></tr></table>
+<p class="acc-desc">Example: call early (e.g. app boot), then <code class="inline">.query()</code> once a prompt is ready, moving spawn/init out of the critical path.</p>
+<pre class="code-block"><code class="autohl">import { startup } from "@anthropic-ai/claude-agent-sdk";
+
+// Pay startup cost upfront
+const warm = await startup({ options: { maxTurns: 3 } });
+
+// Later, when a prompt is ready, this is immediate
+for await (const message of warm.query("What files are here?")) {
+  console.log(message);
+}</code></pre>
+</div></details>
+
+<details class="acc"><summary>tool()</summary><div class="acc-body">
+<p class="acc-desc">Creates a type-safe MCP tool definition for use with SDK MCP servers.</p>
+<pre class="code-block"><code class="autohl">function tool&lt;Schema extends AnyZodRawShape&gt;(
+  name: string,
+  description: string,
+  inputSchema: Schema,
+  handler: (args: InferShape&lt;Schema&gt;, extra: unknown) =&gt; Promise&lt;CallToolResult&gt;,
+  extras?: { annotations?: ToolAnnotations }
+): SdkMcpToolDefinition&lt;Schema&gt;;</code></pre>
+<table class="spec-table"><tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+<tr><td>name</td><td>string</td><td>The name of the tool</td></tr>
+<tr><td>description</td><td>string</td><td>A description of what the tool does</td></tr>
+<tr><td>inputSchema</td><td>Schema</td><td>Zod schema for the tool's input (Zod 3 and Zod 4 supported)</td></tr>
+<tr><td>handler</td><td>function</td><td>Async function that executes the tool logic</td></tr>
+<tr><td>extras</td><td>{annotations?}</td><td>Optional MCP tool annotations, behavioral hints only — clients should not rely on them for security decisions</td></tr></table>
+<h4>ToolAnnotations</h4>
+<table class="spec-table"><tr><th>Field</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td>title</td><td>string</td><td>undefined</td><td>Human-readable title for the tool</td></tr>
+<tr><td>readOnlyHint</td><td>boolean</td><td>false</td><td>If true, the tool does not modify its environment</td></tr>
+<tr><td>destructiveHint</td><td>boolean</td><td>true</td><td>If true, may perform destructive updates (meaningful only when readOnlyHint is false)</td></tr>
+<tr><td>idempotentHint</td><td>boolean</td><td>false</td><td>If true, repeated calls with same args have no additional effect</td></tr>
+<tr><td>openWorldHint</td><td>boolean</td><td>true</td><td>If true, interacts with external entities; if false, domain is closed</td></tr></table>
+<pre class="code-block"><code class="autohl">import { tool } from "@anthropic-ai/claude-agent-sdk";
+import { z } from "zod";
+
+const searchTool = tool(
+  "search",
+  "Search the web",
+  { query: z.string() },
+  async ({ query }) => {
+    return { content: [{ type: "text", text: `Results for: ${query}` }] };
+  },
+  { annotations: { readOnlyHint: true, openWorldHint: true } }
+);</code></pre>
+</div></details>
+
+<details class="acc"><summary>createSdkMcpServer()</summary><div class="acc-body">
+<p class="acc-desc">Creates an MCP server instance that runs in the same process as your application.</p>
+<pre class="code-block"><code class="autohl">function createSdkMcpServer(options: {
+  name: string;
+  version?: string;
+  tools?: Array&lt;SdkMcpToolDefinition&lt;any&gt;&gt;;
+}): McpSdkServerConfigWithInstance;</code></pre>
+<table class="spec-table"><tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+<tr><td>options.name</td><td>string</td><td>The name of the MCP server</td></tr>
+<tr><td>options.version</td><td>string</td><td>Optional version string</td></tr>
+<tr><td>options.tools</td><td>Array&lt;SdkMcpToolDefinition&gt;</td><td>Array of tool definitions created with tool()</td></tr></table>
+</div></details>
+
+<details class="acc"><summary>listSessions()</summary><div class="acc-body">
+<p class="acc-desc">Discovers and lists past sessions with light metadata. Filter by project directory or list sessions across all projects.</p>
+<pre class="code-block"><code class="autohl">function listSessions(options?: ListSessionsOptions): Promise&lt;SDKSessionInfo[]&gt;;</code></pre>
+<table class="spec-table"><tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td>options.dir</td><td>string</td><td>undefined</td><td>Directory to list sessions for; omit for all projects</td></tr>
+<tr><td>options.limit</td><td>number</td><td>undefined</td><td>Maximum number of sessions to return</td></tr>
+<tr><td>options.includeWorktrees</td><td>boolean</td><td>true</td><td>When dir is inside a git repo, include sessions from all worktree paths</td></tr></table>
+<h4>Return type: SDKSessionInfo</h4>
+<table class="spec-table"><tr><th>Property</th><th>Type</th><th>Description</th></tr>
+<tr><td>sessionId</td><td>string</td><td>Unique session identifier (UUID)</td></tr>
+<tr><td>summary</td><td>string</td><td>Display title: custom title, auto-generated summary, or first prompt</td></tr>
+<tr><td>lastModified</td><td>number</td><td>Last modified time, ms since epoch</td></tr>
+<tr><td>fileSize</td><td>number|undefined</td><td>Session file size in bytes (local JSONL storage only)</td></tr>
+<tr><td>customTitle</td><td>string|undefined</td><td>User-set title via /rename</td></tr>
+<tr><td>firstPrompt</td><td>string|undefined</td><td>First meaningful user prompt</td></tr>
+<tr><td>gitBranch</td><td>string|undefined</td><td>Git branch at end of session</td></tr>
+<tr><td>cwd</td><td>string|undefined</td><td>Working directory for the session</td></tr>
+<tr><td>tag</td><td>string|undefined</td><td>User-set session tag</td></tr>
+<tr><td>createdAt</td><td>number|undefined</td><td>Creation time, ms since epoch</td></tr></table>
+<pre class="code-block"><code class="autohl">import { listSessions } from "@anthropic-ai/claude-agent-sdk";
+
+const sessions = await listSessions({ dir: "/path/to/project", limit: 10 });
+
+for (const session of sessions) {
+  console.log(`${session.summary} (${session.sessionId})`);
+}</code></pre>
+</div></details>
+
+<details class="acc"><summary>getSessionMessages()</summary><div class="acc-body">
+<p class="acc-desc">Reads user and assistant messages from a past session transcript.</p>
+<pre class="code-block"><code class="autohl">function getSessionMessages(
+  sessionId: string,
+  options?: GetSessionMessagesOptions
+): Promise&lt;SessionMessage[]&gt;;</code></pre>
+<table class="spec-table"><tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+<tr><td>sessionId</td><td>string</td><td>Session UUID to read</td></tr>
+<tr><td>options.dir</td><td>string</td><td>Project directory; omit to search all projects</td></tr>
+<tr><td>options.limit</td><td>number</td><td>Maximum messages to return</td></tr>
+<tr><td>options.offset</td><td>number</td><td>Number of messages to skip from start</td></tr></table>
+<h4>Return type: SessionMessage</h4>
+<table class="spec-table"><tr><th>Property</th><th>Type</th><th>Description</th></tr>
+<tr><td>type</td><td>"user"|"assistant"</td><td>Message role</td></tr>
+<tr><td>uuid</td><td>string</td><td>Unique message identifier</td></tr>
+<tr><td>session_id</td><td>string</td><td>Session this message belongs to</td></tr>
+<tr><td>message</td><td>unknown</td><td>Raw message payload from the transcript</td></tr>
+<tr><td>parent_tool_use_id</td><td>string|null</td><td>For subagent messages, the tool_use_id of the spawning Agent call</td></tr>
+<tr><td>parent_agent_id</td><td>string|null</td><td>For nested-subagent messages, the agentId of the spawning subagent (v2.1.202+)</td></tr></table>
+</div></details>
+
+<details class="acc"><summary>getSessionInfo()</summary><div class="acc-body">
+<p class="acc-desc">Reads metadata for a single session by ID without scanning the full project directory.</p>
+<pre class="code-block"><code class="autohl">function getSessionInfo(
+  sessionId: string,
+  options?: GetSessionInfoOptions
+): Promise&lt;SDKSessionInfo | undefined&gt;;</code></pre>
+<p class="acc-desc">Returns SDKSessionInfo, or undefined if the session is not found.</p>
+</div></details>
+
+<details class="acc"><summary>renameSession()</summary><div class="acc-body">
+<p class="acc-desc">Renames a session by appending a custom-title entry. Repeated calls are safe; the most recent title wins.</p>
+<pre class="code-block"><code class="autohl">function renameSession(
+  sessionId: string,
+  title: string,
+  options?: SessionMutationOptions
+): Promise&lt;void&gt;;</code></pre>
+</div></details>
+
+<details class="acc"><summary>tagSession()</summary><div class="acc-body">
+<p class="acc-desc">Tags a session. Pass null to clear the tag. Repeated calls are safe; the most recent tag wins.</p>
+<pre class="code-block"><code class="autohl">function tagSession(
+  sessionId: string,
+  tag: string | null,
+  options?: SessionMutationOptions
+): Promise&lt;void&gt;;</code></pre>
+</div></details>
+
+<details class="acc"><summary>resolveSettings()</summary><div class="acc-body">
+<p class="acc-desc">Resolves the effective Claude Code settings for a given directory using the same merge engine as the CLI, without spawning the Claude CLI. Alpha API.</p>
+<pre class="code-block"><code class="autohl">function resolveSettings(
+  options?: ResolveSettingsOptions
+): Promise&lt;ResolvedSettings&gt;;</code></pre>
+<div class="info-box"><span class="tag">NOTE</span><p>Reads MDM sources (macOS plist, Windows HKLM/HKCU) for parity with CLI startup, but does not execute the admin-configured policyHelper subprocess. The trust filter the CLI applies before honoring escalating permission modes is not applied.</p></div>
+<h4>Return type: ResolvedSettings</h4>
+<table class="spec-table"><tr><th>Property</th><th>Type</th><th>Description</th></tr>
+<tr><td>effective</td><td>Settings</td><td>Merged settings after applying all enabled sources in precedence order</td></tr>
+<tr><td>provenance</td><td>Partial&lt;Record&gt;</td><td>For each key in effective, which source supplied the value</td></tr>
+<tr><td>sources</td><td>Array</td><td>Per-source raw settings, lowest to highest precedence</td></tr></table>
+<pre class="code-block"><code class="autohl">import { resolveSettings } from "@anthropic-ai/claude-agent-sdk";
+
+const { effective, provenance } = await resolveSettings({
+  cwd: "/path/to/project",
+  settingSources: ["user", "project", "local"],
+});
+
+console.log(`Cleanup period: ${effective.cleanupPeriodDays} days`);
+console.log(`Set by: ${provenance.cleanupPeriodDays?.source}`);</code></pre>
+</div></details>
+</section>
+
+<!-- 2 Types -->
+<section class="cat-panel" id="cat-2">
+<h2>Types</h2>
+<p class="cat-intro">Core configuration and control types, led by the large <code class="inline">Options</code> object passed to every <code class="inline">query()</code> call.</p>
+
+<details class="acc"><summary>Options <span class="acc-sub">configuration object for query()</span></summary><div class="acc-body">
+<table class="spec-table">
+<tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td>abortController</td><td>AbortController</td><td>new AbortController()</td><td>Controller for cancelling operations</td></tr>
+<tr><td>additionalDirectories</td><td>string[]</td><td>[]</td><td>Additional directories Claude can access</td></tr>
+<tr><td>agent</td><td>string</td><td>undefined</td><td>Agent name for the main thread; must be in agents option or settings</td></tr>
+<tr><td>agents</td><td>Record&lt;string,AgentDefinition&gt;</td><td>undefined</td><td>Programmatically define subagents</td></tr>
+<tr><td>agentProgressSummaries</td><td>boolean</td><td>false</td><td>Generate one-line progress summaries for subagents via task_progress events</td></tr>
+<tr><td>allowDangerouslySkipPermissions</td><td>boolean</td><td>false</td><td>Enable bypassing permissions; required for permissionMode 'bypassPermissions'</td></tr>
+<tr><td>allowedTools</td><td>string[]</td><td>[]</td><td>Tools to auto-approve without prompting; unlisted tools fall through to permissionMode/canUseTool</td></tr>
+<tr><td>betas</td><td>SdkBeta[]</td><td>[]</td><td>Enable beta features</td></tr>
+<tr><td>canUseTool</td><td>CanUseTool</td><td>undefined</td><td>Custom permission function, invoked only when the flow falls through to a prompt</td></tr>
+<tr><td>continue</td><td>boolean</td><td>false</td><td>Continue the most recent conversation</td></tr>
+<tr><td>cwd</td><td>string</td><td>process.cwd()</td><td>Current working directory</td></tr>
+<tr><td>debug</td><td>boolean</td><td>false</td><td>Enable debug mode for the Claude Code process</td></tr>
+<tr><td>debugFile</td><td>string</td><td>undefined</td><td>Write debug logs to a specific file; implicitly enables debug mode</td></tr>
+<tr><td>disallowedTools</td><td>string[]</td><td>[]</td><td>Tools to deny; a scoped rule denies matching calls in every permission mode including bypassPermissions</td></tr>
+<tr><td>effort</td><td>'low'|'medium'|'high'|'xhigh'|'max'</td><td>model default</td><td>Controls how much effort Claude puts into its response</td></tr>
+<tr><td>enableFileCheckpointing</td><td>boolean</td><td>false</td><td>Enable file change tracking for rewinding</td></tr>
+<tr><td>env</td><td>Record&lt;string,string|undefined&gt;</td><td>process.env</td><td>Environment variables; replaces (not merges with) subprocess env when set</td></tr>
+<tr><td>executable</td><td>'bun'|'deno'|'node'</td><td>auto-detected</td><td>JavaScript runtime to use</td></tr>
+<tr><td>executableArgs</td><td>string[]</td><td>[]</td><td>Arguments to pass to the executable</td></tr>
+<tr><td>extraArgs</td><td>Record&lt;string,string|null&gt;</td><td>{}</td><td>Additional arguments</td></tr>
+<tr><td>fallbackModel</td><td>string</td><td>undefined</td><td>Model to use if primary fails</td></tr>
+<tr><td>forkSession</td><td>boolean</td><td>false</td><td>When resuming with resume, fork to a new session ID instead of continuing the original</td></tr>
+<tr><td>forwardSubagentText</td><td>boolean</td><td>false</td><td>Forward subagent text/thinking blocks as assistant/user messages for a nested transcript</td></tr>
+<tr><td>hooks</td><td>Partial&lt;Record&lt;HookEvent,HookCallbackMatcher[]&gt;&gt;</td><td>{}</td><td>Hook callbacks for events</td></tr>
+<tr><td>includeHookEvents</td><td>boolean</td><td>false</td><td>Include hook lifecycle events in the message stream</td></tr>
+<tr><td>includePartialMessages</td><td>boolean</td><td>false</td><td>Include partial message events</td></tr>
+<tr><td>loadTimeoutMs</td><td>number</td><td>60000</td><td>Alpha. Timeout for each sessionStore.load()/listSubkeys() call during resume</td></tr>
+<tr><td>managedSettings</td><td>Settings</td><td>undefined</td><td>Policy-tier settings from the spawning parent process; filtered to restrictive-only keys</td></tr>
+<tr><td>maxBudgetUsd</td><td>number</td><td>undefined</td><td>Stop the query when client-side cost estimate reaches this USD value</td></tr>
+<tr><td>maxThinkingTokens</td><td>number</td><td>undefined</td><td>Deprecated: use thinking instead</td></tr>
+<tr><td>maxTurns</td><td>number</td><td>undefined</td><td>Maximum agentic turns (tool-use round trips)</td></tr>
+<tr><td>mcpServers</td><td>Record&lt;string,McpServerConfig&gt;</td><td>{}</td><td>MCP server configurations</td></tr>
+<tr><td>model</td><td>string</td><td>CLI default</td><td>Claude model alias or full model name</td></tr>
+<tr><td>onElicitation</td><td>function</td><td>undefined</td><td>Callback for MCP elicitation requests; unhandled requests are declined automatically</td></tr>
+<tr><td>outputFormat</td><td>{type:'json_schema',schema}</td><td>undefined</td><td>Define output format for agent results</td></tr>
+<tr><td>outputStyle</td><td>string</td><td>undefined</td><td>Not an Options field — set outputStyle in the inline settings object instead</td></tr>
+<tr><td>pathToClaudeCodeExecutable</td><td>string</td><td>auto-resolved</td><td>Path to Claude Code executable</td></tr>
+<tr><td>permissionMode</td><td>PermissionMode</td><td>'default'</td><td>Permission mode for the session</td></tr>
+<tr><td>permissionPromptToolName</td><td>string</td><td>undefined</td><td>MCP tool name for permission prompts</td></tr>
+<tr><td>persistSession</td><td>boolean</td><td>true</td><td>When false, disables session persistence to disk</td></tr>
+<tr><td>planModeInstructions</td><td>string</td><td>undefined</td><td>Custom workflow instructions replacing the default plan-mode body</td></tr>
+<tr><td>plugins</td><td>SdkPluginConfig[]</td><td>[]</td><td>Load custom plugins from local paths</td></tr>
+<tr><td>promptSuggestions</td><td>boolean</td><td>false</td><td>Emit a prompt_suggestion message after each turn</td></tr>
+<tr><td>resume</td><td>string</td><td>undefined</td><td>Session ID to resume</td></tr>
+<tr><td>resumeSessionAt</td><td>string</td><td>undefined</td><td>Resume session at a specific message UUID</td></tr>
+<tr><td>sandbox</td><td>SandboxSettings</td><td>undefined</td><td>Configure sandbox behavior programmatically</td></tr>
+<tr><td>sessionId</td><td>string</td><td>auto-generated</td><td>Use a specific UUID for the session</td></tr>
+<tr><td>sessionStore</td><td>SessionStore</td><td>undefined</td><td>Mirror session transcripts to an external backend</td></tr>
+<tr><td>sessionStoreFlush</td><td>'batched'|'eager'</td><td>'batched'</td><td>Alpha. Flush mode for sessionStore</td></tr>
+<tr><td>settings</td><td>string|Settings</td><td>undefined</td><td>Inline settings object or path to a settings file</td></tr>
+<tr><td>settingSources</td><td>SettingSource[]</td><td>all sources</td><td>Which filesystem settings to load; [] disables user/project/local</td></tr>
+<tr><td>skills</td><td>string[]|'all'</td><td>undefined</td><td>Skills available to the session; auto-adds the Skill tool to allowedTools</td></tr>
+<tr><td>spawnClaudeCodeProcess</td><td>function</td><td>undefined</td><td>Custom function to spawn the process — run in VMs, containers, or remote environments</td></tr>
+<tr><td>stderr</td><td>function</td><td>undefined</td><td>Callback for stderr output</td></tr>
+<tr><td>strictMcpConfig</td><td>boolean</td><td>false</td><td>Use only servers passed in mcpServers, ignoring project .mcp.json etc.</td></tr>
+<tr><td>systemPrompt</td><td>string|preset object</td><td>undefined (minimal)</td><td>System prompt configuration; preset form supports append and excludeDynamicSections</td></tr>
+<tr><td>taskBudget</td><td>{total:number}</td><td>undefined</td><td>Alpha. API-side task budget in tokens</td></tr>
+<tr><td>thinking</td><td>ThinkingConfig</td><td>{type:'adaptive'}</td><td>Controls Claude's thinking/reasoning behavior</td></tr>
+<tr><td>title</td><td>string</td><td>undefined</td><td>Display title for the session</td></tr>
+<tr><td>toolAliases</td><td>Record&lt;string,string&gt;</td><td>undefined</td><td>Map built-in tool names to MCP tool names</td></tr>
+<tr><td>toolConfig</td><td>ToolConfig</td><td>undefined</td><td>Configuration for built-in tool behavior</td></tr>
+<tr><td>tools</td><td>string[]|preset</td><td>undefined</td><td>Tool configuration; array of names or Claude Code's default preset</td></tr>
+</table>
+</div></details>
+
+<details class="acc"><summary>Query object <span class="acc-sub">returned by query()</span></summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">interface Query extends AsyncGenerator&lt;SDKMessage, void&gt; {
+  interrupt(): Promise&lt;SDKControlInterruptResponse | undefined&gt;;
+  rewindFiles(userMessageId: string, options?: { dryRun?: boolean }): Promise&lt;RewindFilesResult&gt;;
+  setPermissionMode(mode: PermissionMode): Promise&lt;void&gt;;
+  setModel(model?: string): Promise&lt;void&gt;;
+  setMaxThinkingTokens(maxThinkingTokens: number | null): Promise&lt;void&gt;;
+  applyFlagSettings(settings: { [K in keyof Settings]?: Settings[K] | null }): Promise&lt;void&gt;;
+  initializationResult(): Promise&lt;SDKControlInitializeResponse&gt;;
+  reinitialize(): Promise&lt;SDKControlInitializeResponse&gt;;
+  supportedCommands(): Promise&lt;SlashCommand[]&gt;;
+  supportedModels(): Promise&lt;ModelInfo[]&gt;;
+  supportedAgents(): Promise&lt;AgentInfo[]&gt;;
+  mcpServerStatus(): Promise&lt;McpServerStatus[]&gt;;
+  accountInfo(): Promise&lt;AccountInfo&gt;;
+  reconnectMcpServer(serverName: string): Promise&lt;void&gt;;
+  toggleMcpServer(serverName: string, enabled: boolean): Promise&lt;void&gt;;
+  setMcpServers(servers: Record&lt;string, McpServerConfig&gt;): Promise&lt;McpSetServersResult&gt;;
+  streamInput(stream: AsyncIterable&lt;SDKUserMessage&gt;): Promise&lt;void&gt;;
+  stopTask(taskId: string): Promise&lt;void&gt;;
+  close(): void;
+}</code></pre>
+<table class="spec-table"><tr><th>Method</th><th>Description</th></tr>
+<tr><td>interrupt()</td><td>Streaming input mode only. On CLIs advertising interrupt_receipt_v1 (v2.1.205+), resolves with the receipt of queued messages that survive; otherwise undefined</td></tr>
+<tr><td>rewindFiles()</td><td>Restores files to their state at a user message. Pass dryRun to preview. Requires enableFileCheckpointing</td></tr>
+<tr><td>setPermissionMode()</td><td>Changes permission mode (streaming input mode only)</td></tr>
+<tr><td>setModel()</td><td>Changes the model (streaming input mode only)</td></tr>
+<tr><td>setMaxThinkingTokens()</td><td>Deprecated: use the thinking option instead</td></tr>
+<tr><td>applyFlagSettings()</td><td>Merges settings into the flag layer at runtime (streaming input mode only)</td></tr>
+<tr><td>initializationResult()</td><td>Full init result: commands, models, account info, output style</td></tr>
+<tr><td>reinitialize()</td><td>Re-sends the initialize control request; use after a transport gap so pending permission requests reach canUseTool again (v2.1.195+)</td></tr>
+<tr><td>supportedCommands()</td><td>Returns available slash commands</td></tr>
+<tr><td>supportedModels()</td><td>Returns available models with display info</td></tr>
+<tr><td>supportedAgents()</td><td>Returns available subagents as AgentInfo[]</td></tr>
+<tr><td>mcpServerStatus()</td><td>Returns status of connected MCP servers</td></tr>
+<tr><td>accountInfo()</td><td>Returns account information</td></tr>
+<tr><td>reconnectMcpServer()</td><td>Reconnect an MCP server by name</td></tr>
+<tr><td>toggleMcpServer()</td><td>Enable or disable an MCP server by name</td></tr>
+<tr><td>setMcpServers()</td><td>Dynamically replace the set of MCP servers for this session</td></tr>
+<tr><td>streamInput()</td><td>Stream input messages for multi-turn conversations</td></tr>
+<tr><td>stopTask()</td><td>Stop a running background task by ID</td></tr>
+<tr><td>close()</td><td>Close the query, terminate the process, clean up all resources</td></tr></table>
+<h4>applyFlagSettings()</h4>
+<p class="acc-desc">Changes settings on a running session without restarting the query, e.g. tightening permissions mid-session. Only some keys take effect: applied on the next turn are model, effortLevel, ultracode, permissions, hooks, skillOverrides, fastMode, awaySummaryEnabled, agent (switching agent also applies its model override, hooks, and system prompt). System prompt options have no effect mid-session. Successive calls shallow-merge top-level keys; pass null to clear a key back to lower-precedence sources. TypeScript-only — the Python SDK has no equivalent.</p>
+<pre class="code-block"><code class="autohl">const q = query({ prompt: messageStream });
+
+// Override the model for the rest of the session
+await q.applyFlagSettings({ model: "claude-opus-4-6" });
+
+// Later: clear the override and fall back to lower-precedence settings
+await q.applyFlagSettings({ model: null });</code></pre>
+</div></details>
+
+<details class="acc"><summary>WarmQuery <span class="acc-sub">returned by startup()</span></summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">interface WarmQuery extends AsyncDisposable {
+  query(prompt: string | AsyncIterable&lt;SDKUserMessage&gt;): Query;
+  close(): void;
+}</code></pre>
+<table class="spec-table"><tr><th>Method</th><th>Description</th></tr>
+<tr><td>query(prompt)</td><td>Send a prompt to the pre-warmed subprocess; returns a Query. Callable once per WarmQuery</td></tr>
+<tr><td>close()</td><td>Close the subprocess without sending a prompt</td></tr></table>
+<p class="acc-desc">Implements AsyncDisposable, so it works with <code class="inline">await using</code> for automatic cleanup.</p>
+</div></details>
+
+<details class="acc"><summary>SDKControlInitializeResponse</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type SDKControlInitializeResponse = {
+  commands: SlashCommand[];
+  agents: AgentInfo[];
+  output_style: string;
+  available_output_styles: string[];
+  models: ModelInfo[];
+  account: AccountInfo;
+  fast_mode_state?: "off" | "cooldown" | "on";
+};</code></pre>
+<p class="acc-desc">When a client sends initialize to an already-running session, the control-response wrapper also carries an optional <code class="inline">pending_permission_requests</code> array — requests issued before the client connected that are still awaiting a reply. The SDK dispatches each to your <code class="inline">canUseTool</code> callback, the same redelivery <code class="inline">reinitialize()</code> triggers. Handle repeated request IDs idempotently.</p>
+</div></details>
+
+<details class="acc"><summary>SDKControlInterruptResponse</summary><div class="acc-body">
+<p class="acc-desc">The interrupt receipt resolved by interrupt() on a CLI advertising interrupt_receipt_v1 (v2.1.205+). Earlier CLIs resolve undefined.</p>
+<pre class="code-block"><code class="autohl">type SDKControlInterruptResponse = {
+  still_queued: string[];
+};</code></pre>
+<p class="acc-desc"><code class="inline">still_queued</code> lists UUIDs of user messages that survive the interrupt — each runs as its own turn unless cancelled. Only enqueued, main-thread messages appear; unrecognized UUIDs (e.g. scheduled tasks) should be ignored, not treated as errors. Read the receipt rather than inspecting the queue after the result, since the loop starts the next queued turn immediately.</p>
+</div></details>
+
+<details class="acc"><summary>AgentDefinition</summary><div class="acc-body">
+<p class="acc-desc">Configuration for a subagent defined programmatically.</p>
+<pre class="code-block"><code class="autohl">type AgentDefinition = {
+  description: string;
+  tools?: string[];
+  disallowedTools?: string[];
+  prompt: string;
+  model?: string;
+  mcpServers?: AgentMcpServerSpec[];
+  skills?: string[];
+  initialPrompt?: string;
+  maxTurns?: number;
+  background?: boolean;
+  memory?: "user" | "project" | "local";
+  effort?: "low" | "medium" | "high" | "xhigh" | "max" | number;
+  permissionMode?: PermissionMode;
+  criticalSystemReminder_EXPERIMENTAL?: string;
+};</code></pre>
+<table class="spec-table"><tr><th>Field</th><th>Required</th><th>Description</th></tr>
+<tr><td>description</td><td>Yes</td><td>Natural language description of when to use this agent</td></tr>
+<tr><td>tools</td><td>No</td><td>Allowed tool names; if omitted, inherits all tools from parent</td></tr>
+<tr><td>disallowedTools</td><td>No</td><td>Tool names to disallow; mcp__server or mcp__server__* removes a whole server, mcp__* removes all MCP tools</td></tr>
+<tr><td>prompt</td><td>Yes</td><td>The agent's system prompt</td></tr>
+<tr><td>model</td><td>No</td><td>Model override: 'fable','opus','sonnet','haiku','inherit', or a full model ID</td></tr>
+<tr><td>mcpServers</td><td>No</td><td>MCP server specifications for this agent</td></tr>
+<tr><td>skills</td><td>No</td><td>Skill names to preload into the agent context</td></tr>
+<tr><td>initialPrompt</td><td>No</td><td>Auto-submitted as the first user turn when this agent runs as the main thread agent</td></tr>
+<tr><td>maxTurns</td><td>No</td><td>Maximum agentic turns before stopping</td></tr>
+<tr><td>background</td><td>No</td><td>Run as a non-blocking background task when invoked</td></tr>
+<tr><td>memory</td><td>No</td><td>'user','project', or 'local'</td></tr>
+<tr><td>effort</td><td>No</td><td>Reasoning effort level, named or integer</td></tr>
+<tr><td>permissionMode</td><td>No</td><td>Permission mode for tool execution within this agent</td></tr>
+<tr><td>criticalSystemReminder_EXPERIMENTAL</td><td>No</td><td>Experimental: reminder added to the system prompt</td></tr></table>
+</div></details>
+
+<details class="acc"><summary>AgentMcpServerSpec</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type AgentMcpServerSpec = string | Record&lt;string, McpServerConfigForProcessTransport&gt;;</code></pre>
+<p class="acc-desc">A server name referencing the parent's mcpServers config, or an inline record. <code class="inline">McpServerConfigForProcessTransport</code> is McpStdioServerConfig | McpSSEServerConfig | McpHttpServerConfig | McpSdkServerConfig.</p>
+</div></details>
+
+<details class="acc"><summary>SettingSource</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type SettingSource = "user" | "project" | "local";</code></pre>
+<table class="spec-table"><tr><th>Value</th><th>Description</th><th>Location</th></tr>
+<tr><td>'user'</td><td>Global user settings</td><td>~/.claude/settings.json</td></tr>
+<tr><td>'project'</td><td>Shared project settings (version controlled)</td><td>.claude/settings.json</td></tr>
+<tr><td>'local'</td><td>Local project settings (not version controlled)</td><td>.claude/settings.local.json</td></tr></table>
+<p class="acc-desc">When omitted, query() loads all three plus endpoint-managed policy always, and server-managed settings when authenticated with an eligible organization credential.</p>
+<h4>Settings precedence (highest to lowest)</h4>
+<ol><li>Local settings (.claude/settings.local.json)</li><li>Project settings (.claude/settings.json)</li><li>User settings (~/.claude/settings.json)</li></ol>
+<p class="acc-desc">Programmatic options such as agents, allowedTools, and settings override all three tiers. Managed policy settings override programmatic options.</p>
+<pre class="code-block"><code class="autohl">// Disable filesystem settings
+const result = query({ prompt: "Analyze this code", options: { settingSources: [] } });
+
+// Load only project settings
+const result2 = query({
+  prompt: "Run CI checks",
+  options: { settingSources: ["project"] }
+});</code></pre>
+</div></details>
+
+<details class="acc"><summary>PermissionMode</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type PermissionMode =
+  | "default"           // Standard permission behavior
+  | "acceptEdits"       // Auto-accept file edits
+  | "bypassPermissions" // Bypass permission checks; explicit ask rules still prompt
+  | "plan"              // Planning mode - explore without editing
+  | "dontAsk"           // Don't prompt for permissions, deny if not pre-approved
+  | "auto";             // Use a model classifier to approve or deny each tool call</code></pre>
+</div></details>
+
+<details class="acc"><summary>CanUseTool</summary><div class="acc-body">
+<p class="acc-desc">The SDK replacement for the interactive permission prompt: invoked only when the permission flow resolves to a prompt. Calls already approved by allowedTools, a settings allow rule, or the permission mode never invoke it. To gate every tool call, use a PreToolUse hook instead.</p>
+<pre class="code-block"><code class="autohl">type CanUseTool = (
+  toolName: string,
+  input: Record&lt;string, unknown&gt;,
+  options: {
+    signal: AbortSignal;
+    suggestions?: PermissionUpdate[];
+    blockedPath?: string;
+    decisionReason?: string;
+    toolUseID: string;
+    agentID?: string;
+    requestId: string;
+  }
+) =&gt; Promise&lt;PermissionResult | null&gt;;</code></pre>
+<table class="spec-table"><tr><th>Option</th><th>Type</th><th>Description</th></tr>
+<tr><td>signal</td><td>AbortSignal</td><td>Signaled if the operation should be aborted</td></tr>
+<tr><td>suggestions</td><td>PermissionUpdate[]</td><td>Suggested updates so the user isn't prompted again; Bash includes a localSettings suggestion</td></tr>
+<tr><td>blockedPath</td><td>string</td><td>File path that triggered the request, if applicable</td></tr>
+<tr><td>decisionReason</td><td>string</td><td>Explains why this request was triggered</td></tr>
+<tr><td>toolUseID</td><td>string</td><td>Unique identifier for this tool call</td></tr>
+<tr><td>agentID</td><td>string</td><td>Sub-agent's ID, if running within one</td></tr>
+<tr><td>requestId</td><td>string</td><td>The control_request envelope's request_id; must be echoed if you answer out-of-band</td></tr></table>
+<p class="acc-desc">Return null only when your app already sent the control_response over its own channel; otherwise the tool call blocks indefinitely, since permission prompts don't time out. requestId and the null return require v2.1.199+.</p>
+</div></details>
+
+<details class="acc"><summary>PermissionResult</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type PermissionResult =
+  | {
+      behavior: "allow";
+      updatedInput?: Record&lt;string, unknown&gt;;
+      updatedPermissions?: PermissionUpdate[];
+      toolUseID?: string;
+    }
+  | {
+      behavior: "deny";
+      message: string;
+      interrupt?: boolean;
+      toolUseID?: string;
+    };</code></pre>
+</div></details>
+
+<details class="acc"><summary>ToolConfig</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type ToolConfig = {
+  askUserQuestion?: {
+    previewFormat?: "markdown" | "html";
+  };
+};</code></pre>
+<table class="spec-table"><tr><th>Field</th><th>Type</th><th>Description</th></tr>
+<tr><td>askUserQuestion.previewFormat</td><td>'markdown'|'html'</td><td>Opts into the preview field on AskUserQuestion options and sets its format; unset means Claude emits no previews</td></tr></table>
+</div></details>
+
+<details class="acc"><summary>McpServerConfig <span class="acc-sub">stdio, SSE, HTTP, SDK, proxy variants</span></summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type McpServerConfig =
+  | McpStdioServerConfig
+  | McpSSEServerConfig
+  | McpHttpServerConfig
+  | McpSdkServerConfigWithInstance;
+
+type McpStdioServerConfig = {
+  type?: "stdio";
+  command: string;
+  args?: string[];
+  env?: Record&lt;string, string&gt;;
+};
+
+type McpSSEServerConfig = {
+  type: "sse";
+  url: string;
+  headers?: Record&lt;string, string&gt;;
+};
+
+type McpHttpServerConfig = {
+  type: "http";
+  url: string;
+  headers?: Record&lt;string, string&gt;;
+};
+
+type McpSdkServerConfigWithInstance = {
+  type: "sdk";
+  name: string;
+  instance: McpServer;
+};
+
+type McpClaudeAIProxyServerConfig = {
+  type: "claudeai-proxy";
+  url: string;
+  id: string;
+};</code></pre>
+</div></details>
+
+<details class="acc"><summary>SdkPluginConfig</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type SdkPluginConfig = {
+  type: "local";
+  path: string;
+  skipMcpDiscovery?: boolean;
+};</code></pre>
+<table class="spec-table"><tr><th>Field</th><th>Type</th><th>Description</th></tr>
+<tr><td>type</td><td>'local'</td><td>Only local plugins currently supported</td></tr>
+<tr><td>path</td><td>string</td><td>Absolute or relative path to the plugin directory</td></tr>
+<tr><td>skipMcpDiscovery</td><td>boolean</td><td>When true, loads skills/hooks/agents/commands but skips .mcp.json and manifest mcpServers</td></tr></table>
+<pre class="code-block"><code class="autohl">plugins: [
+  { type: "local", path: "./my-plugin" },
+  { type: "local", path: "/absolute/path/to/plugin" }
+];</code></pre>
+</div></details>
+</section>
+
+<!-- 3 Message Types -->
+<section class="cat-panel" id="cat-3">
+<h2>Message Types</h2>
+<p class="cat-intro">Every value that can arrive from the async generator returned by <code class="inline">query()</code> is a member of the <code class="inline">SDKMessage</code> union.</p>
+
+<details class="acc"><summary>SDKMessage <span class="acc-sub">union of all message types</span></summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type SDKMessage =
+  | SDKAssistantMessage | SDKUserMessage | SDKUserMessageReplay | SDKResultMessage
+  | SDKSystemMessage | SDKPartialAssistantMessage | SDKCompactBoundaryMessage
+  | SDKStatusMessage | SDKLocalCommandOutputMessage | SDKHookStartedMessage
+  | SDKHookProgressMessage | SDKHookResponseMessage | SDKPluginInstallMessage
+  | SDKToolProgressMessage | SDKAuthStatusMessage | SDKTaskNotificationMessage
+  | SDKTaskStartedMessage | SDKTaskProgressMessage | SDKTaskUpdatedMessage
+  | SDKBackgroundTasksChangedMessage | SDKSessionStateChangedMessage
+  | SDKWorkerShuttingDownMessage | SDKCommandsChangedMessage | SDKNotificationMessage
+  | SDKFilesPersistedEvent | SDKToolUseSummaryMessage | SDKMemoryRecallMessage
+  | SDKRateLimitEvent | SDKElicitationCompleteMessage | SDKPermissionDeniedMessage
+  | SDKPromptSuggestionMessage | SDKAPIRetryMessage | SDKMirrorErrorMessage
+  | SDKInformationalMessage | SDKConversationResetMessage;</code></pre>
+</div></details>
+
+<details class="acc"><summary>SDKAssistantMessage</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type SDKAssistantMessage = {
+  type: "assistant";
+  uuid: UUID;
+  session_id: string;
+  message: BetaMessage; // From Anthropic SDK
+  parent_tool_use_id: string | null;
+  error?: SDKAssistantMessageError;
+};</code></pre>
+<p class="acc-desc">message is a BetaMessage from the Anthropic SDK (id, content, model, stop_reason, usage). <code class="inline">SDKAssistantMessageError</code> is one of authentication_failed, oauth_org_not_allowed, billing_error, rate_limit, overloaded, invalid_request, model_not_found, server_error, max_output_tokens, unknown. model_not_found means the model doesn't exist or isn't available; overloaded is a 529 (server capacity) versus rate_limit's 429 (your quota).</p>
+</div></details>
+
+<details class="acc"><summary>SDKUserMessage</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type SDKUserMessage = {
+  type: "user";
+  uuid?: UUID;
+  session_id?: string;
+  message: MessageParam; // From Anthropic SDK
+  parent_tool_use_id: string | null;
+  isSynthetic?: boolean;
+  shouldQuery?: boolean;
+  tool_use_result?: unknown;
+  origin?: SDKMessageOrigin;
+};</code></pre>
+<p class="acc-desc">Set shouldQuery to false to append to the transcript without triggering an assistant turn — the message is held and merged into the next turn-triggering message. Use this to inject out-of-band context without spending a model call.</p>
+</div></details>
+
+<details class="acc"><summary>SDKUserMessageReplay</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type SDKUserMessageReplay = {
+  type: "user";
+  uuid: UUID;
+  session_id: string;
+  message: MessageParam;
+  parent_tool_use_id: string | null;
+  isSynthetic?: boolean;
+  tool_use_result?: unknown;
+  origin?: SDKMessageOrigin;
+  isReplay: true;
+};</code></pre>
+</div></details>
+
+<details class="acc"><summary>SDKResultMessage <span class="acc-sub">final result of a turn</span></summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type SDKResultMessage =
+  | {
+      type: "result"; subtype: "success"; uuid: UUID; session_id: string;
+      duration_ms: number; duration_api_ms: number; is_error: boolean;
+      api_error_status?: number | null; num_turns: number; result: string;
+      stop_reason: string | null; ttft_ms?: number; ttft_stream_ms?: number;
+      total_cost_usd: number; usage: NonNullableUsage;
+      modelUsage: { [modelName: string]: ModelUsage };
+      permission_denials: SDKPermissionDenial[]; structured_output?: unknown;
+      deferred_tool_use?: { id: string; name: string; input: Record&lt;string, unknown&gt; };
+      terminal_reason?: TerminalReason; fast_mode_state?: FastModeState;
+      origin?: SDKMessageOrigin;
+    }
+  | {
+      type: "result";
+      subtype: "error_max_turns" | "error_during_execution" | "error_max_budget_usd" | "error_max_structured_output_retries";
+      uuid: UUID; session_id: string; duration_ms: number; duration_api_ms: number;
+      is_error: boolean; num_turns: number; stop_reason: string | null;
+      total_cost_usd: number; usage: NonNullableUsage;
+      modelUsage: { [modelName: string]: ModelUsage };
+      permission_denials: SDKPermissionDenial[]; errors: string[];
+      terminal_reason?: TerminalReason; fast_mode_state?: FastModeState;
+      origin?: SDKMessageOrigin;
+    };</code></pre>
+<table class="spec-table"><tr><th>Field</th><th>Description</th></tr>
+<tr><td>api_error_status</td><td>HTTP status of the terminating API error; absent/null when there was none</td></tr>
+<tr><td>ttft_ms</td><td>Time to first token, ms, measured at the first complete assistant message (success only)</td></tr>
+<tr><td>ttft_stream_ms</td><td>Time to first message_start stream event; lower than ttft_ms (success only)</td></tr>
+<tr><td>terminal_reason</td><td>completed, max_turns, tool_deferred, aborted_streaming, aborted_tools, hook_stopped, stop_hook_prevented, blocking_limit, rapid_refill_breaker, prompt_too_long, image_error, or model_error</td></tr>
+<tr><td>fast_mode_state</td><td>"on", "off", or "cooldown"</td></tr></table>
+<p class="acc-desc">origin forwards the SDKMessageOrigin of the triggering user message; a background-task follow-up carries origin: {kind:"task-notification"}. When a PreToolUse hook returns permissionDecision:"defer", stop_reason is "tool_deferred" and deferred_tool_use carries the pending tool's id/name/input — resume with the same session_id to continue.</p>
+</div></details>
+
+<details class="acc"><summary>SDKSystemMessage <span class="acc-sub">init message</span></summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type SDKSystemMessage = {
+  type: "system"; subtype: "init"; uuid: UUID; session_id: string;
+  agents?: string[]; apiKeySource: ApiKeySource; betas?: string[];
+  claude_code_version: string; cwd: string; tools: string[];
+  mcp_servers: { name: string; status: string }[];
+  model: string; permissionMode: PermissionMode; slash_commands: string[];
+  output_style: string; skills: string[];
+  plugins: { name: string; path: string }[];
+  capabilities?: string[];
+};</code></pre>
+<p class="acc-desc">capabilities (v2.1.205+) names protocol behaviors this CLI implements, for feature-detection instead of version-string comparison. Open set — ignore unrecognized values.</p>
+<table class="spec-table"><tr><th>Capability</th><th>Meaning</th></tr>
+<tr><td>interrupt_receipt_v1</td><td>interrupt() resolves with an SDKControlInterruptResponse receipt</td></tr></table>
+</div></details>
+
+<details class="acc"><summary>SDKPartialAssistantMessage</summary><div class="acc-body">
+<p class="acc-desc">Streaming partial message, only when includePartialMessages is true. parent_tool_use_id is always null; for subagent attribution, use complete messages or enable forwardSubagentText.</p>
+<pre class="code-block"><code class="autohl">type SDKPartialAssistantMessage = {
+  type: "stream_event";
+  event: BetaRawMessageStreamEvent; // From Anthropic SDK
+  parent_tool_use_id: string | null;
+  uuid: UUID; session_id: string;
+  ttft_ms?: number; // present only on message_start events
+};</code></pre>
+</div></details>
+
+<details class="acc"><summary>SDKCompactBoundaryMessage</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type SDKCompactBoundaryMessage = {
+  type: "system"; subtype: "compact_boundary"; uuid: UUID; session_id: string;
+  compact_metadata: { trigger: "manual" | "auto"; pre_tokens: number };
+};</code></pre>
+</div></details>
+
+<details class="acc"><summary>SDKInformationalMessage</summary><div class="acc-body">
+<p class="acc-desc">Generic text banner: non-error status lines, hook feedback, command output. Render content as plaintext at the given level.</p>
+<pre class="code-block"><code class="autohl">type SDKInformationalMessage = {
+  type: "system"; subtype: "informational"; content: string;
+  level: "info" | "notice" | "suggestion" | "warning";
+  tool_use_id?: string; prevent_continuation?: boolean;
+  uuid: UUID; session_id: string;
+};</code></pre>
+</div></details>
+
+<details class="acc"><summary>SDKWorkerShuttingDownMessage</summary><div class="acc-body">
+<p class="acc-desc">Emitted on graceful worker teardown, e.g. "host_exit" or "remote_control_disabled". Only act on this while streaming live — a resumed session replays past instances, so ignore those.</p>
+<pre class="code-block"><code class="autohl">type SDKWorkerShuttingDownMessage = {
+  type: "system"; subtype: "worker_shutting_down"; reason: string;
+  uuid: UUID; session_id: string;
+};</code></pre>
+</div></details>
+
+<details class="acc"><summary>SDKPluginInstallMessage</summary><div class="acc-body">
+<p class="acc-desc">Emitted when CLAUDE_CODE_SYNC_PLUGIN_INSTALL is set, tracking marketplace plugin installation before the first turn. started/completed bracket the overall install; installed/failed report individual marketplaces.</p>
+<pre class="code-block"><code class="autohl">type SDKPluginInstallMessage = {
+  type: "system"; subtype: "plugin_install";
+  status: "started" | "installed" | "failed" | "completed";
+  name?: string; error?: string; uuid: UUID; session_id: string;
+};</code></pre>
+</div></details>
+
+<details class="acc"><summary>SDKPermissionDeniedMessage <span class="acc-sub">v2.1.136+</span></summary><div class="acc-body">
+<p class="acc-desc">Emitted when the permission system auto-denies a tool call without an interactive prompt, so you can render it as it happens. The interactive ask path goes through canUseTool separately; PreToolUse hook denials aren't reported here.</p>
+<pre class="code-block"><code class="autohl">type SDKPermissionDeniedMessage = {
+  type: "system"; subtype: "permission_denied";
+  tool_name: string; tool_use_id: string; agent_id?: string;
+  decision_reason_type?: string; decision_reason?: string; message: string;
+  uuid: UUID; session_id: string;
+};</code></pre>
+<table class="spec-table"><tr><th>Field</th><th>Description</th></tr>
+<tr><td>decision_reason_type</td><td>Discriminator for the deciding component: "rule", "mode", "classifier", or "asyncAgent"</td></tr>
+<tr><td>message</td><td>Rejection message returned to the model in the tool_result</td></tr></table>
+</div></details>
+
+<details class="acc"><summary>SDKPermissionDenial</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type SDKPermissionDenial = {
+  tool_name: string; tool_use_id: string; tool_input: Record&lt;string, unknown&gt;;
+};</code></pre>
+</div></details>
+
+<details class="acc"><summary>SDKMessageOrigin</summary><div class="acc-body">
+<p class="acc-desc">Provenance of a user-role message, appears on SDKUserMessage and forwarded onto the matching SDKResultMessage.</p>
+<pre class="code-block"><code class="autohl">type SDKMessageOrigin =
+  | { kind: "human" }
+  | { kind: "channel"; server: string }
+  | { kind: "peer"; from: string; name?: string; senderTaskId?: string; body?: string }
+  | { kind: "task-notification" }
+  | { kind: "coordinator" }
+  | { kind: "auto-continuation" };</code></pre>
+<table class="spec-table"><tr><th>kind</th><th>Meaning</th></tr>
+<tr><td>human</td><td>Direct end-user input; an absent origin on user messages also means human</td></tr>
+<tr><td>channel</td><td>Message on a channel; server is the source MCP server name</td></tr>
+<tr><td>peer</td><td>From another agent — teammate or cross-session peer; name/body require v2.1.205+</td></tr>
+<tr><td>task-notification</td><td>Synthetic turn injected after a background task finished</td></tr>
+<tr><td>coordinator</td><td>From a team coordinator in an agent team</td></tr>
+<tr><td>auto-continuation</td><td>Synthetic turn injected when the session continues without fresh user input</td></tr></table>
+</div></details>
+</section>
+
+<!-- 4 Hook Types -->
+<section class="cat-panel" id="cat-4">
+<h2>Hook Types</h2>
+<p class="cat-intro">Hooks intercept lifecycle events. See the Hooks guide for usage patterns; this section documents the wire types.</p>
+
+<details class="acc"><summary>HookEvent</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type HookEvent =
+  | "PreToolUse" | "PostToolUse" | "PostToolUseFailure" | "PostToolBatch"
+  | "Notification" | "UserPromptSubmit" | "SessionStart" | "SessionEnd" | "Stop"
+  | "SubagentStart" | "SubagentStop" | "PreCompact" | "PermissionRequest" | "Setup"
+  | "TeammateIdle" | "TaskCompleted" | "ConfigChange" | "WorktreeCreate"
+  | "WorktreeRemove" | "MessageDisplay";</code></pre>
+</div></details>
+
+<details class="acc"><summary>HookCallback / HookCallbackMatcher</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type HookCallback = (
+  input: HookInput,
+  toolUseID: string | undefined,
+  options: { signal: AbortSignal }
+) =&gt; Promise&lt;HookJSONOutput&gt;;
+
+interface HookCallbackMatcher {
+  matcher?: string;
+  hooks: HookCallback[];
+  timeout?: number; // seconds, for all hooks in this matcher
+}</code></pre>
+</div></details>
+
+<details class="acc"><summary>HookInput <span class="acc-sub">union + BaseHookInput</span></summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type HookInput =
+  | PreToolUseHookInput | PostToolUseHookInput | PostToolUseFailureHookInput
+  | PostToolBatchHookInput | NotificationHookInput | UserPromptSubmitHookInput
+  | SessionStartHookInput | SessionEndHookInput | StopHookInput
+  | SubagentStartHookInput | SubagentStopHookInput | PreCompactHookInput
+  | PermissionRequestHookInput | SetupHookInput | TeammateIdleHookInput
+  | TaskCompletedHookInput | ConfigChangeHookInput | WorktreeCreateHookInput
+  | WorktreeRemoveHookInput | MessageDisplayHookInput;
+
+type BaseHookInput = {
+  session_id: string;
+  transcript_path: string;
+  cwd: string;
+  prompt_id?: string;      // v2.1.196+
+  permission_mode?: string;
+  effort?: { level: string };
+  agent_id?: string;
+  agent_type?: string;
+};</code></pre>
+<p class="acc-desc">prompt_id is a UUID for the current user prompt, matching the prompt.id attribute on OpenTelemetry events. Absent until the first user input.</p>
+</div></details>
+
+<details class="acc"><summary>Per-event hook input shapes <span class="acc-sub">20 variants, each extends BaseHookInput</span></summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type PreToolUseHookInput = BaseHookInput & {
+  hook_event_name: "PreToolUse"; tool_name: string; tool_input: unknown; tool_use_id: string;
+};
+
+type PostToolUseHookInput = BaseHookInput & {
+  hook_event_name: "PostToolUse"; tool_name: string; tool_input: unknown;
+  tool_response: unknown; tool_use_id: string; duration_ms?: number;
+};
+
+type PostToolUseFailureHookInput = BaseHookInput & {
+  hook_event_name: "PostToolUseFailure"; tool_name: string; tool_input: unknown;
+  tool_use_id: string; error: string; is_interrupt?: boolean; duration_ms?: number;
+};
+
+// Fires once after every tool call in a batch resolves, before the next model request.
+// tool_response here is the serialized tool_result content, unlike PostToolUseHookInput's structured Output.
+type PostToolBatchHookInput = BaseHookInput & {
+  hook_event_name: "PostToolBatch"; tool_calls: PostToolBatchToolCall[];
+};
+type PostToolBatchToolCall = {
+  tool_name: string; tool_input: unknown; tool_use_id: string; tool_response?: unknown;
+};
+
+type NotificationHookInput = BaseHookInput & {
+  hook_event_name: "Notification"; message: string; title?: string; notification_type: string;
+};
+
+type UserPromptSubmitHookInput = BaseHookInput & {
+  hook_event_name: "UserPromptSubmit"; prompt: string;
+};
+
+type SessionStartHookInput = BaseHookInput & {
+  hook_event_name: "SessionStart"; source: "startup" | "resume" | "clear" | "compact";
+  agent_type?: string; model?: string;
+};
+
+type SessionEndHookInput = BaseHookInput & {
+  hook_event_name: "SessionEnd"; reason: ExitReason;
+};
+
+type StopHookInput = BaseHookInput & {
+  hook_event_name: "Stop"; stop_hook_active: boolean;
+  last_assistant_message?: string;
+  background_tasks?: BackgroundTaskSummary[];
+  session_crons?: SessionCronSummary[];
+};
+
+type SubagentStartHookInput = BaseHookInput & {
+  hook_event_name: "SubagentStart"; agent_id: string; agent_type: string;
+};
+
+type SubagentStopHookInput = BaseHookInput & {
+  hook_event_name: "SubagentStop"; stop_hook_active: boolean; agent_id: string;
+  agent_transcript_path: string; agent_type: string;
+  last_assistant_message?: string;
+  background_tasks?: BackgroundTaskSummary[];
+  session_crons?: SessionCronSummary[];
+};
+type BackgroundTaskSummary = {
+  id: string; type: string; status: string; description: string;
+  command?: string; agent_type?: string; server?: string; tool?: string; name?: string;
+};
+type SessionCronSummary = { id: string; schedule: string; recurring: boolean; prompt: string };
+
+type PreCompactHookInput = BaseHookInput & {
+  hook_event_name: "PreCompact"; trigger: "manual" | "auto";
+  custom_instructions: string | null;
+};
+
+type PermissionRequestHookInput = BaseHookInput & {
+  hook_event_name: "PermissionRequest"; tool_name: string; tool_input: unknown;
+  permission_suggestions?: PermissionUpdate[];
+};
+
+type SetupHookInput = BaseHookInput & {
+  hook_event_name: "Setup"; trigger: "init" | "maintenance";
+};
+
+type TeammateIdleHookInput = BaseHookInput & {
+  hook_event_name: "TeammateIdle"; teammate_name: string;
+  team_name: string; // deprecated since v2.1.178
+};
+
+type TaskCompletedHookInput = BaseHookInput & {
+  hook_event_name: "TaskCompleted"; task_id: string; task_subject: string;
+  task_description?: string; teammate_name?: string;
+  team_name?: string; // deprecated since v2.1.178
+};
+
+type ConfigChangeHookInput = BaseHookInput & {
+  hook_event_name: "ConfigChange";
+  source: "user_settings" | "project_settings" | "local_settings" | "policy_settings" | "skills";
+  file_path?: string;
+};
+
+type WorktreeCreateHookInput = BaseHookInput & {
+  hook_event_name: "WorktreeCreate"; name: string;
+};
+
+type WorktreeRemoveHookInput = BaseHookInput & {
+  hook_event_name: "WorktreeRemove"; worktree_path: string;
+};
+
+type MessageDisplayHookInput = BaseHookInput & {
+  hook_event_name: "MessageDisplay"; turn_id: string; message_id: string;
+  index: number; final: boolean; delta: string;
+};</code></pre>
+</div></details>
+
+<details class="acc"><summary>HookJSONOutput <span class="acc-sub">Async / Sync variants</span></summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type HookJSONOutput = AsyncHookJSONOutput | SyncHookJSONOutput;
+
+type AsyncHookJSONOutput = {
+  async: true;
+  asyncTimeout?: number;
+};
+
+type SyncHookJSONOutput = {
+  continue?: boolean;
+  suppressOutput?: boolean;
+  stopReason?: string;
+  decision?: "approve" | "block";
+  systemMessage?: string;
+  reason?: string;
+  hookSpecificOutput?:
+    | { hookEventName: "PreToolUse"; permissionDecision?: "allow" | "deny" | "ask" | "defer";
+        permissionDecisionReason?: string; updatedInput?: Record&lt;string, unknown&gt;;
+        additionalContext?: string; }
+    | { hookEventName: "UserPromptSubmit"; additionalContext?: string; }
+    | { hookEventName: "SessionStart"; additionalContext?: string; }
+    | { hookEventName: "Setup"; additionalContext?: string; }
+    | { hookEventName: "SubagentStart"; additionalContext?: string; }
+    | { hookEventName: "PostToolUse"; additionalContext?: string; updatedToolOutput?: unknown;
+        updatedMCPToolOutput?: unknown; /* deprecated: use updatedToolOutput */ }
+    | { hookEventName: "PostToolUseFailure"; additionalContext?: string; }
+    | { hookEventName: "PostToolBatch"; additionalContext?: string; }
+    | { hookEventName: "Notification"; additionalContext?: string; }
+    | { hookEventName: "PermissionRequest";
+        decision:
+          | { behavior: "allow"; updatedInput?: Record&lt;string, unknown&gt;; updatedPermissions?: PermissionUpdate[]; }
+          | { behavior: "deny"; message?: string; interrupt?: boolean; }; };
+};</code></pre>
+</div></details>
+</section>
+
+<!-- 5 Tool Input Types -->
+<section class="cat-panel" id="cat-5">
+<h2>Tool Input Types</h2>
+<p class="cat-intro">Input schemas for every built-in Claude Code tool, exported from <code class="inline">@anthropic-ai/claude-agent-sdk</code> as <code class="inline">ToolInputSchemas</code>.</p>
+
+<details class="acc"><summary>Agent <span class="acc-sub">tool name: Agent (was Task)</span></summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type AgentInput = {
+  description: string;
+  prompt: string;
+  subagent_type: string;
+  model?: "sonnet" | "opus" | "haiku" | "fable";
+  resume?: string;
+  run_in_background?: boolean;
+  max_turns?: number;
+  name?: string;
+  mode?: "acceptEdits" | "bypassPermissions" | "default" | "dontAsk" | "plan";
+  isolation?: "worktree";
+};</code></pre>
+<p class="acc-desc">Launches a new agent to handle complex, multi-step tasks autonomously.</p>
+</div></details>
+
+<details class="acc"><summary>AskUserQuestion</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type AskUserQuestionInput = {
+  questions: Array&lt;{
+    question: string; header: string;
+    options: Array&lt;{ label: string; description: string; preview?: string }&gt;;
+    multiSelect: boolean;
+  }&gt;;
+};</code></pre>
+<p class="acc-desc">Asks the user clarifying questions during execution.</p>
+</div></details>
+
+<details class="acc"><summary>Bash</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type BashInput = {
+  command: string;
+  timeout?: number;
+  description?: string;
+  run_in_background?: boolean;
+  dangerouslyDisableSandbox?: boolean;
+};</code></pre>
+<p class="acc-desc">Executes bash commands in a persistent shell session with optional timeout and background execution.</p>
+</div></details>
+
+<details class="acc"><summary>Monitor</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type MonitorInput = {
+  command?: string;
+  ws?: { url: string; protocols?: string[] };
+  description: string;
+  timeout_ms?: number;
+  persistent?: boolean;
+};</code></pre>
+<p class="acc-desc">Runs a background source and delivers each event to Claude without polling: command emits one event per stdout line, ws opens a WebSocket and emits one event per text frame (v2.1.195+). Provide exactly one. Set persistent for session-length watches like log tails; command follows Bash permission rules, a WebSocket prompts separately.</p>
+</div></details>
+
+<details class="acc"><summary>TaskOutput</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type TaskOutputInput = { task_id: string; block: boolean; timeout: number; };</code></pre>
+<p class="acc-desc">Retrieves output from a running or completed background task.</p>
+</div></details>
+
+<details class="acc"><summary>Edit</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type FileEditInput = {
+  file_path: string; old_string: string; new_string: string; replace_all?: boolean;
+};</code></pre>
+<p class="acc-desc">Performs exact string replacements in files.</p>
+</div></details>
+
+<details class="acc"><summary>Read</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type FileReadInput = { file_path: string; offset?: number; limit?: number; pages?: string; };</code></pre>
+<p class="acc-desc">Reads text, images, PDFs, and Jupyter notebooks. Use pages for PDF ranges, e.g. "1-5".</p>
+</div></details>
+
+<details class="acc"><summary>Write</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type FileWriteInput = { file_path: string; content: string; };</code></pre>
+<p class="acc-desc">Writes a file, overwriting if it exists.</p>
+</div></details>
+
+<details class="acc"><summary>Glob</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type GlobInput = { pattern: string; path?: string; };</code></pre>
+<p class="acc-desc">Fast file pattern matching that works with any codebase size.</p>
+</div></details>
+
+<details class="acc"><summary>Grep</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type GrepInput = {
+  pattern: string; path?: string; glob?: string; type?: string;
+  output_mode?: "content" | "files_with_matches" | "count";
+  "-i"?: boolean; "-n"?: boolean; "-B"?: number; "-A"?: number; "-C"?: number;
+  context?: number; head_limit?: number; offset?: number; multiline?: boolean;
+};</code></pre>
+<p class="acc-desc">Powerful search tool built on ripgrep with regex support.</p>
+</div></details>
+
+<details class="acc"><summary>TaskStop</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type TaskStopInput = { task_id?: string; shell_id?: string; /* deprecated: use task_id */ };</code></pre>
+<p class="acc-desc">Stops a running background task or shell. As of v2.1.198, task_id also accepts an agent-team teammate or named background agent by ID or name.</p>
+</div></details>
+
+<details class="acc"><summary>NotebookEdit</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type NotebookEditInput = {
+  notebook_path: string; cell_id?: string; new_source: string;
+  cell_type?: "code" | "markdown"; edit_mode?: "replace" | "insert" | "delete";
+};</code></pre>
+<p class="acc-desc">Edits cells in Jupyter notebook files.</p>
+</div></details>
+
+<details class="acc"><summary>WebFetch</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type WebFetchInput = { url: string; prompt: string; };</code></pre>
+<p class="acc-desc">Fetches content from a URL and processes it with an AI model.</p>
+</div></details>
+
+<details class="acc"><summary>WebSearch</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type WebSearchInput = { query: string; allowed_domains?: string[]; blocked_domains?: string[]; };</code></pre>
+<p class="acc-desc">Searches the web and returns formatted results.</p>
+</div></details>
+
+<details class="acc"><summary>Workflow <span class="acc-sub">SDK v0.3.149+</span></summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type WorkflowInput = {
+  script?: string; name?: string; scriptPath?: string; args?: unknown; resumeFromRunId?: string;
+};</code></pre>
+<p class="acc-desc">Runs a dynamic workflow: a script orchestrating many subagents in the background, returning one consolidated result. At least one of script, name, or scriptPath is required.</p>
+<table class="spec-table"><tr><th>Field</th><th>Type</th><th>Description</th></tr>
+<tr><td>script</td><td>string</td><td>Inline script; must begin with export const meta={name,description}, using agent(), parallel(), pipeline(), phase()</td></tr>
+<tr><td>name</td><td>string</td><td>Built-in or .claude/workflows/ saved workflow name</td></tr>
+<tr><td>scriptPath</td><td>string</td><td>Path to a script file; takes precedence. Every run persists its script and returns the path for iteration</td></tr>
+<tr><td>args</td><td>unknown</td><td>Input exposed to the script as global args, for parameterized named workflows</td></tr>
+<tr><td>resumeFromRunId</td><td>string</td><td>Run ID to resume; cached agent() results reused for unchanged inputs. Same session only</td></tr></table>
+</div></details>
+
+<details class="acc"><summary>TodoWrite <span class="badge">disabled by default</span></summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type TodoWriteInput = {
+  todos: Array&lt;{
+    content: string; status: "pending" | "in_progress" | "completed"; activeForm: string;
+  }&gt;;
+};</code></pre>
+<div class="warn-box"><span class="tag">DEPRECATED</span><p>As of SDK 0.3.142, TodoWrite is disabled by default. Use TaskCreate, TaskGet, TaskUpdate, and TaskList instead, or set CLAUDE_CODE_ENABLE_TASKS=0 to revert.</p></div>
+</div></details>
+
+<details class="acc"><summary>TaskCreate</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type TaskCreateInput = {
+  subject: string; description: string; activeForm?: string; metadata?: Record&lt;string, unknown&gt;;
+};</code></pre>
+<p class="acc-desc">Creates a single task and returns its assigned ID.</p>
+</div></details>
+
+<details class="acc"><summary>TaskUpdate</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type TaskUpdateInput = {
+  taskId: string; status?: "pending" | "in_progress" | "completed" | "deleted";
+  subject?: string; description?: string; activeForm?: string;
+  addBlocks?: string[]; addBlockedBy?: string[]; owner?: string;
+  metadata?: Record&lt;string, unknown&gt;;
+};</code></pre>
+<p class="acc-desc">Patches one task by ID. Set status to "deleted" to remove it.</p>
+</div></details>
+
+<details class="acc"><summary>TaskGet / TaskList</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type TaskGetInput = { taskId: string; };
+type TaskListInput = {};</code></pre>
+<p class="acc-desc">TaskGet returns full details for one task, or null when not found. TaskList returns a snapshot of all tasks.</p>
+</div></details>
+
+<details class="acc"><summary>ExitPlanMode</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type ExitPlanModeInput = {
+  /** Deprecated: no longer used. */
+  allowedPrompts?: Array&lt;{ tool: "Bash"; prompt: string; }&gt;;
+};</code></pre>
+<p class="acc-desc">Exits plan mode. allowedPrompts is deprecated and ignored, kept for transcript compatibility. Before v2.1.205 it requested prompt-based Bash permissions.</p>
+</div></details>
+
+<details class="acc"><summary>ListMcpResources / ReadMcpResource</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type ListMcpResourcesInput = { server?: string; };
+type ReadMcpResourceInput = { server: string; uri: string; };</code></pre>
+<p class="acc-desc">Lists available MCP resources, or reads a specific one from a server.</p>
+</div></details>
+
+<details class="acc"><summary>EnterWorktree</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type EnterWorktreeInput = { name?: string; path?: string; };</code></pre>
+<p class="acc-desc">Creates and enters a temporary git worktree for isolated work. Pass path to switch into an existing worktree. name and path are mutually exclusive.</p>
+</div></details>
+</section>
+
+<!-- 6 Tool Output Types -->
+<section class="cat-panel" id="cat-6">
+<h2>Tool Output Types</h2>
+<p class="cat-intro">Response data returned by each built-in tool, exported as <code class="inline">ToolOutputSchemas</code>.</p>
+
+<details class="acc"><summary>Agent</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type AgentOutput =
+  | { status: "completed"; agentId: string; content: Array&lt;{ type: "text"; text: string }&gt;;
+      resolvedModel?: string; totalToolUseCount: number; totalDurationMs: number;
+      totalTokens: number; usage: { input_tokens: number; output_tokens: number;
+      cache_creation_input_tokens: number | null; cache_read_input_tokens: number | null;
+      server_tool_use: { web_search_requests: number; web_fetch_requests: number } | null;
+      service_tier: ("standard" | "priority" | "batch") | null;
+      cache_creation: { ephemeral_1h_input_tokens: number; ephemeral_5m_input_tokens: number } | null; };
+      prompt: string; }
+  | { status: "async_launched"; agentId: string; description: string; resolvedModel?: string;
+      prompt: string; outputFile: string; canReadOutputFile?: boolean; }
+  | { status: "sub_agent_entered"; description: string; message: string; };</code></pre>
+<p class="acc-desc">Discriminated on status: completed for finished tasks, async_launched for background tasks, sub_agent_entered for interactive subagents. resolvedModel (v2.1.174+) names the model actually used, which can differ from the requested model.</p>
+</div></details>
+
+<details class="acc"><summary>AskUserQuestion</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type AskUserQuestionOutput = {
+  questions: Array&lt;{ question: string; header: string;
+    options: Array&lt;{ label: string; description: string; preview?: string }&gt;;
+    multiSelect: boolean; }&gt;;
+  answers: Record&lt;string, string&gt;;
+  response?: string;
+};</code></pre>
+<p class="acc-desc">response is set when the user typed a freeform reply instead of answering the structured questions.</p>
+</div></details>
+
+<details class="acc"><summary>Bash</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type BashOutput = {
+  stdout: string; stderr: string; rawOutputPath?: string; interrupted: boolean;
+  isImage?: boolean; backgroundTaskId?: string; backgroundedByUser?: boolean;
+  dangerouslyDisableSandbox?: boolean; returnCodeInterpretation?: string;
+  structuredContent?: unknown[]; persistedOutputPath?: string; persistedOutputSize?: number;
+};</code></pre>
+<p class="acc-desc">Command output with stdout/stderr split. Background commands include a backgroundTaskId.</p>
+</div></details>
+
+<details class="acc"><summary>Monitor</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type MonitorOutput = { taskId: string; timeoutMs: number; persistent?: boolean; };</code></pre>
+<p class="acc-desc">Returns the background task ID for the running monitor; use it with TaskStop to cancel early.</p>
+</div></details>
+
+<details class="acc"><summary>Edit</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type FileEditOutput = {
+  filePath: string; oldString: string; newString: string; originalFile: string;
+  structuredPatch: Array&lt;{ oldStart: number; oldLines: number; newStart: number;
+    newLines: number; lines: string[]; }&gt;;
+  userModified: boolean; replaceAll: boolean;
+  gitDiff?: { filename: string; status: "modified" | "added"; additions: number;
+    deletions: number; changes: number; patch: string; };
+};</code></pre>
+<p class="acc-desc">Returns the structured diff of the edit operation.</p>
+</div></details>
+
+<details class="acc"><summary>Read</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type FileReadOutput =
+  | { type: "text"; file: { filePath: string; content: string; numLines: number;
+      startLine: number; totalLines: number; }; }
+  | { type: "image"; file: { base64: string; type: "image/jpeg" | "image/png" | "image/gif" | "image/webp";
+      originalSize: number; dimensions?: { originalWidth?: number; originalHeight?: number;
+      displayWidth?: number; displayHeight?: number; }; }; }
+  | { type: "notebook"; file: { filePath: string; cells: unknown[]; }; }
+  | { type: "pdf"; file: { filePath: string; base64: string; originalSize: number; }; }
+  | { type: "parts"; file: { filePath: string; originalSize: number; count: number; outputDir: string; }; };</code></pre>
+<p class="acc-desc">File contents in a format appropriate to the type, discriminated on type.</p>
+</div></details>
+
+<details class="acc"><summary>Write</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type FileWriteOutput = {
+  type: "create" | "update"; filePath: string; content: string;
+  structuredPatch: Array&lt;{ oldStart: number; oldLines: number; newStart: number;
+    newLines: number; lines: string[]; }&gt;;
+  originalFile: string | null;
+  gitDiff?: { filename: string; status: "modified" | "added"; additions: number;
+    deletions: number; changes: number; patch: string; };
+};</code></pre>
+</div></details>
+
+<details class="acc"><summary>Glob</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type GlobOutput = { durationMs: number; numFiles: number; filenames: string[]; truncated: boolean; };</code></pre>
+<p class="acc-desc">File paths matching the glob pattern, sorted by modification time.</p>
+</div></details>
+
+<details class="acc"><summary>Grep</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type GrepOutput = {
+  mode?: "content" | "files_with_matches" | "count"; numFiles: number; filenames: string[];
+  content?: string; numLines?: number; numMatches?: number;
+  appliedLimit?: number; appliedOffset?: number;
+};</code></pre>
+<p class="acc-desc">Shape varies by mode: file list, content with matches, or match counts.</p>
+</div></details>
+
+<details class="acc"><summary>TaskStop</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type TaskStopOutput = { message: string; task_id: string; task_type: string; command?: string; };</code></pre>
+</div></details>
+
+<details class="acc"><summary>NotebookEdit</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type NotebookEditOutput = {
+  new_source: string; cell_id?: string; cell_type: "code" | "markdown";
+  language: string; edit_mode: string; error?: string;
+  notebook_path: string; original_file: string; updated_file: string;
+};</code></pre>
+</div></details>
+
+<details class="acc"><summary>WebFetch</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type WebFetchOutput = { bytes: number; code: number; codeText: string; result: string; durationMs: number; url: string; };</code></pre>
+</div></details>
+
+<details class="acc"><summary>WebSearch</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type WebSearchOutput = {
+  query: string;
+  results: Array&lt;{ tool_use_id: string; content: Array&lt;{ title: string; url: string }&gt;; } | string&gt;;
+  durationSeconds: number;
+};</code></pre>
+</div></details>
+
+<details class="acc"><summary>Workflow</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type WorkflowOutput = {
+  status: "async_launched"; taskId: string; runId?: string; summary?: string;
+  transcriptDir?: string; scriptPath?: string; error?: string;
+};</code></pre>
+<p class="acc-desc">Returns immediately after acceptance; the final result arrives as a task completion. Check error before treating the run as started — a script that fails its syntax check still returns async_launched with error set, and never runs.</p>
+</div></details>
+
+<details class="acc"><summary>TodoWrite <span class="badge">disabled by default</span></summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type TodoWriteOutput = {
+  oldTodos: Array&lt;{ content: string; status: "pending" | "in_progress" | "completed"; activeForm: string; }&gt;;
+  newTodos: Array&lt;{ content: string; status: "pending" | "in_progress" | "completed"; activeForm: string; }&gt;;
+};</code></pre>
+</div></details>
+
+<details class="acc"><summary>TaskCreate / TaskUpdate / TaskGet / TaskList</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type TaskCreateOutput = { task: { id: string; subject: string; }; };
+
+type TaskUpdateOutput = {
+  success: boolean; taskId: string; updatedFields: string[]; error?: string;
+  statusChange?: { from: string; to: string; };
+};
+
+type TaskGetOutput = {
+  task: { id: string; subject: string; description: string;
+    status: "pending" | "in_progress" | "completed"; blocks: string[]; blockedBy: string[]; } | null;
+};
+
+type TaskListOutput = {
+  tasks: Array&lt;{ id: string; subject: string; status: "pending" | "in_progress" | "completed";
+    owner?: string; blockedBy: string[]; }&gt;;
+};</code></pre>
+</div></details>
+
+<details class="acc"><summary>ExitPlanMode</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type ExitPlanModeOutput = {
+  plan: string | null; isAgent: boolean; filePath?: string; hasTaskTool?: boolean;
+  awaitingLeaderApproval?: boolean; requestId?: string;
+};</code></pre>
+</div></details>
+
+<details class="acc"><summary>ListMcpResources / ReadMcpResource</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type ListMcpResourcesOutput = Array&lt;{
+  uri: string; name: string; mimeType?: string; description?: string; server: string;
+}&gt;;
+
+type ReadMcpResourceOutput = {
+  contents: Array&lt;{ uri: string; mimeType?: string; text?: string; }&gt;;
+};</code></pre>
+</div></details>
+
+<details class="acc"><summary>EnterWorktree</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type EnterWorktreeOutput = { worktreePath: string; worktreeBranch?: string; message: string; };</code></pre>
+</div></details>
+</section>
+
+<!-- 7 Permission Types -->
+<section class="cat-panel" id="cat-7">
+<h2>Permission Types</h2>
+<p class="cat-intro">Types for programmatically reading and updating Claude Code's permission rules.</p>
+
+<details class="acc"><summary>PermissionUpdate</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type PermissionUpdate =
+  | { type: "addRules"; rules: PermissionRuleValue[]; behavior: PermissionBehavior; destination: PermissionUpdateDestination; }
+  | { type: "replaceRules"; rules: PermissionRuleValue[]; behavior: PermissionBehavior; destination: PermissionUpdateDestination; }
+  | { type: "removeRules"; rules: PermissionRuleValue[]; behavior: PermissionBehavior; destination: PermissionUpdateDestination; }
+  | { type: "setMode"; mode: PermissionMode; destination: PermissionUpdateDestination; }
+  | { type: "addDirectories"; directories: string[]; destination: PermissionUpdateDestination; }
+  | { type: "removeDirectories"; directories: string[]; destination: PermissionUpdateDestination; };</code></pre>
+</div></details>
+
+<details class="acc"><summary>PermissionBehavior / PermissionUpdateDestination / PermissionRuleValue</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type PermissionBehavior = "allow" | "deny" | "ask";
+
+type PermissionUpdateDestination =
+  | "userSettings"    // Global user settings
+  | "projectSettings" // Per-directory project settings
+  | "localSettings"   // Local project settings
+  | "session"         // Current session only
+  | "cliArg";         // CLI argument
+
+type PermissionRuleValue = { toolName: string; ruleContent?: string; };</code></pre>
+</div></details>
+</section>
+
+<!-- 8 Other Types -->
+<section class="cat-panel" id="cat-8">
+<h2>Other Types</h2>
+<p class="cat-intro">Supporting types referenced throughout the reference: model and account info, usage accounting, dozens of system-message subtypes, and process-spawning interfaces.</p>
+
+<details class="acc"><summary>ApiKeySource / SdkBeta</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type ApiKeySource = "user" | "project" | "org" | "temporary" | "oauth";
+
+type SdkBeta = "context-1m-2025-08-07";</code></pre>
+<div class="warn-box"><span class="tag">RETIRED</span><p>context-1m-2025-08-07 is retired as of April 30, 2026. Migrate to Claude Sonnet 5, Sonnet 4.6, Opus 4.6/4.7/4.8, which include 1M context at standard pricing with no beta header.</p></div>
+</div></details>
+
+<details class="acc"><summary>SlashCommand / ModelInfo / AgentInfo</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type SlashCommand = { name: string; description: string; argumentHint: string; aliases?: string[]; };
+
+type ModelInfo = {
+  value: string; resolvedModel?: string; displayName: string; description: string;
+  supportsEffort?: boolean; supportedEffortLevels?: ("low" | "medium" | "high" | "xhigh" | "max")[];
+  supportsAdaptiveThinking?: boolean; supportsFastMode?: boolean; supportsAutoMode?: boolean;
+};
+
+type AgentInfo = { name: string; description: string; model?: string; };</code></pre>
+<p class="acc-desc">ModelInfo.resolvedModel (v2.1.197+) is the canonical wire model ID an alias like "sonnet" resolves to. AgentInfo.model, if omitted, means the agent inherits the parent's model.</p>
+</div></details>
+
+<details class="acc"><summary>McpServerStatus / McpServerStatusConfig / AccountInfo</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type McpServerStatus = {
+  name: string; status: "connected" | "failed" | "needs-auth" | "pending" | "disabled";
+  serverInfo?: { name: string; version: string; }; error?: string;
+  config?: McpServerStatusConfig; scope?: string;
+  tools?: { name: string; description?: string;
+    annotations?: { readOnly?: boolean; destructive?: boolean; openWorld?: boolean; }; }[];
+};
+
+type McpServerStatusConfig =
+  | McpStdioServerConfig | McpSSEServerConfig | McpHttpServerConfig
+  | McpSdkServerConfig | McpClaudeAIProxyServerConfig;
+
+type AccountInfo = {
+  email?: string; organization?: string; subscriptionType?: string;
+  tokenSource?: string; apiKeySource?: string;
+};</code></pre>
+</div></details>
+
+<details class="acc"><summary>ModelUsage / Usage / NonNullableUsage / ConfigScope</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type ModelUsage = {
+  inputTokens: number; outputTokens: number; cacheReadInputTokens: number;
+  cacheCreationInputTokens: number; webSearchRequests: number; costUSD: number;
+  contextWindow: number; maxOutputTokens: number;
+};
+
+type ConfigScope = "local" | "user" | "project";
+
+type NonNullableUsage = { [K in keyof Usage]: NonNullable&lt;Usage[K]&gt;; };
+
+// Usage is the BetaUsage type from @anthropic-ai/sdk
+type Usage = {
+  input_tokens: number; output_tokens: number;
+  cache_creation_input_tokens: number | null; cache_read_input_tokens: number | null;
+  cache_creation: { ephemeral_5m_input_tokens: number; ephemeral_1h_input_tokens: number; } | null;
+  server_tool_use: BetaServerToolUsage | null;
+  service_tier: "standard" | "priority" | "batch" | null;
+  speed: "standard" | "fast" | null; inference_geo: string | null;
+  iterations: BetaIterationsUsage | null;
+};</code></pre>
+<p class="acc-desc">ModelUsage.costUSD is a client-side estimate; see Track cost and usage for billing caveats.</p>
+</div></details>
+
+<details class="acc"><summary>CallToolResult / ThinkingConfig</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">// From @modelcontextprotocol/sdk/types.js
+type CallToolResult = {
+  content: Array&lt;{ type: "text" | "image" | "audio" | "resource" | "resource_link"; }&gt;;
+  structuredContent?: Record&lt;string, unknown&gt;;
+  isError?: boolean;
+};
+
+type ThinkingDisplay = "summarized" | "omitted";
+
+type ThinkingConfig =
+  | { type: "adaptive"; display?: ThinkingDisplay }               // model decides (Opus 4.6+)
+  | { type: "enabled"; budgetTokens?: number; display?: ThinkingDisplay } // fixed budget
+  | { type: "disabled" };</code></pre>
+<p class="acc-desc">On Claude Opus 4.7+, the API default display is "omitted" — set "summarized" to receive thinking content in thinking blocks.</p>
+</div></details>
+
+<details class="acc"><summary>SpawnedProcess / SpawnOptions</summary><div class="acc-body">
+<p class="acc-desc">Custom process spawning, used with the spawnClaudeCodeProcess option. Node's ChildProcess already satisfies SpawnedProcess.</p>
+<pre class="code-block"><code class="autohl">interface SpawnedProcess {
+  stdin: Writable; stdout: Readable;
+  readonly killed: boolean; readonly exitCode: number | null;
+  kill(signal: NodeJS.Signals): boolean;
+  on(event: "exit", listener: (code: number | null, signal: NodeJS.Signals | null) =&gt; void): void;
+  on(event: "error", listener: (error: Error) =&gt; void): void;
+  once(event: "exit", listener: (code: number | null, signal: NodeJS.Signals | null) =&gt; void): void;
+  once(event: "error", listener: (error: Error) =&gt; void): void;
+  off(event: "exit", listener: (code: number | null, signal: NodeJS.Signals | null) =&gt; void): void;
+  off(event: "error", listener: (error: Error) =&gt; void): void;
+}
+
+interface SpawnOptions {
+  command: string; args: string[]; cwd?: string;
+  env: Record&lt;string, string | undefined&gt;; signal: AbortSignal;
+}</code></pre>
+<div class="info-box"><span class="tag">NOTE</span><p>The signal field does not fire the instant Options.abortController aborts. The SDK first closes stdin and waits ~2s for clean CLI shutdown, then aborts this signal. To react immediately, listen on your own Options.abortController.signal instead.</p></div>
+</div></details>
+
+<details class="acc"><summary>McpSetServersResult / RewindFilesResult</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type McpSetServersResult = { added: string[]; removed: string[]; errors: Record&lt;string, string&gt;; };
+
+type RewindFilesResult = {
+  canRewind: boolean; error?: string; filesChanged?: string[]; insertions?: number; deletions?: number;
+};</code></pre>
+</div></details>
+
+<details class="acc"><summary>System event messages <span class="acc-sub">SDKStatusMessage and 16 related subtypes</span></summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type SDKStatusMessage = {
+  type: "system"; subtype: "status"; status: "compacting" | null;
+  permissionMode?: PermissionMode; uuid: UUID; session_id: string;
+};
+
+// Background tasks include run_in_background Bash, Monitor watches, background subagents
+type SDKTaskNotificationMessage = {
+  type: "system"; subtype: "task_notification"; task_id: string; tool_use_id?: string;
+  status: "completed" | "failed" | "stopped"; output_file: string; summary: string;
+  usage?: { total_tokens: number; tool_uses: number; duration_ms: number; };
+  uuid: UUID; session_id: string;
+};
+
+type SDKToolUseSummaryMessage = {
+  type: "tool_use_summary"; summary: string; preceding_tool_use_ids: string[];
+  uuid: UUID; session_id: string;
+};
+
+type SDKHookStartedMessage = {
+  type: "system"; subtype: "hook_started"; hook_id: string; hook_name: string;
+  hook_event: string; uuid: UUID; session_id: string;
+};
+
+type SDKHookProgressMessage = {
+  type: "system"; subtype: "hook_progress"; hook_id: string; hook_name: string;
+  hook_event: string; stdout: string; stderr: string; output: string;
+  uuid: UUID; session_id: string;
+};
+
+type SDKHookResponseMessage = {
+  type: "system"; subtype: "hook_response"; hook_id: string; hook_name: string;
+  hook_event: string; output: string; stdout: string; stderr: string; exit_code?: number;
+  outcome: "success" | "error" | "cancelled"; uuid: UUID; session_id: string;
+};
+
+type SDKToolProgressMessage = {
+  type: "tool_progress"; tool_use_id: string; tool_name: string;
+  parent_tool_use_id: string | null; elapsed_time_seconds: number;
+  task_id?: string; uuid: UUID; session_id: string;
+};
+
+type SDKAuthStatusMessage = {
+  type: "auth_status"; isAuthenticating: boolean; output: string[];
+  error?: string; uuid: UUID; session_id: string;
+};
+
+// task_type: "local_bash" (background Bash / Monitor), "local_agent", or "remote_agent"
+type SDKTaskStartedMessage = {
+  type: "system"; subtype: "task_started"; task_id: string; tool_use_id?: string;
+  description: string; task_type?: string; uuid: UUID; session_id: string;
+};
+
+// summary populated only when agentProgressSummaries is enabled
+type SDKTaskProgressMessage = {
+  type: "system"; subtype: "task_progress"; task_id: string; tool_use_id?: string;
+  description: string; subagent_type?: string;
+  usage: { total_tokens: number; tool_uses: number; duration_ms: number; };
+  last_tool_name?: string; summary?: string; uuid: UUID; session_id: string;
+};
+
+// Merge patch into your local task map keyed by task_id
+type SDKTaskUpdatedMessage = {
+  type: "system"; subtype: "task_updated"; task_id: string;
+  patch: { status?: "pending" | "running" | "completed" | "failed" | "killed";
+    description?: string; end_time?: number; total_paused_ms?: number;
+    error?: string; is_backgrounded?: boolean; };
+  uuid: UUID; session_id: string;
+};
+
+// v2.1.203+. tasks is the full live set — replace any cache, don't pair with task_started/task_notification
+type SDKBackgroundTasksChangedMessage = {
+  type: "system"; subtype: "background_tasks_changed";
+  tasks: { task_id: string; task_type: string; description: string; }[];
+  uuid: UUID; session_id: string;
+};
+
+type SDKFilesPersistedEvent = {
+  type: "system"; subtype: "files_persisted";
+  files: { filename: string; file_id: string; }[];
+  failed: { filename: string; error: string; }[];
+  processed_at: string; uuid: UUID; session_id: string;
+};
+
+// v2.1.181+. errorCode "credits_required" means a claude.ai subscription's included usage is exhausted
+type SDKRateLimitEvent = {
+  type: "rate_limit_event";
+  rate_limit_info: { status: "allowed" | "allowed_warning" | "rejected"; resetsAt?: number;
+    utilization?: number; errorCode?: "credits_required";
+    canUserPurchaseCredits?: boolean; hasChargeableSavedPaymentMethod?: boolean; };
+  uuid: UUID; session_id: string;
+};
+
+type SDKLocalCommandOutputMessage = {
+  type: "system"; subtype: "local_command_output"; content: string; uuid: UUID; session_id: string;
+};
+
+// commands is the full updated list; supportedCommands() returns only the init snapshot
+type SDKCommandsChangedMessage = {
+  type: "system"; subtype: "commands_changed"; commands: SlashCommand[];
+  uuid: UUID; session_id: string;
+};
+
+type SDKPromptSuggestionMessage = {
+  type: "prompt_suggestion"; suggestion: string; uuid: UUID; session_id: string;
+};
+
+// Emitted after /clear, plan-mode exit, or a fresh conversation start (v2.1.203+ typings)
+type SDKConversationResetMessage = {
+  type: "conversation_reset"; new_conversation_id: UUID; uuid: UUID; session_id: string;
+};
+
+class AbortError extends Error {}</code></pre>
+</div></details>
+</section>
+
+<!-- 9 Sandbox Configuration -->
+<section class="cat-panel" id="cat-9">
+<h2>Sandbox Configuration</h2>
+<p class="cat-intro">Enable command sandboxing and configure network/filesystem restrictions programmatically via the <code class="inline">sandbox</code> option.</p>
+
+<details class="acc" open><summary>SandboxSettings</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type SandboxSettings = {
+  enabled?: boolean;
+  failIfUnavailable?: boolean;
+  autoAllowBashIfSandboxed?: boolean;
+  excludedCommands?: string[];
+  allowUnsandboxedCommands?: boolean;
+  network?: SandboxNetworkConfig;
+  filesystem?: SandboxFilesystemConfig;
+  ignoreViolations?: Record&lt;string, string[]&gt;;
+  enableWeakerNestedSandbox?: boolean;
+  ripgrep?: { command: string; args?: string[] };
+};</code></pre>
+<table class="spec-table"><tr><th>Property</th><th>Default</th><th>Description</th></tr>
+<tr><td>enabled</td><td>false</td><td>Enable sandbox mode for command execution</td></tr>
+<tr><td>failIfUnavailable</td><td>true</td><td>Stop at startup if enabled but sandbox can't start; false falls back to unsandboxed with a stderr warning</td></tr>
+<tr><td>autoAllowBashIfSandboxed</td><td>true</td><td>Auto-approve bash commands when sandbox is enabled</td></tr>
+<tr><td>excludedCommands</td><td>[]</td><td>Commands that always bypass the sandbox automatically, e.g. ['docker'] — no model involvement</td></tr>
+<tr><td>allowUnsandboxedCommands</td><td>true</td><td>Let the model request unsandboxed execution via dangerouslyDisableSandbox, falling back to permissions</td></tr>
+<tr><td>network</td><td>undefined</td><td>SandboxNetworkConfig</td></tr>
+<tr><td>filesystem</td><td>undefined</td><td>SandboxFilesystemConfig</td></tr>
+<tr><td>ignoreViolations</td><td>undefined</td><td>Map of violation categories to patterns to ignore</td></tr>
+<tr><td>enableWeakerNestedSandbox</td><td>false</td><td>Enable a weaker nested sandbox for compatibility</td></tr>
+<tr><td>ripgrep</td><td>undefined</td><td>Custom ripgrep binary configuration for sandbox environments</td></tr></table>
+<div class="info-box"><span class="tag">NOTE</span><p>Depends on platform support and, on Linux, bubblewrap/socat. If enabled but unavailable, query() reports a result with subtype "error_during_execution" and the reason in errors; a single-shot query() throws after yielding that result. Set failIfUnavailable:false to run unsandboxed instead.</p></div>
+<pre class="code-block"><code class="autohl">import { query } from "@anthropic-ai/claude-agent-sdk";
+
+try {
+  for await (const message of query({
+    prompt: "Build and test my project",
+    options: {
+      sandbox: {
+        enabled: true,
+        autoAllowBashIfSandboxed: true,
+        network: { allowLocalBinding: true }
+      }
+    }
+  })) {
+    if ("result" in message) console.log(message.result);
+  }
+} catch (error) {
+  console.log(`Session ended with an error: ${error}`);
+}</code></pre>
+<div class="warn-box"><span class="tag">WARNING</span><p>Unix socket security: allowUnixSockets can grant access to powerful system services. Allowing /var/run/docker.sock effectively grants full host access via the Docker API, bypassing sandbox isolation.</p></div>
+</div></details>
+
+<details class="acc"><summary>SandboxNetworkConfig</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type SandboxNetworkConfig = {
+  allowedDomains?: string[]; deniedDomains?: string[]; allowManagedDomainsOnly?: boolean;
+  allowLocalBinding?: boolean; allowUnixSockets?: string[]; allowAllUnixSockets?: boolean;
+  httpProxyPort?: number; socksProxyPort?: number;
+};</code></pre>
+<table class="spec-table"><tr><th>Property</th><th>Default</th><th>Description</th></tr>
+<tr><td>allowedDomains</td><td>[]</td><td>Domains sandboxed processes can access</td></tr>
+<tr><td>deniedDomains</td><td>[]</td><td>Domains that cannot be accessed; takes precedence over allowedDomains</td></tr>
+<tr><td>allowManagedDomainsOnly</td><td>false</td><td>Managed-settings only; honors only managed-tier allowedDomains. No effect via SDK options</td></tr>
+<tr><td>allowLocalBinding</td><td>false</td><td>Allow binding to local ports, e.g. dev servers</td></tr>
+<tr><td>allowUnixSockets</td><td>[]</td><td>Unix socket paths processes can access</td></tr>
+<tr><td>allowAllUnixSockets</td><td>false</td><td>Allow access to all Unix sockets</td></tr>
+<tr><td>httpProxyPort / socksProxyPort</td><td>undefined</td><td>Proxy ports for network requests</td></tr></table>
+<div class="info-box"><span class="tag">NOTE</span><p>The built-in proxy enforces allowedDomains by requested hostname and does not inspect TLS, so domain fronting can potentially bypass it. Applies to sandboxed Bash only, not WebFetch, which uses permission rules instead.</p></div>
+</div></details>
+
+<details class="acc"><summary>SandboxFilesystemConfig</summary><div class="acc-body">
+<pre class="code-block"><code class="autohl">type SandboxFilesystemConfig = { allowWrite?: string[]; denyWrite?: string[]; denyRead?: string[]; };</code></pre>
+</div></details>
+
+<details class="acc"><summary>Permissions fallback for unsandboxed commands</summary><div class="acc-body">
+<p class="acc-desc">When allowUnsandboxedCommands is on, the model can set dangerouslyDisableSandbox:true to fall back to the permissions system, invoking canUseTool for custom authorization. excludedCommands is a static, model-uncontrolled bypass list; allowUnsandboxedCommands lets the model decide at runtime.</p>
+<pre class="code-block"><code class="autohl">import { query } from "@anthropic-ai/claude-agent-sdk";
+
+for await (const message of query({
+  prompt: "Deploy my application",
+  options: {
+    sandbox: { enabled: true, allowUnsandboxedCommands: true },
+    permissionMode: "default",
+    canUseTool: async (tool, input) => {
+      if (tool === "Bash" && input.dangerouslyDisableSandbox) {
+        console.log(`Unsandboxed command requested: ${input.command}`);
+        if (isCommandAuthorized(input.command)) {
+          return { behavior: "allow" as const, updatedInput: input };
+        }
+        return { behavior: "deny" as const, message: "Command not authorized for unsandboxed execution" };
+      }
+      return { behavior: "allow" as const, updatedInput: input };
+    }
+  }
+})) {
+  if ("result" in message) console.log(message.result);
+}</code></pre>
+<div class="warn-box"><span class="tag">WARNING</span><p>Commands with dangerouslyDisableSandbox:true have full system access. If permissionMode is bypassPermissions and allowUnsandboxedCommands is enabled, the model can escape sandbox isolation silently (an explicit ask rule still forces a prompt).</p></div>
+</div></details>
+</section>
+
+<!-- 10 See also -->
+<section class="cat-panel" id="cat-10">
+<h2>See also</h2>
+<div class="takeaway"><p>SDK overview — general SDK concepts. Python SDK reference — Python SDK documentation. CLI reference — command-line interface. Common workflows — step-by-step guides.</p></div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme(){
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+let catStep = 0;
+const CAT_MAX = 10;
+function catGoTo(n){
+  catStep = Math.max(0, Math.min(CAT_MAX, n));
+  document.querySelectorAll('.cat-panel').forEach((el,i)=>el.classList.toggle('visible', i===catStep));
+  document.querySelectorAll('.cat-tab').forEach((t,i)=>t.classList.toggle('active', i===catStep));
+  window.scrollTo({top:0, behavior:'instant'});
+}
+
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function hl(raw){
+  const pattern = /(\/\/.*)|(#.*)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)|(\b(?:function|const|let|var|type|interface|class|extends|implements|import|export|from|async|await|return|if|else|for|while|new|typeof|keyof|readonly|public|private|protected|static|enum|namespace|declare|abstract|as|in|of|yield|try|catch|finally|throw|void|null|undefined)\b)/g;
+  let out = '', last = 0, m;
+  while ((m = pattern.exec(raw))) {
+    out += esc(raw.slice(last, m.index));
+    if (m[1] || m[2]) out += '<span class="cmt">' + esc(m[1] || m[2]) + '</span>';
+    else if (m[3]) out += '<span class="str">' + esc(m[3]) + '</span>';
+    else if (m[4]) out += '<span class="kw">' + esc(m[4]) + '</span>';
+    last = pattern.lastIndex;
+  }
+  out += esc(raw.slice(last));
+  return out;
+}
+document.querySelectorAll('code.autohl').forEach(el => {
+  const raw = el.textContent;
+  el.innerHTML = hl(raw);
+});
+</script>
+</body>
+</html>

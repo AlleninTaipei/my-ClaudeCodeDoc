@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create and distribute a plugin marketplace</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+           background: #f0f4f8; color: #1a202c; line-height: 1.7; }
+    header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+             border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
+    header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
+    header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem;
+                max-width: 600px; margin-inline: auto; }
+    main    { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+    section { margin-bottom: 52px; }
+    h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af;
+         border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
+    h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
+    p  { color: #4a5568; margin-bottom: 12px; }
+    ul { color: #4a5568; margin: 0 0 12px 20px; }
+    li { margin-bottom: 4px; }
+    .code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+      padding: 16px 18px; font-family: monospace; font-size: 0.8rem; color: #1a202c;
+      overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
+    .kw  { color: #7c3aed; }
+    .fn  { color: #16a34a; }
+    .str { color: #d97706; }
+    .cmt { color: #94a3b8; font-style: italic; }
+    .key { color: #2563eb; }
+    .info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px;
+      padding: 16px 20px; margin-top: 14px; }
+    .info-box .tag { display: inline-block; background: #3b82f6; color: #fff;
+      font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+      margin-bottom: 10px; letter-spacing: 0.05em; }
+    .info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
+    .warn-box { background: #fef3c7; border: 1px solid #fcd34d; border-radius: 10px;
+      padding: 16px 20px; margin-top: 14px; }
+    .warn-box .tag { display: inline-block; background: #d97706; color: #fff;
+      font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+      margin-bottom: 10px; letter-spacing: 0.05em; }
+    .warn-box p { color: #78350f; font-size: 0.88rem; margin: 0; }
+    .takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+      border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
+    .takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
+    .api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+    .field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
+    .field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+    .field .type { font-size: 0.7rem; color: #9ca3af; margin-left: 6px; }
+    .field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
+    .event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+    .event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px;
+      padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
+    .event-name { font-family: monospace; font-size: 0.8rem; color: #16a34a;
+      min-width: 190px; flex-shrink: 0; }
+    .event-desc { font-size: 0.82rem; color: #4a5568; }
+    .response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px;
+      padding: 20px; margin-top: 16px; }
+    .response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+    .response-field:last-child { border-bottom: none; }
+    .rf-key { font-family: monospace; font-size: 0.8rem; color: #d97706; width: 160px; flex-shrink: 0; }
+    .rf-val { font-size: 0.85rem; color: #374151; }
+    .stage-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stage-tab  { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+    .stage-tab.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+    .stage-tab.done   { background: #166534; border-color: #4ade80; color: #dcfce7; }
+    .step-indicator { color: #6b7280; font-size: 0.82rem; margin-top: 10px; display: block; }
+    .demo-panel { display: none; }
+    .demo-panel.visible { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+    .col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
+    .col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em;
+      text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+    .col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
+    .col-card p:last-child { margin-bottom: 0; }
+    .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .chip-label { font-size: 0.75rem; color: #6b7280; }
+    .chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+      cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
+    .chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
+    @media (max-width: 640px) { .api-fields, .two-col { grid-template-columns: 1fr; } }
+    #themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999;
+      padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+      cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c;
+      transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
+    #themeToggle:hover { border-color: #2563eb; color: #2563eb; }
+    body.dark { background: #0f1117; color: #e2e8f0; }
+    body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
+    body.dark header h1 { color: #f7fafc; }
+    body.dark header p  { color: #a0aec0; }
+    body.dark h2 { color: #90cdf4; border-left-color: #4299e1; }
+    body.dark h3 { color: #e2e8f0; }
+    body.dark p, body.dark ul { color: #a0aec0; }
+    body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
+    body.dark .kw  { color: #9f7aea; }
+    body.dark .fn  { color: #68d391; }
+    body.dark .str { color: #f6ad55; }
+    body.dark .cmt { color: #4a5568; }
+    body.dark .key { color: #63b3ed; }
+    body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
+    body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
+    body.dark .info-box p { color: #a0aec0; }
+    body.dark .warn-box { background: #3a2a10; border-color: #7a5a20; }
+    body.dark .warn-box .tag { background: #7a5a20; color: #f6ad55; }
+    body.dark .warn-box p { color: #f6ad55; }
+    body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
+    body.dark .takeaway p { color: #c6f6d5; }
+    body.dark .field { background: #1a202c; border-color: #2d3748; }
+    body.dark .field .name { color: #68d391; }
+    body.dark .field .desc { color: #718096; }
+    body.dark .event-item { background: #1a202c; border-color: #2d3748; }
+    body.dark .event-name { color: #68d391; }
+    body.dark .event-desc { color: #718096; }
+    body.dark .response-box { background: #1a202c; border-color: #2d3748; }
+    body.dark .response-field { border-bottom-color: #2d3748; }
+    body.dark .rf-key { color: #f6ad55; }
+    body.dark .rf-val { color: #a0aec0; }
+    body.dark .step-indicator { color: #718096; }
+    body.dark .stage-tab { background: #1a202c; border-color: #2d3748; color: #718096; }
+    body.dark .stage-tab.active { background: #2b6cb0; border-color: #4299e1; color: #fff; }
+    body.dark .stage-tab.done   { background: #276749; border-color: #48bb78; color: #c6f6d5; }
+    body.dark .col-card { background: #1a202c; border-color: #2d3748; }
+    body.dark .col-card-title { color: #4a5568; }
+    body.dark .col-card p { color: #a0aec0; }
+    body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
+    body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
+    body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+    body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
+  </style>
+</head>
+<body>
+
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+
+<header>
+  <h1>Create and distribute a plugin marketplace</h1>
+  <p>Build and host plugin marketplaces to distribute Claude Code extensions across teams and communities.</p>
+</header>
+
+<main>
+
+<section>
+  <h2>Overview</h2>
+  <p>Creating and distributing a marketplace involves four stages: create the plugins you want to share, define a <code>marketplace.json</code> catalog, host it on a git provider, and let users add it with <code>/plugin marketplace add</code>.</p>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">1. Create plugins</span><span class="event-desc">Build skills, agents, hooks, MCP servers, or LSP servers</span></div>
+    <div class="event-item"><span class="event-name">2. Create the marketplace file</span><span class="event-desc">Define a marketplace.json listing your plugins</span></div>
+    <div class="event-item"><span class="event-name">3. Host the marketplace</span><span class="event-desc">Push to GitHub, GitLab, or another git host</span></div>
+    <div class="event-item"><span class="event-name">4. Share with users</span><span class="event-desc">Users add it with /plugin marketplace add</span></div>
+  </div>
+  <div class="takeaway"><p>Once live, update the marketplace by pushing changes to the repository. Users refresh with <code>/plugin marketplace update</code>.</p></div>
+</section>
+
+<section>
+  <h2>Walkthrough: create a local marketplace</h2>
+  <p>This example builds a marketplace with one plugin, a <code>quality-review</code> skill for code reviews.</p>
+
+  <div class="stage-tabs">
+    <div class="wt-tab stage-tab active" onclick="wtGoTo(0)">1 · Directory</div>
+    <div class="wt-tab stage-tab" onclick="wtGoTo(1)">2 · Skill</div>
+    <div class="wt-tab stage-tab" onclick="wtGoTo(2)">3 · Manifest</div>
+    <div class="wt-tab stage-tab" onclick="wtGoTo(3)">4 · Marketplace file</div>
+    <div class="wt-tab stage-tab" onclick="wtGoTo(4)">5 · Add &amp; install</div>
+    <div class="wt-tab stage-tab" onclick="wtGoTo(5)">6 · Try it</div>
+  </div>
+
+  <div class="wt-panel demo-panel visible" id="wt-p0">
+    <p>Create the directory structure for the marketplace, plugin, and skill.</p>
+    <pre class="code-block"><span class="fn">mkdir</span> -p my-marketplace/.claude-plugin
+<span class="fn">mkdir</span> -p my-marketplace/plugins/quality-review-plugin/.claude-plugin
+<span class="fn">mkdir</span> -p my-marketplace/plugins/quality-review-plugin/skills/quality-review</pre>
+  </div>
+  <div class="wt-panel demo-panel" id="wt-p1">
+    <p>Create <code>SKILL.md</code> defining what the <code>quality-review</code> skill does.</p>
+    <pre class="code-block"><span class="cmt">---</span>
+<span class="key">description</span>: <span class="str">Review code for bugs, security, and performance</span>
+<span class="cmt">---</span>
+
+Review the code I've selected or the recent changes for:
+- Potential bugs or edge cases
+- Security concerns
+- Performance issues
+- Readability improvements</pre>
+  </div>
+  <div class="wt-panel demo-panel" id="wt-p2">
+    <p>Create <code>plugin.json</code> in <code>.claude-plugin/</code> describing the plugin.</p>
+    <pre class="code-block">{
+  <span class="str">"name"</span>: <span class="str">"quality-review-plugin"</span>,
+  <span class="str">"description"</span>: <span class="str">"Adds a quality-review skill for quick code reviews"</span>,
+  <span class="str">"version"</span>: <span class="str">"1.0.0"</span>
+}</pre>
+    <div class="info-box"><span class="tag">NOTE</span><p>Setting <code>version</code> means users only receive updates when you change this field, so bump it on every release. If omitted and hosted in git, every commit counts as a new version.</p></div>
+  </div>
+  <div class="wt-panel demo-panel" id="wt-p3">
+    <p>Create the marketplace catalog that lists the plugin.</p>
+    <pre class="code-block">{
+  <span class="str">"name"</span>: <span class="str">"my-plugins"</span>,
+  <span class="str">"owner"</span>: { <span class="str">"name"</span>: <span class="str">"Your Name"</span> },
+  <span class="str">"plugins"</span>: [
+    {
+      <span class="str">"name"</span>: <span class="str">"quality-review-plugin"</span>,
+      <span class="str">"source"</span>: <span class="str">"./plugins/quality-review-plugin"</span>,
+      <span class="str">"description"</span>: <span class="str">"Adds a quality-review skill for quick code reviews"</span>
+    }
+  ]
+}</pre>
+  </div>
+  <div class="wt-panel demo-panel" id="wt-p4">
+    <p>Add the marketplace and install the plugin.</p>
+    <pre class="code-block">/plugin marketplace add ./my-marketplace
+/plugin install quality-review-plugin@my-plugins</pre>
+  </div>
+  <div class="wt-panel demo-panel" id="wt-p5">
+    <p>Select code in your editor and run the new skill. Plugin skills are namespaced with the plugin name.</p>
+    <pre class="code-block">/quality-review-plugin:quality-review</pre>
+  </div>
+  <span class="step-indicator" id="wtIndicator">Step 1 of 6</span>
+
+  <div class="warn-box"><span class="tag">HOW PLUGINS ARE INSTALLED</span><p>When users install a plugin, Claude Code copies the plugin directory to a cache location. Plugins can't reference files outside their directory using paths like <code>../shared-utils</code>, because those files won't be copied. Use symlinks to share files across plugins.</p></div>
+</section>
+
+<section>
+  <h2>Create the marketplace file</h2>
+  <p>Create <code>.claude-plugin/marketplace.json</code> in your repository root. Each plugin entry needs at minimum a <code>name</code> and a <code>source</code>.</p>
+  <pre class="code-block">{
+  <span class="str">"name"</span>: <span class="str">"company-tools"</span>,
+  <span class="str">"owner"</span>: { <span class="str">"name"</span>: <span class="str">"DevTools Team"</span>, <span class="str">"email"</span>: <span class="str">"devtools@example.com"</span> },
+  <span class="str">"plugins"</span>: [
+    {
+      <span class="str">"name"</span>: <span class="str">"code-formatter"</span>,
+      <span class="str">"source"</span>: <span class="str">"./plugins/formatter"</span>,
+      <span class="str">"description"</span>: <span class="str">"Automatic code formatting on save"</span>,
+      <span class="str">"version"</span>: <span class="str">"2.1.0"</span>,
+      <span class="str">"author"</span>: { <span class="str">"name"</span>: <span class="str">"DevTools Team"</span> }
+    },
+    {
+      <span class="str">"name"</span>: <span class="str">"deployment-tools"</span>,
+      <span class="str">"source"</span>: { <span class="str">"source"</span>: <span class="str">"github"</span>, <span class="str">"repo"</span>: <span class="str">"company/deploy-plugin"</span> },
+      <span class="str">"description"</span>: <span class="str">"Deployment automation tools"</span>
+    }
+  ]
+}</pre>
+</section>
+
+<section>
+  <h2>Marketplace schema</h2>
+  <h3>Required fields</h3>
+  <div class="api-fields">
+    <div class="field"><span class="name">name</span><span class="type">string</span><div class="desc">Marketplace identifier (kebab-case). Public-facing, used as <code>/plugin install my-tool@your-marketplace</code>. Each user can register only one marketplace per name.</div></div>
+    <div class="field"><span class="name">owner</span><span class="type">object</span><div class="desc">Marketplace maintainer info: <code>name</code> (required), <code>email</code> (optional)</div></div>
+    <div class="field"><span class="name">plugins</span><span class="type">array</span><div class="desc">List of available plugins</div></div>
+  </div>
+  <div class="warn-box"><span class="tag">RESERVED NAMES</span><p>Names such as <code>claude-code-marketplace</code>, <code>claude-code-plugins</code>, <code>anthropic-plugins</code>, and similar are reserved for official Anthropic use and are re-checked on every load, not just when added. Names that impersonate official marketplaces are also blocked.</p></div>
+
+  <h3>Optional fields</h3>
+  <div class="api-fields">
+    <div class="field"><span class="name">$schema</span><span class="type">string</span><div class="desc">JSON Schema URL for editor autocomplete; ignored at load time</div></div>
+    <div class="field"><span class="name">description</span><span class="type">string</span><div class="desc">Brief marketplace description</div></div>
+    <div class="field"><span class="name">version</span><span class="type">string</span><div class="desc">Marketplace manifest version</div></div>
+    <div class="field"><span class="name">metadata.pluginRoot</span><span class="type">string</span><div class="desc">Base directory prepended to relative plugin source paths</div></div>
+    <div class="field"><span class="name">allowCrossMarketplaceDependenciesOn</span><span class="type">array</span><div class="desc">Other marketplaces this marketplace's plugins may depend on</div></div>
+    <div class="field"><span class="name">renames</span><span class="type">object</span><div class="desc">Map from a former plugin name to its current name, or null if removed. Requires v2.1.193+</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Plugin entries</h2>
+  <p>Each entry describes a plugin and where to find it. Any field from the plugin manifest schema is accepted, plus marketplace-specific fields: <code>source</code>, <code>category</code>, <code>tags</code>, <code>strict</code>, and <code>relevance</code>.</p>
+  <h3>Required</h3>
+  <div class="api-fields">
+    <div class="field"><span class="name">name</span><span class="type">string</span><div class="desc">Plugin identifier (kebab-case), public-facing</div></div>
+    <div class="field"><span class="name">source</span><span class="type">string | object</span><div class="desc">Where to fetch the plugin from</div></div>
+  </div>
+  <h3>Optional metadata</h3>
+  <div class="api-fields">
+    <div class="field"><span class="name">displayName</span><span class="type">string</span><div class="desc">Human-readable name shown in UI. v2.1.143+</div></div>
+    <div class="field"><span class="name">version</span><span class="type">string</span><div class="desc">Pins the plugin; omit to fall back to git commit SHA</div></div>
+    <div class="field"><span class="name">author / homepage / repository / license</span><span class="type">-</span><div class="desc">Standard attribution fields</div></div>
+    <div class="field"><span class="name">keywords / category / tags</span><span class="type">-</span><div class="desc">Discovery and categorization</div></div>
+    <div class="field"><span class="name">strict</span><span class="type">boolean</span><div class="desc">Whether plugin.json is the authority for components (default true)</div></div>
+    <div class="field"><span class="name">relevance</span><span class="type">object</span><div class="desc">Signals for suggesting this plugin to org users. v2.1.152+</div></div>
+    <div class="field"><span class="name">defaultEnabled</span><span class="type">boolean</span><div class="desc">Whether enabled after install (default true). v2.1.154+</div></div>
+  </div>
+  <h3>Component configuration</h3>
+  <div class="api-fields">
+    <div class="field"><span class="name">skills / commands / agents</span><span class="type">string|array</span><div class="desc">Custom paths to component directories/files</div></div>
+    <div class="field"><span class="name">hooks / mcpServers / lspServers</span><span class="type">string|object</span><div class="desc">Inline config or path to config file</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Plugin sources</h2>
+  <p>Sources tell Claude Code where to fetch each plugin listed in the marketplace. After cloning or downloading, Claude Code copies the plugin into the local cache at <code>~/.claude/plugins/cache</code>.</p>
+
+  <div class="chip-row">
+    <span class="chip-label">Source type:</span>
+    <div class="ps-chip chip active" onclick="psShow(0)">Relative path</div>
+    <div class="ps-chip chip" onclick="psShow(1)">github</div>
+    <div class="ps-chip chip" onclick="psShow(2)">url (git)</div>
+    <div class="ps-chip chip" onclick="psShow(3)">git-subdir</div>
+    <div class="ps-chip chip" onclick="psShow(4)">npm</div>
+  </div>
+
+  <div class="ps-panel demo-panel visible" id="ps-0">
+    <pre class="code-block">{ <span class="str">"name"</span>: <span class="str">"my-plugin"</span>, <span class="str">"source"</span>: <span class="str">"./plugins/my-plugin"</span> }</pre>
+    <p>Local directory within the marketplace repo. Must start with <code>./</code>, resolved relative to the marketplace root (the directory containing <code>.claude-plugin/</code>), not the <code>.claude-plugin/</code> directory itself. Don't use <code>../</code>. Only works when the marketplace itself was added via git or a local directory, not a direct URL to <code>marketplace.json</code>.</p>
+  </div>
+  <div class="ps-panel demo-panel" id="ps-1">
+    <pre class="code-block">{
+  <span class="str">"name"</span>: <span class="str">"github-plugin"</span>,
+  <span class="str">"source"</span>: { <span class="str">"source"</span>: <span class="str">"github"</span>, <span class="str">"repo"</span>: <span class="str">"owner/plugin-repo"</span>, <span class="str">"ref"</span>: <span class="str">"v2.0.0"</span>, <span class="str">"sha"</span>: <span class="str">"a1b2c3..."</span> }
+}</pre>
+    <p>Fields: <code>repo</code> (required, owner/repo), <code>ref</code> (branch/tag, defaults to default branch), <code>sha</code> (40-char commit SHA). When both are set, <code>sha</code> is the effective pin.</p>
+  </div>
+  <div class="ps-panel demo-panel" id="ps-2">
+    <pre class="code-block">{
+  <span class="str">"name"</span>: <span class="str">"git-plugin"</span>,
+  <span class="str">"source"</span>: { <span class="str">"source"</span>: <span class="str">"url"</span>, <span class="str">"url"</span>: <span class="str">"https://gitlab.com/team/plugin.git"</span>, <span class="str">"ref"</span>: <span class="str">"main"</span> }
+}</pre>
+    <p>Fields: <code>url</code> (required, https:// or git@, .git suffix optional), <code>ref</code>, <code>sha</code>.</p>
+  </div>
+  <div class="ps-panel demo-panel" id="ps-3">
+    <pre class="code-block">{
+  <span class="str">"name"</span>: <span class="str">"my-plugin"</span>,
+  <span class="str">"source"</span>: { <span class="str">"source"</span>: <span class="str">"git-subdir"</span>, <span class="str">"url"</span>: <span class="str">"https://github.com/acme-corp/monorepo.git"</span>, <span class="str">"path"</span>: <span class="str">"tools/claude-plugin"</span> }
+}</pre>
+    <p>Uses a sparse, partial clone to fetch only the subdirectory, minimizing bandwidth for monorepos. Fields: <code>url</code>, <code>path</code> (required), <code>ref</code>, <code>sha</code>.</p>
+  </div>
+  <div class="ps-panel demo-panel" id="ps-4">
+    <pre class="code-block">{
+  <span class="str">"name"</span>: <span class="str">"my-npm-plugin"</span>,
+  <span class="str">"source"</span>: { <span class="str">"source"</span>: <span class="str">"npm"</span>, <span class="str">"package"</span>: <span class="str">"@acme/claude-plugin"</span>, <span class="str">"version"</span>: <span class="str">"^2.0.0"</span>, <span class="str">"registry"</span>: <span class="str">"https://npm.example.com"</span> }
+}</pre>
+    <p>Installed via <code>npm install</code>. Fields: <code>package</code> (required), <code>version</code>, <code>registry</code> (defaults to npmjs.org).</p>
+  </div>
+
+  <div class="info-box"><span class="tag">MARKETPLACE VS PLUGIN SOURCE</span><p>Marketplace source is where <code>marketplace.json</code> itself is fetched from (supports ref, not sha). Plugin source is where each listed plugin is fetched from (supports both ref and sha). They can point to different repositories, pinned independently.</p></div>
+
+  <h3>Strict mode</h3>
+  <div class="two-col">
+    <div class="col-card"><div class="col-card-title">strict: true (default)</div><p>plugin.json is the authority. Marketplace entry can supplement it with additional components; both merge.</p></div>
+    <div class="col-card"><div class="col-card-title">strict: false</div><p>Marketplace entry is the entire definition. If the plugin also has a plugin.json declaring components, that's a conflict and it fails to load.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>Host and distribute marketplaces</h2>
+  <div class="stage-tabs">
+    <div class="host-tab stage-tab active" onclick="hostGoTo(0)">GitHub</div>
+    <div class="host-tab stage-tab" onclick="hostGoTo(1)">Other git hosts</div>
+    <div class="host-tab stage-tab" onclick="hostGoTo(2)">Private repos</div>
+    <div class="host-tab stage-tab" onclick="hostGoTo(3)">Test locally</div>
+    <div class="host-tab stage-tab" onclick="hostGoTo(4)">Require for team</div>
+    <div class="host-tab stage-tab" onclick="hostGoTo(5)">Containers</div>
+    <div class="host-tab stage-tab" onclick="hostGoTo(6)">Managed restrictions</div>
+  </div>
+  <div class="host-panel demo-panel visible" id="host-p0">
+    <p><strong>Recommended.</strong> Create a repository, add <code>.claude-plugin/marketplace.json</code>, and share with <code>/plugin marketplace add owner/repo</code>. Benefits: built-in version control, issue tracking, team collaboration.</p>
+  </div>
+  <div class="host-panel demo-panel" id="host-p1">
+    <p>Any git host works (GitLab, Bitbucket, self-hosted). Add with the full URL:</p>
+    <pre class="code-block">/plugin marketplace add https://gitlab.com/company/plugins.git</pre>
+  </div>
+  <div class="host-panel demo-panel" id="host-p2">
+    <p>Manual install/update uses your existing git credential helpers (HTTPS via <code>gh auth login</code>, Keychain, git-credential-store; SSH via ssh-agent). Background auto-updates need a token in the environment since interactive prompts would block startup:</p>
+    <div class="api-fields">
+      <div class="field"><span class="name">GITHUB_TOKEN / GH_TOKEN</span><div class="desc">Personal access token or GitHub App token</div></div>
+      <div class="field"><span class="name">GITLAB_TOKEN / GL_TOKEN</span><div class="desc">Personal access token or project token</div></div>
+      <div class="field"><span class="name">BITBUCKET_TOKEN</span><div class="desc">App password or repository access token</div></div>
+    </div>
+  </div>
+  <div class="host-panel demo-panel" id="host-p3">
+    <pre class="code-block">/plugin marketplace add ./my-marketplace
+/plugin install quality-review-plugin@my-plugins</pre>
+  </div>
+  <div class="host-panel demo-panel" id="host-p4">
+    <p>Configure <code>.claude/settings.json</code> so team members are prompted to install automatically once they trust the folder:</p>
+    <pre class="code-block">{
+  <span class="str">"extraKnownMarketplaces"</span>: {
+    <span class="str">"company-tools"</span>: { <span class="str">"source"</span>: { <span class="str">"source"</span>: <span class="str">"github"</span>, <span class="str">"repo"</span>: <span class="str">"your-org/claude-plugins"</span> } }
+  },
+  <span class="str">"enabledPlugins"</span>: { <span class="str">"code-formatter@company-tools"</span>: <span class="kw">true</span> }
+}</pre>
+  </div>
+  <div class="host-panel demo-panel" id="host-p5">
+    <p>Pre-populate a plugins directory at build time via <code>CLAUDE_CODE_PLUGIN_SEED_DIR</code> so containers start with marketplaces/plugins available without runtime cloning. Layer multiple seeds with <code>:</code> (Unix) or <code>;</code> (Windows).</p>
+    <pre class="code-block">CLAUDE_CODE_PLUGIN_CACHE_DIR=/opt/claude-seed claude plugin marketplace add your-org/plugins
+CLAUDE_CODE_PLUGIN_CACHE_DIR=/opt/claude-seed claude plugin install my-tool@your-plugins</pre>
+    <div class="event-list">
+      <div class="event-item"><span class="event-name">Read-only</span><span class="event-desc">Seed is never written to; auto-updates disabled for seed marketplaces</span></div>
+      <div class="event-item"><span class="event-name">Seed precedence</span><span class="event-desc">Seed entries overwrite matching user config entries each startup</span></div>
+      <div class="event-item"><span class="event-name">Path resolution</span><span class="event-desc">Located by probing the seed dir at runtime, not trusting stored paths</span></div>
+      <div class="event-item"><span class="event-name">Mutation blocked</span><span class="event-desc">marketplace remove/update fail against seed-managed entries</span></div>
+    </div>
+  </div>
+  <div class="host-panel demo-panel" id="host-p6">
+    <p>Administrators restrict which marketplaces users may add via <code>strictKnownMarketplaces</code> in managed settings; pair with <code>disableSideloadFlags</code> to also block CLI sideload flags.</p>
+    <div class="response-box">
+      <div class="response-field"><span class="rf-key">Undefined</span><span class="rf-val">No restrictions</span></div>
+      <div class="response-field"><span class="rf-key">Empty array []</span><span class="rf-val">Complete lockdown, no new marketplaces</span></div>
+      <div class="response-field"><span class="rf-key">List of sources</span><span class="rf-val">Only exact-match marketplaces allowed</span></div>
+    </div>
+    <pre class="code-block">{
+  <span class="str">"strictKnownMarketplaces"</span>: [
+    { <span class="str">"source"</span>: <span class="str">"hostPattern"</span>, <span class="str">"hostPattern"</span>: <span class="str">"^github\\.example\\.com$"</span> }
+  ]
+}</pre>
+    <p>Checked before any network/filesystem operation, on add and on install/update/refresh/auto-update. Uses exact matching (no URL normalization); prefer <code>hostPattern</code> when a repo can be cloned by multiple URL forms.</p>
+  </div>
+  <span class="step-indicator" id="hostIndicator">1 of 7</span>
+</section>
+
+<section>
+  <h2>Version resolution and release channels</h2>
+  <p>Versions determine cache paths and update detection. Resolved from the first set of: <code>plugin.json</code> version → marketplace entry version → git commit SHA.</p>
+  <div class="warn-box"><span class="tag">WARNING</span><p>Setting <code>version</code> pins the plugin — pushing commits without bumping it does nothing for existing users. Avoid setting version in both plugin.json and the marketplace entry; plugin.json always wins silently.</p></div>
+  <h3>Set up release channels</h3>
+  <p>Create two marketplaces pointing to different refs/SHAs of the same repo, then assign each to a user group via managed settings.</p>
+  <pre class="code-block"><span class="cmt">// stable-tools marketplace</span>
+{ <span class="str">"name"</span>: <span class="str">"code-formatter"</span>, <span class="str">"source"</span>: { <span class="str">"source"</span>: <span class="str">"github"</span>, <span class="str">"repo"</span>: <span class="str">"acme-corp/code-formatter"</span>, <span class="str">"ref"</span>: <span class="str">"stable"</span> } }
+
+<span class="cmt">// latest-tools marketplace</span>
+{ <span class="str">"name"</span>: <span class="str">"code-formatter"</span>, <span class="str">"source"</span>: { <span class="str">"source"</span>: <span class="str">"github"</span>, <span class="str">"repo"</span>: <span class="str">"acme-corp/code-formatter"</span>, <span class="str">"ref"</span>: <span class="str">"latest"</span> } }</pre>
+  <p>Each channel must resolve to a different version string or Claude Code treats them as identical.</p>
+</section>
+
+<section>
+  <h2>Rename or remove a plugin</h2>
+  <p>A plugin's <code>name</code> is its stable identifier; changing it breaks existing installs. To relabel without breaking installs, set <code>displayName</code> and keep <code>name</code> unchanged. To actually rename or remove, add a top-level <code>renames</code> map (requires v2.1.193+):</p>
+  <pre class="code-block">{
+  <span class="str">"name"</span>: <span class="str">"acme-tools"</span>,
+  <span class="str">"plugins"</span>: [ { <span class="str">"name"</span>: <span class="str">"code-formatter"</span>, <span class="str">"source"</span>: <span class="str">"./plugins/code-formatter"</span> } ],
+  <span class="str">"renames"</span>: { <span class="str">"formatter"</span>: <span class="str">"code-formatter"</span>, <span class="str">"legacy-linter"</span>: <span class="kw">null</span> }
+}</pre>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">Points to new name</span><span class="event-desc">Loads under new name, shows a one-line notice, rewrites settings keys</span></div>
+    <div class="event-item"><span class="event-name">null entry</span><span class="event-desc">Old key dropped, notice reports removal</span></div>
+    <div class="event-item"><span class="event-name">Remote source rename</span><span class="event-desc">Reports plugin-cache-miss; user must /plugin install once under new name</span></div>
+  </div>
+  <p>Treat <code>renames</code> as append-only history — keep old entries even after users have migrated; Claude Code follows chains. Run <code>claude plugin validate .</code> to reject cycles or dangling chains.</p>
+</section>
+
+<section>
+  <h2>Validation and testing</h2>
+  <pre class="code-block">claude plugin validate .
+/plugin validate .
+/plugin marketplace add ./path/to/marketplace
+/plugin install test-plugin@marketplace-name</pre>
+</section>
+
+<section>
+  <h2>Manage marketplaces from the CLI</h2>
+  <div class="chip-row">
+    <span class="chip-label">Command:</span>
+    <div class="cli-chip chip active" onclick="cliShow(0)">add</div>
+    <div class="cli-chip chip" onclick="cliShow(1)">list</div>
+    <div class="cli-chip chip" onclick="cliShow(2)">remove</div>
+    <div class="cli-chip chip" onclick="cliShow(3)">update</div>
+  </div>
+  <div class="cli-panel demo-panel visible" id="cli-0">
+    <pre class="code-block">claude plugin marketplace add &lt;source&gt; [options]
+
+claude plugin marketplace add acme-corp/claude-plugins
+claude plugin marketplace add acme-corp/claude-plugins@v2.0
+claude plugin marketplace add https://gitlab.example.com/team/plugins.git
+claude plugin marketplace add ./my-marketplace --scope project
+claude plugin marketplace add acme-corp/monorepo --sparse .claude-plugin plugins</pre>
+    <p>Options: <code>--scope &lt;user|project|local&gt;</code> (default user), <code>--sparse &lt;paths...&gt;</code>. A bare host without a scheme is rejected as of v2.1.196.</p>
+  </div>
+  <div class="cli-panel demo-panel" id="cli-1">
+    <pre class="code-block">claude plugin marketplace list [--json]</pre>
+    <p>With <code>--json</code>, entries include <code>name</code>, <code>source</code>, and source-specific fields (<code>repo</code>, <code>url</code>, <code>path</code>, <code>ref</code>).</p>
+  </div>
+  <div class="cli-panel demo-panel" id="cli-2">
+    <pre class="code-block">claude plugin marketplace remove &lt;name&gt; [--scope &lt;scope&gt;]</pre>
+    <p>Alias: <code>rm</code>. Omitting <code>--scope</code> removes the declaration from every editable scope.</p>
+    <div class="warn-box"><span class="tag">WARNING</span><p>Removing a marketplace from its last remaining scope also uninstalls plugins installed from it. Use <code>update</code> to refresh without losing plugins.</p></div>
+  </div>
+  <div class="cli-panel demo-panel" id="cli-3">
+    <pre class="code-block">claude plugin marketplace update [name]</pre>
+    <p>Omit <code>name</code> to update all marketplaces. Seed-managed marketplaces are read-only and skipped.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Troubleshooting</h2>
+  <div class="event-list">
+    <div class="event-item"><span class="event-name">Marketplace not loading</span><span class="event-desc">Verify URL accessible, .claude-plugin/marketplace.json exists, JSON valid, private-repo permissions</span></div>
+    <div class="event-item"><span class="event-name">Validation errors</span><span class="event-desc">claude plugin validate . checks schema, duplicate names, path traversal; per-entry plugin.json checks too</span></div>
+    <div class="event-item"><span class="event-name">Plugin install failures</span><span class="event-desc">Check source URLs, required files, GitHub access, pinned commit still exists</span></div>
+    <div class="event-item"><span class="event-name">Private repo auth fails</span><span class="event-desc">Verify gh auth status, credential.helper config, or GITHUB_TOKEN for background updates</span></div>
+    <div class="event-item"><span class="event-name">Updates fail offline</span><span class="event-desc">Set CLAUDE_CODE_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE=1 to keep stale cache instead of wiping it</span></div>
+    <div class="event-item"><span class="event-name">Git operations time out</span><span class="event-desc">Raise CLAUDE_CODE_PLUGIN_GIT_TIMEOUT_MS (default 120s)</span></div>
+    <div class="event-item"><span class="event-name">Relative paths fail in URL marketplaces</span><span class="event-desc">URL-based marketplaces only download marketplace.json; use GitHub/npm/git-URL sources or a git-based marketplace instead</span></div>
+    <div class="event-item"><span class="event-name">Files not found after install</span><span class="event-desc">Plugins are copied to a cache dir; paths like ../shared-utils don't resolve — use symlinks</span></div>
+  </div>
+
+  <h3>Common validation errors</h3>
+  <div class="response-box">
+    <div class="response-field"><span class="rf-key">File not found: marketplace.json</span><span class="rf-val">Create the manifest with required fields</span></div>
+    <div class="response-field"><span class="rf-key">Invalid JSON syntax</span><span class="rf-val">Check for missing/extra commas or unquoted strings</span></div>
+    <div class="response-field"><span class="rf-key">Duplicate plugin name</span><span class="rf-val">Give each plugin a unique name</span></div>
+    <div class="response-field"><span class="rf-key">source: Path contains ".."</span><span class="rf-val">Use paths relative to marketplace root without ..</span></div>
+    <div class="response-field"><span class="rf-key">YAML frontmatter failed to parse</span><span class="rf-val">Fix YAML syntax; file loads with no metadata at runtime</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>See also</h2>
+  <ul>
+    <li>Discover and install prebuilt plugins</li>
+    <li>Plugins — creating your own</li>
+    <li>Plugins reference — complete technical specifications</li>
+    <li>Plugin settings — configuration options</li>
+    <li>strictKnownMarketplaces reference — managed marketplace restrictions</li>
+  </ul>
+</section>
+
+</main>
+
+<script>
+  function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+  }
+
+  let wtStep = 0;
+  const WT_MAX = 5;
+  function wtGoTo(n) {
+    wtStep = Math.max(0, Math.min(WT_MAX, n));
+    document.querySelectorAll('.wt-panel').forEach((el, i) => el.classList.toggle('visible', i === wtStep));
+    document.querySelectorAll('.wt-tab').forEach((t, i) => {
+      t.classList.remove('active', 'done');
+      if (i === wtStep) t.classList.add('active'); else if (i < wtStep) t.classList.add('done');
+    });
+    document.getElementById('wtIndicator').textContent = `Step ${wtStep + 1} of ${WT_MAX + 1}`;
+  }
+  wtGoTo(0);
+
+  function psShow(n) {
+    document.querySelectorAll('.ps-panel').forEach((el, i) => el.classList.toggle('visible', i === n));
+    document.querySelectorAll('.ps-chip').forEach((c, i) => c.classList.toggle('active', i === n));
+  }
+
+  let hostStep = 0;
+  const HOST_MAX = 6;
+  function hostGoTo(n) {
+    hostStep = Math.max(0, Math.min(HOST_MAX, n));
+    document.querySelectorAll('.host-panel').forEach((el, i) => el.classList.toggle('visible', i === hostStep));
+    document.querySelectorAll('.host-tab').forEach((t, i) => {
+      t.classList.remove('active', 'done');
+      if (i === hostStep) t.classList.add('active'); else if (i < hostStep) t.classList.add('done');
+    });
+    document.getElementById('hostIndicator').textContent = `${hostStep + 1} of ${HOST_MAX + 1}`;
+  }
+  hostGoTo(0);
+
+  function cliShow(n) {
+    document.querySelectorAll('.cli-panel').forEach((el, i) => el.classList.toggle('visible', i === n));
+    document.querySelectorAll('.cli-chip').forEach((c, i) => c.classList.toggle('active', i === n));
+  }
+</script>
+</body>
+</html>

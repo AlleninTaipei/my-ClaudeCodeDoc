@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Enterprise deployment overview</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f0f4f8;color:#1a202c;line-height:1.7;}
+header{background:linear-gradient(135deg,#dbeafe 0%,#f0f4f8 100%);border-bottom:1px solid #bfdbfe;padding:48px 24px 40px;text-align:center;}
+header h1{font-size:2.2rem;font-weight:700;color:#1e3a5f;}
+header p{margin-top:10px;color:#4a5568;font-size:1.05rem;max-width:640px;margin-inline:auto;}
+main{max-width:900px;margin:0 auto;padding:48px 24px 80px;}
+section{margin-bottom:52px;}
+h2{font-size:1.4rem;font-weight:600;color:#1e40af;border-left:4px solid #3b82f6;padding-left:14px;margin-bottom:20px;}
+h3{font-size:1.05rem;font-weight:600;color:#1a202c;margin:20px 0 8px;}
+p{color:#4a5568;margin-bottom:12px;}
+ul,ol{color:#4a5568;font-size:0.9rem;margin:8px 0 8px 20px;}
+li{margin-bottom:6px;}
+code.inline{font-family:monospace;background:#e2e8f0;padding:1px 5px;border-radius:4px;font-size:0.85em;color:#7c3aed;}
+.code-block{background:#f8fafc;border:1px solid #cbd5e0;border-radius:8px;padding:16px 18px;font-family:monospace;font-size:0.82rem;color:#1a202c;overflow-x:auto;margin-top:14px;line-height:1.7;white-space:pre;}
+.kw{color:#7c3aed;} .fn{color:#16a34a;} .str{color:#d97706;} .cmt{color:#94a3b8;font-style:italic;} .key{color:#2563eb;}
+.info-box{background:#dbeafe;border:1px solid #93c5fd;border-radius:10px;padding:16px 20px;margin-top:14px;}
+.info-box .tag{display:inline-block;background:#3b82f6;color:#fff;font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:10px;letter-spacing:0.05em;}
+.info-box p{color:#1e3a5f;font-size:0.88rem;margin:0;}
+.takeaway{background:linear-gradient(135deg,#dcfce7,#f0fdf4);border:1px solid #4ade80;border-radius:10px;padding:20px 24px;margin-top:16px;}
+.takeaway p{color:#166534;font-size:0.9rem;margin:0;}
+.table-wrap{overflow-x:auto;margin-top:16px;border:1px solid #cbd5e0;border-radius:10px;}
+table.data{width:100%;border-collapse:collapse;font-size:0.78rem;min-width:760px;}
+table.data th{background:#e2e8f0;text-align:left;color:#374151;font-weight:700;padding:10px 12px;white-space:nowrap;}
+table.data td{padding:10px 12px;border-top:1px solid #e2e8f0;color:#4a5568;background:#fff;}
+.chip-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
+.chip-label{font-size:0.75rem;color:#6b7280;}
+.chip{padding:5px 14px;border-radius:20px;font-size:0.78rem;font-weight:600;cursor:pointer;border:1px solid #cbd5e0;background:#e2e8f0;color:#4a5568;transition:all .2s;}
+.chip.active{background:#dcfce7;border-color:#4ade80;color:#166534;}
+.stage-tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;}
+.stage-tab{padding:7px 16px;border-radius:20px;font-size:0.82rem;font-weight:600;cursor:pointer;border:1px solid #cbd5e0;background:#e2e8f0;color:#4a5568;transition:all .2s;}
+.stage-tab.active{background:#2563eb;border-color:#3b82f6;color:#fff;}
+.demo-panel{display:none;}
+.demo-panel.visible{display:block;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;}
+.col-card{background:#fff;border:1px solid #cbd5e0;border-radius:10px;padding:16px 18px;}
+.col-card-title{font-size:0.9rem;font-weight:700;color:#1e40af;margin-bottom:8px;}
+.col-card p{font-size:0.85rem;color:#4a5568;margin-bottom:0;}
+.event-list{margin-top:14px;display:flex;flex-direction:column;gap:8px;}
+.event-item{background:#fff;border:1px solid #cbd5e0;border-radius:6px;padding:12px 16px;display:flex;gap:14px;align-items:baseline;}
+.event-name{font-family:monospace;font-weight:700;color:#2563eb;min-width:26px;flex-shrink:0;}
+.event-desc{font-size:0.85rem;color:#4a5568;}
+#themeToggle{position:fixed;top:16px;right:16px;z-index:9999;padding:7px 14px;border-radius:20px;font-size:0.78rem;font-weight:700;cursor:pointer;border:1px solid #cbd5e0;background:#fff;color:#1a202c;transition:all .25s;box-shadow:0 2px 8px rgba(0,0,0,.12);letter-spacing:.03em;}
+#themeToggle:hover{border-color:#2563eb;color:#2563eb;}
+@media(max-width:640px){.two-col{grid-template-columns:1fr;}}
+
+body.dark{background:#0f1117;color:#e2e8f0;}
+body.dark header{background:linear-gradient(135deg,#1a1f2e 0%,#0f1117 100%);border-bottom-color:#2d3748;}
+body.dark header h1{color:#f7fafc;} body.dark header p{color:#a0aec0;}
+body.dark h2{color:#90cdf4;border-left-color:#4299e1;} body.dark h3{color:#e2e8f0;}
+body.dark p,body.dark ul,body.dark ol{color:#a0aec0;}
+body.dark code.inline{background:#1a202c;color:#b794f4;}
+body.dark .code-block{background:#0d1117;border-color:#2d3748;color:#e2e8f0;}
+body.dark .kw{color:#9f7aea;} body.dark .fn{color:#68d391;} body.dark .str{color:#f6ad55;} body.dark .cmt{color:#4a5568;} body.dark .key{color:#63b3ed;}
+body.dark .info-box{background:#1a202c;border-color:#2a4a6a;}
+body.dark .info-box .tag{background:#2a4a6a;color:#90cdf4;}
+body.dark .info-box p{color:#a0aec0;}
+body.dark .takeaway{background:linear-gradient(135deg,#1a2a1a,#1a202c);border-color:#276749;}
+body.dark .takeaway p{color:#c6f6d5;}
+body.dark .table-wrap{border-color:#2d3748;}
+body.dark table.data th{background:#1a202c;color:#cbd5e0;}
+body.dark table.data td{background:#0f1117;color:#a0aec0;border-top-color:#2d3748;}
+body.dark .chip{background:#1a202c;border-color:#2d3748;color:#718096;}
+body.dark .chip.active{background:#1c3a2a;border-color:#38a169;color:#68d391;}
+body.dark .stage-tab{background:#1a202c;border-color:#2d3748;color:#718096;}
+body.dark .stage-tab.active{background:#2b6cb0;border-color:#4299e1;color:#fff;}
+body.dark .col-card{background:#1a202c;border-color:#2d3748;}
+body.dark .col-card-title{color:#90cdf4;}
+body.dark .col-card p{color:#a0aec0;}
+body.dark .event-item{background:#1a202c;border-color:#2d3748;}
+body.dark .event-desc{color:#a0aec0;}
+body.dark #themeToggle{background:#1a202c;color:#e2e8f0;border-color:#4a5568;box-shadow:0 2px 8px rgba(0,0,0,.4);}
+body.dark #themeToggle:hover{border-color:#90cdf4;color:#90cdf4;}
+</style>
+</head>
+<body>
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+<header>
+<h1>Enterprise deployment overview</h1>
+<p>How Claude Code integrates with third-party services and infrastructure to meet enterprise deployment requirements.</p>
+</header>
+
+<main>
+<div class="info-box"><span class="tag">OVERVIEW</span><p>Organizations can deploy Claude Code through Anthropic directly or through a cloud provider. For most organizations, Claude for Teams or Claude for Enterprise provides the best experience: a single subscription covering both Claude Code and Claude on the web, centralized billing, and no infrastructure setup. <b style="display:none"></b>Claude for Teams is self-service with collaboration features and billing management, best for smaller teams. Claude for Enterprise adds SSO, domain capture, role-based permissions, compliance API access, and managed org-wide policy — best for larger organizations with security and compliance requirements.</p></div>
+
+<section>
+<h2>Compare deployment options</h2>
+<p>If your organization has specific infrastructure requirements, compare the options below. Scroll horizontally to see every provider.</p>
+<div class="table-wrap">
+<table class="data">
+<tr><th>Feature</th><th>Claude for Teams/Enterprise</th><th>Anthropic Console</th><th>Amazon Bedrock</th><th>Claude Platform on AWS</th><th>Google Cloud's Agent Platform</th><th>Microsoft Foundry</th></tr>
+<tr><td>Best for</td><td>Most organizations (recommended)</td><td>Individual developers</td><td>AWS-native deployments</td><td>AWS Marketplace billing with Claude API features</td><td>GCP-native deployments</td><td>Azure-native deployments</td></tr>
+<tr><td>Billing</td><td>Teams: $150/seat (Premium) with PAYG available. Enterprise: Contact Sales</td><td>PAYG</td><td>PAYG through AWS</td><td>PAYG through AWS Marketplace</td><td>PAYG through GCP</td><td>PAYG through Azure</td></tr>
+<tr><td>Regions</td><td>Supported countries</td><td>Supported countries</td><td>Multiple AWS regions</td><td>Multiple AWS regions</td><td>Multiple GCP regions</td><td>Multiple Azure regions</td></tr>
+<tr><td>Prompt caching</td><td>Enabled by default</td><td>Enabled by default</td><td>Enabled by default</td><td>Enabled by default</td><td>Enabled by default</td><td>Enabled by default</td></tr>
+<tr><td>Authentication</td><td>Claude.ai SSO or email</td><td>API key</td><td>API key or AWS credentials</td><td>API key or AWS credentials</td><td>GCP credentials</td><td>API key or Microsoft Entra ID</td></tr>
+<tr><td>Cost tracking</td><td>Usage dashboard</td><td>Usage dashboard</td><td>AWS Cost Explorer</td><td>AWS Cost Explorer</td><td>GCP Billing</td><td>Azure Cost Management</td></tr>
+<tr><td>Includes Claude on web</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+<tr><td>Enterprise features</td><td>Team management, SSO, usage monitoring</td><td>None</td><td>IAM policies, CloudTrail</td><td>IAM policies, CloudTrail</td><td>IAM roles, Cloud Audit Logs</td><td>RBAC policies, Azure Monitor</td></tr>
+</table>
+</div>
+<p style="margin-top:14px;">Deployment options with setup instructions: Claude for Teams or Enterprise, Anthropic Console, Claude apps gateway (a self-hosted gateway adding IdP sign-in in front of Bedrock, Claude Platform on AWS, Vertex, Foundry, or the Anthropic API directly), Amazon Bedrock, Claude Platform on AWS, Google Cloud's Agent Platform, and Microsoft Foundry.</p>
+</section>
+
+<section>
+<h2>Configure proxies and gateways</h2>
+<p>Most organizations can use a cloud provider directly. Configure a corporate proxy or LLM gateway only if your organization has specific network or management requirements — the two can be combined.</p>
+<div class="two-col">
+<div class="col-card"><div class="col-card-title">Corporate proxy</div><p>Routes traffic through an HTTP/HTTPS proxy. Use for security monitoring, compliance, or network policy enforcement. Configure with <code class="inline">HTTPS_PROXY</code> or <code class="inline">HTTP_PROXY</code>.</p></div>
+<div class="col-card"><div class="col-card-title">LLM Gateway</div><p>Sits between Claude Code and the cloud provider for auth and routing. Use for centralized usage tracking, custom rate limiting/budgets, or centralized auth. Configure with <code class="inline">ANTHROPIC_BASE_URL</code> and provider-specific variants.</p></div>
+</div>
+<p style="margin-top:16px;">Select a provider, then a configuration style, to see the environment variables to set in your shell profile (<code class="inline">.bashrc</code>, <code class="inline">.zshrc</code>).</p>
+<div class="chip-row"><span class="chip-label">Provider:</span>
+<div class="chip active" onclick="providerGoTo(0)">Amazon Bedrock</div>
+<div class="chip" onclick="providerGoTo(1)">Microsoft Foundry</div>
+<div class="chip" onclick="providerGoTo(2)">Google Cloud's Agent Platform</div>
+</div>
+
+<div class="provider-panel demo-panel visible" id="prov-0">
+<div class="stage-tabs">
+<div class="pxy-tab-0 stage-tab active" onclick="pxyGoTo(0,0)">Corporate proxy</div>
+<div class="pxy-tab-0 stage-tab" onclick="pxyGoTo(0,1)">LLM Gateway</div>
+</div>
+<div class="pxy-panel-0 demo-panel visible" id="pxy-0-0">
+<pre class="code-block"><code class="autohl"># Enable Bedrock
+export CLAUDE_CODE_USE_BEDROCK=1
+export AWS_REGION=us-east-1
+
+# Configure corporate proxy
+export HTTPS_PROXY='https://proxy.example.com:8080'</code></pre>
+</div>
+<div class="pxy-panel-0 demo-panel" id="pxy-0-1">
+<pre class="code-block"><code class="autohl"># Enable Bedrock
+export CLAUDE_CODE_USE_BEDROCK=1
+
+# Configure LLM gateway
+export ANTHROPIC_BEDROCK_BASE_URL='https://your-llm-gateway.com/bedrock'
+export CLAUDE_CODE_SKIP_BEDROCK_AUTH=1  # If gateway handles AWS auth</code></pre>
+</div>
+</div>
+
+<div class="provider-panel demo-panel" id="prov-1">
+<div class="stage-tabs">
+<div class="pxy-tab-1 stage-tab active" onclick="pxyGoTo(1,0)">Corporate proxy</div>
+<div class="pxy-tab-1 stage-tab" onclick="pxyGoTo(1,1)">LLM Gateway</div>
+</div>
+<div class="pxy-panel-1 demo-panel visible" id="pxy-1-0">
+<pre class="code-block"><code class="autohl"># Enable Microsoft Foundry
+export CLAUDE_CODE_USE_FOUNDRY=1
+export ANTHROPIC_FOUNDRY_RESOURCE=your-resource
+export ANTHROPIC_FOUNDRY_API_KEY=your-api-key  # Or omit for Entra ID auth
+
+# Configure corporate proxy
+export HTTPS_PROXY='https://proxy.example.com:8080'</code></pre>
+</div>
+<div class="pxy-panel-1 demo-panel" id="pxy-1-1">
+<pre class="code-block"><code class="autohl"># Enable Microsoft Foundry
+export CLAUDE_CODE_USE_FOUNDRY=1
+
+# Configure LLM gateway
+export ANTHROPIC_FOUNDRY_BASE_URL='https://your-llm-gateway.com'
+export ANTHROPIC_FOUNDRY_API_KEY=your-gateway-key  # Sent as x-api-key</code></pre>
+</div>
+</div>
+
+<div class="provider-panel demo-panel" id="prov-2">
+<div class="stage-tabs">
+<div class="pxy-tab-2 stage-tab active" onclick="pxyGoTo(2,0)">Corporate proxy</div>
+<div class="pxy-tab-2 stage-tab" onclick="pxyGoTo(2,1)">LLM Gateway</div>
+</div>
+<div class="pxy-panel-2 demo-panel visible" id="pxy-2-0">
+<pre class="code-block"><code class="autohl"># Enable Agent Platform
+export CLAUDE_CODE_USE_VERTEX=1
+export CLOUD_ML_REGION=us-east5
+export ANTHROPIC_VERTEX_PROJECT_ID=your-project-id
+
+# Configure corporate proxy
+export HTTPS_PROXY='https://proxy.example.com:8080'</code></pre>
+</div>
+<div class="pxy-panel-2 demo-panel" id="pxy-2-1">
+<pre class="code-block"><code class="autohl"># Enable Agent Platform
+export CLAUDE_CODE_USE_VERTEX=1
+
+# Configure LLM gateway
+export ANTHROPIC_VERTEX_BASE_URL='https://your-llm-gateway.com/vertex'
+export CLAUDE_CODE_SKIP_VERTEX_AUTH=1  # If gateway handles GCP auth
+export ANTHROPIC_VERTEX_PROJECT_ID=your-gcp-project-id
+export CLOUD_ML_REGION=us-east5</code></pre>
+</div>
+</div>
+
+<div class="info-box"><span class="tag">TIP</span><p>Use <code class="inline">/status</code> in Claude Code to verify your proxy and gateway configuration is applied correctly.</p></div>
+</section>
+
+<section>
+<h2>Best practices for organizations</h2>
+<div class="two-col">
+<div class="col-card"><div class="col-card-title">Invest in documentation and memory</div><p>Deploy CLAUDE.md files at multiple levels: organization-wide in system directories for company-wide standards, and repository-level checked into source control so all users benefit.</p></div>
+<div class="col-card"><div class="col-card-title">Simplify deployment</div><p>If you have a custom development environment, a "one click" way to install Claude Code is key to growing adoption across an organization.</p></div>
+<div class="col-card"><div class="col-card-title">Start with guided usage</div><p>Encourage new users to try Claude Code for codebase Q&amp;A or smaller bug fixes. Ask it to make a plan, check its suggestions, and give feedback if it's off-track before letting it run more agentically.</p></div>
+<div class="col-card"><div class="col-card-title">Pin model versions for cloud providers</div><p>On Bedrock, Vertex, Foundry, or Claude Platform on AWS, pin versions with <code class="inline">ANTHROPIC_DEFAULT_*_MODEL</code>. Without pinning, aliases resolve to Claude Code's built-in default, which can lag the newest release.</p></div>
+<div class="col-card"><div class="col-card-title">Configure security policies</div><p>Security teams can configure managed permissions for what Claude Code is and is not allowed to do, which cannot be overwritten by local configuration.</p></div>
+<div class="col-card"><div class="col-card-title">Leverage MCP for integrations</div><p>Connect to ticket systems or error logs. One central team should configure MCP servers and check a <code class="inline">.mcp.json</code> into the codebase so all users benefit.</p></div>
+</div>
+<p style="margin-top:16px;">At Anthropic, Claude Code powers development across every Anthropic codebase.</p>
+</section>
+
+<section>
+<h2>Next steps</h2>
+<p>Once you've chosen a deployment option and configured access for your team, work through these three steps.</p>
+<div class="event-list">
+<div class="event-item"><span class="event-name">1</span><span class="event-desc"><b>Roll out to your team</b> — share installation instructions and have team members install Claude Code and authenticate with their credentials.</span></div>
+<div class="event-item"><span class="event-name">2</span><span class="event-desc"><b>Set up shared configuration</b> — create a CLAUDE.md file in your repositories to help Claude Code understand your codebase and coding standards.</span></div>
+<div class="event-item"><span class="event-name">3</span><span class="event-desc"><b>Configure permissions</b> — review security settings to define what Claude Code can and cannot do in your environment.</span></div>
+</div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme(){
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+function providerGoTo(n){
+  document.querySelectorAll('.provider-panel').forEach((el,i)=>el.classList.toggle('visible', i===n));
+  document.querySelectorAll('.chip-row .chip').forEach((c,i)=>c.classList.toggle('active', i===n));
+}
+
+function pxyGoTo(provider, step){
+  document.querySelectorAll('.pxy-panel-'+provider).forEach((el,i)=>el.classList.toggle('visible', i===step));
+  document.querySelectorAll('.pxy-tab-'+provider).forEach((t,i)=>t.classList.toggle('active', i===step));
+}
+
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function hl(raw){
+  const pattern = /(\/\/.*)|(#.*)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)|(\b(?:export|function|const|let|var|if|else|return)\b)/g;
+  let out = '', last = 0, m;
+  while ((m = pattern.exec(raw))) {
+    out += esc(raw.slice(last, m.index));
+    if (m[1] || m[2]) out += '<span class="cmt">' + esc(m[1] || m[2]) + '</span>';
+    else if (m[3]) out += '<span class="str">' + esc(m[3]) + '</span>';
+    else if (m[4]) out += '<span class="kw">' + esc(m[4]) + '</span>';
+    last = pattern.lastIndex;
+  }
+  out += esc(raw.slice(last));
+  return out;
+}
+document.querySelectorAll('code.autohl').forEach(el => {
+  const raw = el.textContent;
+  el.innerHTML = hl(raw);
+});
+</script>
+</body>
+</html>

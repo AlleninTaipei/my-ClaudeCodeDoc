@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Track team usage with analytics</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f0f4f8;color:#1a202c;line-height:1.7;}
+header{background:linear-gradient(135deg,#dbeafe 0%,#f0f4f8 100%);border-bottom:1px solid #bfdbfe;padding:48px 24px 40px;text-align:center;}
+header h1{font-size:2.2rem;font-weight:700;color:#1e3a5f;}
+header p{margin-top:10px;color:#4a5568;font-size:1.05rem;max-width:640px;margin-inline:auto;}
+main{max-width:880px;margin:0 auto;padding:48px 24px 80px;}
+section{margin-bottom:48px;}
+h2{font-size:1.4rem;font-weight:600;color:#1e40af;border-left:4px solid #3b82f6;padding-left:14px;margin-bottom:20px;}
+h3{font-size:1.05rem;font-weight:600;color:#1a202c;margin:22px 0 8px;}
+h4{font-size:0.92rem;font-weight:700;color:#374151;margin:16px 0 6px;}
+p{color:#4a5568;margin-bottom:12px;}
+ul,ol{color:#4a5568;font-size:0.9rem;margin:8px 0 8px 20px;}
+li{margin-bottom:6px;}
+code.inline{font-family:monospace;background:#e2e8f0;padding:1px 5px;border-radius:4px;font-size:0.85em;color:#7c3aed;}
+.info-box{background:#dbeafe;border:1px solid #93c5fd;border-radius:10px;padding:16px 20px;margin-top:14px;}
+.info-box .tag{display:inline-block;background:#3b82f6;color:#fff;font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:10px;letter-spacing:0.05em;}
+.info-box p{color:#1e3a5f;font-size:0.88rem;margin:0;}
+.warn-box{background:#fef3c7;border:1px solid #fcd34d;border-radius:10px;padding:16px 20px;margin-top:14px;}
+.warn-box .tag{display:inline-block;background:#d97706;color:#fff;font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:10px;letter-spacing:0.05em;}
+.warn-box p{color:#78350f;font-size:0.88rem;margin:0;}
+.takeaway{background:linear-gradient(135deg,#dcfce7,#f0fdf4);border:1px solid #4ade80;border-radius:10px;padding:20px 24px;margin-top:16px;}
+.takeaway p{color:#166534;font-size:0.9rem;margin:0;}
+.table-wrap{overflow-x:auto;margin-top:14px;border:1px solid #cbd5e0;border-radius:10px;}
+table.data{width:100%;border-collapse:collapse;font-size:0.82rem;min-width:600px;}
+table.data th{background:#e2e8f0;text-align:left;color:#374151;font-weight:700;padding:10px 12px;}
+table.data td{padding:10px 12px;border-top:1px solid #e2e8f0;color:#4a5568;background:#fff;}
+.stage-tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+.stage-tab{padding:7px 15px;border-radius:20px;font-size:0.8rem;font-weight:600;cursor:pointer;border:1px solid #cbd5e0;background:#e2e8f0;color:#4a5568;transition:all .2s;}
+.stage-tab.active{background:#2563eb;border-color:#3b82f6;color:#fff;}
+.stage-tab.done{background:#166534;border-color:#4ade80;color:#dcfce7;}
+.step-indicator{color:#6b7280;font-size:0.8rem;margin-top:10px;display:block;}
+.demo-panel{display:none;}
+.demo-panel.visible{display:block;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.api-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+.field{background:#fff;border:1px solid #cbd5e0;border-radius:8px;padding:14px 16px;}
+.field .name{font-weight:700;font-size:0.86rem;color:#1e40af;}
+.field .desc{font-size:0.82rem;color:#4a5568;margin-top:4px;}
+.chip-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
+.chip-label{font-size:0.75rem;color:#6b7280;}
+.chip{padding:5px 14px;border-radius:20px;font-size:0.78rem;font-weight:600;cursor:pointer;border:1px solid #cbd5e0;background:#e2e8f0;color:#4a5568;transition:all .2s;}
+.chip.active{background:#dcfce7;border-color:#4ade80;color:#166534;}
+.event-list{margin-top:14px;display:flex;flex-direction:column;gap:8px;}
+.event-item{background:#fff;border:1px solid #cbd5e0;border-radius:6px;padding:12px 16px;display:flex;gap:14px;align-items:baseline;}
+.event-name{font-family:monospace;font-weight:700;color:#2563eb;min-width:20px;flex-shrink:0;}
+.event-desc{font-size:0.85rem;color:#4a5568;}
+#themeToggle{position:fixed;top:16px;right:16px;z-index:9999;padding:7px 14px;border-radius:20px;font-size:0.78rem;font-weight:700;cursor:pointer;border:1px solid #cbd5e0;background:#fff;color:#1a202c;transition:all .25s;box-shadow:0 2px 8px rgba(0,0,0,.12);letter-spacing:.03em;}
+#themeToggle:hover{border-color:#2563eb;color:#2563eb;}
+@media(max-width:640px){.api-fields{grid-template-columns:1fr;}}
+
+body.dark{background:#0f1117;color:#e2e8f0;}
+body.dark header{background:linear-gradient(135deg,#1a1f2e 0%,#0f1117 100%);border-bottom-color:#2d3748;}
+body.dark header h1{color:#f7fafc;} body.dark header p{color:#a0aec0;}
+body.dark h2{color:#90cdf4;border-left-color:#4299e1;} body.dark h3{color:#e2e8f0;} body.dark h4{color:#cbd5e0;}
+body.dark p,body.dark ul,body.dark ol{color:#a0aec0;}
+body.dark code.inline{background:#1a202c;color:#b794f4;}
+body.dark .info-box{background:#1a202c;border-color:#2a4a6a;}
+body.dark .info-box .tag{background:#2a4a6a;color:#90cdf4;}
+body.dark .info-box p{color:#a0aec0;}
+body.dark .warn-box{background:#2a2010;border-color:#7a5a20;}
+body.dark .warn-box .tag{background:#7a5a20;color:#fbd38d;}
+body.dark .warn-box p{color:#fbd38d;}
+body.dark .takeaway{background:linear-gradient(135deg,#1a2a1a,#1a202c);border-color:#276749;}
+body.dark .takeaway p{color:#c6f6d5;}
+body.dark .table-wrap{border-color:#2d3748;}
+body.dark table.data th{background:#1a202c;color:#cbd5e0;}
+body.dark table.data td{background:#0f1117;color:#a0aec0;border-top-color:#2d3748;}
+body.dark .stage-tab{background:#1a202c;border-color:#2d3748;color:#718096;}
+body.dark .stage-tab.active{background:#2b6cb0;border-color:#4299e1;color:#fff;}
+body.dark .stage-tab.done{background:#276749;border-color:#48bb78;color:#c6f6d5;}
+body.dark .step-indicator{color:#718096;}
+body.dark .field{background:#1a202c;border-color:#2d3748;}
+body.dark .field .name{color:#90cdf4;}
+body.dark .field .desc{color:#a0aec0;}
+body.dark .chip{background:#1a202c;border-color:#2d3748;color:#718096;}
+body.dark .chip.active{background:#1c3a2a;border-color:#38a169;color:#68d391;}
+body.dark .event-item{background:#1a202c;border-color:#2d3748;}
+body.dark .event-desc{color:#a0aec0;}
+body.dark #themeToggle{background:#1a202c;color:#e2e8f0;border-color:#4a5568;box-shadow:0 2px 8px rgba(0,0,0,.4);}
+body.dark #themeToggle:hover{border-color:#90cdf4;color:#90cdf4;}
+</style>
+</head>
+<body>
+<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+<header>
+<h1>Track team usage with analytics</h1>
+<p>View Claude Code usage metrics, track adoption, and measure engineering velocity in the analytics dashboard.</p>
+</header>
+
+<main>
+<div class="table-wrap">
+<table class="data">
+<tr><th>Plan</th><th>Dashboard URL</th><th>Includes</th></tr>
+<tr><td>Claude for Teams / Enterprise</td><td>claude.ai/analytics/claude-code</td><td>Usage metrics, contribution metrics with GitHub integration, leaderboard, data export</td></tr>
+<tr><td>API (Claude Console)</td><td>platform.claude.com/claude-code</td><td>Usage metrics, spend tracking, team insights</td></tr>
+</table>
+</div>
+
+<section>
+<h2>Access analytics for Team and Enterprise</h2>
+<p>Navigate to claude.ai/analytics/claude-code. Admins and Owners can view the dashboard, which includes usage metrics (lines accepted, suggestion accept rate, daily active users and sessions), contribution metrics (PRs and lines shipped with Claude Code assistance, via GitHub integration), a leaderboard of top contributors, and CSV data export. For per-user token counts and cost estimates, configure OpenTelemetry export.</p>
+
+<h3>Enable contribution metrics</h3>
+<div class="info-box"><span class="tag">BETA</span><p>Contribution metrics are in public beta, available on Team and Enterprise plans, and only cover users within your claude.ai organization — usage through the Console API or third-party integrations is not included.</p></div>
+<div class="warn-box"><span class="tag">ZDR</span><p>Contribution metrics are not available for organizations with Zero Data Retention enabled — the dashboard shows usage metrics only.</p></div>
+<p>You need the Owner role to configure analytics settings, and a GitHub admin must install the GitHub app. Four steps:</p>
+
+<div class="stage-tabs" id="stepTabs">
+<div class="step-tab stage-tab active" onclick="stepGoTo(0)">1 · Install app</div>
+<div class="step-tab stage-tab" onclick="stepGoTo(1)">2 · Enable analytics</div>
+<div class="step-tab stage-tab" onclick="stepGoTo(2)">3 · Enable GitHub</div>
+<div class="step-tab stage-tab" onclick="stepGoTo(3)">4 · Authenticate</div>
+</div>
+<div class="step-panel demo-panel visible" id="step-p0"><p>A GitHub admin installs the Claude GitHub app on your organization's GitHub account at github.com/apps/claude.</p></div>
+<div class="step-panel demo-panel" id="step-p1"><p>A Claude Owner navigates to claude.ai/admin-settings/claude-code and enables the Claude Code analytics feature.</p></div>
+<div class="step-panel demo-panel" id="step-p2"><p>On the same page, enable the "GitHub analytics" toggle.</p></div>
+<div class="step-panel demo-panel" id="step-p3"><p>Complete the GitHub authentication flow and select which GitHub organizations to include in the analysis.</p></div>
+<span class="step-indicator" id="stepIndicator">Step 1 of 4</span>
+
+<p style="margin-top:16px;">Data typically appears within 24 hours, with daily updates. If no data appears you may see "GitHub app required" (install the app) or "Data processing in progress" (check back in a few days). Supports GitHub Cloud and GitHub Enterprise Server.</p>
+
+<h3>Review summary metrics</h3>
+<div class="info-box"><span class="tag">NOTE</span><p>These metrics are deliberately conservative — an underestimate of Claude Code's actual impact. Only lines and PRs with high confidence in Claude Code's involvement are counted.</p></div>
+<div class="api-fields">
+<div class="field"><div class="name">PRs with CC</div><div class="desc">Total merged pull requests containing at least one line of code written with Claude Code.</div></div>
+<div class="field"><div class="name">Lines of code with CC</div><div class="desc">Total "effective lines" across merged PRs written with Claude Code — lines with more than 3 characters after normalization, excluding empty lines and trivial punctuation.</div></div>
+<div class="field"><div class="name">PRs with Claude Code (%)</div><div class="desc">Percentage of all merged PRs containing Claude Code-assisted code.</div></div>
+<div class="field"><div class="name">Suggestion accept rate</div><div class="desc">Percentage of times users accept Claude Code's editing suggestions, including Edit, Write, and NotebookEdit usage.</div></div>
+<div class="field"><div class="name">Lines of code accepted</div><div class="desc">Total lines written by Claude Code that users accepted in their sessions. Excludes rejected suggestions and later deletions.</div></div>
+</div>
+
+<h3>Explore the charts</h3>
+<div class="chip-row"><span class="chip-label">Chart:</span>
+<div class="chip active" onclick="chartGoTo(0)">Adoption</div>
+<div class="chip" onclick="chartGoTo(1)">PRs per user</div>
+<div class="chip" onclick="chartGoTo(2)">Pull requests</div>
+<div class="chip" onclick="chartGoTo(3)">Leaderboard</div>
+</div>
+<div class="chart-panel demo-panel visible" id="chart-0"><h4>Track adoption</h4><p>Daily usage trends: <b>users</b> (daily active users) and <b>sessions</b> (active Claude Code sessions per day).</p></div>
+<div class="chart-panel demo-panel" id="chart-1"><h4>Measure PRs per user</h4><p>Individual developer activity over time: <b>PRs per user</b> (merged PRs per day ÷ daily active users) alongside <b>users</b>. Use this to see how productivity changes as adoption increases.</p></div>
+<div class="chart-panel demo-panel" id="chart-2"><h4>View pull requests breakdown</h4><p>Daily breakdown of merged PRs: <b>PRs with CC</b> vs <b>PRs without CC</b>. Toggle to a Lines of code view for the same breakdown by line count.</p></div>
+<div class="chart-panel demo-panel" id="chart-3"><h4>Find top contributors</h4><p>Top 10 users ranked by contribution volume, toggling between Pull requests (CC vs all PRs) and Lines of code (CC vs all lines). Export all users downloads complete contribution data as CSV, not just the top 10 shown.</p></div>
+
+<h3>PR attribution</h3>
+<p>When contribution metrics are enabled, Claude Code analyzes merged pull requests to determine which code was written with its assistance, by matching session activity against the code in each PR.</p>
+<div class="api-fields">
+<div class="field"><div class="name">Tagging criteria</div><div class="desc">PRs are tagged "with Claude Code" if they contain at least one line written during a session, using conservative matching — only high-confidence involvement counts.</div></div>
+<div class="field"><div class="name">Attribution process</div><div class="desc">Added PR-diff lines are extracted, matching sessions within a time window are identified, lines are matched against session output, then metrics are calculated. Lines are normalized first: whitespace trimmed, quotes standardized, lowercased. Merged PRs are labeled claude-code-assisted in GitHub.</div></div>
+<div class="field"><div class="name">Time window</div><div class="desc">Sessions from 21 days before to 2 days after the PR merge date are considered.</div></div>
+<div class="field"><div class="name">Excluded files</div><div class="desc">Lock files, generated code, build directories, test fixtures/snapshots, and lines over 1,000 characters (likely minified) are excluded automatically.</div></div>
+</div>
+<p style="margin-top:12px;">Additional notes: code rewritten by developers by more than 20% is not attributed to Claude Code; sessions outside the 21-day window are not considered; the algorithm ignores the PR's source or destination branch.</p>
+
+<h3>Get the most from analytics</h3>
+<div class="takeaway"><p>Monitor adoption via the Adoption chart to find active users who can share best practices and spot usage dips that may signal friction. Measure ROI with contribution metrics, tracking PRs-per-user over time and comparing PRs/lines shipped with vs. without Claude Code, alongside DORA metrics or sprint velocity. Identify power users via the Leaderboard to find people who can share prompting techniques and help onboard others. Access data programmatically by searching GitHub for PRs labeled claude-code-assisted.</p></div>
+</section>
+
+<section>
+<h2>Access analytics for API customers</h2>
+<p>API customers using the Claude Console access analytics at platform.claude.com/claude-code. You need the UsageView permission, granted to Developer, Billing, Admin, Owner, and Primary Owner roles.</p>
+<div class="info-box"><span class="tag">NOTE</span><p>Contribution metrics with GitHub integration are not currently available for API customers — the Console dashboard shows usage and spend metrics only.</p></div>
+<div class="api-fields">
+<div class="field"><div class="name">Lines of code accepted</div><div class="desc">Total lines written by Claude Code that users accepted in their sessions. Excludes rejected suggestions and later deletions.</div></div>
+<div class="field"><div class="name">Suggestion accept rate</div><div class="desc">Percentage of times users accept code editing tool usage (Edit, Write, NotebookEdit).</div></div>
+<div class="field"><div class="name">Activity</div><div class="desc">Daily active users and sessions shown on a chart.</div></div>
+<div class="field"><div class="name">Spend</div><div class="desc">Daily API costs in dollars alongside user count.</div></div>
+</div>
+
+<h3>View team insights</h3>
+<p>The team insights table shows per-user metrics:</p>
+<div class="event-list">
+<div class="event-item"><span class="event-name">•</span><span class="event-desc"><b>Members</b> — all users who have authenticated to Claude Code. API key users display by key identifier, OAuth users by email.</span></div>
+<div class="event-item"><span class="event-name">•</span><span class="event-desc"><b>Spend this month</b> — per-user total API costs for the current month.</span></div>
+<div class="event-item"><span class="event-name">•</span><span class="event-desc"><b>Lines this month</b> — per-user total of accepted code lines for the current month.</span></div>
+</div>
+<div class="info-box"><span class="tag">NOTE</span><p>Spend figures in the Console dashboard are estimates for analytics purposes. Refer to your billing page for actual costs.</p></div>
+</section>
+
+<section>
+<h2>Related resources</h2>
+<div class="takeaway"><p>Monitoring with OpenTelemetry — export real-time metrics and events to your observability stack. Manage costs effectively — set spend limits and optimize token usage. Permissions — configure roles and permissions.</p></div>
+</section>
+
+</main>
+
+<script>
+function toggleTheme(){
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+}
+
+let stepIdx = 0;
+const STEP_MAX = 3;
+function stepGoTo(n){
+  stepIdx = Math.max(0, Math.min(STEP_MAX, n));
+  document.querySelectorAll('.step-panel').forEach((el,i)=>el.classList.toggle('visible', i===stepIdx));
+  document.querySelectorAll('.step-tab').forEach((t,i)=>{
+    t.classList.remove('active','done');
+    if(i===stepIdx) t.classList.add('active');
+    else if(i<stepIdx) t.classList.add('done');
+  });
+  document.getElementById('stepIndicator').textContent = `Step ${stepIdx+1} of ${STEP_MAX+1}`;
+}
+stepGoTo(0);
+
+function chartGoTo(n){
+  document.querySelectorAll('.chart-panel').forEach((el,i)=>el.classList.toggle('visible', i===n));
+  document.querySelectorAll('.chip-row .chip').forEach((c,i)=>c.classList.toggle('active', i===n));
+}
+</script>
+</body>
+</html>
