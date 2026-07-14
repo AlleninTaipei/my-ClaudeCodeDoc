@@ -428,6 +428,9 @@
   .chapter__drawer-inner{
     overflow:hidden;
   }
+  .chapter__drawer.is-expanded .chapter__drawer-inner{
+    overflow:visible;
+  }
   .filelist{
     list-style:none;
     margin:14px 0 4px;
@@ -440,18 +443,55 @@
     gap:6px 18px;
   }
   .filelist li{
+    position:relative;
     font-family:'IBM Plex Mono', monospace;
     font-size:12.5px;
     color:var(--ink-soft);
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
+    display:flex;
+  }
+  .filelist li[data-tip]::after{
+    content:attr(data-tip);
+    position:absolute;
+    left:0;
+    bottom:100%;
+    margin-bottom:9px;
+    width:max-content;
+    max-width:280px;
+    padding:9px 11px;
+    background:var(--paper-3);
+    color:var(--ink);
+    border:1px solid var(--line-strong);
+    border-left:2px solid var(--signal);
+    border-radius:var(--radius);
+    font-family:'Source Serif 4', Georgia, serif;
+    font-size:12.5px;
+    line-height:1.5;
+    white-space:normal;
+    box-shadow:0 6px 18px rgba(0,0,0,0.18);
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(4px);
+    transition:opacity 0.15s ease, transform 0.15s ease;
+    z-index:20;
+    pointer-events:none;
+  }
+  .filelist li[data-tip]:hover::after,
+  .filelist li[data-tip]:focus-within::after{
+    opacity:1;
+    visibility:visible;
+    transform:translateY(0);
   }
   .filelist li::before{
     content:"·/ ";
     color:var(--sage);
+    flex:none;
   }
   .filelist li a{
+    display:block;
+    min-width:0;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
     color:inherit;
     text-decoration:none;
     border-bottom:1px solid transparent;
@@ -572,15 +612,15 @@
             </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
-                <li><a href="01_入門與基本認識/overview.html"><code>overview.html</code></a></li>
-                <li><a href="01_入門與基本認識/quickstart.html"><code>quickstart.html</code></a></li>
-                <li><a href="01_入門與基本認識/how-claude-code-works.html"><code>how-claude-code-works.html</code></a></li>
-                <li><a href="01_入門與基本認識/glossary.html"><code>glossary.html</code></a></li>
-                <li><a href="01_入門與基本認識/authentication.html"><code>authentication.html</code></a></li>
-                <li><a href="01_入門與基本認識/setup.html"><code>setup.html</code></a></li>
-                <li><a href="01_入門與基本認識/desktop-quickstart.html"><code>desktop-quickstart.html</code></a></li>
-                <li><a href="01_入門與基本認識/web-quickstart.html"><code>web-quickstart.html</code></a></li>
-                <li><a href="01_入門與基本認識/best-practices.html"><code>best-practices.html</code></a></li>
+                <li data-tip="Claude Code 是一套具備代理能力的程式協作工具, 能讀取你的程式碼庫, 編輯檔案, 執行指令, 並與開發工具整合, 可在終端機, IDE, 桌面應用程式與瀏覽器中使用."><a href="01_入門與基本認識/overview.html"><code>overview.html</code></a></li>
+                <li data-tip="歡迎使用 Claude Code."><a href="01_入門與基本認識/quickstart.html"><code>quickstart.html</code></a></li>
+                <li data-tip="了解代理迴圈, 內建工具, 以及 Claude Code 如何與你的專案互動."><a href="01_入門與基本認識/how-claude-code-works.html"><code>how-claude-code-works.html</code></a></li>
+                <li data-tip="Claude Code 術語定義, 說明代理迴圈, 壓縮, CLAUDE.md, hooks, 子代理, MCP 等核心概念的意義."><a href="01_入門與基本認識/glossary.html"><code>glossary.html</code></a></li>
+                <li data-tip="登入 Claude Code, 並為個人, 團隊與組織設定驗證方式."><a href="01_入門與基本認識/authentication.html"><code>authentication.html</code></a></li>
+                <li data-tip="Claude Code 的系統需求, 各平台安裝方式, 版本管理與解除安裝說明."><a href="01_入門與基本認識/setup.html"><code>setup.html</code></a></li>
+                <li data-tip="在桌面安裝 Claude Code, 並開始你的第一個程式協作工作階段."><a href="01_入門與基本認識/desktop-quickstart.html"><code>desktop-quickstart.html</code></a></li>
+                <li data-tip="透過瀏覽器或手機在雲端執行 Claude Code, 連接 GitHub 儲存庫, 送出任務, 無需本機環境即可審閱 PR."><a href="01_入門與基本認識/web-quickstart.html"><code>web-quickstart.html</code></a></li>
+                <li data-tip="善用 Claude Code 的技巧與作法, 從環境設定到擴展至多個並行工作階段."><a href="01_入門與基本認識/best-practices.html"><code>best-practices.html</code></a></li>
               </ul>
             </div></div>
           </div>
@@ -601,22 +641,22 @@
             </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
-                <li><a href="02_日常操作與個人化設定/interactive-mode.html"><code>interactive-mode.html</code></a></li>
-                <li><a href="02_日常操作與個人化設定/common-workflows.html"><code>common-workflows.html</code></a></li>
-                <li><a href="02_日常操作與個人化設定/commands.html"><code>commands.html</code></a></li>
-                <li><a href="02_日常操作與個人化設定/cli-reference.html"><code>cli-reference.html</code></a></li>
-                <li><a href="02_日常操作與個人化設定/permission-modes.html"><code>permission-modes.html</code></a></li>
-                <li><a href="02_日常操作與個人化設定/permissions.html"><code>permissions.html</code></a></li>
-                <li><a href="02_日常操作與個人化設定/settings.html"><code>settings.html</code></a></li>
-                <li><a href="02_日常操作與個人化設定/memory.html"><code>memory.html</code></a></li>
-                <li><a href="02_日常操作與個人化設定/claude-directory.html"><code>claude-directory.html</code></a></li>
-                <li><a href="02_日常操作與個人化設定/sessions.html"><code>sessions.html</code></a></li>
-                <li><a href="02_日常操作與個人化設定/statusline.html"><code>statusline.html</code></a></li>
-                <li><a href="02_日常操作與個人化設定/keybindings.html"><code>keybindings.html</code></a></li>
-                <li><a href="02_日常操作與個人化設定/terminal-config.html"><code>terminal-config.html</code></a></li>
-                <li><a href="02_日常操作與個人化設定/fullscreen.html"><code>fullscreen.html</code></a></li>
-                <li><a href="02_日常操作與個人化設定/fast-mode.html"><code>fast-mode.html</code></a></li>
-                <li><a href="02_日常操作與個人化設定/model-config.html"><code>model-config.html</code></a></li>
+                <li data-tip="Claude Code 工作階段中鍵盤快捷鍵, 輸入模式與互動功能的完整參考."><a href="02_日常操作與個人化設定/interactive-mode.html"><code>interactive-mode.html</code></a></li>
+                <li data-tip="以 Claude Code 探索程式碼庫, 修復錯誤, 重構, 測試等日常工作的逐步指南."><a href="02_日常操作與個人化設定/common-workflows.html"><code>common-workflows.html</code></a></li>
+                <li data-tip="Claude Code 可用指令的完整參考, 包含內建指令與內建 skills."><a href="02_日常操作與個人化設定/commands.html"><code>commands.html</code></a></li>
+                <li data-tip="Claude Code 命令列介面的完整參考, 包含指令與旗標."><a href="02_日常操作與個人化設定/cli-reference.html"><code>cli-reference.html</code></a></li>
+                <li data-tip="控制 Claude 在編輯檔案或執行指令前是否需要詢問, 可在 CLI 中以 Shift+Tab 切換模式, 或在 VS Code, 桌面應用程式與 claude.ai 中使用模式選單."><a href="02_日常操作與個人化設定/permission-modes.html"><code>permission-modes.html</code></a></li>
+                <li data-tip="以細緻的權限規則, 模式與受管理原則, 控制 Claude Code 能存取與執行的範圍."><a href="02_日常操作與個人化設定/permissions.html"><code>permissions.html</code></a></li>
+                <li data-tip="透過全域與專案層級的設定檔以及環境變數來設定 Claude Code."><a href="02_日常操作與個人化設定/settings.html"><code>settings.html</code></a></li>
+                <li data-tip="以 CLAUDE.md 檔案給予 Claude 持久性的指示, 並讓 Claude 透過自動記憶功能累積學習內容."><a href="02_日常操作與個人化設定/memory.html"><code>memory.html</code></a></li>
+                <li data-tip="Claude Code 讀取 CLAUDE.md, settings.json, hooks, skills, commands, 子代理, workflows, 規則與自動記憶的位置, 認識專案內的 .claude 目錄與家目錄下的 ~/.claude."><a href="02_日常操作與個人化設定/claude-directory.html"><code>claude-directory.html</code></a></li>
+                <li data-tip="為 Claude Code 對話命名, 恢復, 分支與切換, 涵蓋 --continue, --resume, --from-pr, /resume 選單, 工作階段命名, 匯出逐字稿與逐字稿儲存位置."><a href="02_日常操作與個人化設定/sessions.html"><code>sessions.html</code></a></li>
+                <li data-tip="設定自訂狀態列, 監看 Claude Code 的上下文視窗用量, 費用與 git 狀態."><a href="02_日常操作與個人化設定/statusline.html"><code>statusline.html</code></a></li>
+                <li data-tip="以按鍵綁定設定檔自訂 Claude Code 的鍵盤快捷鍵."><a href="02_日常操作與個人化設定/keybindings.html"><code>keybindings.html</code></a></li>
+                <li data-tip="修正 Shift+Enter 換行, 讓 Claude 完成時發出終端機提示音, 設定 tmux, 對齊色彩主題, 並在 Claude Code CLI 中啟用 Vim 模式."><a href="02_日常操作與個人化設定/terminal-config.html"><code>terminal-config.html</code></a></li>
+                <li data-tip="啟用更流暢, 不閃爍的渲染模式, 支援滑鼠操作, 並在長對話中保持穩定的記憶體用量."><a href="02_日常操作與個人化設定/fullscreen.html"><code>fullscreen.html</code></a></li>
+                <li data-tip="切換快速模式, 讓 Claude Code 以更快的速度取得 Opus 回應."><a href="02_日常操作與個人化設定/fast-mode.html"><code>fast-mode.html</code></a></li>
+                <li data-tip="了解 Claude Code 的模型設定, 包含 opusplan 之類的模型別名."><a href="02_日常操作與個人化設定/model-config.html"><code>model-config.html</code></a></li>
               </ul>
             </div></div>
           </div>
@@ -637,19 +677,19 @@
             </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
-                <li><a href="03_使用介面與平台整合/platforms.html"><code>platforms.html</code></a></li>
-                <li><a href="03_使用介面與平台整合/vs-code.html"><code>vs-code.html</code></a></li>
-                <li><a href="03_使用介面與平台整合/jetbrains.html"><code>jetbrains.html</code></a></li>
-                <li><a href="03_使用介面與平台整合/desktop.html"><code>desktop.html</code></a></li>
-                <li><a href="03_使用介面與平台整合/desktop-linux.html"><code>desktop-linux.html</code></a></li>
-                <li><a href="03_使用介面與平台整合/chrome.html"><code>chrome.html</code></a></li>
-                <li><a href="03_使用介面與平台整合/computer-use.html"><code>computer-use.html</code></a></li>
-                <li><a href="03_使用介面與平台整合/claude-code-on-the-web.html"><code>claude-code-on-the-web.html</code></a></li>
-                <li><a href="03_使用介面與平台整合/remote-control.html"><code>remote-control.html</code></a></li>
-                <li><a href="03_使用介面與平台整合/slack.html"><code>slack.html</code></a></li>
-                <li><a href="03_使用介面與平台整合/voice-dictation.html"><code>voice-dictation.html</code></a></li>
-                <li><a href="03_使用介面與平台整合/deep-links.html"><code>deep-links.html</code></a></li>
-                <li><a href="03_使用介面與平台整合/artifacts.html"><code>artifacts.html</code></a></li>
+                <li data-tip="選擇 Claude Code 的執行環境與連接對象, 比較 CLI, 桌面應用程式, VS Code, JetBrains, 網頁版, 行動裝置, 以及 Chrome, Slack, CI/CD 等整合方式."><a href="03_使用介面與平台整合/platforms.html"><code>platforms.html</code></a></li>
+                <li data-tip="安裝並設定 VS Code 的 Claude Code 擴充功能, 透過行內差異比對, @ 提及, 計畫審閱與鍵盤快捷鍵取得 AI 協作能力."><a href="03_使用介面與平台整合/vs-code.html"><code>vs-code.html</code></a></li>
+                <li data-tip="在 IntelliJ, PyCharm, WebStorm 等 JetBrains IDE 中使用 Claude Code."><a href="03_使用介面與平台整合/jetbrains.html"><code>jetbrains.html</code></a></li>
+                <li data-tip="充分運用 Claude Code 桌面應用程式, 包含具備 Git 隔離的並行工作階段, 拖放式版面配置, 整合終端機與檔案編輯器, 側邊對話, 電腦操作能力, 從手機派送工作階段, 視覺化差異比對審閱, 應用程式預覽, PR 監看, 連接器與企業設定."><a href="03_使用介面與平台整合/desktop.html"><code>desktop.html</code></a></li>
+                <li data-tip="在 Ubuntu 與 Debian 上安裝並更新 Claude 桌面應用程式."><a href="03_使用介面與平台整合/desktop-linux.html"><code>desktop-linux.html</code></a></li>
+                <li data-tip="將 Claude Code 連接至 Chrome 瀏覽器, 測試網頁應用程式, 以主控台記錄除錯, 自動填寫表單, 並從網頁擷取資料."><a href="03_使用介面與平台整合/chrome.html"><code>chrome.html</code></a></li>
+                <li data-tip="在 Claude Code CLI 中啟用電腦操作能力, 讓 Claude 能在 macOS 上開啟應用程式, 點擊, 輸入並讀取畫面, 不必離開終端機就能測試原生應用程式, 除錯視覺問題並自動化僅有圖形介面的工具."><a href="03_使用介面與平台整合/computer-use.html"><code>computer-use.html</code></a></li>
+                <li data-tip="在 Anthropic 的沙盒環境中設定雲端環境, 設定腳本, 網路存取與 Docker, 以 --cloud 與 --teleport 在網頁版與終端機之間搬移工作階段."><a href="03_使用介面與平台整合/claude-code-on-the-web.html"><code>claude-code-on-the-web.html</code></a></li>
+                <li data-tip="以遠端控制功能, 從手機, 平板或任何瀏覽器繼續本機的 Claude Code 工作階段, 可搭配 claude.ai/code 與 Claude 行動應用程式使用."><a href="03_使用介面與平台整合/remote-control.html"><code>remote-control.html</code></a></li>
+                <li data-tip="直接從你的 Slack 工作區指派程式協作任務."><a href="03_使用介面與平台整合/slack.html"><code>slack.html</code></a></li>
+                <li data-tip="在 Claude Code CLI 中以按住錄音或點按錄音的語音輸入方式口述提示."><a href="03_使用介面與平台整合/voice-dictation.html"><code>voice-dictation.html</code></a></li>
+                <li data-tip="以網址開啟 Claude Code 終端機工作階段, 在操作手冊, 告警與儀表板中嵌入 claude-cli:// 連結, 點擊即可在正確的儲存庫中以正確的提示開啟 Claude Code."><a href="03_使用介面與平台整合/deep-links.html"><code>deep-links.html</code></a></li>
+                <li data-tip="Artifacts 能把 Claude Code 的成果轉換成即時互動網頁, 以私人網址在組織內分享."><a href="03_使用介面與平台整合/artifacts.html"><code>artifacts.html</code></a></li>
               </ul>
             </div></div>
           </div>
@@ -670,21 +710,21 @@
             </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
-                <li><a href="04_擴充能力/features-overview.html"><code>features-overview.html</code></a></li>
-                <li><a href="04_擴充能力/skills.html"><code>skills.html</code></a></li>
-                <li><a href="04_擴充能力/sub-agents.html"><code>sub-agents.html</code></a></li>
-                <li><a href="04_擴充能力/hooks-guide.html"><code>hooks-guide.html</code></a></li>
-                <li><a href="04_擴充能力/hooks.html"><code>hooks.html</code></a></li>
-                <li><a href="04_擴充能力/mcp-quickstart.html"><code>mcp-quickstart.html</code></a></li>
-                <li><a href="04_擴充能力/mcp.html"><code>mcp.html</code></a></li>
-                <li><a href="04_擴充能力/output-styles.html"><code>output-styles.html</code></a></li>
-                <li><a href="04_擴充能力/plugins.html"><code>plugins.html</code></a></li>
-                <li><a href="04_擴充能力/plugins-reference.html"><code>plugins-reference.html</code></a></li>
-                <li><a href="04_擴充能力/plugin-marketplaces.html"><code>plugin-marketplaces.html</code></a></li>
-                <li><a href="04_擴充能力/discover-plugins.html"><code>discover-plugins.html</code></a></li>
-                <li><a href="04_擴充能力/plugin-dependencies.html"><code>plugin-dependencies.html</code></a></li>
-                <li><a href="04_擴充能力/plugin-hints.html"><code>plugin-hints.html</code></a></li>
-                <li><a href="04_擴充能力/plugin-relevance.html"><code>plugin-relevance.html</code></a></li>
+                <li data-tip="了解何時該使用 CLAUDE.md, Skills, 子代理, hooks, MCP 與 plugins."><a href="04_擴充能力/features-overview.html"><code>features-overview.html</code></a></li>
+                <li data-tip="建立, 管理並分享 skills, 擴充 Claude 在 Claude Code 中的能力, 涵蓋自訂指令與內建 skills."><a href="04_擴充能力/skills.html"><code>skills.html</code></a></li>
+                <li data-tip="在 Claude Code 中建立並使用專門的 AI 子代理, 因應特定任務流程並改善上下文管理."><a href="04_擴充能力/sub-agents.html"><code>sub-agents.html</code></a></li>
+                <li data-tip="在 Claude Code 編輯檔案, 完成任務或需要輸入時自動執行 shell 指令, 用於格式化程式碼, 發送通知, 驗證指令並強制執行專案規則."><a href="04_擴充能力/hooks-guide.html"><code>hooks-guide.html</code></a></li>
+                <li data-tip="Claude Code hook 事件, 設定結構, JSON 輸入輸出格式, 結束代碼, 非同步 hooks, HTTP hooks, 提示 hooks 與 MCP 工具 hooks 的參考."><a href="04_擴充能力/hooks.html"><code>hooks.html</code></a></li>
+                <li data-tip="為 Claude Code 加入 MCP 伺服器, 驗證連線是否成功, 並找到磁碟上的設定檔."><a href="04_擴充能力/mcp-quickstart.html"><code>mcp-quickstart.html</code></a></li>
+                <li data-tip="了解如何以 Model Context Protocol 將 Claude Code 連接至你的工具."><a href="04_擴充能力/mcp.html"><code>mcp.html</code></a></li>
+                <li data-tip="調整 Claude Code, 使其能用於軟體工程以外的用途."><a href="04_擴充能力/output-styles.html"><code>output-styles.html</code></a></li>
+                <li data-tip="建立自訂 plugins, 以 skills, agents, hooks 與 MCP 伺服器擴充 Claude Code."><a href="04_擴充能力/plugins.html"><code>plugins.html</code></a></li>
+                <li data-tip="Claude Code plugin 系統的完整技術參考, 包含結構定義, CLI 指令與元件規格."><a href="04_擴充能力/plugins-reference.html"><code>plugins-reference.html</code></a></li>
+                <li data-tip="建置並架設 plugin 市集, 在團隊與社群之間散布 Claude Code 擴充功能."><a href="04_擴充能力/plugin-marketplaces.html"><code>plugin-marketplaces.html</code></a></li>
+                <li data-tip="從市集尋找並安裝 plugins, 以新的 skills, agents 與能力擴充 Claude Code."><a href="04_擴充能力/discover-plugins.html"><code>discover-plugins.html</code></a></li>
+                <li data-tip="為 plugin 相依項目宣告版本限制, 確保上游 plugin 發布重大變更時, 你的 plugin 仍能正常運作."><a href="04_擴充能力/plugin-dependencies.html"><code>plugin-dependencies.html</code></a></li>
+                <li data-tip="從你的 CLI 發出一行標記, 讓 Claude Code 提示使用者安裝你的官方 plugin."><a href="04_擴充能力/plugin-hints.html"><code>plugin-hints.html</code></a></li>
+                <li data-tip="為市集中的 plugin 項目加上相關性區塊, 當使用者的工作內容相符時, Claude Code 就會建議該 plugin."><a href="04_擴充能力/plugin-relevance.html"><code>plugin-relevance.html</code></a></li>
               </ul>
             </div></div>
           </div>
@@ -705,17 +745,17 @@
             </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
-                <li><a href="05_自動化與多代理協作/goal.html"><code>goal.html</code></a></li>
-                <li><a href="05_自動化與多代理協作/scheduled-tasks.html"><code>scheduled-tasks.html</code></a></li>
-                <li><a href="05_自動化與多代理協作/desktop-scheduled-tasks.html"><code>desktop-scheduled-tasks.html</code></a></li>
-                <li><a href="05_自動化與多代理協作/routines.html"><code>routines.html</code></a></li>
-                <li><a href="05_自動化與多代理協作/channels.html"><code>channels.html</code></a></li>
-                <li><a href="05_自動化與多代理協作/channels-reference.html"><code>channels-reference.html</code></a></li>
-                <li><a href="05_自動化與多代理協作/agents.html"><code>agents.html</code></a></li>
-                <li><a href="05_自動化與多代理協作/agent-view.html"><code>agent-view.html</code></a></li>
-                <li><a href="05_自動化與多代理協作/agent-teams.html"><code>agent-teams.html</code></a></li>
-                <li><a href="05_自動化與多代理協作/headless.html"><code>headless.html</code></a></li>
-                <li><a href="05_自動化與多代理協作/ultraplan.html"><code>ultraplan.html</code></a></li>
+                <li data-tip="以 /goal 設定完成條件, Claude 會持續跨回合工作, 直到條件達成為止."><a href="05_自動化與多代理協作/goal.html"><code>goal.html</code></a></li>
+                <li data-tip="在 Claude Code 工作階段中使用 /loop 與 cron 排程工具, 重複執行提示, 輪詢狀態, 或設定單次提醒."><a href="05_自動化與多代理協作/scheduled-tasks.html"><code>scheduled-tasks.html</code></a></li>
+                <li data-tip="在 Claude Code 桌面應用程式中設定排程任務, 讓 Claude 定期自動執行每日程式碼審查, 相依套件稽核或晨間簡報."><a href="05_自動化與多代理協作/desktop-scheduled-tasks.html"><code>desktop-scheduled-tasks.html</code></a></li>
+                <li data-tip="讓 Claude Code 自動運作, 在 Anthropic 管理的雲端基礎架構上定義依排程執行, 由 API 呼叫觸發, 或回應 GitHub 事件的 routines."><a href="05_自動化與多代理協作/routines.html"><code>routines.html</code></a></li>
+                <li data-tip="以 channels 從 MCP 伺服器將訊息, 告警與 webhooks 推送進 Claude Code 工作階段, 轉發 CI 結果, 聊天訊息與監控事件, 讓 Claude 在你不在時也能即時反應."><a href="05_自動化與多代理協作/channels.html"><code>channels.html</code></a></li>
+                <li data-tip="建置能將 webhooks, 告警與聊天訊息推送進 Claude Code 工作階段的 MCP 伺服器, 這是 channel 合約的參考, 涵蓋能力宣告, 通知事件, 回覆工具, 傳送者管控與權限轉發."><a href="05_自動化與多代理協作/channels-reference.html"><code>channels-reference.html</code></a></li>
+                <li data-tip="比較 Claude Code 同時處理多項任務的方式, 包含子代理, agent view, agent teams 與動態 workflows."><a href="05_自動化與多代理協作/agents.html"><code>agents.html</code></a></li>
+                <li data-tip="在同一個畫面上派送並管理多個 Claude Code 工作階段, agent view 會顯示每個工作階段正在做什麼, 以及哪些需要你輸入."><a href="05_自動化與多代理協作/agent-view.html"><code>agent-view.html</code></a></li>
+                <li data-tip="協調多個 Claude Code 實體以團隊方式協同運作, 共用任務, 代理間訊息傳遞與集中管理."><a href="05_自動化與多代理協作/agent-teams.html"><code>agent-teams.html</code></a></li>
+                <li data-tip="以 Agent SDK, 從 CLI, Python 或 TypeScript 以程式方式執行 Claude Code."><a href="05_自動化與多代理協作/headless.html"><code>headless.html</code></a></li>
+                <li data-tip="從 CLI 開始擬定計畫, 在網頁版 Claude Code 上草擬, 再遠端執行或回到終端機執行."><a href="05_自動化與多代理協作/ultraplan.html"><code>ultraplan.html</code></a></li>
               </ul>
             </div></div>
           </div>
@@ -736,13 +776,13 @@
             </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
-                <li><a href="06_品質安全與合規/checkpointing.html"><code>checkpointing.html</code></a></li>
-                <li><a href="06_品質安全與合規/code-review.html"><code>code-review.html</code></a></li>
-                <li><a href="06_品質安全與合規/ultrareview.html"><code>ultrareview.html</code></a></li>
-                <li><a href="06_品質安全與合規/security.html"><code>security.html</code></a></li>
-                <li><a href="06_品質安全與合規/security-guidance.html"><code>security-guidance.html</code></a></li>
-                <li><a href="06_品質安全與合規/data-usage.html"><code>data-usage.html</code></a></li>
-                <li><a href="06_品質安全與合規/legal-and-compliance.html"><code>legal-and-compliance.html</code></a></li>
+                <li data-tip="追蹤, 回溯並摘要 Claude 的編輯與對話內容, 用以管理工作階段狀態."><a href="06_品質安全與合規/checkpointing.html"><code>checkpointing.html</code></a></li>
+                <li data-tip="設定自動化 PR 審查, 以多代理分析你的完整程式碼庫, 找出邏輯錯誤, 安全漏洞與回歸問題."><a href="06_品質安全與合規/code-review.html"><code>code-review.html</code></a></li>
+                <li data-tip="以 /code-review ultra 在雲端執行深度多代理程式碼審查, 在合併前找出並驗證錯誤."><a href="06_品質安全與合規/ultrareview.html"><code>ultrareview.html</code></a></li>
+                <li data-tip="了解 Claude Code 的安全防護機制與安全使用的最佳實務."><a href="06_品質安全與合規/security.html"><code>security.html</code></a></li>
+                <li data-tip="安裝 security-guidance plugin, 讓 Claude 在同一個工作階段中審查自己的程式碼變更是否有漏洞並加以修復."><a href="06_品質安全與合規/security-guidance.html"><code>security-guidance.html</code></a></li>
+                <li data-tip="了解 Anthropic 針對 Claude 的資料使用政策."><a href="06_品質安全與合規/data-usage.html"><code>data-usage.html</code></a></li>
+                <li data-tip="Claude Code 的法律協議, 合規認證與安全資訊."><a href="06_品質安全與合規/legal-and-compliance.html"><code>legal-and-compliance.html</code></a></li>
               </ul>
             </div></div>
           </div>
@@ -763,11 +803,11 @@
             </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
-                <li><a href="07_成本效能與可觀測性/costs.html"><code>costs.html</code></a></li>
-                <li><a href="07_成本效能與可觀測性/prompt-caching.html"><code>prompt-caching.html</code></a></li>
-                <li><a href="07_成本效能與可觀測性/context-window.html"><code>context-window.html</code></a></li>
-                <li><a href="07_成本效能與可觀測性/monitoring-usage.html"><code>monitoring-usage.html</code></a></li>
-                <li><a href="07_成本效能與可觀測性/analytics.html"><code>analytics.html</code></a></li>
+                <li data-tip="追蹤 token 用量, 設定團隊花費上限, 並以上下文管理, 模型選擇, 延伸思考設定與前處理 hooks 降低 Claude Code 的費用."><a href="07_成本效能與可觀測性/costs.html"><code>costs.html</code></a></li>
+                <li data-tip="Claude Code 會自動管理提示快取, 說明為何切換模型會觸發一次緩慢的未快取回合, /compact 的成本為何, 為何 CLAUDE.md 的修改不會在工作階段中途生效, 以及如何檢查快取命中率."><a href="07_成本效能與可觀測性/prompt-caching.html"><code>prompt-caching.html</code></a></li>
+                <li data-tip="以互動模擬呈現 Claude Code 上下文視窗在工作階段中如何被填滿, 說明哪些內容會自動載入, 每次讀取檔案的成本, 以及規則與 hooks 何時觸發."><a href="07_成本效能與可觀測性/context-window.html"><code>context-window.html</code></a></li>
+                <li data-tip="了解如何為 Claude Code 啟用並設定 OpenTelemetry."><a href="07_成本效能與可觀測性/monitoring-usage.html"><code>monitoring-usage.html</code></a></li>
+                <li data-tip="在分析儀表板中檢視 Claude Code 使用指標, 追蹤採用情形, 並衡量工程團隊的開發速度."><a href="07_成本效能與可觀測性/analytics.html"><code>analytics.html</code></a></li>
               </ul>
             </div></div>
           </div>
@@ -788,11 +828,11 @@
             </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
-                <li><a href="08_CICD與大型專案整合/github-actions.html"><code>github-actions.html</code></a></li>
-                <li><a href="08_CICD與大型專案整合/github-enterprise-server.html"><code>github-enterprise-server.html</code></a></li>
-                <li><a href="08_CICD與大型專案整合/gitlab-ci-cd.html"><code>gitlab-ci-cd.html</code></a></li>
-                <li><a href="08_CICD與大型專案整合/large-codebases.html"><code>large-codebases.html</code></a></li>
-                <li><a href="08_CICD與大型專案整合/devcontainer.html"><code>devcontainer.html</code></a></li>
+                <li data-tip="了解如何以 Claude Code GitHub Actions 將 Claude Code 整合進你的開發流程."><a href="08_CICD與大型專案整合/github-actions.html"><code>github-actions.html</code></a></li>
+                <li data-tip="將 Claude Code 連接至自架的 GitHub Enterprise Server, 用於網頁工作階段, 程式碼審查與 plugin 市集."><a href="08_CICD與大型專案整合/github-enterprise-server.html"><code>github-enterprise-server.html</code></a></li>
+                <li data-tip="了解如何以 GitLab CI/CD 將 Claude Code 整合進你的開發流程."><a href="08_CICD與大型專案整合/gitlab-ci-cd.html"><code>gitlab-ci-cd.html</code></a></li>
+                <li data-tip="為 monorepo 與大型單一樹狀程式碼庫設定 Claude Code, 以巢狀 CLAUDE.md 檔案, 稀疏 worktree, 程式碼智慧與各套件專屬的 skills, 讓 Claude 專注在你正在處理的程式碼上."><a href="08_CICD與大型專案整合/large-codebases.html"><code>large-codebases.html</code></a></li>
+                <li data-tip="在 dev container 中執行 Claude Code, 讓團隊擁有一致且隔離的開發環境."><a href="08_CICD與大型專案整合/devcontainer.html"><code>devcontainer.html</code></a></li>
               </ul>
             </div></div>
           </div>
@@ -813,36 +853,36 @@
             </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
-                <li><a href="09_Agent_SDK開發/overview.html"><code>overview.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/quickstart.html"><code>quickstart.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/agent-loop.html"><code>agent-loop.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/claude-code-features.html"><code>claude-code-features.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/streaming-vs-single-mode.html"><code>streaming-vs-single-mode.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/streaming-output.html"><code>streaming-output.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/sessions.html"><code>sessions.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/session-storage.html"><code>session-storage.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/custom-tools.html"><code>custom-tools.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/mcp.html"><code>mcp.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/tool-search.html"><code>tool-search.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/skills.html"><code>skills.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/subagents.html"><code>subagents.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/slash-commands.html"><code>slash-commands.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/plugins.html"><code>plugins.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/modifying-system-prompts.html"><code>modifying-system-prompts.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/permissions.html"><code>permissions.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/hooks.html"><code>hooks.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/file-checkpointing.html"><code>file-checkpointing.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/structured-outputs.html"><code>structured-outputs.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/todo-tracking.html"><code>todo-tracking.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/user-input.html"><code>user-input.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/cost-tracking.html"><code>cost-tracking.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/observability.html"><code>observability.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/secure-deployment.html"><code>secure-deployment.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/migration-guide.html"><code>migration-guide.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/hosting.html"><code>hosting.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/python.html"><code>python.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/typescript.html"><code>typescript.html</code></a></li>
-                <li><a href="09_Agent_SDK開發/typescript-v2-preview.html"><code>typescript-v2-preview.html</code></a></li>
+                <li data-tip="以 Claude Code 作為函式庫, 建置可用於正式環境的 AI 代理."><a href="09_Agent_SDK開發/overview.html"><code>overview.html</code></a></li>
+                <li data-tip="開始使用 Python 或 TypeScript Agent SDK, 建置能自主運作的 AI 代理."><a href="09_Agent_SDK開發/quickstart.html"><code>quickstart.html</code></a></li>
+                <li data-tip="了解支撐 SDK 代理運作的訊息生命週期, 工具執行, 上下文視窗與架構."><a href="09_Agent_SDK開發/agent-loop.html"><code>agent-loop.html</code></a></li>
+                <li data-tip="將專案指示, skills, hooks 等 Claude Code 功能載入你的 SDK 代理."><a href="09_Agent_SDK開發/claude-code-features.html"><code>claude-code-features.html</code></a></li>
+                <li data-tip="了解 Claude Agent SDK 的兩種輸入模式, 以及各自適用的時機."><a href="09_Agent_SDK開發/streaming-vs-single-mode.html"><code>streaming-vs-single-mode.html</code></a></li>
+                <li data-tip="在文字與工具呼叫以串流方式傳回時, 從 Agent SDK 取得即時回應."><a href="09_Agent_SDK開發/streaming-output.html"><code>streaming-output.html</code></a></li>
+                <li data-tip="工作階段如何保存代理的對話紀錄, 以及何時該使用 continue, resume 與 fork 回到先前的執行結果."><a href="09_Agent_SDK開發/sessions.html"><code>sessions.html</code></a></li>
+                <li data-tip="將工作階段逐字稿鏡射至 S3, Redis 或自訂後端, 讓任何主機都能恢復這些工作階段."><a href="09_Agent_SDK開發/session-storage.html"><code>session-storage.html</code></a></li>
+                <li data-tip="以 Claude Agent SDK 的行內 MCP 伺服器定義自訂工具, 讓 Claude 能呼叫你的函式, 存取你的 API, 並執行特定領域的操作."><a href="09_Agent_SDK開發/custom-tools.html"><code>custom-tools.html</code></a></li>
+                <li data-tip="設定 MCP 伺服器, 以外部工具擴充你的代理, 涵蓋傳輸類型, 大量工具的工具搜尋, 驗證與錯誤處理."><a href="09_Agent_SDK開發/mcp.html"><code>mcp.html</code></a></li>
+                <li data-tip="讓你的代理擴展至數千個工具, 只在需要時才發現並載入所需的工具."><a href="09_Agent_SDK開發/tool-search.html"><code>tool-search.html</code></a></li>
+                <li data-tip="在 Claude Agent SDK 中以 Agent Skills 擴充 Claude 的專門能力."><a href="09_Agent_SDK開發/skills.html"><code>skills.html</code></a></li>
+                <li data-tip="在 Claude Agent SDK 應用程式中定義並呼叫子代理, 隔離上下文, 平行執行任務, 並套用專門的指示."><a href="09_Agent_SDK開發/subagents.html"><code>subagents.html</code></a></li>
+                <li data-tip="了解如何透過 SDK 以斜線指令控制 Claude Code 工作階段."><a href="09_Agent_SDK開發/slash-commands.html"><code>slash-commands.html</code></a></li>
+                <li data-tip="透過 Agent SDK 載入自訂 plugins, 以 skills, agents, hooks 與 MCP 伺服器擴充 Claude Code."><a href="09_Agent_SDK開發/plugins.html"><code>plugins.html</code></a></li>
+                <li data-tip="在 claude_code 預設值與自訂系統提示之間做選擇, 並以 CLAUDE.md, output styles, append 或完全自訂的提示自訂行為."><a href="09_Agent_SDK開發/modifying-system-prompts.html"><code>modifying-system-prompts.html</code></a></li>
+                <li data-tip="以權限模式, hooks 與宣告式的允許/拒絕規則, 控制你的代理如何使用工具."><a href="09_Agent_SDK開發/permissions.html"><code>permissions.html</code></a></li>
+                <li data-tip="以 hooks 在關鍵執行點攔截並自訂代理的行為."><a href="09_Agent_SDK開發/hooks.html"><code>hooks.html</code></a></li>
+                <li data-tip="追蹤代理工作階段中的檔案變更, 並將檔案還原至任一先前狀態."><a href="09_Agent_SDK開發/file-checkpointing.html"><code>file-checkpointing.html</code></a></li>
+                <li data-tip="以 JSON Schema, Zod 或 Pydantic, 從代理 workflow 傳回經過驗證的 JSON, 在多回合工具使用後取得型別安全的結構化資料."><a href="09_Agent_SDK開發/structured-outputs.html"><code>structured-outputs.html</code></a></li>
+                <li data-tip="以 Claude Agent SDK 追蹤並顯示待辦事項, 有條理地管理任務."><a href="09_Agent_SDK開發/todo-tracking.html"><code>todo-tracking.html</code></a></li>
+                <li data-tip="將 Claude 的核准請求與釐清問題呈現給使用者, 再把使用者的決定回傳給 SDK."><a href="09_Agent_SDK開發/user-input.html"><code>user-input.html</code></a></li>
+                <li data-tip="了解如何以 Claude Agent SDK 追蹤 token 用量, 估算費用, 並設定提示快取."><a href="09_Agent_SDK開發/cost-tracking.html"><code>cost-tracking.html</code></a></li>
+                <li data-tip="以 OpenTelemetry, 將 Agent SDK 的追蹤紀錄, 指標與事件匯出至你的可觀測性後端."><a href="09_Agent_SDK開發/observability.html"><code>observability.html</code></a></li>
+                <li data-tip="以隔離機制, 憑證管理與網路控管, 保護 Claude Code 與 Agent SDK 部署安全的指南."><a href="09_Agent_SDK開發/secure-deployment.html"><code>secure-deployment.html</code></a></li>
+                <li data-tip="將 Claude Code TypeScript 與 Python SDK 遷移至 Claude Agent SDK 的指南."><a href="09_Agent_SDK開發/migration-guide.html"><code>migration-guide.html</code></a></li>
+                <li data-tip="在正式環境部署 Agent SDK, 涵蓋子行程架構, 工作階段持久化, 擴展, 可觀測性, 以及 Docker, Kubernetes 與沙盒供應商的多租戶隔離."><a href="09_Agent_SDK開發/hosting.html"><code>hosting.html</code></a></li>
+                <li data-tip="Python Agent SDK 的完整 API 參考, 包含所有函式, 型別與類別."><a href="09_Agent_SDK開發/python.html"><code>python.html</code></a></li>
+                <li data-tip="TypeScript Agent SDK 的完整 API 參考, 包含所有函式, 型別與介面."><a href="09_Agent_SDK開發/typescript.html"><code>typescript.html</code></a></li>
+                <li data-tip="已移除的 V2 TypeScript Agent SDK 工作階段 API 參考, 說明多回合對話中以工作階段為基礎的傳送/串流模式."><a href="09_Agent_SDK開發/typescript-v2-preview.html"><code>typescript-v2-preview.html</code></a></li>
               </ul>
             </div></div>
           </div>
@@ -863,29 +903,29 @@
             </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
-                <li><a href="10_企業級部署與治理/admin-setup.html"><code>admin-setup.html</code></a></li>
-                <li><a href="10_企業級部署與治理/feature-availability.html"><code>feature-availability.html</code></a></li>
-                <li><a href="10_企業級部署與治理/auto-mode-config.html"><code>auto-mode-config.html</code></a></li>
-                <li><a href="10_企業級部署與治理/managed-mcp.html"><code>managed-mcp.html</code></a></li>
-                <li><a href="10_企業級部署與治理/server-managed-settings.html"><code>server-managed-settings.html</code></a></li>
-                <li><a href="10_企業級部署與治理/network-config.html"><code>network-config.html</code></a></li>
-                <li><a href="10_企業級部署與治理/sandbox-environments.html"><code>sandbox-environments.html</code></a></li>
-                <li><a href="10_企業級部署與治理/sandboxing.html"><code>sandboxing.html</code></a></li>
-                <li><a href="10_企業級部署與治理/gateways.html"><code>gateways.html</code></a></li>
-                <li><a href="10_企業級部署與治理/llm-gateway.html"><code>llm-gateway.html</code></a></li>
-                <li><a href="10_企業級部署與治理/llm-gateway-connect.html"><code>llm-gateway-connect.html</code></a></li>
-                <li><a href="10_企業級部署與治理/llm-gateway-protocol.html"><code>llm-gateway-protocol.html</code></a></li>
-                <li><a href="10_企業級部署與治理/llm-gateway-rollout.html"><code>llm-gateway-rollout.html</code></a></li>
-                <li><a href="10_企業級部署與治理/claude-apps-gateway.html"><code>claude-apps-gateway.html</code></a></li>
-                <li><a href="10_企業級部署與治理/claude-apps-gateway-config.html"><code>claude-apps-gateway-config.html</code></a></li>
-                <li><a href="10_企業級部署與治理/claude-apps-gateway-deploy.html"><code>claude-apps-gateway-deploy.html</code></a></li>
-                <li><a href="10_企業級部署與治理/claude-apps-gateway-on-gcp.html"><code>claude-apps-gateway-on-gcp.html</code></a></li>
-                <li><a href="10_企業級部署與治理/claude-apps-gateway-spend-limits.html"><code>claude-apps-gateway-spend-limits.html</code></a></li>
-                <li><a href="10_企業級部署與治理/amazon-bedrock.html"><code>amazon-bedrock.html</code></a></li>
-                <li><a href="10_企業級部署與治理/google-vertex-ai.html"><code>google-vertex-ai.html</code></a></li>
-                <li><a href="10_企業級部署與治理/microsoft-foundry.html"><code>microsoft-foundry.html</code></a></li>
-                <li><a href="10_企業級部署與治理/claude-platform-on-aws.html"><code>claude-platform-on-aws.html</code></a></li>
-                <li><a href="10_企業級部署與治理/third-party-integrations.html"><code>third-party-integrations.html</code></a></li>
+                <li data-tip="給部署 Claude Code 的管理者的決策地圖, 涵蓋 API 供應商, 受管理設定, 原則強制執行, 用量監控與資料處理."><a href="10_企業級部署與治理/admin-setup.html"><code>admin-setup.html</code></a></li>
+                <li data-tip="比較 Claude Code 各項功能在 Anthropic 訂閱方案, Anthropic Console, Amazon Bedrock, Claude Platform on AWS, Google Vertex AI 與 Microsoft Foundry 上的可用情形."><a href="10_企業級部署與治理/feature-availability.html"><code>feature-availability.html</code></a></li>
+                <li data-tip="告訴自動模式分類器你的組織信任哪些儲存庫, bucket 與網域, 設定環境背景, 覆寫預設的封鎖與允許規則, 並以 auto-mode CLI 子指令檢查目前生效的設定."><a href="10_企業級部署與治理/auto-mode-config.html"><code>auto-mode-config.html</code></a></li>
+                <li data-tip="以受管理的設定檔, 允許清單與拒絕清單, 限制使用者能新增或連接的 MCP 伺服器."><a href="10_企業級部署與治理/managed-mcp.html"><code>managed-mcp.html</code></a></li>
+                <li data-tip="透過伺服器下發的設定, 為組織集中設定 Claude Code, 不需要裝置管理基礎架構."><a href="10_企業級部署與治理/server-managed-settings.html"><code>server-managed-settings.html</code></a></li>
+                <li data-tip="為企業環境設定 Claude Code, 包含 proxy 伺服器, 自訂憑證授權單位 (CA) 與雙向 TLS (mTLS) 驗證."><a href="10_企業級部署與治理/network-config.html"><code>network-config.html</code></a></li>
+                <li data-tip="比較 Claude Code 的沙盒選項, 包含內建的沙盒化 Bash 工具, sandbox runtime, dev container, Docker 與虛擬機, 依你的威脅模型選擇合適的隔離方式."><a href="10_企業級部署與治理/sandbox-environments.html"><code>sandbox-environments.html</code></a></li>
+                <li data-tip="了解 Claude Code 沙盒化的 Bash 工具如何提供檔案系統與網路隔離, 讓代理能更安全且更自主地執行."><a href="10_企業級部署與治理/sandboxing.html"><code>sandboxing.html</code></a></li>
+                <li data-tip="將 Claude Code 導向自架的 gateway, 集中管理憑證, 用量追蹤與成本控管, 涵蓋架構, Anthropic 的 Claude apps gateway, 以及使用其他 gateway 產品."><a href="10_企業級部署與治理/gateways.html"><code>gateways.html</code></a></li>
+                <li data-tip="將 Claude Code 導向你組織既有的 LLM gateway, 涵蓋連接 Claude Code 至 gateway, 為組織推行 gateway, 以及 Claude Code 會傳送給 gateway 的內容."><a href="10_企業級部署與治理/llm-gateway.html"><code>llm-gateway.html</code></a></li>
+                <li data-tip="將 Claude Code 指向組織的 LLM gateway, 確認管理者是否已設定完成, 或自行為 CLI, VS Code, GitHub Actions 與 Agent SDK 設定基礎網址與憑證, 再驗證連線並排除 gateway 錯誤."><a href="10_企業級部署與治理/llm-gateway-connect.html"><code>llm-gateway-connect.html</code></a></li>
+                <li data-tip="Claude Code 與 LLM gateway 之間的 API 合約, 涵蓋端點, 需轉發的標頭與內文欄位, 欄位被移除時的功能降級, 用於成本追蹤的歸屬標頭, 以及模型探索."><a href="10_企業級部署與治理/llm-gateway-protocol.html"><code>llm-gateway-protocol.html</code></a></li>
+                <li data-tip="為 Claude Code 部署 gateway 產品, 設定它轉發 Claude Code 傳送的內容, 核發開發者憑證, 透過受管理設定散布組態, 並驗證推行結果."><a href="10_企業級部署與治理/llm-gateway-rollout.html"><code>llm-gateway-rollout.html</code></a></li>
+                <li data-tip="在自架的 gateway 後方, 透過 Amazon Bedrock, Google Cloud 或 Microsoft Foundry 執行 Claude Code, 具備 SSO 登入, 依群組區分的模型存取權限與 OTLP 遙測."><a href="10_企業級部署與治理/claude-apps-gateway.html"><code>claude-apps-gateway.html</code></a></li>
+                <li data-tip="gateway.yaml 所有設定選項的參考, 涵蓋 listener 與 TLS, OIDC, 工作階段, Postgres 儲存, Bedrock/Agent Platform/Foundry 上游, 模型路由, 受管理原則與遙測."><a href="10_企業級部署與治理/claude-apps-gateway-config.html"><code>claude-apps-gateway-config.html</code></a></li>
+                <li data-tip="在你的 IdP 註冊 gateway, 建置容器, 部署至 Kubernetes 或 Cloud Run, 並負責健康檢查, 密鑰輪替, 升級與安全性等維運工作."><a href="10_企業級部署與治理/claude-apps-gateway-deploy.html"><code>claude-apps-gateway-deploy.html</code></a></li>
+                <li data-tip="在 Google Cloud 上執行 Claude apps gateway 的實作範例, 包含 Cloud Run 或 GKE, Cloud SQL for PostgreSQL, Secret Manager, 以及以服務帳戶驗證存取 Agent Platform."><a href="10_企業級部署與治理/claude-apps-gateway-on-gcp.html"><code>claude-apps-gateway-on-gcp.html</code></a></li>
+                <li data-tip="透過 Claude apps gateway, 依日, 週或月限制每位開發者的花費, 以 Admin API 設定上限, gateway 會即時在每次請求強制執行."><a href="10_企業級部署與治理/claude-apps-gateway-spend-limits.html"><code>claude-apps-gateway-spend-limits.html</code></a></li>
+                <li data-tip="了解如何透過 Amazon Bedrock 設定 Claude Code, 包含建置流程, IAM 設定與疑難排解."><a href="10_企業級部署與治理/amazon-bedrock.html"><code>amazon-bedrock.html</code></a></li>
+                <li data-tip="了解如何透過 Google Vertex AI 設定 Claude Code, 包含建置流程, IAM 設定與疑難排解."><a href="10_企業級部署與治理/google-vertex-ai.html"><code>google-vertex-ai.html</code></a></li>
+                <li data-tip="了解如何透過 Microsoft Foundry 設定 Claude Code, 包含建置流程, 組態設定與疑難排解."><a href="10_企業級部署與治理/microsoft-foundry.html"><code>microsoft-foundry.html</code></a></li>
+                <li data-tip="設定 Claude Code, 以 AWS 驗證, IAM 存取控管與 AWS Marketplace 計費, 使用由 Anthropic 營運的 Claude API."><a href="10_企業級部署與治理/claude-platform-on-aws.html"><code>claude-platform-on-aws.html</code></a></li>
+                <li data-tip="了解 Claude Code 如何與各種第三方服務及基礎架構整合, 以符合企業部署需求."><a href="10_企業級部署與治理/third-party-integrations.html"><code>third-party-integrations.html</code></a></li>
               </ul>
             </div></div>
           </div>
@@ -906,12 +946,12 @@
             </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
-                <li><a href="11_疑難排解與參考資料/debug-your-config.html"><code>debug-your-config.html</code></a></li>
-                <li><a href="11_疑難排解與參考資料/troubleshooting.html"><code>troubleshooting.html</code></a></li>
-                <li><a href="11_疑難排解與參考資料/troubleshoot-install.html"><code>troubleshoot-install.html</code></a></li>
-                <li><a href="11_疑難排解與參考資料/errors.html"><code>errors.html</code></a></li>
-                <li><a href="11_疑難排解與參考資料/env-vars.html"><code>env-vars.html</code></a></li>
-                <li><a href="11_疑難排解與參考資料/tools-reference.html"><code>tools-reference.html</code></a></li>
+                <li data-tip="診斷為何 CLAUDE.md, 設定, hooks, MCP 伺服器或 skills 沒有生效, 以 /context, /doctor, /hooks 與 /mcp 查看實際載入的內容."><a href="11_疑難排解與參考資料/debug-your-config.html"><code>debug-your-config.html</code></a></li>
+                <li data-tip="解決 Claude Code 中過高的 CPU 或記憶體用量, 卡住, 自動壓縮反覆觸發與搜尋問題, 並找到其他問題適用的頁面."><a href="11_疑難排解與參考資料/troubleshooting.html"><code>troubleshooting.html</code></a></li>
+                <li data-tip="解決安裝或登入 Claude Code 時出現的指令找不到, PATH, 權限, 網路與驗證錯誤."><a href="11_疑難排解與參考資料/troubleshoot-install.html"><code>troubleshoot-install.html</code></a></li>
+                <li data-tip="查詢 Claude Code 執行階段的錯誤訊息, 說明每個錯誤的意義與修正方式."><a href="11_疑難排解與參考資料/errors.html"><code>errors.html</code></a></li>
+                <li data-tip="控制 Claude Code 行為的環境變數參考."><a href="11_疑難排解與參考資料/env-vars.html"><code>env-vars.html</code></a></li>
+                <li data-tip="Claude Code 可使用工具的完整參考, 包含權限需求與各工具的行為."><a href="11_疑難排解與參考資料/tools-reference.html"><code>tools-reference.html</code></a></li>
               </ul>
             </div></div>
           </div>
@@ -932,11 +972,11 @@
             </div>
             <div class="chapter__drawer"><div class="chapter__drawer-inner">
               <ul class="filelist">
-                <li><a href="12_其他資源/advisor.html"><code>advisor.html</code></a></li>
-                <li><a href="12_其他資源/champion-kit.html"><code>champion-kit.html</code></a></li>
-                <li><a href="12_其他資源/communications-kit.html"><code>communications-kit.html</code></a></li>
-                <li><a href="12_其他資源/prompt-library.html"><code>prompt-library.html</code></a></li>
-                <li><a href="12_其他資源/changelog.html"><code>changelog.html</code></a></li>
+                <li data-tip="為你的主要模型配對一個更強大的顧問模型, 讓 Claude 在任務的關鍵時刻徵詢意見."><a href="12_其他資源/advisor.html"><code>advisor.html</code></a></li>
+                <li data-tip="給在內部推廣 Claude Code 的工程師的行動手冊, 說明該分享什麼, 如何回答問題, 以及如何在團隊中提升採用率."><a href="12_其他資源/champion-kit.html"><code>champion-kit.html</code></a></li>
+                <li data-tip="在工程組織內推行 Claude Code 所需的上線公告, 分階段推廣訊息與常見問答回覆."><a href="12_其他資源/communications-kit.html"><code>communications-kit.html</code></a></li>
+                <li data-tip="可直接複製貼上的 Claude Code 提示範例, 依任務與角色標記."><a href="12_其他資源/prompt-library.html"><code>prompt-library.html</code></a></li>
+                <li data-tip="Claude Code 的版本發布說明, 依版本列出新功能, 改善項目與錯誤修正."><a href="12_其他資源/changelog.html"><code>changelog.html</code></a></li>
               </ul>
             </div></div>
           </div>
@@ -986,6 +1026,16 @@
       btn.setAttribute('aria-expanded', String(!open));
       drawer.classList.toggle('is-open', !open);
       btn.firstChild.textContent = !open ? '收合檔案清單' : '展開檔案清單';
+      if(!open){
+        drawer.addEventListener('transitionend', function handler(e){
+          if(e.target === drawer && e.propertyName === 'grid-template-rows'){
+            drawer.classList.add('is-expanded');
+            drawer.removeEventListener('transitionend', handler);
+          }
+        });
+      } else {
+        drawer.classList.remove('is-expanded');
+      }
     });
   });
 
