@@ -1,242 +1,662 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Quickstart 快速上手互動課程</title>
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f0f4f8; color: #1a202c; line-height: 1.7; }
-header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%); border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
-header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
-header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
-main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
-section { margin-bottom: 44px; }
-h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
-p  { color: #4a5568; margin-bottom: 12px; }
-.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c; overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
-.kw { color: #7c3aed; } .fn { color: #16a34a; } .str { color: #d97706; } .cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
-.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
-.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
-.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
-.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
-.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
-.api-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
-.field { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px; padding: 14px 16px; }
-.field .name { font-family: monospace; font-size: 0.85rem; color: #16a34a; font-weight: 600; }
-.field .desc { font-size: 0.82rem; color: #4a5568; margin-top: 4px; }
-.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
-.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
-.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a; min-width: 170px; flex-shrink: 0; }
-.event-desc { font-size: 0.82rem; color: #4a5568; }
-.response-box { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 12px 16px; margin-top: 16px; }
-.response-field { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
-.response-field:last-child { border-bottom: none; }
-.rf-key { font-family: monospace; font-size: 0.8rem; color: #d97706; width: 150px; flex-shrink: 0; }
-.rf-val { font-size: 0.85rem; color: #374151; }
-.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
-.chip-label { font-size: 0.75rem; color: #6b7280; }
-.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
-.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
-@media (max-width: 640px) { .api-fields { grid-template-columns: 1fr; } }
-#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
-#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
-body.dark { background: #0f1117; color: #e2e8f0; }
-body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
-body.dark header h1 { color: #f7fafc; } body.dark header p { color: #a0aec0; }
-body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark p { color: #a0aec0; }
-body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
-body.dark .kw { color: #9f7aea; } body.dark .fn { color: #68d391; } body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
-body.dark .info-box { background: #1a202c; border-color: #2a4a6a; } body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; } body.dark .info-box p { color: #a0aec0; }
-body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; } body.dark .takeaway p { color: #c6f6d5; }
-body.dark .field { background: #1a202c; border-color: #2d3748; } body.dark .field .name { color: #68d391; } body.dark .field .desc { color: #718096; }
-body.dark .event-item { background: #1a202c; border-color: #2d3748; } body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
-body.dark .response-box { background: #1a202c; border-color: #2d3748; } body.dark .response-field { border-bottom-color: #2d3748; } body.dark .rf-key { color: #f6ad55; } body.dark .rf-val { color: #a0aec0; }
-body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; } body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
-body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); } body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quickstart 快速上手互動課程</title>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      line-height: 1.7;
+    }
+
+    header {
+      background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+      border-bottom: 1px solid #bfdbfe;
+      padding: 48px 24px 40px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #1e3a5f;
+    }
+
+    header p {
+      margin-top: 10px;
+      color: #4a5568;
+      font-size: 1.05rem;
+      max-width: 600px;
+      margin-inline: auto;
+    }
+
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    section {
+      margin-bottom: 44px;
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #1e40af;
+      border-left: 4px solid #3b82f6;
+      padding-left: 14px;
+      margin-bottom: 20px;
+    }
+
+    p {
+      color: #4a5568;
+      margin-bottom: 12px;
+    }
+
+    .code-block {
+      background: #f8fafc;
+      border: 1px solid #cbd5e0;
+      border-radius: 8px;
+      padding: 16px 18px;
+      font-family: monospace;
+      font-size: 0.82rem;
+      color: #1a202c;
+      overflow-x: auto;
+      margin-top: 14px;
+      line-height: 1.7;
+      white-space: pre;
+    }
+
+    .kw {
+      color: #7c3aed;
+    }
+
+    .fn {
+      color: #16a34a;
+    }
+
+    .str {
+      color: #d97706;
+    }
+
+    .cmt {
+      color: #94a3b8;
+      font-style: italic;
+    }
+
+    .key {
+      color: #2563eb;
+    }
+
+    .info-box {
+      background: #dbeafe;
+      border: 1px solid #93c5fd;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-top: 14px;
+    }
+
+    .info-box .tag {
+      display: inline-block;
+      background: #3b82f6;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      letter-spacing: 0.05em;
+    }
+
+    .info-box p {
+      color: #1e3a5f;
+      font-size: 0.88rem;
+      margin: 0;
+    }
+
+    .takeaway {
+      background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+      border: 1px solid #4ade80;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-top: 16px;
+    }
+
+    .takeaway p {
+      color: #166534;
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    .api-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .field {
+      background: #fff;
+      border: 1px solid #cbd5e0;
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+
+    .field .name {
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: #16a34a;
+      font-weight: 600;
+    }
+
+    .field .desc {
+      font-size: 0.82rem;
+      color: #4a5568;
+      margin-top: 4px;
+    }
+
+    .event-list {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .event-item {
+      background: #fff;
+      border: 1px solid #cbd5e0;
+      border-radius: 6px;
+      padding: 9px 14px;
+      display: flex;
+      gap: 14px;
+      align-items: baseline;
+    }
+
+    .event-name {
+      font-family: monospace;
+      font-size: 0.82rem;
+      color: #16a34a;
+      min-width: 170px;
+      flex-shrink: 0;
+    }
+
+    .event-desc {
+      font-size: 0.82rem;
+      color: #4a5568;
+    }
+
+    .response-box {
+      background: #fff;
+      border: 1px solid #cbd5e0;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-top: 16px;
+    }
+
+    .response-field {
+      display: flex;
+      gap: 16px;
+      padding: 8px 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .response-field:last-child {
+      border-bottom: none;
+    }
+
+    .rf-key {
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #d97706;
+      width: 150px;
+      flex-shrink: 0;
+    }
+
+    .rf-val {
+      font-size: 0.85rem;
+      color: #374151;
+    }
+
+    .chip-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+
+    .chip-label {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .chip {
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid #cbd5e0;
+      background: #e2e8f0;
+      color: #4a5568;
+      transition: all 0.2s;
+    }
+
+    .chip.active {
+      background: #dcfce7;
+      border-color: #4ade80;
+      color: #166534;
+    }
+
+    @media (max-width: 640px) {
+      .api-fields {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    #themeToggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 9999;
+      padding: 7px 14px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid #cbd5e0;
+      background: #fff;
+      color: #1a202c;
+      transition: all 0.25s;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+      letter-spacing: 0.03em;
+    }
+
+    #themeToggle:hover {
+      border-color: #2563eb;
+      color: #2563eb;
+    }
+
+    body.dark {
+      background: #0f1117;
+      color: #e2e8f0;
+    }
+
+    body.dark header {
+      background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%);
+      border-bottom-color: #2d3748;
+    }
+
+    body.dark header h1 {
+      color: #f7fafc;
+    }
+
+    body.dark header p {
+      color: #a0aec0;
+    }
+
+    body.dark h2 {
+      color: #90cdf4;
+      border-left-color: #4299e1;
+    }
+
+    body.dark p {
+      color: #a0aec0;
+    }
+
+    body.dark .code-block {
+      background: #0d1117;
+      border-color: #2d3748;
+      color: #e2e8f0;
+    }
+
+    body.dark .kw {
+      color: #9f7aea;
+    }
+
+    body.dark .fn {
+      color: #68d391;
+    }
+
+    body.dark .str {
+      color: #f6ad55;
+    }
+
+    body.dark .cmt {
+      color: #4a5568;
+    }
+
+    body.dark .key {
+      color: #63b3ed;
+    }
+
+    body.dark .info-box {
+      background: #1a202c;
+      border-color: #2a4a6a;
+    }
+
+    body.dark .info-box .tag {
+      background: #2a4a6a;
+      color: #90cdf4;
+    }
+
+    body.dark .info-box p {
+      color: #a0aec0;
+    }
+
+    body.dark .takeaway {
+      background: linear-gradient(135deg, #1a2a1a, #1a202c);
+      border-color: #276749;
+    }
+
+    body.dark .takeaway p {
+      color: #c6f6d5;
+    }
+
+    body.dark .field {
+      background: #1a202c;
+      border-color: #2d3748;
+    }
+
+    body.dark .field .name {
+      color: #68d391;
+    }
+
+    body.dark .field .desc {
+      color: #718096;
+    }
+
+    body.dark .event-item {
+      background: #1a202c;
+      border-color: #2d3748;
+    }
+
+    body.dark .event-name {
+      color: #68d391;
+    }
+
+    body.dark .event-desc {
+      color: #718096;
+    }
+
+    body.dark .response-box {
+      background: #1a202c;
+      border-color: #2d3748;
+    }
+
+    body.dark .response-field {
+      border-bottom-color: #2d3748;
+    }
+
+    body.dark .rf-key {
+      color: #f6ad55;
+    }
+
+    body.dark .rf-val {
+      color: #a0aec0;
+    }
+
+    body.dark .chip {
+      background: #1a202c;
+      border-color: #2d3748;
+      color: #718096;
+    }
+
+    body.dark .chip.active {
+      background: #1c3a2a;
+      border-color: #38a169;
+      color: #68d391;
+    }
+
+    body.dark #themeToggle {
+      background: #1a202c;
+      color: #e2e8f0;
+      border-color: #4a5568;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    body.dark #themeToggle:hover {
+      border-color: #90cdf4;
+      color: #90cdf4;
+    }
+  </style>
 </head>
+
 <body>
-<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
-<header>
-  <h1>Quickstart 快速上手</h1>
-  <p>幾分鐘內開始使用 AI 驅動的編碼協助, 一步步走過安裝, 登入到第一次修改程式碼。</p>
-</header>
-<main>
+  <button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+  <header>
+    <h1>Quickstart 快速上手</h1>
+    <p>幾分鐘內開始使用 AI 驅動的編碼協助, 一步步走過安裝, 登入到第一次修改程式碼。</p>
+  </header>
+  <main>
 
-<section>
-  <h2>開始之前</h2>
-  <div class="api-fields">
-    <div class="field"><div class="name">終端機</div><div class="desc">已開啟命令列, 新手可參考 terminal guide</div></div>
-    <div class="field"><div class="name">程式專案</div><div class="desc">一個可以練習操作的程式碼專案</div></div>
-    <div class="field"><div class="name">帳號</div><div class="desc">Claude 訂閱 (Pro, Max, Team, Enterprise) 或 Console 帳號, 或透過支援的雲端供應商</div></div>
-  </div>
-  <div class="info-box"><span class="tag">NOTE</span><p>本指南涵蓋終端機 CLI, Claude Code 也支援 web, desktop app, VS Code, JetBrains, Slack 與 CI/CD。</p></div>
-</section>
+    <section>
+      <h2>開始之前</h2>
+      <div class="api-fields">
+        <div class="field">
+          <div class="name">終端機</div>
+          <div class="desc">已開啟命令列, 新手可參考 terminal guide</div>
+        </div>
+        <div class="field">
+          <div class="name">程式專案</div>
+          <div class="desc">一個可以練習操作的程式碼專案</div>
+        </div>
+        <div class="field">
+          <div class="name">帳號</div>
+          <div class="desc">Claude 訂閱 (Pro, Max, Team, Enterprise) 或 Console 帳號, 或透過支援的雲端供應商</div>
+        </div>
+      </div>
+      <div class="info-box"><span class="tag">NOTE</span>
+        <p>本指南涵蓋終端機 CLI, Claude Code 也支援 web, desktop app, VS Code, JetBrains, Slack 與 CI/CD。</p>
+      </div>
+    </section>
 
-<section>
-  <h2>Step 1: 安裝 Claude Code</h2>
-  <div class="chip-row">
-    <span class="chip-label">選擇安裝方式:</span>
-    <div class="chip active" onclick="qsChip(this,0)">Native (建議)</div>
-    <div class="chip" onclick="qsChip(this,1)">Homebrew</div>
-    <div class="chip" onclick="qsChip(this,2)">WinGet</div>
-  </div>
-  <div id="qsPanel0"><pre class="code-block"><span class="cmt"># macOS, Linux, WSL</span>
+    <section>
+      <h2>Step 1: 安裝 Claude Code</h2>
+      <div class="chip-row">
+        <span class="chip-label">選擇安裝方式:</span>
+        <div class="chip active" onclick="qsChip(this,0)">Native (建議)</div>
+        <div class="chip" onclick="qsChip(this,1)">Homebrew</div>
+        <div class="chip" onclick="qsChip(this,2)">WinGet</div>
+      </div>
+      <div id="qsPanel0">
+        <pre class="code-block"><span class="cmt"># macOS, Linux, WSL</span>
 <span class="fn">curl</span> -fsSL https://claude.ai/install.sh | bash
 
 <span class="cmt"># Windows PowerShell</span>
-<span class="fn">irm</span> https://claude.ai/install.ps1 | iex</pre></div>
-  <div id="qsPanel1" style="display:none"><pre class="code-block"><span class="fn">brew</span> install --cask claude-code</pre></div>
-  <div id="qsPanel2" style="display:none"><pre class="code-block"><span class="fn">winget</span> install Anthropic.ClaudeCode</pre></div>
-</section>
+<span class="fn">irm</span> https://claude.ai/install.ps1 | iex</pre>
+      </div>
+      <div id="qsPanel1" style="display:none">
+        <pre class="code-block"><span class="fn">brew</span> install --cask claude-code</pre>
+      </div>
+      <div id="qsPanel2" style="display:none">
+        <pre class="code-block"><span class="fn">winget</span> install Anthropic.ClaudeCode</pre>
+      </div>
+    </section>
 
-<section>
-  <h2>Step 2: 登入你的帳號</h2>
-  <pre class="code-block"><span class="fn">claude</span></pre>
-  <div class="event-list">
-    <div class="event-item"><span class="event-name">Claude Pro/Max/Team</span><span class="event-desc">建議方案, 瀏覽器完成驗證</span></div>
-    <div class="event-item"><span class="event-name">Claude Console</span><span class="event-desc">API 存取搭配預付額度, 首次登入自動建立工作區</span></div>
-    <div class="event-item"><span class="event-name">Bedrock / Vertex AI / Foundry</span><span class="event-desc">企業雲端供應商</span></div>
-    <div class="event-item"><span class="event-name">自架 Claude apps gateway</span><span class="event-desc">/login 直接開啟 Cloud gateway 畫面, 用企業 SSO 登入</span></div>
-  </div>
-</section>
+    <section>
+      <h2>Step 2: 登入你的帳號</h2>
+      <pre class="code-block"><span class="fn">claude</span></pre>
+      <div class="event-list">
+        <div class="event-item"><span class="event-name">Claude Pro/Max/Team</span><span class="event-desc">建議方案,
+            瀏覽器完成驗證</span></div>
+        <div class="event-item"><span class="event-name">Claude Console</span><span class="event-desc">API 存取搭配預付額度,
+            首次登入自動建立工作區</span></div>
+        <div class="event-item"><span class="event-name">Bedrock / Vertex AI / Foundry</span><span
+            class="event-desc">企業雲端供應商</span></div>
+        <div class="event-item"><span class="event-name">自架 Claude apps gateway</span><span class="event-desc">/login
+            直接開啟 Cloud gateway 畫面, 用企業 SSO 登入</span></div>
+      </div>
+    </section>
 
-<section>
-  <h2>Step 3: 開始你的第一個 Session</h2>
-  <pre class="code-block"><span class="kw">cd</span> /path/to/your/project
+    <section>
+      <h2>Step 3: 開始你的第一個 Session</h2>
+      <pre class="code-block"><span class="kw">cd</span> /path/to/your/project
 <span class="fn">claude</span></pre>
-  <p>輸入 <span class="key">/help</span> 查看可用指令, 或 <span class="key">/resume</span> 繼續先前的對話。</p>
-</section>
+      <p>輸入 <span class="key">/help</span> 查看可用指令, 或 <span class="key">/resume</span> 繼續先前的對話。</p>
+    </section>
 
-<section>
-  <h2>Step 4: 提出你的第一個問題</h2>
-  <pre class="code-block">what does this project do?
+    <section>
+      <h2>Step 4: 提出你的第一個問題</h2>
+      <pre class="code-block">what does this project do?
 what technologies does this project use?
 where is the main entry point?
 explain the folder structure</pre>
-  <div class="info-box"><span class="tag">NOTE</span><p>Claude Code 會依需要讀取你的專案檔案, 不需要手動加入情境。</p></div>
-</section>
+      <div class="info-box"><span class="tag">NOTE</span>
+        <p>Claude Code 會依需要讀取你的專案檔案, 不需要手動加入情境。</p>
+      </div>
+    </section>
 
-<section>
-  <h2>Step 5: 做出第一個程式碼修改</h2>
-  <pre class="code-block">add a hello world function to the main file</pre>
-  <div class="event-list">
-    <div class="event-item"><span class="event-name">1. 找到檔案</span><span class="event-desc">Claude Code 找出適合的檔案</span></div>
-    <div class="event-item"><span class="event-name">2. 顯示變更</span><span class="event-desc">向你展示提議的修改內容</span></div>
-    <div class="event-item"><span class="event-name">3. 請求核准</span><span class="event-desc">等待你的同意</span></div>
-    <div class="event-item"><span class="event-name">4. 進行編輯</span><span class="event-desc">核准後才真正寫入檔案</span></div>
-  </div>
-</section>
+    <section>
+      <h2>Step 5: 做出第一個程式碼修改</h2>
+      <pre class="code-block">add a hello world function to the main file</pre>
+      <div class="event-list">
+        <div class="event-item"><span class="event-name">1. 找到檔案</span><span class="event-desc">Claude Code
+            找出適合的檔案</span></div>
+        <div class="event-item"><span class="event-name">2. 顯示變更</span><span class="event-desc">向你展示提議的修改內容</span></div>
+        <div class="event-item"><span class="event-name">3. 請求核准</span><span class="event-desc">等待你的同意</span></div>
+        <div class="event-item"><span class="event-name">4. 進行編輯</span><span class="event-desc">核准後才真正寫入檔案</span></div>
+      </div>
+    </section>
 
-<section>
-  <h2>Step 6: 用 Git 搭配 Claude Code</h2>
-  <pre class="code-block">what files have I changed?
+    <section>
+      <h2>Step 6: 用 Git 搭配 Claude Code</h2>
+      <pre class="code-block">what files have I changed?
 commit my changes with a descriptive message
 create a new branch called feature/quickstart
 show me the last 5 commits
 help me resolve merge conflicts</pre>
-</section>
+    </section>
 
-<section>
-  <h2>Step 7: 修正錯誤或新增功能</h2>
-  <pre class="code-block">add input validation to the user registration form
+    <section>
+      <h2>Step 7: 修正錯誤或新增功能</h2>
+      <pre class="code-block">add input validation to the user registration form
 there's a bug where users can submit empty forms - fix it</pre>
-  <div class="event-list">
-    <div class="event-item"><span class="event-name">定位相關程式碼</span><span class="event-desc">找出問題所在位置</span></div>
-    <div class="event-item"><span class="event-name">理解情境</span><span class="event-desc">分析周邊程式碼與邏輯</span></div>
-    <div class="event-item"><span class="event-name">實作解決方案</span><span class="event-desc">寫出修正或新功能</span></div>
-    <div class="event-item"><span class="event-name">執行測試</span><span class="event-desc">若有測試就一併執行驗證</span></div>
-  </div>
-</section>
+      <div class="event-list">
+        <div class="event-item"><span class="event-name">定位相關程式碼</span><span class="event-desc">找出問題所在位置</span></div>
+        <div class="event-item"><span class="event-name">理解情境</span><span class="event-desc">分析周邊程式碼與邏輯</span></div>
+        <div class="event-item"><span class="event-name">實作解決方案</span><span class="event-desc">寫出修正或新功能</span></div>
+        <div class="event-item"><span class="event-name">執行測試</span><span class="event-desc">若有測試就一併執行驗證</span></div>
+      </div>
+    </section>
 
-<section>
-  <h2>Step 8: 試試其他常見工作流程</h2>
-  <div class="chip-row">
-    <span class="chip-label">選擇工作流程:</span>
-    <div class="chip active" onclick="wfChip(this,0)">重構程式碼</div>
-    <div class="chip" onclick="wfChip(this,1)">撰寫測試</div>
-    <div class="chip" onclick="wfChip(this,2)">更新文件</div>
-    <div class="chip" onclick="wfChip(this,3)">程式碼審查</div>
-  </div>
-  <div id="wfPanel0"><pre class="code-block">refactor the authentication module to use async/await instead of callbacks</pre></div>
-  <div id="wfPanel1" style="display:none"><pre class="code-block">write unit tests for the calculator functions</pre></div>
-  <div id="wfPanel2" style="display:none"><pre class="code-block">update the README with installation instructions</pre></div>
-  <div id="wfPanel3" style="display:none"><pre class="code-block">review my changes and suggest improvements</pre></div>
-</section>
+    <section>
+      <h2>Step 8: 試試其他常見工作流程</h2>
+      <div class="chip-row">
+        <span class="chip-label">選擇工作流程:</span>
+        <div class="chip active" onclick="wfChip(this,0)">重構程式碼</div>
+        <div class="chip" onclick="wfChip(this,1)">撰寫測試</div>
+        <div class="chip" onclick="wfChip(this,2)">更新文件</div>
+        <div class="chip" onclick="wfChip(this,3)">程式碼審查</div>
+      </div>
+      <div id="wfPanel0">
+        <pre class="code-block">refactor the authentication module to use async/await instead of callbacks</pre>
+      </div>
+      <div id="wfPanel1" style="display:none">
+        <pre class="code-block">write unit tests for the calculator functions</pre>
+      </div>
+      <div id="wfPanel2" style="display:none">
+        <pre class="code-block">update the README with installation instructions</pre>
+      </div>
+      <div id="wfPanel3" style="display:none">
+        <pre class="code-block">review my changes and suggest improvements</pre>
+      </div>
+    </section>
 
-<section>
-  <h2>常用指令</h2>
-  <h3 style="font-size:1.05rem;font-weight:600;margin:16px 0 8px;">Shell 指令</h3>
-  <div class="response-box">
-    <div class="response-field"><span class="rf-key">claude</span><span class="rf-val">啟動互動模式</span></div>
-    <div class="response-field"><span class="rf-key">claude "task"</span><span class="rf-val">執行一次性任務</span></div>
-    <div class="response-field"><span class="rf-key">claude -p "query"</span><span class="rf-val">執行一次性查詢後結束</span></div>
-    <div class="response-field"><span class="rf-key">claude -c</span><span class="rf-val">繼續目前目錄最近的對話</span></div>
-    <div class="response-field"><span class="rf-key">claude -r</span><span class="rf-val">從清單恢復先前對話</span></div>
-  </div>
-  <h3 style="font-size:1.05rem;font-weight:600;margin:16px 0 8px;">Session 指令</h3>
-  <div class="response-box">
-    <div class="response-field"><span class="rf-key">/clear</span><span class="rf-val">清除對話紀錄</span></div>
-    <div class="response-field"><span class="rf-key">/help</span><span class="rf-val">顯示可用指令</span></div>
-    <div class="response-field"><span class="rf-key">/exit</span><span class="rf-val">結束 Claude Code</span></div>
-  </div>
-</section>
+    <section>
+      <h2>常用指令</h2>
+      <h3 style="font-size:1.05rem;font-weight:600;margin:16px 0 8px;">Shell 指令</h3>
+      <div class="response-box">
+        <div class="response-field"><span class="rf-key">claude</span><span class="rf-val">啟動互動模式</span></div>
+        <div class="response-field"><span class="rf-key">claude "task"</span><span class="rf-val">執行一次性任務</span></div>
+        <div class="response-field"><span class="rf-key">claude -p "query"</span><span class="rf-val">執行一次性查詢後結束</span>
+        </div>
+        <div class="response-field"><span class="rf-key">claude -c</span><span class="rf-val">繼續目前目錄最近的對話</span></div>
+        <div class="response-field"><span class="rf-key">claude -r</span><span class="rf-val">從清單恢復先前對話</span></div>
+      </div>
+      <h3 style="font-size:1.05rem;font-weight:600;margin:16px 0 8px;">Session 指令</h3>
+      <div class="response-box">
+        <div class="response-field"><span class="rf-key">/clear</span><span class="rf-val">清除對話紀錄</span></div>
+        <div class="response-field"><span class="rf-key">/help</span><span class="rf-val">顯示可用指令</span></div>
+        <div class="response-field"><span class="rf-key">/exit</span><span class="rf-val">結束 Claude Code</span></div>
+      </div>
+    </section>
 
-<section>
-  <h2>新手實用技巧</h2>
-  <div class="chip-row">
-    <span class="chip-label">選擇技巧:</span>
-    <div class="chip active" onclick="ptChip(this,0)">具體提出請求</div>
-    <div class="chip" onclick="ptChip(this,1)">分步驟指示</div>
-    <div class="chip" onclick="ptChip(this,2)">讓 Claude 先探索</div>
-    <div class="chip" onclick="ptChip(this,3)">用捷徑省時間</div>
-  </div>
-  <div id="ptPanel0"><p>不要說 "fix the bug", 改成 "fix the login bug where users see a blank screen after entering wrong credentials"。</p></div>
-  <div id="ptPanel1" style="display:none"><pre class="code-block">1. create a new database table for user profiles
+    <section>
+      <h2>新手實用技巧</h2>
+      <div class="chip-row">
+        <span class="chip-label">選擇技巧:</span>
+        <div class="chip active" onclick="ptChip(this,0)">具體提出請求</div>
+        <div class="chip" onclick="ptChip(this,1)">分步驟指示</div>
+        <div class="chip" onclick="ptChip(this,2)">讓 Claude 先探索</div>
+        <div class="chip" onclick="ptChip(this,3)">用捷徑省時間</div>
+      </div>
+      <div id="ptPanel0">
+        <p>不要說 "fix the bug", 改成 "fix the login bug where users see a blank screen after entering wrong credentials"。
+        </p>
+      </div>
+      <div id="ptPanel1" style="display:none">
+        <pre class="code-block">1. create a new database table for user profiles
 2. create an API endpoint to get and update user profiles
-3. build a webpage that allows users to see and edit their information</pre></div>
-  <div id="ptPanel2" style="display:none"><pre class="code-block">analyze the database schema
-build a dashboard showing products that are most frequently returned by our UK customers</pre></div>
-  <div id="ptPanel3" style="display:none"><div class="event-list"><div class="event-item"><span class="event-name">/</span><span class="event-desc">查看所有指令與 skills</span></div><div class="event-item"><span class="event-name">Tab</span><span class="event-desc">指令自動完成</span></div><div class="event-item"><span class="event-name">↑</span><span class="event-desc">指令歷史紀錄</span></div><div class="event-item"><span class="event-name">Shift+Tab</span><span class="event-desc">循環切換權限模式</span></div></div></div>
-</section>
+3. build a webpage that allows users to see and edit their information</pre>
+      </div>
+      <div id="ptPanel2" style="display:none">
+        <pre class="code-block">analyze the database schema
+build a dashboard showing products that are most frequently returned by our UK customers</pre>
+      </div>
+      <div id="ptPanel3" style="display:none">
+        <div class="event-list">
+          <div class="event-item"><span class="event-name">/</span><span class="event-desc">查看所有指令與 skills</span></div>
+          <div class="event-item"><span class="event-name">Tab</span><span class="event-desc">指令自動完成</span></div>
+          <div class="event-item"><span class="event-name">↑</span><span class="event-desc">指令歷史紀錄</span></div>
+          <div class="event-item"><span class="event-name">Shift+Tab</span><span class="event-desc">循環切換權限模式</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
-<section>
-  <h2>接下來呢?</h2>
-  <div class="api-fields">
-    <div class="field"><div class="name">How Claude Code works</div><div class="desc">理解 agentic loop, 內建工具與專案互動方式</div></div>
-    <div class="field"><div class="name">Best practices</div><div class="desc">用有效提示與專案設定取得更好結果</div></div>
-    <div class="field"><div class="name">Common workflows</div><div class="desc">常見任務的逐步指南</div></div>
-    <div class="field"><div class="name">Extend Claude Code</div><div class="desc">用 CLAUDE.md, skills, hooks, MCP 客製化</div></div>
-  </div>
-</section>
+    <section>
+      <h2>取得協助</h2>
+      <div class="takeaway">
+        <p>在 Claude Code 中輸入 /help 或直接問「how do I...」, 瀏覽其他說明文件, 或加入 Discord 社群取得技巧與支援。</p>
+      </div>
+    </section>
 
-<section>
-  <h2>取得協助</h2>
-  <div class="takeaway"><p>在 Claude Code 中輸入 /help 或直接問「how do I...」, 瀏覽其他說明文件, 或加入 Discord 社群取得技巧與支援。</p></div>
-</section>
-
-</main>
-<script>
-  function toggleTheme() {
-    const isDark = document.body.classList.toggle('dark');
-    document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
-  }
-  function qsChip(el, i) {
-    el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
-    for (let n = 0; n < 3; n++) document.getElementById('qsPanel'+n).style.display = (n === i ? 'block' : 'none');
-  }
-  function wfChip(el, i) {
-    el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
-    for (let n = 0; n < 4; n++) document.getElementById('wfPanel'+n).style.display = (n === i ? 'block' : 'none');
-  }
-  function ptChip(el, i) {
-    el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
-    for (let n = 0; n < 4; n++) document.getElementById('ptPanel'+n).style.display = (n === i ? 'block' : 'none');
-  }
-</script>
+  </main>
+  <script>
+    function toggleTheme() {
+      const isDark = document.body.classList.toggle('dark');
+      document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+    }
+    function qsChip(el, i) {
+      el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      for (let n = 0; n < 3; n++) document.getElementById('qsPanel' + n).style.display = (n === i ? 'block' : 'none');
+    }
+    function wfChip(el, i) {
+      el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      for (let n = 0; n < 4; n++) document.getElementById('wfPanel' + n).style.display = (n === i ? 'block' : 'none');
+    }
+    function ptChip(el, i) {
+      el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      for (let n = 0; n < 4; n++) document.getElementById('ptPanel' + n).style.display = (n === i ? 'block' : 'none');
+    }
+  </script>
 </body>
+
 </html>

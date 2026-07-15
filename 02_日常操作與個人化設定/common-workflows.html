@@ -1,234 +1,628 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Common Workflows 互動課程</title>
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f0f4f8; color: #1a202c; line-height: 1.7; }
-header { background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%); border-bottom: 1px solid #bfdbfe; padding: 48px 24px 40px; text-align: center; }
-header h1 { font-size: 2.2rem; font-weight: 700; color: #1e3a5f; }
-header p  { margin-top: 10px; color: #4a5568; font-size: 1.05rem; max-width: 600px; margin-inline: auto; }
-main    { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
-section { margin-bottom: 52px; }
-h2 { font-size: 1.4rem; font-weight: 600; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 20px; }
-h3 { font-size: 1.05rem; font-weight: 600; color: #1a202c; margin: 20px 0 8px; }
-p  { color: #4a5568; margin-bottom: 12px; }
-.code-block { background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px 18px; font-family: monospace; font-size: 0.82rem; color: #1a202c; overflow-x: auto; margin-top: 14px; line-height: 1.7; white-space: pre; }
-.kw  { color: #7c3aed; } .fn  { color: #16a34a; } .str { color: #d97706; } .cmt { color: #94a3b8; font-style: italic; } .key { color: #2563eb; }
-.info-box { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
-.info-box .tag { display: inline-block; background: #3b82f6; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: 0.05em; }
-.info-box p { color: #1e3a5f; font-size: 0.88rem; margin: 0; }
-.takeaway { background: linear-gradient(135deg, #dcfce7, #f0fdf4); border: 1px solid #4ade80; border-radius: 10px; padding: 20px 24px; margin-top: 16px; }
-.takeaway p { color: #166534; font-size: 0.9rem; margin: 0; }
-.event-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
-.event-item { background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; padding: 9px 14px; display: flex; gap: 14px; align-items: baseline; }
-.event-name { font-family: monospace; font-size: 0.82rem; color: #16a34a; min-width: 26px; flex-shrink: 0; font-weight:700; }
-.event-desc { font-size: 0.82rem; color: #4a5568; }
-.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
-.chip-label { font-size: 0.75rem; color: #6b7280; }
-.chip { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e0; background: #e2e8f0; color: #4a5568; transition: all 0.2s; }
-.chip.active { background: #dcfce7; border-color: #4ade80; color: #166534; }
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
-.col-card { background: #fff; border: 1px solid #cbd5e0; border-radius: 10px; padding: 16px 18px; }
-.col-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
-.col-card p { font-size: 0.83rem; color: #4a5568; margin-bottom: 6px; }
-.col-card p:last-child { margin-bottom: 0; }
-@media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
-#themeToggle { position: fixed; top: 16px; right: 16px; z-index: 9999; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.12); letter-spacing: 0.03em; }
-#themeToggle:hover { border-color: #2563eb; color: #2563eb; }
-body.dark { background: #0f1117; color: #e2e8f0; }
-body.dark header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom-color: #2d3748; }
-body.dark header h1 { color: #f7fafc; } body.dark header p  { color: #a0aec0; }
-body.dark h2 { color: #90cdf4; border-left-color: #4299e1; } body.dark h3 { color: #e2e8f0; } body.dark p  { color: #a0aec0; }
-body.dark .code-block { background: #0d1117; border-color: #2d3748; color: #e2e8f0; }
-body.dark .kw  { color: #9f7aea; } body.dark .fn  { color: #68d391; } body.dark .str { color: #f6ad55; } body.dark .cmt { color: #4a5568; } body.dark .key { color: #63b3ed; }
-body.dark .info-box { background: #1a202c; border-color: #2a4a6a; }
-body.dark .info-box .tag { background: #2a4a6a; color: #90cdf4; }
-body.dark .info-box p { color: #a0aec0; }
-body.dark .takeaway { background: linear-gradient(135deg, #1a2a1a, #1a202c); border-color: #276749; }
-body.dark .takeaway p { color: #c6f6d5; }
-body.dark .event-item { background: #1a202c; border-color: #2d3748; }
-body.dark .event-name { color: #68d391; } body.dark .event-desc { color: #718096; }
-body.dark .chip { background: #1a202c; border-color: #2d3748; color: #718096; }
-body.dark .chip.active { background: #1c3a2a; border-color: #38a169; color: #68d391; }
-body.dark .col-card { background: #1a202c; border-color: #2d3748; }
-body.dark .col-card-title { color: #4a5568; } body.dark .col-card p { color: #a0aec0; }
-body.dark #themeToggle { background: #1a202c; color: #e2e8f0; border-color: #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
-body.dark #themeToggle:hover { border-color: #90cdf4; color: #90cdf4; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Common Workflows 互動課程</title>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      line-height: 1.7;
+    }
+
+    header {
+      background: linear-gradient(135deg, #dbeafe 0%, #f0f4f8 100%);
+      border-bottom: 1px solid #bfdbfe;
+      padding: 48px 24px 40px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #1e3a5f;
+    }
+
+    header p {
+      margin-top: 10px;
+      color: #4a5568;
+      font-size: 1.05rem;
+      max-width: 600px;
+      margin-inline: auto;
+    }
+
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    section {
+      margin-bottom: 52px;
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #1e40af;
+      border-left: 4px solid #3b82f6;
+      padding-left: 14px;
+      margin-bottom: 20px;
+    }
+
+    h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #1a202c;
+      margin: 20px 0 8px;
+    }
+
+    p {
+      color: #4a5568;
+      margin-bottom: 12px;
+    }
+
+    .code-block {
+      background: #f8fafc;
+      border: 1px solid #cbd5e0;
+      border-radius: 8px;
+      padding: 16px 18px;
+      font-family: monospace;
+      font-size: 0.82rem;
+      color: #1a202c;
+      overflow-x: auto;
+      margin-top: 14px;
+      line-height: 1.7;
+      white-space: pre;
+    }
+
+    .kw {
+      color: #7c3aed;
+    }
+
+    .fn {
+      color: #16a34a;
+    }
+
+    .str {
+      color: #d97706;
+    }
+
+    .cmt {
+      color: #94a3b8;
+      font-style: italic;
+    }
+
+    .key {
+      color: #2563eb;
+    }
+
+    .info-box {
+      background: #dbeafe;
+      border: 1px solid #93c5fd;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-top: 14px;
+    }
+
+    .info-box .tag {
+      display: inline-block;
+      background: #3b82f6;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      letter-spacing: 0.05em;
+    }
+
+    .info-box p {
+      color: #1e3a5f;
+      font-size: 0.88rem;
+      margin: 0;
+    }
+
+    .takeaway {
+      background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+      border: 1px solid #4ade80;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-top: 16px;
+    }
+
+    .takeaway p {
+      color: #166534;
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    .event-list {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .event-item {
+      background: #fff;
+      border: 1px solid #cbd5e0;
+      border-radius: 6px;
+      padding: 9px 14px;
+      display: flex;
+      gap: 14px;
+      align-items: baseline;
+    }
+
+    .event-name {
+      font-family: monospace;
+      font-size: 0.82rem;
+      color: #16a34a;
+      min-width: 26px;
+      flex-shrink: 0;
+      font-weight: 700;
+    }
+
+    .event-desc {
+      font-size: 0.82rem;
+      color: #4a5568;
+    }
+
+    .chip-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+
+    .chip-label {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .chip {
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid #cbd5e0;
+      background: #e2e8f0;
+      color: #4a5568;
+      transition: all 0.2s;
+    }
+
+    .chip.active {
+      background: #dcfce7;
+      border-color: #4ade80;
+      color: #166534;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .col-card {
+      background: #fff;
+      border: 1px solid #cbd5e0;
+      border-radius: 10px;
+      padding: 16px 18px;
+    }
+
+    .col-card-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #6b7280;
+      margin-bottom: 10px;
+    }
+
+    .col-card p {
+      font-size: 0.83rem;
+      color: #4a5568;
+      margin-bottom: 6px;
+    }
+
+    .col-card p:last-child {
+      margin-bottom: 0;
+    }
+
+    @media (max-width: 640px) {
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    #themeToggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 9999;
+      padding: 7px 14px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid #cbd5e0;
+      background: #fff;
+      color: #1a202c;
+      transition: all 0.25s;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+      letter-spacing: 0.03em;
+    }
+
+    #themeToggle:hover {
+      border-color: #2563eb;
+      color: #2563eb;
+    }
+
+    body.dark {
+      background: #0f1117;
+      color: #e2e8f0;
+    }
+
+    body.dark header {
+      background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%);
+      border-bottom-color: #2d3748;
+    }
+
+    body.dark header h1 {
+      color: #f7fafc;
+    }
+
+    body.dark header p {
+      color: #a0aec0;
+    }
+
+    body.dark h2 {
+      color: #90cdf4;
+      border-left-color: #4299e1;
+    }
+
+    body.dark h3 {
+      color: #e2e8f0;
+    }
+
+    body.dark p {
+      color: #a0aec0;
+    }
+
+    body.dark .code-block {
+      background: #0d1117;
+      border-color: #2d3748;
+      color: #e2e8f0;
+    }
+
+    body.dark .kw {
+      color: #9f7aea;
+    }
+
+    body.dark .fn {
+      color: #68d391;
+    }
+
+    body.dark .str {
+      color: #f6ad55;
+    }
+
+    body.dark .cmt {
+      color: #4a5568;
+    }
+
+    body.dark .key {
+      color: #63b3ed;
+    }
+
+    body.dark .info-box {
+      background: #1a202c;
+      border-color: #2a4a6a;
+    }
+
+    body.dark .info-box .tag {
+      background: #2a4a6a;
+      color: #90cdf4;
+    }
+
+    body.dark .info-box p {
+      color: #a0aec0;
+    }
+
+    body.dark .takeaway {
+      background: linear-gradient(135deg, #1a2a1a, #1a202c);
+      border-color: #276749;
+    }
+
+    body.dark .takeaway p {
+      color: #c6f6d5;
+    }
+
+    body.dark .event-item {
+      background: #1a202c;
+      border-color: #2d3748;
+    }
+
+    body.dark .event-name {
+      color: #68d391;
+    }
+
+    body.dark .event-desc {
+      color: #718096;
+    }
+
+    body.dark .chip {
+      background: #1a202c;
+      border-color: #2d3748;
+      color: #718096;
+    }
+
+    body.dark .chip.active {
+      background: #1c3a2a;
+      border-color: #38a169;
+      color: #68d391;
+    }
+
+    body.dark .col-card {
+      background: #1a202c;
+      border-color: #2d3748;
+    }
+
+    body.dark .col-card-title {
+      color: #4a5568;
+    }
+
+    body.dark .col-card p {
+      color: #a0aec0;
+    }
+
+    body.dark #themeToggle {
+      background: #1a202c;
+      color: #e2e8f0;
+      border-color: #4a5568;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    body.dark #themeToggle:hover {
+      border-color: #90cdf4;
+      color: #90cdf4;
+    }
+  </style>
 </head>
+
 <body>
 
-<button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
+  <button id="themeToggle" onclick="toggleTheme()">🌙 暗色模式</button>
 
-<header>
-  <h1>Common Workflows</h1>
-  <p>探索程式碼庫, 修 bug, 重構, 測試等日常任務的逐步指南</p>
-</header>
+  <header>
+    <h1>Common Workflows</h1>
+    <p>探索程式碼庫, 修 bug, 重構, 測試等日常任務的逐步指南</p>
+  </header>
 
-<main>
+  <main>
 
-<section>
-  <h2>提示語範例 (Prompt Recipes)</h2>
-  <p>以下是日常任務常見的提示模式, 每種都適用於任何 Claude Code 介面, 依需求調整措辭。點選分類切換範例。</p>
-  <div class="chip-row" id="recipeChips">
-    <span class="chip-label">情境:</span>
-    <span class="chip active" data-group="explore">理解新的程式碼庫</span>
-    <span class="chip" data-group="bug">修 bug</span>
-    <span class="chip" data-group="refactor">重構</span>
-    <span class="chip" data-group="test">撰寫測試</span>
-    <span class="chip" data-group="pr">建立 PR</span>
-    <span class="chip" data-group="docs">處理文件</span>
-    <span class="chip" data-group="image">處理圖片</span>
-    <span class="chip" data-group="schedule">排程執行</span>
-  </div>
+    <section>
+      <h2>提示語範例 (Prompt Recipes)</h2>
+      <p>以下是日常任務常見的提示模式, 每種都適用於任何 Claude Code 介面, 依需求調整措辭。點選分類切換範例。</p>
+      <div class="chip-row" id="recipeChips">
+        <span class="chip-label">情境:</span>
+        <span class="chip active" data-group="explore">理解新的程式碼庫</span>
+        <span class="chip" data-group="bug">修 bug</span>
+        <span class="chip" data-group="refactor">重構</span>
+        <span class="chip" data-group="test">撰寫測試</span>
+        <span class="chip" data-group="pr">建立 PR</span>
+        <span class="chip" data-group="docs">處理文件</span>
+        <span class="chip" data-group="image">處理圖片</span>
+        <span class="chip" data-group="schedule">排程執行</span>
+      </div>
 
-  <div class="recipe-panel" data-group="explore">
-    <div class="event-list">
-      <div class="event-item"><span class="event-name">1</span><span class="event-desc">cd /path/to/project 進入專案根目錄</span></div>
-      <div class="event-item"><span class="event-name">2</span><span class="event-desc">claude 啟動 Claude Code</span></div>
-      <div class="event-item"><span class="event-name">3</span><span class="event-desc">"give me an overview of this codebase" 詢問高層次總覽</span></div>
-      <div class="event-item"><span class="event-name">4</span><span class="event-desc">"explain the main architecture patterns used here" 深入特定元件</span></div>
-    </div>
-    <div class="info-box"><span class="tag">提示</span><p>從廣泛問題開始再逐步縮小範圍; 詢問專案慣例與模式; 請求專案專屬術語表。</p></div>
-  </div>
+      <div class="recipe-panel" data-group="explore">
+        <div class="event-list">
+          <div class="event-item"><span class="event-name">1</span><span class="event-desc">cd /path/to/project
+              進入專案根目錄</span></div>
+          <div class="event-item"><span class="event-name">2</span><span class="event-desc">claude 啟動 Claude Code</span>
+          </div>
+          <div class="event-item"><span class="event-name">3</span><span class="event-desc">"give me an overview of this
+              codebase" 詢問高層次總覽</span></div>
+          <div class="event-item"><span class="event-name">4</span><span class="event-desc">"explain the main
+              architecture patterns used here" 深入特定元件</span></div>
+        </div>
+        <div class="info-box"><span class="tag">提示</span>
+          <p>從廣泛問題開始再逐步縮小範圍; 詢問專案慣例與模式; 請求專案專屬術語表。</p>
+        </div>
+      </div>
 
-  <div class="recipe-panel" data-group="bug" style="display:none">
-    <div class="event-list">
-      <div class="event-item"><span class="event-name">1</span><span class="event-desc">"I'm seeing an error when I run npm test" 分享錯誤訊息</span></div>
-      <div class="event-item"><span class="event-name">2</span><span class="event-desc">"suggest a few ways to fix the @ts-ignore in user.ts" 請求修復建議</span></div>
-      <div class="event-item"><span class="event-name">3</span><span class="event-desc">"update user.ts to add the null check you suggested" 套用修復</span></div>
-    </div>
-    <div class="info-box"><span class="tag">提示</span><p>告訴 Claude 重現問題的指令並取得 stack trace; 說明重現步驟; 告知錯誤是間歇性或持續發生。</p></div>
-  </div>
+      <div class="recipe-panel" data-group="bug" style="display:none">
+        <div class="event-list">
+          <div class="event-item"><span class="event-name">1</span><span class="event-desc">"I'm seeing an error when I
+              run npm test" 分享錯誤訊息</span></div>
+          <div class="event-item"><span class="event-name">2</span><span class="event-desc">"suggest a few ways to fix
+              the @ts-ignore in user.ts" 請求修復建議</span></div>
+          <div class="event-item"><span class="event-name">3</span><span class="event-desc">"update user.ts to add the
+              null check you suggested" 套用修復</span></div>
+        </div>
+        <div class="info-box"><span class="tag">提示</span>
+          <p>告訴 Claude 重現問題的指令並取得 stack trace; 說明重現步驟; 告知錯誤是間歇性或持續發生。</p>
+        </div>
+      </div>
 
-  <div class="recipe-panel" data-group="refactor" style="display:none">
-    <div class="event-list">
-      <div class="event-item"><span class="event-name">1</span><span class="event-desc">"find deprecated API usage in our codebase" 找出待重構的舊程式碼</span></div>
-      <div class="event-item"><span class="event-name">2</span><span class="event-desc">"suggest how to refactor utils.js to use modern JavaScript features" 取得重構建議</span></div>
-      <div class="event-item"><span class="event-name">3</span><span class="event-desc">"refactor utils.js to use ES2024 features while maintaining the same behavior" 安全套用變更</span></div>
-      <div class="event-item"><span class="event-name">4</span><span class="event-desc">"run tests for the refactored code" 驗證重構結果</span></div>
-    </div>
-    <div class="info-box"><span class="tag">提示</span><p>請 Claude 解釋現代做法的優點; 需要時要求保留向後相容性; 以小而可測試的增量進行重構。</p></div>
-  </div>
+      <div class="recipe-panel" data-group="refactor" style="display:none">
+        <div class="event-list">
+          <div class="event-item"><span class="event-name">1</span><span class="event-desc">"find deprecated API usage
+              in our codebase" 找出待重構的舊程式碼</span></div>
+          <div class="event-item"><span class="event-name">2</span><span class="event-desc">"suggest how to refactor
+              utils.js to use modern JavaScript features" 取得重構建議</span></div>
+          <div class="event-item"><span class="event-name">3</span><span class="event-desc">"refactor utils.js to use
+              ES2024 features while maintaining the same behavior" 安全套用變更</span></div>
+          <div class="event-item"><span class="event-name">4</span><span class="event-desc">"run tests for the
+              refactored code" 驗證重構結果</span></div>
+        </div>
+        <div class="info-box"><span class="tag">提示</span>
+          <p>請 Claude 解釋現代做法的優點; 需要時要求保留向後相容性; 以小而可測試的增量進行重構。</p>
+        </div>
+      </div>
 
-  <div class="recipe-panel" data-group="test" style="display:none">
-    <div class="event-list">
-      <div class="event-item"><span class="event-name">1</span><span class="event-desc">"find functions in NotificationsService.swift that are not covered by tests" 找出未測試的程式碼</span></div>
-      <div class="event-item"><span class="event-name">2</span><span class="event-desc">"add tests for the notification service" 產生測試骨架</span></div>
-      <div class="event-item"><span class="event-name">3</span><span class="event-desc">"add test cases for edge conditions" 補齊邊界案例</span></div>
-      <div class="event-item"><span class="event-name">4</span><span class="event-desc">"run the new tests and fix any failures" 執行並驗證測試</span></div>
-    </div>
-    <div class="info-box"><span class="tag">提示</span><p>Claude 會檢視現有測試檔案以符合風格, 框架與斷言慣例; 也可請 Claude 找出容易被忽略的邊界值與例外情況。</p></div>
-  </div>
+      <div class="recipe-panel" data-group="test" style="display:none">
+        <div class="event-list">
+          <div class="event-item"><span class="event-name">1</span><span class="event-desc">"find functions in
+              NotificationsService.swift that are not covered by tests" 找出未測試的程式碼</span></div>
+          <div class="event-item"><span class="event-name">2</span><span class="event-desc">"add tests for the
+              notification service" 產生測試骨架</span></div>
+          <div class="event-item"><span class="event-name">3</span><span class="event-desc">"add test cases for edge
+              conditions" 補齊邊界案例</span></div>
+          <div class="event-item"><span class="event-name">4</span><span class="event-desc">"run the new tests and fix
+              any failures" 執行並驗證測試</span></div>
+        </div>
+        <div class="info-box"><span class="tag">提示</span>
+          <p>Claude 會檢視現有測試檔案以符合風格, 框架與斷言慣例; 也可請 Claude 找出容易被忽略的邊界值與例外情況。</p>
+        </div>
+      </div>
 
-  <div class="recipe-panel" data-group="pr" style="display:none">
-    <div class="event-list">
-      <div class="event-item"><span class="event-name">1</span><span class="event-desc">"summarize the changes I've made to the authentication module" 摘要變更</span></div>
-      <div class="event-item"><span class="event-name">2</span><span class="event-desc">"create a pr" 產生 pull request</span></div>
-      <div class="event-item"><span class="event-name">3</span><span class="event-desc">"enhance the PR description with more context" 審閱並補強說明</span></div>
-    </div>
-    <div class="info-box"><span class="tag">提示</span><p>用 gh pr create 建立的 PR 會自動連結該 session, 之後可用 claude --from-pr &lt;number&gt; 或貼上 PR URL 到 /resume 選擇器找回。</p></div>
-  </div>
+      <div class="recipe-panel" data-group="pr" style="display:none">
+        <div class="event-list">
+          <div class="event-item"><span class="event-name">1</span><span class="event-desc">"summarize the changes I've
+              made to the authentication module" 摘要變更</span></div>
+          <div class="event-item"><span class="event-name">2</span><span class="event-desc">"create a pr" 產生 pull
+              request</span></div>
+          <div class="event-item"><span class="event-name">3</span><span class="event-desc">"enhance the PR description
+              with more context" 審閱並補強說明</span></div>
+        </div>
+        <div class="info-box"><span class="tag">提示</span>
+          <p>用 gh pr create 建立的 PR 會自動連結該 session, 之後可用 claude --from-pr &lt;number&gt; 或貼上 PR URL 到 /resume 選擇器找回。</p>
+        </div>
+      </div>
 
-  <div class="recipe-panel" data-group="docs" style="display:none">
-    <div class="event-list">
-      <div class="event-item"><span class="event-name">1</span><span class="event-desc">"find functions without proper JSDoc comments in the auth module" 找出缺文件的程式碼</span></div>
-      <div class="event-item"><span class="event-name">2</span><span class="event-desc">"add JSDoc comments to the undocumented functions in auth.js" 產生文件</span></div>
-      <div class="event-item"><span class="event-name">3</span><span class="event-desc">"improve the generated documentation with more context and examples" 審閱並強化</span></div>
-      <div class="event-item"><span class="event-name">4</span><span class="event-desc">"check if the documentation follows our project standards" 驗證文件</span></div>
-    </div>
-    <div class="info-box"><span class="tag">提示</span><p>指定想要的文件風格 (JSDoc, docstring 等); 要求文件包含範例; 針對公開 API, 介面與複雜邏輯撰寫文件。</p></div>
-  </div>
+      <div class="recipe-panel" data-group="docs" style="display:none">
+        <div class="event-list">
+          <div class="event-item"><span class="event-name">1</span><span class="event-desc">"find functions without
+              proper JSDoc comments in the auth module" 找出缺文件的程式碼</span></div>
+          <div class="event-item"><span class="event-name">2</span><span class="event-desc">"add JSDoc comments to the
+              undocumented functions in auth.js" 產生文件</span></div>
+          <div class="event-item"><span class="event-name">3</span><span class="event-desc">"improve the generated
+              documentation with more context and examples" 審閱並強化</span></div>
+          <div class="event-item"><span class="event-name">4</span><span class="event-desc">"check if the documentation
+              follows our project standards" 驗證文件</span></div>
+        </div>
+        <div class="info-box"><span class="tag">提示</span>
+          <p>指定想要的文件風格 (JSDoc, docstring 等); 要求文件包含範例; 針對公開 API, 介面與複雜邏輯撰寫文件。</p>
+        </div>
+      </div>
 
-  <div class="recipe-panel" data-group="image" style="display:none">
-    <div class="event-list">
-      <div class="event-item"><span class="event-name">1</span><span class="event-desc">拖放圖片, 或用 Ctrl+V 貼上, 或提供圖片路徑</span></div>
-      <div class="event-item"><span class="event-name">2</span><span class="event-desc">"What does this image show?" 請 Claude 分析圖片內容</span></div>
-      <div class="event-item"><span class="event-name">3</span><span class="event-desc">"Generate CSS to match this design mockup" 依視覺內容取得程式碼建議</span></div>
-    </div>
-    <div class="info-box"><span class="tag">提示</span><p>當文字描述不夠清楚時使用圖片; 可在同一對話中處理多張圖片; 圖片分析適用於流程圖, 截圖與設計稿。</p></div>
-  </div>
+      <div class="recipe-panel" data-group="image" style="display:none">
+        <div class="event-list">
+          <div class="event-item"><span class="event-name">1</span><span class="event-desc">拖放圖片, 或用 Ctrl+V 貼上,
+              或提供圖片路徑</span></div>
+          <div class="event-item"><span class="event-name">2</span><span class="event-desc">"What does this image show?"
+              請 Claude 分析圖片內容</span></div>
+          <div class="event-item"><span class="event-name">3</span><span class="event-desc">"Generate CSS to match this
+              design mockup" 依視覺內容取得程式碼建議</span></div>
+        </div>
+        <div class="info-box"><span class="tag">提示</span>
+          <p>當文字描述不夠清楚時使用圖片; 可在同一對話中處理多張圖片; 圖片分析適用於流程圖, 截圖與設計稿。</p>
+        </div>
+      </div>
 
-  <div class="recipe-panel" data-group="schedule" style="display:none">
-    <div class="event-list">
-      <div class="event-item"><span class="event-name">Routines</span><span class="event-desc">在 Anthropic 代管基礎架構上執行, 即使電腦關機也能跑, 於 claude.ai/code/routines 設定</span></div>
-      <div class="event-item"><span class="event-name">Desktop scheduled tasks</span><span class="event-desc">透過桌面版 app 在本機執行, 適合需要直接存取本機檔案的任務</span></div>
-      <div class="event-item"><span class="event-name">GitHub Actions</span><span class="event-desc">在 CI pipeline 中執行, 適合綁定 repo 事件的任務</span></div>
-      <div class="event-item"><span class="event-name">/loop</span><span class="event-desc">在目前 CLI session 中快速輪詢, session 結束任務即停止</span></div>
-    </div>
-    <div class="info-box"><span class="tag">提示</span><p>撰寫排程任務提示時要明確定義成功樣貌與後續處理方式, 因為任務自動執行, 無法詢問澄清問題。</p></div>
-  </div>
-</section>
+      <div class="recipe-panel" data-group="schedule" style="display:none">
+        <div class="event-list">
+          <div class="event-item"><span class="event-name">Routines</span><span class="event-desc">在 Anthropic
+              代管基礎架構上執行, 即使電腦關機也能跑, 於 claude.ai/code/routines 設定</span></div>
+          <div class="event-item"><span class="event-name">Desktop scheduled tasks</span><span class="event-desc">透過桌面版
+              app 在本機執行, 適合需要直接存取本機檔案的任務</span></div>
+          <div class="event-item"><span class="event-name">GitHub Actions</span><span class="event-desc">在 CI pipeline
+              中執行, 適合綁定 repo 事件的任務</span></div>
+          <div class="event-item"><span class="event-name">/loop</span><span class="event-desc">在目前 CLI session 中快速輪詢,
+              session 結束任務即停止</span></div>
+        </div>
+        <div class="info-box"><span class="tag">提示</span>
+          <p>撰寫排程任務提示時要明確定義成功樣貌與後續處理方式, 因為任務自動執行, 無法詢問澄清問題。</p>
+        </div>
+      </div>
+    </section>
 
-<section>
-  <h2>恢復先前的對話</h2>
-  <p>當任務橫跨多次工作階段時, 從上次停下的地方繼續, 而不用重新解釋 context。Claude Code 會持續在本機儲存每次對話。</p>
-  <div class="code-block"><span class="fn">claude</span> <span class="key">--continue</span></div>
-  <div class="info-box"><span class="tag">說明</span><p>恢復目前目錄中最近的 session; 若尚無對話, 印出 "No conversation found to continue" 並結束。用 claude --resume 從清單選擇, 或在 session 內用 /resume。</p></div>
-</section>
+    <section>
+      <h2>恢復先前的對話</h2>
+      <p>當任務橫跨多次工作階段時, 從上次停下的地方繼續, 而不用重新解釋 context。Claude Code 會持續在本機儲存每次對話。</p>
+      <div class="code-block"><span class="fn">claude</span> <span class="key">--continue</span></div>
+      <div class="info-box"><span class="tag">說明</span>
+        <p>恢復目前目錄中最近的 session; 若尚無對話, 印出 "No conversation found to continue" 並結束。用 claude --resume 從清單選擇, 或在 session 內用
+          /resume。</p>
+      </div>
+    </section>
 
-<section>
-  <h2>用 Worktree 執行平行 session</h2>
-  <p>在一個終端機處理功能, 同時在另一個終端機修 bug, 彼此的編輯不會衝突。每個 worktree 是獨立分支上的獨立檢出。</p>
-  <div class="code-block"><span class="fn">claude</span> <span class="key">--worktree</span> feature-auth</div>
-  <div class="info-box"><span class="tag">說明</span><p>在第二個終端機以不同名稱執行相同指令即可啟動獨立的平行 session。要從單一畫面監控多個平行 session, 可使用背景代理人 (agent view)。</p></div>
-</section>
+    <section>
+      <h2>用 Worktree 執行平行 session</h2>
+      <p>在一個終端機處理功能, 同時在另一個終端機修 bug, 彼此的編輯不會衝突。每個 worktree 是獨立分支上的獨立檢出。</p>
+      <div class="code-block"><span class="fn">claude</span> <span class="key">--worktree</span> feature-auth</div>
+      <div class="info-box"><span class="tag">說明</span>
+        <p>在第二個終端機以不同名稱執行相同指令即可啟動獨立的平行 session。要從單一畫面監控多個平行 session, 可使用背景代理人 (agent view)。</p>
+      </div>
+    </section>
 
-<section>
-  <h2>編輯前先規劃</h2>
-  <p>對於希望先審閱再落地的變更, 切換到 plan mode。Claude 會讀取檔案並提出計畫, 在你核准前不會做任何編輯。</p>
-  <div class="code-block"><span class="fn">claude</span> <span class="key">--permission-mode</span> plan</div>
-  <div class="info-box"><span class="tag">說明</span><p>也可在 session 中按 Shift+Tab 切換進入 plan mode。</p></div>
-</section>
+    <section>
+      <h2>編輯前先規劃</h2>
+      <p>對於希望先審閱再落地的變更, 切換到 plan mode。Claude 會讀取檔案並提出計畫, 在你核准前不會做任何編輯。</p>
+      <div class="code-block"><span class="fn">claude</span> <span class="key">--permission-mode</span> plan</div>
+      <div class="info-box"><span class="tag">說明</span>
+        <p>也可在 session 中按 Shift+Tab 切換進入 plan mode。</p>
+      </div>
+    </section>
 
-<section>
-  <h2>將研究工作委派給 Subagent</h2>
-  <p>探索大型程式碼庫會讓 context 塞滿檔案讀取內容。將探索工作委派出去, 只讓結論回傳。</p>
-  <div class="code-block"><span class="cmt">use a subagent to investigate how our auth system handles token refresh</span></div>
-  <div class="info-box"><span class="tag">說明</span><p>subagent 會在自己的 context window 中讀取檔案並回報摘要。</p></div>
-</section>
+    <section>
+      <h2>將研究工作委派給 Subagent</h2>
+      <p>探索大型程式碼庫會讓 context 塞滿檔案讀取內容。將探索工作委派出去, 只讓結論回傳。</p>
+      <div class="code-block"><span class="cmt">use a subagent to investigate how our auth system handles token
+          refresh</span></div>
+      <div class="info-box"><span class="tag">說明</span>
+        <p>subagent 會在自己的 context window 中讀取檔案並回報摘要。</p>
+      </div>
+    </section>
 
-<section>
-  <h2>將 Claude 接入腳本</h2>
-  <p>以非互動方式執行 Claude, 用於 CI, pre-commit hook 或批次處理。標準輸入輸出的行為如同任何 Unix 工具。</p>
-  <div class="code-block"><span class="fn">git</span> log --oneline -20 | <span class="fn">claude</span> <span class="key">-p</span> <span class="str">"summarize these recent commits"</span></div>
-  <div class="takeaway"><p>要點: 探索用 subagent 保持主 context 乾淨; 大變更用 plan mode 先審閱; 平行任務用 worktree 避免衝突; 自動化用管線接入 -p。</p></div>
-</section>
+    <section>
+      <h2>將 Claude 接入腳本</h2>
+      <p>以非互動方式執行 Claude, 用於 CI, pre-commit hook 或批次處理。標準輸入輸出的行為如同任何 Unix 工具。</p>
+      <div class="code-block"><span class="fn">git</span> log --oneline -20 | <span class="fn">claude</span> <span
+          class="key">-p</span> <span class="str">"summarize these recent commits"</span></div>
+      <div class="takeaway">
+        <p>要點: 探索用 subagent 保持主 context 乾淨; 大變更用 plan mode 先審閱; 平行任務用 worktree 避免衝突; 自動化用管線接入 -p。</p>
+      </div>
+    </section>
 
-<section>
-  <h2>下一步</h2>
-  <div class="two-col">
-    <div class="col-card"><div class="col-card-title">Best Practices</div><p>發揮 Claude Code 最大效益的模式與慣例</p></div>
-    <div class="col-card"><div class="col-card-title">Manage Sessions</div><p>恢復, 命名與分支對話</p></div>
-    <div class="col-card"><div class="col-card-title">Worktrees</div><p>執行獨立的平行 session</p></div>
-    <div class="col-card"><div class="col-card-title">Extend Claude Code</div><p>加入 skills, hooks, MCP, subagent 與 plugin</p></div>
-  </div>
-</section>
+  </main>
 
-</main>
-
-<script>
-function toggleTheme() {
-  const isDark = document.body.classList.toggle('dark');
-  document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
-}
-function setupChipSwitcher(chipContainerId, panelSelector) {
-  const container = document.getElementById(chipContainerId);
-  const chips = container.querySelectorAll('.chip');
-  const panels = document.querySelectorAll(panelSelector);
-  chips.forEach(chip => {
-    chip.addEventListener('click', () => {
-      chips.forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      const group = chip.dataset.group;
-      panels.forEach(p => { p.style.display = (p.dataset.group === group) ? '' : 'none'; });
-    });
-  });
-}
-setupChipSwitcher('recipeChips', '.recipe-panel');
-</script>
+  <script>
+    function toggleTheme() {
+      const isDark = document.body.classList.toggle('dark');
+      document.getElementById('themeToggle').textContent = isDark ? '☀ 亮色模式' : '🌙 暗色模式';
+    }
+    function setupChipSwitcher(chipContainerId, panelSelector) {
+      const container = document.getElementById(chipContainerId);
+      const chips = container.querySelectorAll('.chip');
+      const panels = document.querySelectorAll(panelSelector);
+      chips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          chips.forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          const group = chip.dataset.group;
+          panels.forEach(p => { p.style.display = (p.dataset.group === group) ? '' : 'none'; });
+        });
+      });
+    }
+    setupChipSwitcher('recipeChips', '.recipe-panel');
+  </script>
 </body>
+
 </html>
